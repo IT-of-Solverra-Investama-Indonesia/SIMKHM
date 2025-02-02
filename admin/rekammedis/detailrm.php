@@ -529,7 +529,6 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
 
 
                     <div class="table-responsive">
-                      <!-- <h3><?php echo $pecah2["pasien"]; ?></h3> -->
                       <table class="table" style="width:100%;" id="myTable">
                         <thead>
                           <tr>
@@ -974,7 +973,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
 
-                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet">TTD</a></center> -->
+                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">TTD</a></center> -->
                                     </td>
                                   </tr>
                                   <tr>
@@ -983,7 +982,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
 
-                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet">TTD</a></center> -->
+                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">TTD</a></center> -->
                                     </td>
                                   </tr>
                                   <tr>
@@ -992,14 +991,14 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
 
-                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet">TTD</a></center> -->
+                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">TTD</a></center> -->
                                     </td>
                                   </tr>
                                   <tr>
                                     <td></td>
                                     <td>
                                       <center>
-                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet">Paraf</a>
+                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                       </center>
                                     </td>
                                   </tr>
@@ -1310,7 +1309,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <td style="margin-top:10px;">
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $_SESSION['admin']['namalengkap'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $_SESSION['admin']['namalengkap'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                         </center>
                                       </td>
                                     </tr>
@@ -1341,7 +1340,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                     <td>
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $p['nama_lengkap'] ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?= $p['nama_lengkap'] ?>)</p>
-                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas">Paraf</a>
+                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                       </center>
                                     </td>
                                   </tr>
@@ -1356,7 +1355,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Persetujuan Perubahan Resep</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $_SESSION['admin']['namalengkap'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $_SESSION['admin']['namalengkap'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
@@ -1365,7 +1364,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Petugas Farmasi</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $_SESSION['admin']['namalengkap'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $_SESSION['admin']['namalengkap'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
@@ -1608,7 +1607,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <td style="margin-top:10px;">
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $cekr['petugas'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $cekr['petugas'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                         </center>
                                       </td>
                                     </tr>
@@ -1641,7 +1640,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                     <td>
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $p['nama_lengkap'] ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?= $p['nama_lengkap'] ?>)</p>
-                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas">Paraf</a>
+                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                       </center>
                                     </td>
                                   </tr>
@@ -1656,7 +1655,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Persetujuan Perubahan Resep</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $cekr['petugas'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $cekr['petugas'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
@@ -1665,12 +1664,13 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Petugas Farmasi</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $cekr['petugas'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $cekr['petugas'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
+                                <a target="_blank" href="../rekammedis/e-resep.php?id=<?= $_GET['id']?>&tgl=<?= $_GET['tgl']?>&idrekammedis=<?= $_GET['idrekammedis'] ?>" class="btn btn-secondary mt-3"><i class="bi bi-printer mt-3"></i> Print</a>
                               </center>
                               <br>
 
@@ -1691,7 +1691,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                           // echo "<p><img src='".$file_path."' /></p>";
                           echo "
                   <script>
-                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
                   </script>
               ";
                         }
@@ -1708,7 +1708,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                           // echo "<p><img src='".$file_path."' /></p>";
                           echo "
                   <script>
-                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
                   </script>
               ";
                         }
@@ -1725,7 +1725,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                           // echo "<p><img src='".$file_path."' /></p>";
                           echo "
                   <script>
-                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
                   </script>
               ";
                         }
@@ -1742,7 +1742,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                           // echo "<p><img src='".$file_path."' /></p>";
                           echo "
                   <script>
-                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
                   </script>
               ";
                         }
@@ -1759,7 +1759,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                           // echo "<p><img src='".$file_path."' /></p>";
                           echo "
                   <script>
-                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                      document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
                   </script>
               ";
                         }
@@ -1778,7 +1778,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
               <script>
               alert('Berhasil' );
               
-                  document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                  document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
               </script>
               ";
               }
@@ -1797,7 +1797,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
               <script>
               alert('Berhasil update ' );
 
-                  document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik';
+                  document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
               </script>
               ";
                         }

@@ -106,7 +106,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>KHM WONOREJO</title>
+  <title>KHM</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
   <!-- DATATABLES -->
@@ -587,7 +587,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                         <td><?= $kamar['status_antri'] ?></td>
                                         <td>
                                           <div class="dropdown">
-                                            <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker') { ?>
+                                            <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
                                               <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                               <ul class="dropdown-menu">
                                                 <li><a href="index.php?halaman=detailrm&id=<?php echo $kamar["no_rm"]; ?>&tgl=<?php echo $kamar["jadwal"]; ?>&racik" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
@@ -740,7 +740,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                             <?php } ?>
                             <td>
                               <div class="dropdown">
-                                <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker') { ?>
+                                <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
                                   <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                   <ul class="dropdown-menu">
                                     <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>

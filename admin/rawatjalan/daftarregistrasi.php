@@ -171,6 +171,78 @@ if (isset($_GET['detail'])) {
                             $pemeriksaanFisik = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM pemeriksaan_fisik WHERE REPLACE(REPLACE(REPLACE(norm, '\t', ' '), '  ', ' '), '  ', ' ') = '$_GET[detail]' AND DATE_FORMAT(created_at, '%Y-%m-%d') = '$data[tgl_rm]' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
                           ?>
                           <?php if($pemeriksaanFisik['jumlah'] == 1){?>
+                            <?= ($pemeriksaanFisik['gcs_e'] != 4) ? "gcs_e: ".$pemeriksaanFisik['gcs_e']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['gcs_v'] != 5) ? "gcs_v: ".$pemeriksaanFisik['gcs_v']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['gcs_m'] != 6) ? "gcs_m: ".$pemeriksaanFisik['gcs_m']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['rangsangan_meninggal'] != '-') ? "rangsangan_meninggal: ".$pemeriksaanFisik['rangsangan_meninggal']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['refleks_fisiologis1'] != '+') ? "refleks_fisiologis1: ".$pemeriksaanFisik['refleks_fisiologis1']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['refleks_fisiologis2'] != '+') ? "refleks_fisiologis2: ".$pemeriksaanFisik['refleks_fisiologis2']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['refleks_patologis'] != '-') ? "refleks_patologis: ".$pemeriksaanFisik['refleks_patologis']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['flat'] != 'flat') ? "flat: ".$pemeriksaanFisik['flat']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['hl'] != 'membesar') ? "hl: ".$pemeriksaanFisik['hl']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['assistos'] != '-') ? "assistos: ".$pemeriksaanFisik['assistos']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['thympani'] != '+') ? "thympani: ".$pemeriksaanFisik['thympani']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['soepel'] != '+') ? "soepel: ".$pemeriksaanFisik['soepel']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_atas_kiri'] != '-') ? "ntf_atas_kiri: ".$pemeriksaanFisik['ntf_atas_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_atas'] != '-') ? "ntf_atas: ".$pemeriksaanFisik['ntf_atas']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_atas_kanan'] != '-') ? "ntf_atas_kanan: ".$pemeriksaanFisik['ntf_atas_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_tengah_kiri'] != '-') ? "ntf_tengah_kiri: ".$pemeriksaanFisik['ntf_tengah_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_tengah'] != '-') ? "ntf_tengah: ".$pemeriksaanFisik['ntf_tengah']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_tengah_kanan'] != '-') ? "ntf_tengah_kanan: ".$pemeriksaanFisik['ntf_tengah_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_bawah_kiri'] != '-') ? "ntf_bawah_kiri: ".$pemeriksaanFisik['ntf_bawah_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_bawah'] != '-') ? "ntf_bawah: ".$pemeriksaanFisik['ntf_bawah']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ntf_bawah_kanan'] != '-') ? "ntf_bawah_kanan: ".$pemeriksaanFisik['ntf_bawah_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['bu'] != '+') ? "bu: ".$pemeriksaanFisik['bu']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['bu_komen'] != '') ? "bu_komen: ".$pemeriksaanFisik['bu_komen']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['anemis_kiri'] != '-') ? "anemis_kiri: ".$pemeriksaanFisik['anemis_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['anemis_kanan'] != '-') ? "anemis_kanan: ".$pemeriksaanFisik['anemis_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ikterik_kiri'] != '-') ? "ikterik_kiri: ".$pemeriksaanFisik['ikterik_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['ikterik_kanan'] != '-') ? "ikterik_kanan: ".$pemeriksaanFisik['ikterik_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['rcl_kiri'] != '+') ? "rcl_kiri: ".$pemeriksaanFisik['rcl_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['rcl_kanan'] != '+') ? "rcl_kanan: ".$pemeriksaanFisik['rcl_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['pupil_kiri'] != '') ? "pupil_kiri: ".$pemeriksaanFisik['pupil_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['pupil_kanan'] != '') ? "pupil_kanan: ".$pemeriksaanFisik['pupil_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['visus_kiri'] != '6/6') ? "visus_kiri: ".$pemeriksaanFisik['visus_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['visus_kanan'] != '6/6') ? "visus_kanan: ".$pemeriksaanFisik['visus_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['torax'] != 'Simetris') ? "torax: ".$pemeriksaanFisik['torax']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['retraksi'] != '') ? "retraksi: ".$pemeriksaanFisik['retraksi']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['vesikuler_kiri'] != '-') ? "vesikuler_kiri: ".$pemeriksaanFisik['vesikuler_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['vesikuler_kanan'] != '-') ? "vesikuler_kanan: ".$pemeriksaanFisik['vesikuler_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['wheezing_kiri'] != '-') ? "wheezing_kiri: ".$pemeriksaanFisik['wheezing_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['wheezing_kanan'] != '-') ? "wheezing_kanan: ".$pemeriksaanFisik['wheezing_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['rongki_kiri'] != '-') ? "rongki_kiri: ".$pemeriksaanFisik['rongki_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['rongki_kanan'] != '-') ? "rongki_kanan: ".$pemeriksaanFisik['rongki_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['s1s2'] != 'reguler') ? "s1s2: ".$pemeriksaanFisik['s1s2']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['murmur'] != '-') ? "murmur: ".$pemeriksaanFisik['murmur']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['golop'] != '-') ? "golop: ".$pemeriksaanFisik['golop']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['nch_kiri'] != '-') ? "nch_kiri: ".$pemeriksaanFisik['nch_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['nch_kanan'] != '-') ? "nch_kanan: ".$pemeriksaanFisik['nch_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['polip_kiri'] != '-') ? "polip_kiri: ".$pemeriksaanFisik['polip_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['polip_kanan'] != '-') ? "polip_kanan: ".$pemeriksaanFisik['polip_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['conca_kiri'] != '-') ? "conca_kiri: ".$pemeriksaanFisik['conca_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['conca_kanan'] != '-') ? "conca_kanan: ".$pemeriksaanFisik['conca_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['faring_hipertermis'] != '-') ? "faring_hipertermis: ".$pemeriksaanFisik['faring_hipertermis']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['halitosis'] != '-') ? "halitosis: ".$pemeriksaanFisik['halitosis']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['pembesaran_tonsil'] != 'T1') ? "pembesaran_tonsil: ".$pemeriksaanFisik['pembesaran_tonsil']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['serumin_kiri'] != '-') ? "serumin_kiri: ".$pemeriksaanFisik['serumin_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['serumin_kanan'] != '-') ? "serumin_kanan: ".$pemeriksaanFisik['serumin_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['typani_intak_kiri'] != '+') ? "typani_intak_kiri: ".$pemeriksaanFisik['typani_intak_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['typani_intak_kanan'] != '+') ? "typani_intak_kanan: ".$pemeriksaanFisik['typani_intak_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['pembesaran_getah_bening'] != '') ? "pembesaran_getah_bening: ".$pemeriksaanFisik['pembesaran_getah_bening']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['akral_hangat_atas_kiri'] != '+') ? "akral_hangat_atas_kiri: ".$pemeriksaanFisik['akral_hangat_atas_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['akral_hangat_atas_kanan'] != '+') ? "akral_hangat_atas_kanan: ".$pemeriksaanFisik['akral_hangat_atas_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['akral_hangat_bawah_kiri'] != '+') ? "akral_hangat_bawah_kiri: ".$pemeriksaanFisik['akral_hangat_bawah_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['akral_hangat_bawah_kanan'] != '+') ? "akral_hangat_bawah_kanan: ".$pemeriksaanFisik['akral_hangat_bawah_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['oe_atas_kiri'] != '-') ? "oe_atas_kiri: ".$pemeriksaanFisik['oe_atas_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['oe_atas_kanan'] != '-') ? "oe_atas_kanan: ".$pemeriksaanFisik['oe_atas_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['oe_bawah_kiri'] != '-') ? "oe_bawah_kiri: ".$pemeriksaanFisik['oe_bawah_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['oe_bawah_kanan'] != '-') ? "oe_bawah_kanan: ".$pemeriksaanFisik['oe_bawah_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['crt'] != '<= 2') ? "crt: ".$pemeriksaanFisik['crt']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['motorik_atas_kiri'] != 5) ? "motorik_atas_kiri: ".$pemeriksaanFisik['motorik_atas_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['motorik_atas_kanan'] != 5) ? "motorik_atas_kanan: ".$pemeriksaanFisik['motorik_atas_kanan']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['motorik_bawah_kiri'] != 5) ? "motorik_bawah_kiri: ".$pemeriksaanFisik['motorik_bawah_kiri']."<br>" : '' ?>
+                            <?= ($pemeriksaanFisik['motorik_bawah_kanan'] != 5) ? "motorik_bawah_kanan: ".$pemeriksaanFisik['motorik_bawah_kanan']."<br>" : '' ?>
+                            kognitif: <?= $pemeriksaanFisik['kognitif']?><br>
                             <button type="button" onclick="upDataPemeriksaanFisik('<?= $pemeriksaanFisik['gcs_e']?>', '<?= $pemeriksaanFisik['gcs_v']?>', '<?= $pemeriksaanFisik['gcs_m']?>', '<?= $pemeriksaanFisik['rangsangan_meninggal']?>', '<?= $pemeriksaanFisik['refleks_fisiologis1']?>', '<?= $pemeriksaanFisik['refleks_fisiologis2']?>', '<?= $pemeriksaanFisik['refleks_patologis']?>', '<?= $pemeriksaanFisik['flat']?>', '<?= $pemeriksaanFisik['hl']?>', '<?= $pemeriksaanFisik['assistos']?>', '<?= $pemeriksaanFisik['thympani']?>', '<?= $pemeriksaanFisik['soepel']?>', '<?= $pemeriksaanFisik['ntf_atas_kiri']?>', '<?= $pemeriksaanFisik['ntf_atas']?>', '<?= $pemeriksaanFisik['ntf_atas_kanan']?>', '<?= $pemeriksaanFisik['ntf_tengah_kiri']?>', '<?= $pemeriksaanFisik['ntf_tengah']?>', '<?= $pemeriksaanFisik['ntf_tengah_kanan']?>', '<?= $pemeriksaanFisik['ntf_bawah_kiri']?>', '<?= $pemeriksaanFisik['ntf_bawah']?>', '<?= $pemeriksaanFisik['ntf_bawah_kanan']?>', '<?= $pemeriksaanFisik['bu']?>', '<?= $pemeriksaanFisik['bu_komen']?>', '<?= $pemeriksaanFisik['anemis_kiri']?>', '<?= $pemeriksaanFisik['anemis_kanan']?>', '<?= $pemeriksaanFisik['ikterik_kiri']?>', '<?= $pemeriksaanFisik['ikterik_kanan']?>', '<?= $pemeriksaanFisik['rcl_kiri']?>', '<?= $pemeriksaanFisik['rcl_kanan']?>', '<?= $pemeriksaanFisik['pupil_kiri']?>', '<?= $pemeriksaanFisik['pupil_kanan']?>', '<?= $pemeriksaanFisik['visus_kiri']?>', '<?= $pemeriksaanFisik['visus_kanan']?>', '<?= $pemeriksaanFisik['torax']?>', '<?= $pemeriksaanFisik['retraksi']?>', '<?= $pemeriksaanFisik['vesikuler_kiri']?>', '<?= $pemeriksaanFisik['vesikuler_kanan']?>', '<?= $pemeriksaanFisik['wheezing_kiri']?>', '<?= $pemeriksaanFisik['wheezing_kanan']?>', '<?= $pemeriksaanFisik['rongki_kiri']?>', '<?= $pemeriksaanFisik['rongki_kanan']?>', '<?= $pemeriksaanFisik['s1s2']?>', '<?= $pemeriksaanFisik['murmur']?>', '<?= $pemeriksaanFisik['golop']?>', '<?= $pemeriksaanFisik['nch_kiri']?>', '<?= $pemeriksaanFisik['nch_kanan']?>', '<?= $pemeriksaanFisik['polip_kiri']?>', '<?= $pemeriksaanFisik['polip_kanan']?>', '<?= $pemeriksaanFisik['conca_kiri']?>', '<?= $pemeriksaanFisik['conca_kanan']?>', '<?= $pemeriksaanFisik['faring_hipertermis']?>', '<?= $pemeriksaanFisik['halitosis']?>', '<?= $pemeriksaanFisik['pembesaran_tonsil']?>', '<?= $pemeriksaanFisik['serumin_kiri']?>', '<?= $pemeriksaanFisik['serumin_kanan']?>', '<?= $pemeriksaanFisik['typani_intak_kiri']?>', '<?= $pemeriksaanFisik['typani_intak_kanan']?>', '<?= $pemeriksaanFisik['pembesaran_getah_bening']?>', '<?= $pemeriksaanFisik['akral_hangat_atas_kiri']?>', '<?= $pemeriksaanFisik['akral_hangat_atas_kanan']?>', '<?= $pemeriksaanFisik['akral_hangat_bawah_kiri']?>', '<?= $pemeriksaanFisik['akral_hangat_bawah_kanan']?>', '<?= $pemeriksaanFisik['oe_atas_kiri']?>', '<?= $pemeriksaanFisik['oe_atas_kanan']?>', '<?= $pemeriksaanFisik['oe_bawah_kiri']?>', '<?= $pemeriksaanFisik['oe_bawah_kanan']?>', '<?= $pemeriksaanFisik['crt']?>', '<?= $pemeriksaanFisik['motorik_atas_kiri']?>', '<?= $pemeriksaanFisik['motorik_atas_kanan']?>', '<?= $pemeriksaanFisik['motorik_bawah_kiri']?>', '<?= $pemeriksaanFisik['motorik_bawah_kanan']?>', '<?= $pemeriksaanFisik['kognitif']?>')" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#showPemeriksaanFisik">
                               <i class="bi bi-eye"></i> Lihat
                             </button>        
