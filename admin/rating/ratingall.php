@@ -11,11 +11,49 @@ $user = $_SESSION['admin']['username'];
 	<h1>Rating</h1>
 	<a href="index.php?halaman=ratingall&all" class="btn btn-sm btn-warning mb-2" style="max-width: 100px;">Ratting All</a>
 	<div class="row">
+		<div class="col-12">
+			<div class="card shadow-sm p-2 mb-2">
+				<h4>Prosentasi Rating Keseluruhan</h4>
+				<table id="myTable0" class="table table-striped table-hover" style="font-size: 12px;">
+					<thead>
+						<tr>
+							<th>Bulan</th>
+							<th>Jumlah Rating</th>
+							<th>Jumlah Kunjungan</th>
+							<th>Prosentase</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						$getAllRegister = $koneksi->query("SELECT DATE_FORMAT(jadwal, '%Y-%m') as bulan, COUNT(*) as jum FROM registrasi_rawat WHERE status_antri != 'Belum Datang' GROUP BY DATE_FORMAT(jadwal, '%Y-%m') ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC");
+						foreach ($getAllRegister as $reg) {
+						?>
+							<tr>
+								<td>
+									<a href="index.php?halaman=ratingall&all&src&key=&date_start=<?= date('Y-m-1', strtotime($reg['bulan'])) ?>&date_end=<?= date('Y-m-t', strtotime($reg['bulan'])) ?>">
+										<?= $reg['bulan'] ?>
+									</a>
+								</td>
+								<td>
+									<?=
+									$jumRating  = $koneksi->query("SELECT * FROM rating WHERE DATE_FORMAT(tgl, '%Y-%m') = '$reg[bulan]'")->num_rows;
+									?>
+								</td>
+								<td><?= $reg['jum'] ?></td>
+								<td>
+									<?= number_format(($jumRating / $reg['jum']) * 100, 2) ?>%
+								</td>
+							</tr>
+						<?php } ?>
+					</tbody>
+				</table>
+			</div>
+		</div>
 		<div class="col-md-6 mb-2">
 			<div class="card shadow p-2 h-100">
 				<h4>Rating Dokter</h4>
 				<div class="table-responsive">
-					<table id="myTable1" class="table table-striped table-hover">
+					<table id="myTable1" class="table table-striped table-hover" style="font-size: 12px;">
 						<thead>
 							<tr>
 								<th>Bulan</th>
@@ -56,7 +94,7 @@ $user = $_SESSION['admin']['username'];
 			<div class="card shadow p-2 h-100">
 				<h4>Rating Kasir</h4>
 				<div class="table-responsive">
-					<table id="myTable2" class="table table-striped table-hover">
+					<table id="myTable2" class="table table-striped table-hover" style="font-size: 12px;">
 						<thead>
 							<tr>
 								<th>Bulan</th>
@@ -97,7 +135,7 @@ $user = $_SESSION['admin']['username'];
 			<div class="card shadow p-2 h-100">
 				<h4>Rating Pendaftaran</h4>
 				<div class="table-responsive">
-					<table id="myTable3" class="table table-striped table-hover">
+					<table id="myTable3" class="table table-striped table-hover" style="font-size: 12px;">
 						<thead>
 							<tr>
 								<th>Bulan</th>
@@ -138,7 +176,7 @@ $user = $_SESSION['admin']['username'];
 			<div class="card shadow p-2 h-100">
 				<h4>Rating Perawat</h4>
 				<div class="table-responsive">
-					<table id="myTable4" class="table table-striped table-hover">
+					<table id="myTable4" class="table table-striped table-hover" style="font-size: 12px;">
 						<thead>
 							<tr>
 								<th>Bulan</th>
@@ -179,7 +217,7 @@ $user = $_SESSION['admin']['username'];
 			<div class="card shadow p-2 h-100">
 				<h4>Rating Kebersihan</h4>
 				<div class="table-responsive">
-					<table id="myTable5" class="table table-striped table-hover">
+					<table id="myTable5" class="table table-striped table-hover" style="font-size: 12px;">
 						<thead>
 							<tr>
 								<th>Bulan</th>
@@ -220,7 +258,7 @@ $user = $_SESSION['admin']['username'];
 			<div class="card shadow p-2 h-100">
 				<h4>Rating Apoteker</h4>
 				<div class="table-responsive">
-					<table id="myTable6" class="table table-striped table-hover">
+					<table id="myTable6" class="table table-striped table-hover" style="font-size: 12px;">
 						<thead>
 							<tr>
 								<th>Bulan</th>
@@ -263,7 +301,7 @@ $user = $_SESSION['admin']['username'];
 	<button class="btn btn-dark btn-sm" onclick="window.history.back()" style="max-width: 100px;">Kembali</button>
 	<div class="card shadow p-2 mt-2">
 		<div class="table-responsive">
-			<table id="myTable" class="table table-striped table-hover" style="width:100%">
+			<table id="myTable" class="table table-striped table-hover" style="font-size: 12px;" style="width:100%">
 				<!-- Boleh aku nyoba kak ? -->
 				<thead>
 
@@ -485,6 +523,9 @@ $user = $_SESSION['admin']['username'];
 <script>
 	$(document).ready(function() {
 		$('#myTable').DataTable({
+			order: false,
+		});
+		$('#myTable0').DataTable({
 			order: false,
 		});
 		$('#myTable1').DataTable({
