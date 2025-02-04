@@ -37,6 +37,7 @@ $username = $_SESSION['admin']['username'];
               <tr>
                 <th>Tgl</th>
                 <th>Nama Obat</th>
+                <th>Tipe</th>
                 <th>Id Obat</th>
                 <th>Suplier</th>
                 <th>Jumlah Obat</th>
@@ -59,6 +60,7 @@ $username = $_SESSION['admin']['username'];
                 <tr>
                   <td><?= $obat['tgl_beli'] ?></td>
                   <td><?= $obat['nama_obat'] ?></td>
+                  <td><?= $obat['tipe'] ?></td>
                   <td><?= $obat['id_obat'] ?></td>
                   <td><?= $obat['produsen'] ?></td>
                   <td><?= $obat['jml_obat'] ?></td>

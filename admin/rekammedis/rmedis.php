@@ -648,9 +648,9 @@
                   <select class="form-select" style="height: 20px;" aria-label="Default select example" name="nama_obat[]" >
                       <?php
                       if(!isset($_GET['inap'])){
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       }else{
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       }
                         foreach ($getObat as $data) {
                       ?>
@@ -693,9 +693,9 @@
                   <select class="form-select"  aria-label="Default select example" name="nama_obat[]" >
                       <?php
                         if(!isset($_GET['inap'])){
-                          $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                          $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       }else{
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
 
                       }
                         foreach ($getObat as $data) {
@@ -799,9 +799,9 @@
                           <option value="">Pilih</option>
                             <?php
                                if(!isset($_GET['inap'])){
-                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                 }else{
-                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
   
                             }
                                 foreach ($getObat as $data) {
@@ -842,9 +842,9 @@
 
                           <?php
                              if(!isset($_GET['inap'])){
-                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                           }else{
-                            $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                            $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
 
                           }
                             foreach ($getObat as $data) {
@@ -943,9 +943,9 @@
                           <option value="">Pilih</option>
                             <?php
                             if(!isset($_GET['inap'])){
-                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                             }else{
-                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
 
                             }
                                 foreach ($getObat as $data) {
@@ -1024,9 +1024,9 @@
 
                           <?php
                             if(!isset($_GET['inap'])){
-                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                           }else{
-                            $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                            $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
 
                           }
                             foreach ($getObat as $data) {

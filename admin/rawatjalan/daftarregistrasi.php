@@ -1,78 +1,76 @@
 <?php
-date_default_timezone_set('Asia/Jakarta');
+  date_default_timezone_set('Asia/Jakarta');
+  $perawat = $_SESSION['admin']['username'];
+  // $id=$_GET['id'];
 
-$perawat = $_SESSION['admin']['username'];
-// $id=$_GET['id'];
-
-
-$date = date("Y-m-d");
-$queryKey = '';
-
-if (isset($_POST['src'])) {
-  $queryKey = " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR diagnosis LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR antrian LIKE '%$_POST[key]%' OR registrasi_rawat.jadwal LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%')";
-}
-if (isset($_GET['day'])) {
-  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' " . $queryKey . " ORDER BY idrawat DESC";
-  $linkPage = "index.php?halaman=daftarregistrasi&day";
-} elseif (isset($_GET['all'])) {
-  $queryPasien = "SELECT * FROM registrasi_rawat INNER JOIN rekam_medis ON rekam_medis.jadwal = registrasi_rawat.jadwal WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY idrawat DESC";
-  $linkPage = "index.php?halaman=daftarregistrasi&all";
-  if (isset($_POST['filter'])) {
-    $tgl_awal = $_POST['tgl_awal'];
-    $tgl_akhir = $_POST['tgl_akhir'];
-    $queryPasien = "SELECT * FROM registrasi_rawat INNER JOIN rekam_medis ON rekam_medis.jadwal = registrasi_rawat.jadwal WHERE perawatan = 'Rawat Jalan' AND registrasi_rawat.jadwal BETWEEN '$tgl_awal' AND '$tgl_akhir' " . $queryKey . " ORDER BY idrawat DESC";
-  } 
-}else {
-  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY kode DESC";
-  $linkPage = "index.php?halaman=daftarregistrasi";
-}
-
-if (isset($_GET['detail'])) {
-  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND no_rm = '$_GET[detail]' ORDER BY idrawat DESC LIMIT 1";
-}
-
-if (isset($_GET['off'])) {
-  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and DATE_FORMAT(jadwal, '%y/%m')='$_GET[bulan]' and kategori = 'offline' " . $queryKey . " ORDER BY kode DESC";
-  $linkPage = "index.php?halaman=daftarregistrasi&off&bulan=$_GET[bulan]";
-} elseif (isset($_GET['on'])) {
-  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and DATE_FORMAT(jadwal, '%y/%m')='$_GET[bulan]' and kategori = 'online' " . $queryKey . " ORDER BY kode DESC";
-  $linkPage = "index.php?halaman=daftarregistrasi&on&bulan=$_GET[bulan]";
-}
-//   Pagination
-// Parameters for pagination
-$limit = 100; // Number of entries to show in a page
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$start = ($page - 1) * $limit;
-
-// Get the total number of records
-$tgl_mulaii = date('Y-m-d', strtotime('2024-03-28'));
-$result = $koneksi->query($queryPasien);
-$total_records = $result->num_rows;
-
-// Calculate total pages
-$total_pages = ceil($total_records / $limit);
-
-$cekPage = '';
-if (isset($_GET['page'])) {
-  $cekPage = $_GET['page'];
-} else {
-  $cekPage = '1';
-}
-// End Pagination
-// if(isset($_POST['src'])){
-//   $pasien = $koneksi->query($queryPasien);
-// }else{
-//   $pasien = $koneksi->query($queryPasien." LIMIT $start, $limit;");
-// }
-if (isset($_GET['detail'])) {
-  $pasien = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND no_rm = '$_GET[detail]' ORDER BY idrawat DESC LIMIT 1");
-} else {
+  $date = date("Y-m-d");
+  $queryKey = '';
+  
   if (isset($_POST['src'])) {
-    $pasien = $koneksi->query($queryPasien);
-  } else {
-    $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit");
+    $queryKey = " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR diagnosis LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR antrian LIKE '%$_POST[key]%' OR registrasi_rawat.jadwal LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%')";
   }
-}
+  if (isset($_GET['day'])) {
+    $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' " . $queryKey . " ORDER BY idrawat DESC";
+    $linkPage = "index.php?halaman=daftarregistrasi&day";
+  } elseif (isset($_GET['all'])) {
+    $queryPasien = "SELECT * FROM registrasi_rawat INNER JOIN rekam_medis ON rekam_medis.jadwal = registrasi_rawat.jadwal WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY idrawat DESC";
+    $linkPage = "index.php?halaman=daftarregistrasi&all";
+    if (isset($_POST['filter'])) {
+      $tgl_awal = $_POST['tgl_awal'];
+      $tgl_akhir = $_POST['tgl_akhir'];
+      $queryPasien = "SELECT * FROM registrasi_rawat INNER JOIN rekam_medis ON rekam_medis.jadwal = registrasi_rawat.jadwal WHERE perawatan = 'Rawat Jalan' AND registrasi_rawat.jadwal BETWEEN '$tgl_awal' AND '$tgl_akhir' " . $queryKey . " ORDER BY idrawat DESC";
+    } 
+  }else {
+    $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY kode DESC";
+    $linkPage = "index.php?halaman=daftarregistrasi";
+  }
+  
+  if (isset($_GET['detail'])) {
+    $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND no_rm = '$_GET[detail]' ORDER BY idrawat DESC LIMIT 1";
+  }
+  
+  if (isset($_GET['off'])) {
+    $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and DATE_FORMAT(jadwal, '%y/%m')='$_GET[bulan]' and kategori = 'offline' " . $queryKey . " ORDER BY kode DESC";
+    $linkPage = "index.php?halaman=daftarregistrasi&off&bulan=$_GET[bulan]";
+  } elseif (isset($_GET['on'])) {
+    $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and DATE_FORMAT(jadwal, '%y/%m')='$_GET[bulan]' and kategori = 'online' " . $queryKey . " ORDER BY kode DESC";
+    $linkPage = "index.php?halaman=daftarregistrasi&on&bulan=$_GET[bulan]";
+  }
+  //   Pagination
+  // Parameters for pagination
+  $limit = 100; // Number of entries to show in a page
+  $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+  $start = ($page - 1) * $limit;
+  
+  // Get the total number of records
+  $tgl_mulaii = date('Y-m-d', strtotime('2024-03-28'));
+  $result = $koneksi->query($queryPasien);
+  $total_records = $result->num_rows;
+  
+  // Calculate total pages
+  $total_pages = ceil($total_records / $limit);
+  
+  $cekPage = '';
+  if (isset($_GET['page'])) {
+    $cekPage = $_GET['page'];
+  } else {
+    $cekPage = '1';
+  }
+  // End Pagination
+  // if(isset($_POST['src'])){
+  //   $pasien = $koneksi->query($queryPasien);
+  // }else{
+  //   $pasien = $koneksi->query($queryPasien." LIMIT $start, $limit;");
+  // }
+  if (isset($_GET['detail'])) {
+    $pasien = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND no_rm = '$_GET[detail]' ORDER BY idrawat DESC LIMIT 1");
+  } else {
+    if (isset($_POST['src'])) {
+      $pasien = $koneksi->query($queryPasien);
+    } else {
+      $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit");
+    }
+  }
 ?>
 
 

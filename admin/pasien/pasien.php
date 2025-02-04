@@ -449,12 +449,13 @@ $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
     });
   </script>
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-  <script>
-    function samakanAlamat() {
-      document.getElementById("alamatDomisili").innerHTML='Provinsi '+document.getElementById("provins").value +', '+'Kabupaten/Kota '+document.getElementById("kot").value +', '+'Kecamatan '+document.getElementById("kecamata").value +', '+ 'Desa/Kelurahan '+document.getElementById("keluraha").value +', '+ document.getElementById("alamatAsal").value +', '+ document.getElementById("kode_pos").value  ;
-    }
-  </script>
- <!-- <script>
+    <script>
+      function samakanAlamat() {
+        document.getElementById("alamatDomisili").innerHTML='Provinsi '+document.getElementById("provins").value +', '+'Kabupaten/Kota '+document.getElementById("kot").value +', '+'Kecamatan '+document.getElementById("kecamata").value +', '+ 'Desa/Kelurahan '+document.getElementById("keluraha").value +', '+ document.getElementById("alamatAsal").value +', '+ document.getElementById("kode_pos").value  ;
+      }
+    </script>
+    
+    <!-- <script>
         fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/provinces.json`)
             .then((response) => response.json())
             .then((provinces) => {
@@ -534,9 +535,8 @@ $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
             });
     </script> -->
 
-
     <script>
-        const selectProvinsiDom = document.getElementById('provinsi_dom');
+      const selectProvinsiDom = document.getElementById('provinsi_dom');
         const selectKotaDom = document.getElementById('kota_dom');
         const selectKecamatanDom = document.getElementById('kecamatan_dom');
         const selectKelurahanDom = document.getElementById('kelurahan_dom');
@@ -588,118 +588,86 @@ $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
                 });
         });
     </script>
-
-
-
 </body>
-
 </html>
 
-
 <?php 
+  if (isset ($_POST['save'])) {
+    $nama_lengkap=htmlspecialchars($_POST["nama_lengkap"]);
+    $nama_ibu=htmlspecialchars($_POST["nama_ibu"]);
+    $no_rm= str_replace(' ', '', htmlspecialchars($_POST["no_rm"]));
+    $tgl_lahir=htmlspecialchars($_POST["tgl_lahir"]);
+    $suku=htmlspecialchars($_POST["suku"]);
+    $bahasa=htmlspecialchars($_POST["bahasa"]);
+    $jenis_kelamin=htmlspecialchars($_POST["jenis_kelamin"]);
+    $agama=htmlspecialchars($_POST["agama"]);
+    $pendidikan=htmlspecialchars($_POST["pendidikan"]);
+    $pekerjaan=htmlspecialchars($_POST["pekerjaan"]);
+    $status_nikah=htmlspecialchars($_POST["status_nikah"]);
 
+    $nohp=htmlspecialchars($_POST["nohp"]);
+    $email=htmlspecialchars($_POST["email"]);
+    $jenis_identitas=htmlspecialchars($_POST["jenis_identitas"]);
+    $no_identitas=($_POST["no_identitas"]);
 
-if (isset ($_POST['save'])) {
-  $nama_lengkap=htmlspecialchars($_POST["nama_lengkap"]);
-  $nama_ibu=htmlspecialchars($_POST["nama_ibu"]);
-  $no_rm= str_replace(' ', '', htmlspecialchars($_POST["no_rm"]));
-  $tgl_lahir=htmlspecialchars($_POST["tgl_lahir"]);
-  $suku=htmlspecialchars($_POST["suku"]);
-  $bahasa=htmlspecialchars($_POST["bahasa"]);
-  $jenis_kelamin=htmlspecialchars($_POST["jenis_kelamin"]);
-  $agama=htmlspecialchars($_POST["agama"]);
-  $pendidikan=htmlspecialchars($_POST["pendidikan"]);
-  $pekerjaan=htmlspecialchars($_POST["pekerjaan"]);
-  $status_nikah=htmlspecialchars($_POST["status_nikah"]);
+    $provinsi=htmlspecialchars($_POST["provinsi"]);
+    $kota=htmlspecialchars($_POST["kota"]);
+    $kecamatan=htmlspecialchars($_POST["kecamatan"]);
+    $kelurahan=htmlspecialchars($_POST["kelurahan"]);
+    $kode_pos=htmlspecialchars($_POST["kode_pos"]);
+    $alamat=htmlspecialchars($_POST["alamat"]);
+    $pembiayaan=htmlspecialchars($_POST["pembiayaan"]);
+    $no_bpjs=htmlspecialchars($_POST["no_bpjs"]);
+    $kategori=htmlspecialchars($_POST["kategori"]);
+    $username_admin=htmlspecialchars($_POST["username_admin"]);
+    $idadmin=htmlspecialchars($_POST["idadmin"]);
+    $status_log=htmlspecialchars($_POST["status_log"]);
 
-  $nohp=htmlspecialchars($_POST["nohp"]);
-  $email=htmlspecialchars($_POST["email"]);
-  $jenis_identitas=htmlspecialchars($_POST["jenis_identitas"]);
-  $no_identitas=($_POST["no_identitas"]);
+    //hitung usia
+    $lahir    =new DateTime($tgl_lahir);
+    $today        =new DateTime();
+    $umur = $today->diff($lahir);
+    $umur2=$umur->y." Tahun,".$umur->m." Bulan,".$umur->d." Hari";
+    $foto=$_FILES['foto']['name'];
+    $lokasi=$_FILES['foto']['tmp_name'];
+    move_uploaded_file($lokasi, '../pasien/foto/'.$foto);
 
-  $provinsi=htmlspecialchars($_POST["provinsi"]);
-  $kota=htmlspecialchars($_POST["kota"]);
-  $kecamatan=htmlspecialchars($_POST["kecamatan"]);
-  $kelurahan=htmlspecialchars($_POST["kelurahan"]);
-  $kode_pos=htmlspecialchars($_POST["kode_pos"]);
-  $alamat=htmlspecialchars($_POST["alamat"]);
-
-  $pembiayaan=htmlspecialchars($_POST["pembiayaan"]);
-  $no_bpjs=htmlspecialchars($_POST["no_bpjs"]);
-
-  $kategori=htmlspecialchars($_POST["kategori"]);
-
-  $username_admin=htmlspecialchars($_POST["username_admin"]);
-
-  $idadmin=htmlspecialchars($_POST["idadmin"]);
-
-  $status_log=htmlspecialchars($_POST["status_log"]);
-
-  //hitung usia
-  $lahir    =new DateTime($tgl_lahir);
-  $today        =new DateTime();
-  $umur = $today->diff($lahir);
-  $umur2=$umur->y." Tahun,".$umur->m." Bulan,".$umur->d." Hari";
-
-  $foto=$_FILES['foto']['name'];
-
-  $lokasi=$_FILES['foto']['tmp_name'];
-
-  move_uploaded_file($lokasi, '../pasien/foto/'.$foto);
-
-  $getPasienTerdaftar = $koneksi->query("SELECT COUNT(*) as jumlah FROM pasien WHERE no_rm='$no_rm'")->fetch_assoc();
-
-  if(empty($getPasienTerdaftar['jumlah']) ){
-
-    $koneksi->query("INSERT INTO pasien 
-
-      (nama_lengkap, nama_ibu, nohp, email, no_identitas,  tgl_lahir, jenis_kelamin, jenis_identitas, provinsi, kota, kelurahan, kecamatan, kode_pos, alamat, kategori, status_nikah, pembiayaan, foto, no_rm, umur, no_bpjs, agama, suku, bahasa, pendidikan, pekerjaan)
-
-      VALUES ('$nama_lengkap', '$nama_ibu', '$nohp', '$email', '$no_identitas', '$tgl_lahir', '$jenis_kelamin', '$jenis_identitas', '$provinsi', '$kota', '$kelurahan', '$kecamatan',  '$kode_pos', '$alamat', '$kategori', '$status_nikah','$pembiayaan', '$foto', '$no_rm', '$umur2','$no_bpjs', '$agama', '$suku', '$bahasa', '$pendidikan', '$pekerjaan')
-
+    $getPasienTerdaftar = $koneksi->query("SELECT COUNT(*) as jumlah FROM pasien WHERE no_rm='$no_rm'")->fetch_assoc();
+    if($getPasienTerdaftar['jumlah'] == 0 ){
+      $koneksi->query("INSERT INTO pasien 
+        (nama_lengkap, nama_ibu, nohp, email, no_identitas,  tgl_lahir, jenis_kelamin, jenis_identitas, provinsi, kota, kelurahan, kecamatan, kode_pos, alamat, kategori, status_nikah, pembiayaan, foto, no_rm, umur, no_bpjs, agama, suku, bahasa, pendidikan, pekerjaan)
+        VALUES ('$nama_lengkap', '$nama_ibu', '$nohp', '$email', '$no_identitas', '$tgl_lahir', '$jenis_kelamin', '$jenis_identitas', '$provinsi', '$kota', '$kelurahan', '$kecamatan',  '$kode_pos', '$alamat', '$kategori', '$status_nikah','$pembiayaan', '$foto', '$no_rm', '$umur2','$no_bpjs', '$agama', '$suku', '$bahasa', '$pendidikan', '$pekerjaan')
       ");
-
-    $koneksi->query("INSERT INTO log_user 
-
-      (status_log, username_admin, idadmin)
-
-      VALUES ('$status_log', '$username_admin', '$idadmin')
-
+      $koneksi->query("INSERT INTO log_user 
+        (status_log, username_admin, idadmin)
+        VALUES ('$status_log', '$username_admin', '$idadmin')
       ");
-
       if (mysqli_affected_rows($koneksi)>0) {
         echo "
-        <script>
-        alert('Data berhasil ditambah');
-        document.location.href='index.php?halaman=daftarpasien';
-        </script>
-
+          <script>
+            alert('Data berhasil ditambah');
+            document.location.href='index.php?halaman=daftarpasien';
+          </script>
         ";
-
       } else {
-
         echo "
-        <script>
-        alert('GAGAL MENGHAPUS DATA');
-        document.location.href='index.php?halaman=daftarpasien';
-        </script>
-
+          <script>
+            alert('GAGAL MENGHAPUS DATA');
+            document.location.href='index.php?halaman=daftarpasien';
+          </script>
         ";
-
       }
-  }else{
-    echo "
-    <script>
-    alert('Pasien sudah terdaftar!!!');
-    document.location.href='index.php?halaman=pasien';
-    </script>
+    }else{
+      echo "
+        <script>
+          alert('Pasien sudah terdaftar!!!');
+          document.location.href='index.php?halaman=pasien';
+        </script>
+      ";
 
-    ";
+    }
 
   }
-
-}
-
 ?>
 
 

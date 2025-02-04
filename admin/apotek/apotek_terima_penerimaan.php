@@ -1,5 +1,18 @@
 <?php
     $id = htmlspecialchars($_GET['beli']);
+    
+    $getSinglePembelian = $koneksi->query("SELECT * FROM pembelian_obat WHERE id_beli = '$id'")->fetch_assoc();
+    $getSingleCek = $koneksi->query("SELECT * FROM apotek WHERE nama_obat = '$getSinglePembelian[nama_obat]'");
+    if ($getSingleCek->num_rows == 0) {
+        $koneksi->query("INSERT INTO apotek (nama_obat, tipe, id_obat, bentuk, jml_obat, jml_obat_minim, harga_beli, tgl_beli, margininap, margin_jual, produsen) VALUES ('$getSinglePembelian[nama_obat]', '$getSinglePembelian[tipe]', '$getSinglePembelian[id_obat]', '$getSinglePembelian[bentuk]', '0', '$getSinglePembelian[jml_obat_minim]', '$getSinglePembelian[harga_beli]', '$getSinglePembelian[tgl_beli]', '100', '100', '$getSinglePembelian[produsen]')");
+    
+        echo "
+            <script>
+                document.location.href='index.php?halaman=apotek_terima_penerimaan&beli=$_GET[beli]';
+            </script>
+        ";
+    }
+
     $single = $koneksi->query("SELECT * FROM pembelian_obat INNER JOIN apotek ON apotek.id_obat = pembelian_obat.id_obat WHERE id_beli = '$id' GROUP BY apotek.id_obat")->fetch_assoc();
 ?>
 <a href="index.php?halaman=apotek_terima" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;"><i class="bi bi-arrow-left"></i> Kembali</a>
