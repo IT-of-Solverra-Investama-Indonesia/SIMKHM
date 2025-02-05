@@ -166,6 +166,7 @@
                         <option <?= ($pecahrawat['carabayar'] === "") ? "selected" : ""; ?>>Pilih Pembayaran</option>
                         <option value="bpjs" <?= ($pecahrawat['carabayar'] === "bpjs") ? "selected" : ""; ?>>bpjs</option>
                         <option value="umum" <?= ($pecahrawat['carabayar'] === "umum") ? "selected" : ""; ?>>umum</option>
+                        <option value="malam" <?= ($pecahrawat['carabayar'] === "malam") ? "selected" : ""; ?>>malam</option>
                       </select>
                     </div>
                     <div class="col-md-6">
