@@ -56,6 +56,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
 
                    //rating
                    elseif ($hal=="ratingall"){include '../rating/ratingall.php';}
+                   elseif ($hal=="rating_user"){include '../rating/rating_user.php';}
                    //informasi
                    elseif ($hal=="informasi"){include '../informasi/informasi.php';}
                    elseif ($hal=="tambahinformasi"){include '../informasi/tambah-informasi.php';}

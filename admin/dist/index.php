@@ -568,7 +568,14 @@ if(!isset($_SESSION['login'])){
       </li><!-- End Register Page Nav -->
 
       <?php } ?>
+
       <li class="nav-item">
+        <?php if ($level == 'kasir' or $level == 'apoteker' or $level == 'daftar'or $level == 'dokter') { ?>
+          <a class="nav-link collapsed" href="index.php?halaman=rating_user">
+            <i class="bi bi-star"></i>
+            <span>Rating Per User</span>
+          </a>
+        <?php }?>
         <a class="nav-link collapsed" href="logout.php">
           <i class="bi bi-box-arrow-in-right"></i>
           <span>Logout</span>
