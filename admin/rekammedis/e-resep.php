@@ -95,14 +95,77 @@
     $pasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . htmlspecialchars($_GET['id']) . "'")->fetch_assoc();
     ?>
 
-    <script>
+    <!-- <script>
         window.print()
-    </script>
-
-    <div class="page">
+    </script> -->
+    <div class="" style="">
         <div class="header">
-            <h3>KLINIK KISADA MULIA</h3>
-            <p>Telp: (021) 24571010</p>
+            <h4>KLINIK HUSADA MULIA</h4>
+            <p>Instansi Farmasi</p>
+            <hr>
+        </div>
+        <div class="content">
+            <table>
+                <tr>
+                    <td>No. RM / No. RW</td>
+                    <td>:</td>
+                    <td><?= $pasien['no_rm'] ?></td>
+                </tr>
+                <tr>
+                    <td>Nama Pasien</td>
+                    <td>:</td>
+                    <td><?= $pasien['nama_lengkap'] ?></td>
+                </tr>
+                <tr>
+                    <td>Tgl. Resep</td>
+                    <td>:</td>
+                    <td><?= date('d-m-Y', strtotime($_GET['tgl'])) ?></td>
+                </tr>
+                <tr>
+                    <td>Nama Dokter</td>
+                    <td>:</td>
+                    <td><?= $dokter['namalengkap'] ?></td>
+                </tr>
+                <tr>
+                    <td>Poliklinik</td>
+                    <td>:</td>
+                    <td>Umum</td>
+                </tr>
+                <tr>
+                    <td>Jenis Bayar</td>
+                    <td>:</td>
+                    <td><?= $registrasi['carabayar'] ?></td>
+                </tr>
+            </table>
+            <table class="table mt-3">
+                <thead>
+                    <tr>
+                        <td>No.</td>
+                        <td>Nama Obat</td>
+                        <td>Signa</td>
+                        <td>Qty</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $no = 1;
+                    foreach ($dataObat as $obat) { ?>
+                        <tr>
+                            <td><?= $no++ ?></td>
+                            <td><?= htmlspecialchars($obat['nama_obat']) ?></td>
+                            <td><?= htmlspecialchars($obat['dosis1_obat']) ?>x<?= htmlspecialchars($obat['dosis2_obat']) ?> <?= htmlspecialchars($obat['per_obat']) ?> (<?= htmlspecialchars($obat['petunjuk_obat']) ?>)</td>
+                            <td><?= htmlspecialchars($obat['jml_dokter']) ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- <div class="page">
+        <div class="header">
+            <h4>KLINIK KISADA MULIA</h4>
+            <p>Instansi Farmasi</p>
+            <hr>
         </div>
 
         <div class="content">
@@ -127,11 +190,12 @@
                     <td><b> : </b></td>
                     <td>Umum</td>
                 </tr>
+                <tr>
+                    <td><b>Pasien</b></td>
+                    <td><b> : </b></td>
+                    <td><?= $pasien['nama_lengkap'] ?></td>
+                </tr>
             </table>
-            <!-- <p class="mb-0"><strong>Nama Dokter:</strong> Dr. John Doe</p>
-        <p class="mb-0"><strong>SIP:</strong> 123456789</p>
-        <p class="mb-0"><strong>No. Resep:</strong> 001</p>
-        <p class="mb-2"><strong>Ruangan/Poli:</strong> Umum</p> -->
 
             <div class="card p-2">
                 <table style="width: 40%;">
@@ -168,13 +232,11 @@
                                 <td><strong>Nama Pasien</strong> </td>
                                 <td><strong> : </strong></td>
                                 <td><?= $pasien['nama_lengkap'] ?></td>
-                                <!-- <td><strong class="ml-3">BB:</strong> 60 kg</td> -->
                             </tr>
                             <tr>
                                 <td><strong>Alamat</strong></td>
                                 <td><strong> : </strong></td>
                                 <td><?= $pasien['alamat'] ?></td>
-                                <!-- <td><strong class="ml-3">Tgl. Lahir:</strong> 01-01-1990</td> -->
                             </tr>
                             <tr>
                                 <td><strong>Diagnosis</strong></td>
@@ -295,10 +357,6 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="signature">
-            <p>Dokter Pengirim,</p>
-            <p>____________________</p>
-        </div> -->
         </div>
     </div>
     <div class="page">
@@ -509,7 +567,7 @@
                 </td>
             </tr>
         </table>
-    </div>
+    </div> -->
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

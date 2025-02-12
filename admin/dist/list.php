@@ -64,6 +64,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    //rekam medis
                    elseif ($hal=="rekammedisall"){include '../rekammedis/rekammedisall.php';}
                    elseif ($hal=="resume"){include '../rekammedis/resume.php';}
+                   elseif ($hal=="resumeedit"){include '../rekammedis/resumeedit.php';}
                    elseif ($hal=="rmedis"){include '../rekammedis/rmedis.php';}
                    elseif ($hal=="daftarrmedis"){include '../rekammedis/daftarrmedis.php';}
                    elseif ($hal=="detailrm"){include '../rekammedis/detailrm.php';}

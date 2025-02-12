@@ -5,87 +5,58 @@
   // ini_set('session.gc_maxlifetime', $session_duration);
   //jalankan halaman fungsi
   require 'function.php';
-//jalankan session
-//cek cookie
-
-if (isset($_COOKIE['id']) && isset($_COOKIE['key']) ) {
-    $id=$_COOKIE['id'];
-    $key=$_COOKIE['key'];
-
-    //ambil username berdasarkan id
-    $result = mysqli_query($koneksi, "SELECT username FROM admin WHERE id = $id");
-    $row=mysqli_fetch_assoc($result);
-    //cek cookie dan username
-    if ($key===$row['username']) {
-        $_SESSION['admin'] = $row;
-        $_SESSION['login'] = $row;
-    }
-}
-
-
-//jika tombol login di tekan
-
-if (isset ($_POST["login"])) {
-
-    $username=$_POST["username"];
-
-    $password=$_POST["password"];
-
-	  $shift=$_POST['shift'];
-    
-	  $dokter_rawat=$_POST['dokter_rawat'];
-    
-
-
-    $result=mysqli_query($koneksi, "SELECT * FROM admin WHERE username='$username'");
-
-    $baris=mysqli_num_rows($result);
-
-    // var_dump($baris);
-
-    //cek username
-
-    if (mysqli_num_rows($result)===1) {
-
-    //cek password
-
-        //ambil dulu data password dari db
-
-        $row2=mysqli_fetch_assoc($result);
-
-        //var_dump($row2['password']);
-
-        if ($password==$row2['password']){
-
-        //set sessionnya, sebelumnya jalankan session di code no 1
-
-        
-            $_SESSION['admin']= $row2;
-
-            $_SESSION['login']= true;
-
-			      $_SESSION['shift']=$shift;
-			      $_SESSION['dokter_rawat']=$dokter_rawat;
-            $_SESSION['login_time'] = time();
-            
-
-
-          if($row2['level'] == 'dokter'){
-            echo "<script> location='index.php?halaman=daftarrmedis'; </script> ";
-          }else{
-            echo "<script> location='index.php'; </script> ";
+  //jalankan session
+  //cek cookie
+  if (isset($_COOKIE['id']) && isset($_COOKIE['key']) ) {
+      $id=$_COOKIE['id'];
+      $key=$_COOKIE['key'];
+  
+      //ambil username berdasarkan id
+      $result = mysqli_query($koneksi, "SELECT username FROM admin WHERE id = $id");
+      $row=mysqli_fetch_assoc($result);
+      //cek cookie dan username
+      if ($key===$row['username']) {
+          $_SESSION['admin'] = $row;
+          $_SESSION['login'] = $row;
+      }
+  }
+  //jika tombol login di tekan
+  if (isset ($_POST["login"])) {
+      $username=$_POST["username"];
+      $password=$_POST["password"];
+      $shift=$_POST['shift'];
+      $dokter_rawat=$_POST['dokter_rawat'];
+      $result=mysqli_query($koneksi, "SELECT * FROM admin WHERE username='$username'");
+      $baris=mysqli_num_rows($result);
+      // var_dump($baris);
+      //cek username
+      if (mysqli_num_rows($result)===1) {
+      //cek password
+          //ambil dulu data password dari db
+          $row2=mysqli_fetch_assoc($result);
+          //var_dump($row2['password']);
+          if ($password==$row2['password']){
+            //set sessionnya, sebelumnya jalankan session di code no 1
+              $_SESSION['admin']= $row2;
+              $_SESSION['login']= true;
+              $_SESSION['shift']=$shift;
+              $_SESSION['dokter_rawat']=$dokter_rawat;
+              $_SESSION['login_time'] = time();
+              if($row2['level'] == 'dokter'){
+                echo "<script> location='index.php?halaman=daftarrmedis'; </script> ";
+              }elseif($row2['level'] == 'racik'){
+                echo "<script> location='index.php?halaman=daftarrmedis&all'; </script> ";
+              } elseif ($row2['level'] == 'apoteker') {
+                echo "<script> location='index.php?halaman=daftarapotek'; </script> ";
+              }else{
+                echo "<script> location='index.php'; </script> ";
+              }
+            //header('location:home.php');
+            exit;
           }
-
-        //header('location:home.php');
-
-        exit;
-
-        }
-    }
-
-$error=true;
-
-}
+      }
+      $error=true;
+  }
 ?>
 
 

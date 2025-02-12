@@ -1,25 +1,25 @@
 <?php
-// error_reporting(0);
-$username = $_SESSION['admin']['username'];
-$ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
+  // error_reporting(0);
+  $username = $_SESSION['admin']['username'];
+  $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 
-$pasien = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE idrawat='$_GET[id]';");
-$pasien = $pasien->fetch_assoc();
+  $pasien = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE idrawat='$_GET[id]';");
+  $pasien = $pasien->fetch_assoc();
 
-$p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[norm]';");
-$p = $p->fetch_assoc();
+  $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[norm]';");
+  $p = $p->fetch_assoc();
 
-$rm = $koneksi->query("SELECT * FROM rekam_medis  WHERE norm='$_GET[norm]';");
-$rm = $rm->fetch_assoc();
+  $rm = $koneksi->query("SELECT * FROM rekam_medis  WHERE norm='$_GET[norm]';");
+  $rm = $rm->fetch_assoc();
 
-if (isset($_GET['kj'])) {
-  $awal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm='$_GET[norm]' AND id_rm='$_GET[kj]';");
-} else {
-  // $awal=$koneksi->query("SELECT * FROM kajian_awal WHERE norm='$_GET[norm]';");
-  $awal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm='$_GET[norm]' ORDER BY tgl_rm DESC LIMIT 1;");
-}
-$awal = $awal->fetch_assoc();
-date_default_timezone_set("asia/jakarta");
+  if (isset($_GET['kj'])) {
+    $awal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm='$_GET[norm]' AND id_rm='$_GET[kj]';");
+  } else {
+    // $awal=$koneksi->query("SELECT * FROM kajian_awal WHERE norm='$_GET[norm]';");
+    $awal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm='$_GET[norm]' ORDER BY tgl_rm DESC LIMIT 1;");
+  }
+  $awal = $awal->fetch_assoc();
+  date_default_timezone_set("asia/jakarta");
 ?>
 
 <!DOCTYPE html>
@@ -1038,7 +1038,12 @@ date_default_timezone_set("asia/jakarta");
                       <tr>
                         <td><?= $item['nama_pasien'] ?></td>
                         <td><?= $item['tgl_rm'] ?></td>
-                        <td><a href="index.php?halaman=resume&id=<?= $_GET['id'] ?>&norm=<?= $_GET['norm'] ?>&ubah&kj=<?= $item['id_rm'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
+                        <td>
+                          <?php if ($_SESSION['admin']['level'] == 'rekam medis') { ?>
+                            <a href="index.php?halaman=resumeedit&id=<?= $item['id_rm'] ?>" class="btn btn-sm btn-success"><i class="bi bi-pencil"></i></a>
+                          <?php }?>
+                          <a href="index.php?halaman=resume&id=<?= $_GET['id'] ?>&norm=<?= $_GET['norm'] ?>&ubah&kj=<?= $item['id_rm'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                        </td>
                       </tr>
                     <?php } ?>
                   </tbody>

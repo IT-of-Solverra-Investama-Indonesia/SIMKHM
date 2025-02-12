@@ -140,7 +140,7 @@ if(!isset($_SESSION['login'])){
       </li>
       <!-- End Dashboard Nav -->
 
-     <?php if($level == 'perawat' or $level == 'ceo'  or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') {?>
+     <?php if($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') {?>
 
       <li class="nav-heading">Perawat</li>
 
@@ -187,7 +187,7 @@ if(!isset($_SESSION['login'])){
      <?php } ?>
 
 
-     <?php if($level == 'dokter' or $level == 'ceo'  or $level == 'sup') {?>
+     <?php if($level == 'dokter' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup') {?>
 
       <li class="nav-heading">Dokter</li>
 

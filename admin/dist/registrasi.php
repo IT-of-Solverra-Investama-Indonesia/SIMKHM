@@ -140,6 +140,7 @@ include 'function.php';
                         <option value="lab">lab</option>
                         
                         <option value="racik">racik</option>
+                        <option value="rekam medis">rekam medis</option>
                       </select>
                     </div>
 
