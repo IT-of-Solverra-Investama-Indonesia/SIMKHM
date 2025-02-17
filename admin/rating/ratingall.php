@@ -49,252 +49,313 @@ $user = $_SESSION['admin']['username'];
 				</table>
 			</div>
 		</div>
-		<div class="col-md-6 mb-2">
-			<div class="card shadow p-2 h-100">
-				<h4>Rating Dokter</h4>
-				<div class="table-responsive">
-					<table id="myTable1" class="table table-striped table-hover" style="font-size: 12px;">
-						<thead>
-							<tr>
-								<th>Bulan</th>
-								<th>Nama Dokter</th>
-								<th>Total Rating</th>
-								<th>Jumlah Voting</th>
-								<th>Rata Rata</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							$getRatingDokter = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(vote) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE vote != 0 GROUP BY nama, bulan ORDER BY bulan DESC");
-							foreach ($getRatingDokter as $dokter) {
-							?>
-								<tr>
-									<td>
-										<a href="index.php?halaman=ratingall&detail&petugas=nama&nama=<?= $dokter['nama'] ?>&bulan=<?= $dokter['bulan'] ?>">
-											<?= $dokter['bulan'] ?>
-										</a>
-									</td>
-									<td><?= $dokter['nama'] ?></td>
-									<td><?= $dokter['jumlahRating'] ?></td>
-									<td>
-										<?php
-										$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$dokter[bulan]'")->fetch_assoc();
-										?>
-										<?= $dokter['jumlahVote'] . " " . "(" . number_format(($dokter['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
-									</td>
-									<td><?= number_format($dokter['jumlahRating'] / $dokter['jumlahVote'], 2) ?></td>
-								</tr>
-							<?php } ?>
-						</tbody>
-					</table>
-				</div>
+		<div class="col-12">
+			<div class="card shadow p-2 mb-2">
+				<form method="post">
+					<div class="row">
+						<div class="col-9">
+							<label for="">Tipe</label>
+							<select name="jenis" id="" class="form-control">
+								<option value="Dokter">Dokter</option>
+								<option value="Kasir">Kasir</option>
+								<option value="Pendaftaran">Pendaftaran</option>
+								<option value="Apoteker">Apoteker</option>
+								<option value="Perawat">Perawat</option>
+								<option value="Kebersihan">Kebersihan</option>
+							</select>
+						</div>
+						<div class="col-3">
+							<br>
+							<button class="btn btn-primary" name="fil"><i class="bi bi-filter"></i></button>
+						</div>
+					</div>
+				</form>
 			</div>
 		</div>
-		<div class="col-md-6 mb-2">
-			<div class="card shadow p-2 h-100">
-				<h4>Rating Kasir</h4>
-				<div class="table-responsive">
-					<table id="myTable2" class="table table-striped table-hover" style="font-size: 12px;">
-						<thead>
-							<tr>
-								<th>Bulan</th>
-								<th>Nama Kasir</th>
-								<th>Total Rating</th>
-								<th>Jumlah Voting</th>
-								<th>Rata Rata</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							$getRatingKasir = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_kasir) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_kasir != 0 GROUP BY nama_kasir, bulan ORDER BY bulan DESC");
-							foreach ($getRatingKasir as $kasir) {
-							?>
-								<tr>
-									<td>
-										<a href="index.php?halaman=ratingall&detail&petugas=nama_kasir&nama=<?= $kasir['nama_kasir'] ?>&bulan=<?= $kasir['bulan'] ?>">
-											<?= $kasir['bulan'] ?>
-										</a>
-									</td>
-									<td><?= $kasir['nama_kasir'] ?></td>
-									<td><?= $kasir['jumlahRating'] ?></td>
-									<td>
-										<?php
-										$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$kasir[bulan]'")->fetch_assoc();
-										?>
-										<?= $kasir['jumlahVote'] . " " . "(" . number_format(($kasir['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
-									</td>
-									<td><?= number_format($kasir['jumlahRating'] / $kasir['jumlahVote'], 2) ?></td>
-								</tr>
-							<?php } ?>
-						</tbody>
-					</table>
+		<?php if (isset($_POST['fil'])) { ?>
+			<?php if (isset($_POST['jenis']) AND $_POST['jenis'] == 'Dokter') { ?>
+				<div class="col-md-12 mb-2 ">
+					<div class="card shadow p-2 h-100">
+						<h4>Rating Dokter</h4>
+						<div class="table-responsive">
+							<table id="myTable1" class="table table-striped table-hover" style="font-size: 12px;">
+								<thead>
+									<tr>
+										<th>Bulan</th>
+										<th>Nama Dokter</th>
+										<th>Total Rating</th>
+										<th>Jumlah Voting</th>
+										<th>Rata Rata</th>
+										<th>Skor</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$getRatingDokter = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(vote) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE vote != 0 GROUP BY nama, bulan ORDER BY bulan DESC");
+									foreach ($getRatingDokter as $dokter) {
+									?>
+										<tr>
+											<td>
+												<a href="index.php?halaman=ratingall&detail&petugas=nama&nama=<?= $dokter['nama'] ?>&bulan=<?= $dokter['bulan'] ?>">
+													<?= $dokter['bulan'] ?>
+												</a>
+											</td>
+											<td><?= $dokter['nama'] ?></td>
+											<td><?= $dokter['jumlahRating'] ?></td>
+											<td>
+												<?php
+												$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$dokter[bulan]'")->fetch_assoc();
+												?>
+												<?= $dokter['jumlahVote'] . " " . "(" . number_format($persen = ($dokter['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
+											</td>
+											<td><?= number_format($rata = $dokter['jumlahRating'] / $dokter['jumlahVote'], 2) ?></td>
+											<td>
+												<?= number_format($rata + ($persen / 2), 2)?>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
-		<div class="col-md-6 mb-2">
-			<div class="card shadow p-2 h-100">
-				<h4>Rating Pendaftaran</h4>
-				<div class="table-responsive">
-					<table id="myTable3" class="table table-striped table-hover" style="font-size: 12px;">
-						<thead>
-							<tr>
-								<th>Bulan</th>
-								<th>Nama Pendaftaran</th>
-								<th>Total Rating</th>
-								<th>Jumlah Voting</th>
-								<th>Rata Rata</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							$getRatingDaftar = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_daftar) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_daftar != 0 GROUP BY nama_daftar, bulan ORDER BY bulan DESC");
-							foreach ($getRatingDaftar as $daftar) {
-							?>
-								<tr>
-									<td>
-										<a href="index.php?halaman=ratingall&detail&petugas=nama_daftar&nama=<?= $daftar['nama_daftar'] ?>&bulan=<?= $daftar['bulan'] ?>">
-											<?= $daftar['bulan'] ?>
-										</a>
-									</td>
-									<td><?= $daftar['nama_daftar'] ?></td>
-									<td><?= $daftar['jumlahRating'] ?></td>
-									<td>
-										<?php
-										$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$daftar[bulan]'")->fetch_assoc();
-										?>
-										<?= $daftar['jumlahVote'] . " " . "(" . number_format(($daftar['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
-									</td>
-									<td><?= number_format($daftar['jumlahRating'] / $daftar['jumlahVote'], 2) ?></td>
-								</tr>
-							<?php } ?>
-						</tbody>
-					</table>
+			<?php } ?>
+			<?php if (isset($_POST['jenis']) AND $_POST['jenis'] == 'Kasir') { ?>
+				<div class="col-md-12 mb-2 ">
+					<div class="card shadow p-2 h-100">
+						<h4>Rating Kasir</h4>
+						<div class="table-responsive">
+							<table id="myTable2" class="table table-striped table-hover" style="font-size: 12px;">
+								<thead>
+									<tr>
+										<th>Bulan</th>
+										<th>Nama Kasir</th>
+										<th>Total Rating</th>
+										<th>Jumlah Voting</th>
+										<th>Rata Rata</th>
+										<th>Skor</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$getRatingKasir = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_kasir) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_kasir != 0 GROUP BY nama_kasir, bulan ORDER BY bulan DESC");
+									foreach ($getRatingKasir as $kasir) {
+									?>
+										<tr>
+											<td>
+												<a href="index.php?halaman=ratingall&detail&petugas=nama_kasir&nama=<?= $kasir['nama_kasir'] ?>&bulan=<?= $kasir['bulan'] ?>">
+													<?= $kasir['bulan'] ?>
+												</a>
+											</td>
+											<td><?= $kasir['nama_kasir'] ?></td>
+											<td><?= $kasir['jumlahRating'] ?></td>
+											<td>
+												<?php
+												$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$kasir[bulan]'")->fetch_assoc();
+												?>
+												<?= $kasir['jumlahVote'] . " " . "(" . number_format($persen = ($kasir['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
+											</td>
+											<td><?= number_format($rata = $kasir['jumlahRating'] / $kasir['jumlahVote'], 2) ?></td>
+											<td>
+												<?= number_format($rata + ($persen / 2), 2)?>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
-		<div class="col-md-6 mb-2">
-			<div class="card shadow p-2 h-100">
-				<h4>Rating Perawat</h4>
-				<div class="table-responsive">
-					<table id="myTable4" class="table table-striped table-hover" style="font-size: 12px;">
-						<thead>
-							<tr>
-								<th>Bulan</th>
-								<th>Nama Perawat</th>
-								<th>Total Rating</th>
-								<th>Jumlah Voting</th>
-								<th>Rata Rata</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							$getRatingRawat = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_prwt) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_prwt != 0 GROUP BY nama_prwt, bulan ORDER BY bulan DESC");
-							foreach ($getRatingRawat as $rawat) {
-							?>
-								<tr>
-									<td>
-										<a href="index.php?halaman=ratingall&detail&petugas=nama_prwt&nama=<?= $rawat['nama_prwt'] ?>&bulan=<?= $rawat['bulan'] ?>">
-											<?= $rawat['bulan'] ?>
-										</a>
-									</td>
-									<td><?= $rawat['nama_prwt'] ?></td>
-									<td><?= $rawat['jumlahRating'] ?></td>
-									<td>
-										<?php
-										$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$rawat[bulan]'")->fetch_assoc();
-										?>
-										<?= $rawat['jumlahVote'] . " " . "(" . number_format(($rawat['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
-									</td>
-									<td><?= number_format($rawat['jumlahRating'] / $rawat['jumlahVote'], 2) ?></td>
-								</tr>
-							<?php } ?>
-						</tbody>
-					</table>
+			<?php } ?>
+			<?php if (isset($_POST['jenis']) AND $_POST['jenis'] == 'Pendaftaran') { ?>
+				<div class="col-md-12 mb-2 ">
+					<div class="card shadow p-2 h-100">
+						<h4>Rating Pendaftaran</h4>
+						<div class="table-responsive">
+							<table id="myTable3" class="table table-striped table-hover" style="font-size: 12px;">
+								<thead>
+									<tr>
+										<th>Bulan</th>
+										<th>Nama Pendaftaran</th>
+										<th>Total Rating</th>
+										<th>Jumlah Voting</th>
+										<th>Rata Rata</th>
+										<th>Skor</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$getRatingDaftar = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_daftar) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_daftar != 0 GROUP BY nama_daftar, bulan ORDER BY bulan DESC");
+									foreach ($getRatingDaftar as $daftar) {
+									?>
+										<tr>
+											<td>
+												<a href="index.php?halaman=ratingall&detail&petugas=nama_daftar&nama=<?= $daftar['nama_daftar'] ?>&bulan=<?= $daftar['bulan'] ?>">
+													<?= $daftar['bulan'] ?>
+												</a>
+											</td>
+											<td><?= $daftar['nama_daftar'] ?></td>
+											<td><?= $daftar['jumlahRating'] ?></td>
+											<td>
+												<?php
+												$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$daftar[bulan]'")->fetch_assoc();
+												?>
+												<?= $daftar['jumlahVote'] . " " . "(" . number_format($persen = ($daftar['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
+											</td>
+											<td><?= number_format($rata = $daftar['jumlahRating'] / $daftar['jumlahVote'], 2) ?></td>
+											<td>
+												<?= number_format($rata + ($persen / 2), 2)?>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
-		<div class="col-md-6 mb-2">
-			<div class="card shadow p-2 h-100">
-				<h4>Rating Kebersihan</h4>
-				<div class="table-responsive">
-					<table id="myTable5" class="table table-striped table-hover" style="font-size: 12px;">
-						<thead>
-							<tr>
-								<th>Bulan</th>
-								<th>Kebersihan</th>
-								<th>Total Rating</th>
-								<th>Jumlah Voting</th>
-								<th>Rata Rata</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							$getRatingBersih = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_bersih) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_bersih != 0 GROUP BY nama_bersih, bulan ORDER BY bulan DESC");
-							foreach ($getRatingBersih as $bersih) {
-							?>
-								<tr>
-									<td>
-										<a href="index.php?halaman=ratingall&detail&petugas=nama_bersih&nama=<?= $bersih['nama_bersih'] ?>&bulan=<?= $bersih['bulan'] ?>">
-											<?= $bersih['bulan'] ?>
-										</a>
-									</td>
-									<td><?= $bersih['nama_bersih'] ?></td>
-									<td><?= $bersih['jumlahRating'] ?></td>
-									<td>
-										<?php
-										$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$bersih[bulan]'")->fetch_assoc();
-										?>
-										<?= $bersih['jumlahVote'] . " " . "(" . number_format(($bersih['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
-									</td>
-									<td><?= number_format($bersih['jumlahRating'] / $bersih['jumlahVote'], 2) ?></td>
-								</tr>
-							<?php } ?>
-						</tbody>
-					</table>
+			<?php } ?>
+			<?php if (isset($_POST['jenis']) AND $_POST['jenis'] == 'Apoteker') { ?>
+				<div class="col-md-12 mb-2 ">
+					<div class="card shadow p-2 h-100">
+						<h4>Rating Apoteker</h4>
+						<div class="table-responsive">
+							<table id="myTable6" class="table table-striped table-hover" style="font-size: 12px;">
+								<thead>
+									<tr>
+										<th>Bulan</th>
+										<th>Nama Apoteker</th>
+										<th>Total Rating</th>
+										<th>Jumlah Voting</th>
+										<th>Rata Rata</th>
+										<th>Skor</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$getRatingApotek = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_apotek) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_apotek != 0 GROUP BY nama_apotek, bulan ORDER BY bulan DESC");
+									foreach ($getRatingApotek as $apotek) {
+									?>
+										<tr>
+											<td>
+												<a href="index.php?halaman=ratingall&detail&petugas=nama_apotek&nama=<?= $apotek['nama_apotek'] ?>&bulan=<?= $apotek['bulan'] ?>">
+													<?= $apotek['bulan'] ?>
+												</a>
+											</td>
+											<td><?= $apotek['nama_apotek'] ?></td>
+											<td><?= $apotek['jumlahRating'] ?></td>
+											<td>
+												<?php
+												$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$apotek[bulan]'")->fetch_assoc();
+												?>
+												<?= $apotek['jumlahVote'] . " " . "(" . number_format($persen = ($apotek['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
+											</td>
+											<td><?= number_format($rata = $apotek['jumlahRating'] / $apotek['jumlahVote'], 2) ?></td>
+											<td>
+												<?= number_format($rata + ($persen / 2), 2)?>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
-		<div class="col-md-6 mb-2">
-			<div class="card shadow p-2 h-100">
-				<h4>Rating Apoteker</h4>
-				<div class="table-responsive">
-					<table id="myTable6" class="table table-striped table-hover" style="font-size: 12px;">
-						<thead>
-							<tr>
-								<th>Bulan</th>
-								<th>Nama Apoteker</th>
-								<th>Total Rating</th>
-								<th>Jumlah Voting</th>
-								<th>Rata Rata</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							$getRatingApotek = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_apotek) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_apotek != 0 GROUP BY nama_apotek, bulan ORDER BY bulan DESC");
-							foreach ($getRatingApotek as $apotek) {
-							?>
-								<tr>
-									<td>
-										<a href="index.php?halaman=ratingall&detail&petugas=nama_apotek&nama=<?= $apotek['nama_apotek'] ?>&bulan=<?= $apotek['bulan'] ?>">
-											<?= $apotek['bulan'] ?>
-										</a>
-									</td>
-									<td><?= $apotek['nama_apotek'] ?></td>
-									<td><?= $apotek['jumlahRating'] ?></td>
-									<td>
-										<?php
-										$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$apotek[bulan]'")->fetch_assoc();
-										?>
-										<?= $apotek['jumlahVote'] . " " . "(" . number_format(($apotek['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
-									</td>
-									<td><?= number_format($apotek['jumlahRating'] / $apotek['jumlahVote'], 2) ?></td>
-								</tr>
-							<?php } ?>
-						</tbody>
-					</table>
+			<?php } ?>
+			<?php if (isset($_POST['jenis']) AND $_POST['jenis'] == 'Perawat') { ?>
+				<div class="col-md-12 mb-2 ">
+					<div class="card shadow p-2 h-100">
+						<h4>Rating Perawat</h4>
+						<div class="table-responsive">
+							<table id="myTable4" class="table table-striped table-hover" style="font-size: 12px;">
+								<thead>
+									<tr>
+										<th>Bulan</th>
+										<th>Nama Perawat</th>
+										<th>Total Rating</th>
+										<th>Jumlah Voting</th>
+										<th>Rata Rata</th>
+										<th>Skor</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$getRatingRawat = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_prwt) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_prwt != 0 GROUP BY nama_prwt, bulan ORDER BY bulan DESC");
+									foreach ($getRatingRawat as $rawat) {
+									?>
+										<tr>
+											<td>
+												<a href="index.php?halaman=ratingall&detail&petugas=nama_prwt&nama=<?= $rawat['nama_prwt'] ?>&bulan=<?= $rawat['bulan'] ?>">
+													<?= $rawat['bulan'] ?>
+												</a>
+											</td>
+											<td><?= $rawat['nama_prwt'] ?></td>
+											<td><?= $rawat['jumlahRating'] ?></td>
+											<td>
+												<?php
+												$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$rawat[bulan]'")->fetch_assoc();
+												?>
+												<?= $rawat['jumlahVote'] . " " . "(" . number_format($persen = ($rawat['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
+											</td>
+											<td><?= number_format($rata = $rawat['jumlahRating'] / $rawat['jumlahVote'], 2) ?></td>
+											<td>
+												<?= number_format($rata + ($persen / 2), 2)?>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
+			<?php } ?>
+			<?php if (isset($_POST['jenis']) AND $_POST['jenis'] == 'Kebersihan') { ?>
+				<div class="col-md-12 mt-0 mb-2">
+					<div class="card shadow p-2 h-100">
+						<h4>Rating Kebersihan</h4>
+						<div class="table-responsive">
+							<table id="myTable5" class="table table-striped table-hover" style="font-size: 12px;">
+								<thead>
+									<tr>
+										<th>Bulan</th>
+										<th>Kebersihan</th>
+										<th>Total Rating</th>
+										<th>Jumlah Voting</th>
+										<th>Rata Rata</th>
+										<th>Skor</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$getRatingBersih = $koneksi->query("SELECT *, DATE_FORMAT(tgl, '%Y-%m') as bulan, SUM(rating_bersih) as jumlahRating, COUNT(*) as jumlahVote FROM rating WHERE rating_bersih != 0 GROUP BY nama_bersih, bulan ORDER BY bulan DESC");
+									foreach ($getRatingBersih as $bersih) {
+									?>
+										<tr>
+											<td>
+												<a href="index.php?halaman=ratingall&detail&petugas=nama_bersih&nama=<?= $bersih['nama_bersih'] ?>&bulan=<?= $bersih['bulan'] ?>">
+													<?= $bersih['bulan'] ?>
+												</a>
+											</td>
+											<td><?= $bersih['nama_bersih'] ?></td>
+											<td><?= $bersih['jumlahRating'] ?></td>
+											<td>
+												<?php
+												$getTotalKunjungan = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m') = '$bersih[bulan]'")->fetch_assoc();
+												?>
+												<?= $bersih['jumlahVote'] . " " . "(" . number_format($persen = ($bersih['jumlahVote'] / $getTotalKunjungan['jum']) * 100, 1) . "%)" ?>
+											</td>
+											<td><?= number_format($rata = $bersih['jumlahRating'] / $bersih['jumlahVote'], 2) ?></td>
+											<td>
+												<?= number_format($rata + ($persen / 2), 2)?>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			<?php } ?>
+		<?php } ?>
 	</div>
 <?php } elseif (isset($_GET['detail'])) { ?>
 	<h3>Rating</h3>

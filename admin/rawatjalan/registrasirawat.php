@@ -163,16 +163,20 @@ date_default_timezone_set('Asia/Jakarta');
                       <label for="inputState" class="form-label" style="color: orangered; font-weight:bold">Antrian</label>
                       <select id="antrian" name="antrian" class="form-control" autofocus>
                         <?php
+                        if ($_SESSION['shift'] == 'Pagi') {
+                          $sif = 'pagi';
+                        } elseif ($_SESSION['shift'] == 'Sore') {
+                          $sif = 'sore';
+                        } elseif ($_SESSION['shift'] == 'Malam') {
+                          $sif = 'malam';
+                        }
+
                         date_default_timezone_set('Asia/Jakarta');
                         $date = date('Ymd') + 0;
                         $time = date('Hi') - 300;
                         //var_dump($time);
 
-                        $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab 
-            WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
-                            WHERE registrasi_rawat.kode = tgltab.kode) 
-            AND tgl=$date AND jam>=$time 
-            ORDER BY tgltab.no ASC");
+                        $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat WHERE registrasi_rawat.kode = tgltab.kode) AND tgl=$date AND jam>=$time AND shift = '$sif' ORDER BY tgltab.no ASC");
                         //   $k = $koneksi->query("SELECT * FROM tgltab WHERE tgl>=$tg AND jam>$time ORDER BY tgltab.no ASC");
                         ?>
                         <option value="" width="40">Silahkan Pilih Antrian</option>

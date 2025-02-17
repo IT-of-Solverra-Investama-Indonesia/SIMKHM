@@ -164,10 +164,10 @@ date_default_timezone_set('Asia/Jakarta');
                             } else {
                               $biaya_lab = 0;
                             };
-                            if (isset($biayaRawat["biaya_lain"])) {
+                            if ($biayaRawat["biaya_lain"] != "") {
                               $biaya_lain = $biayaRawat["biaya_lain"];
                             } else {
-                              $biaya_lain = 0;
+                              $biaya_lain = "";
                             };
                             if (isset($biayaRawat["total_lain"])) {
                               $total_lain = $biayaRawat["total_lain"];
@@ -225,7 +225,7 @@ date_default_timezone_set('Asia/Jakarta');
                                   <?php } ?>
                                 </span>
                               </td>
-                              <td><?php echo intval($biaya_lain); ?></td>
+                              <td><?php echo $biaya_lain; ?></td>
                               <td><?php echo intval($total_lain); ?></td>
                               <td><?php echo intval($potongan); ?></td>
                               </td>
