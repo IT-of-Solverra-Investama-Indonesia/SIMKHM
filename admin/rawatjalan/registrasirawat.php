@@ -9,6 +9,13 @@ $poli = $_SESSION['admin']['username'];
 $ambil = $koneksi->query("SELECT * FROM pasien WHERE idpasien='$_GET[id]' ");
 $pecah = $ambil->fetch_assoc();
 date_default_timezone_set('Asia/Jakarta');
+if(isset($_GET['confirm'])){
+  echo "
+    <script>
+      alert('Input Ulang Jika Memang Datang 2x');
+    </script>
+  ";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -287,28 +294,40 @@ date_default_timezone_set('Asia/Jakarta');
 </body>
 
 </html>
-
 <?php
-
 if (isset($_POST['save'])) {
+  $id_pasien = isset($_POST["id_pasien"]) ? htmlspecialchars($_POST["id_pasien"]) : '';
+  $jenis_kunjungan = isset($_POST["jenis_kunjungan"]) ? htmlspecialchars($_POST["jenis_kunjungan"]) : '';
+  $no_rm = isset($_POST["no_rm"]) ? htmlspecialchars($_POST["no_rm"]) : '';
+  $nama_pasien = isset($_POST["nama_pasien"]) ? htmlspecialchars($_POST["nama_pasien"]) : '';
+  $dokter_rawat = isset($_POST["dokter_rawat"]) ? htmlspecialchars($_POST["dokter_rawat"]) : '';
+  $perawatan = isset($_POST["perawatan"]) ? htmlspecialchars($_POST["perawatan"]) : '';
+  $jadwal = isset($_POST["jadwal"]) ? htmlspecialchars($_POST["jadwal"]) : '';
+  $antrian = isset($_POST["antrian"]) ? htmlspecialchars($_POST["antrian"]) : '';
+  // $shift = isset($_POST["shift"]) ? $_POST["shift"] : '';
+  // $poli = isset($_POST["poli"]) ? $_POST["poli"] : '';
+  $id_get = isset($_GET['id']) ? $_GET['id'] : '';
 
-  $jenis_kunjungan = htmlspecialchars($_POST["jenis_kunjungan"]);
+  // Periksa apakah pasien sudah terdaftar hari ini
+  $cekDouble = $koneksi->query("SELECT * FROM registrasi_rawat WHERE id_pasien = '$id_pasien' AND jadwal LIKE '%".date('Y-m-d')."%'");
+  if (!$cekDouble) {
+    die("Query Error: " . $koneksi->error);
+  }
 
-  $id_pasien = htmlspecialchars($_POST["id_pasien"]);
+  if ($cekDouble->num_rows != 0 && !isset($_GET['confirm'])) {
+    echo "<script>
+        var confirmRegister = confirm('Pasien sudah pernah didaftarkan hari ini, apakah Anda ingin mendaftarkannya lagi?');
+        if (confirmRegister) {
+            window.location.href = window.location.href + '&confirm=yes';
+        } else {
+            window.location.href = 'index.php?halaman=registrasirawat&id=$id_get';
+        }
+    </script>";
+    exit(); // Hentikan PHP agar tidak langsung insert
+  }
 
-  $no_rm = htmlspecialchars($_POST["no_rm"]);
-
-  $nama_pasien = htmlspecialchars($_POST["nama_pasien"]);
-  $dokter_rawat = htmlspecialchars($_POST["dokter_rawat"]);
-  $perawatan = htmlspecialchars($_POST["perawatan"]);
-  $jadwal = htmlspecialchars($_POST["jadwal"]);
-  $antrian = htmlspecialchars($_POST["antrian"]);
-
-  $tgl2 = date('Y-m-d');
   $tgl = date('Ymd') + 0;
-  $kode = $tgl;
-  $kode .= "+";
-  $kode .= $antrian;
+  $kode = $tgl . "+" . $antrian;
 
   if ($perawatan == "Rawat Inap") {
     $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk) VALUES ('$nama_pasien','$no_rm', '$jadwal')");
@@ -316,87 +335,135 @@ if (isset($_POST['save'])) {
     $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, kode, petugaspoli, kategori) VALUES ('$nama_pasien', '$dokter_rawat', '$perawatan', '$_POST[kamar]', '$jenis_kunjungan', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]', '$shift', '$kode', '$poli', 'offline')");
   }
 
-  // $koneksi->query("INSERT INTO log_user 
-
-  // (status_log, username_admin, idadmin)
-
-  // VALUES ('$status_log', '$username_admin', '$idadmin')
-
-  // ");
-  // $getToken = curl_init();
-  // curl_setopt_array($getToken, array(
-  //   CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/oauth2/v1/accesstoken?grant_type=client_credentials',
-  //   CURLOPT_RETURNTRANSFER => true,
-  //   CURLOPT_ENCODING => '',
-  //   CURLOPT_MAXREDIRS => 10,
-  //   CURLOPT_TIMEOUT => 0,
-  //   CURLOPT_FOLLOWLOCATION => true,
-  //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  //   CURLOPT_CUSTOMREQUEST => 'POST',
-  //   CURLOPT_POSTFIELDS => 'client_id=pnZFT0j4Hs1FKIqQKeRspG1ncJwauPVKNnrT2OeiuPpP2E3l&client_secret=FNTJCctvzsWjmjb7VHGbdzLT1xLG9FcV8bAWql27GKJ8o9S5iXxHvOQYpi85qzzv',
-  //   CURLOPT_HTTPHEADER => array(
-  //     'Content-Type: application/x-www-form-urlencoded',
-  //     'Authorization: Bearer WVqDq4p8tYLyaNtYtCDytoaJLNJj'
-  //   ),
-  // ));
-
-  // $responseToken = curl_exec($getToken);
-
-  // curl_close($getToken);
-  // // echo $responseToken;
-  // $pecahToken = json_decode($responseToken, true);
-  // $token = $pecahToken['access_token'];
-
-  // // ID PASIEN
-  // $curl = curl_init();
-  // curl_setopt_array($curl, array(
-  //   CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/fhir-r4/v1/Patient?identifier=https%3A%2F%2Ffhir.kemkes.go.id%2Fid%2Fnik%7C'.$_POST['no_identitas'],
-  //   CURLOPT_RETURNTRANSFER => true,
-  //   CURLOPT_ENCODING => '',
-  //   CURLOPT_MAXREDIRS => 10,
-  //   CURLOPT_TIMEOUT => 0,
-  //   CURLOPT_FOLLOWLOCATION => true,
-  //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  //   CURLOPT_CUSTOMREQUEST => 'GET',
-  //   CURLOPT_HTTPHEADER => array(
-  //     'Content-Type: application/json',
-  //     'Authorization: Bearer '.$token,
-  //   ),
-  // ));
-
-  // $response = curl_exec($curl);
-  // curl_close($curl);
-  // $getIHS = json_decode($response, true);
-
-  // $IHSpasien = $getIHS['entry'][0]['resource']['id'];
-  // $koneksi->query("UPDATE pasien SET ihs_id='$IHSpasien' WHERE no_identitas='$_POST[no_identitas]' ");
-
-
   if ($perawatan == "Rawat Jalan") {
-
-    echo "
-    <script>
-  
-    alert('Data berhasil didaftarkan!');
-    document.location.href='index.php?halaman=daftarregistrasi&day';
-  
-    </script>
-  
-    ";
+    echo "<script>
+            alert('Data berhasil didaftarkan!');
+            window.location.href='index.php?halaman=daftarregistrasi&day';
+        </script>";
   } else {
-    echo "
-      <script>
-    
-      alert('Data berhasil didaftarkan!');
-      document.location.href='index.php?halaman=daftarigd';
-    
-      </script>
-    
-      ";
-  }
-
-  if (mysqli_affected_rows($koneksi) > 0) {
+    echo "<script>
+            alert('Data berhasil didaftarkan!');
+            window.location.href='index.php?halaman=daftarigd';
+        </script>";
   }
 }
+?>
+
+<?php
+// if (isset($_POST['save'])) {
+//   $cekDouble = $koneksi->query("SELECT * FROM registrasi_rawat WHERE id_pasien = '" . htmlspecialchars($_POST["id_pasien"]) . "' AND date_format(jadwal, '%Y-%m-%d') = '" . date('Y-m-d') . "'");
+//   if($cekDouble->num_rows != 0){
+//     echo "
+//       <script>
+//           if (confirm('Pasien sudah pernah didaftarkan hari ini, apakah Anda ingin mendaftarkannya lagi?')) {
+//               document.location.href = 'index.php?halaman=registrasirawat&id=$_GET[id]';
+//           }
+//       </script>
+//     ";
+//   }
+
+//   $jenis_kunjungan = htmlspecialchars($_POST["jenis_kunjungan"]);
+//   $id_pasien = htmlspecialchars($_POST["id_pasien"]);
+//   $no_rm = htmlspecialchars($_POST["no_rm"]);
+//   $nama_pasien = htmlspecialchars($_POST["nama_pasien"]);
+//   $dokter_rawat = htmlspecialchars($_POST["dokter_rawat"]);
+//   $perawatan = htmlspecialchars($_POST["perawatan"]);
+//   $jadwal = htmlspecialchars($_POST["jadwal"]);
+//   $antrian = htmlspecialchars($_POST["antrian"]);
+
+//   $tgl2 = date('Y-m-d');
+//   $tgl = date('Ymd') + 0;
+//   $kode = $tgl;
+//   $kode .= "+";
+//   $kode .= $antrian;
+
+//   if ($perawatan == "Rawat Inap") {
+//     $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk) VALUES ('$nama_pasien','$no_rm', '$jadwal')");
+//   } else {
+//     $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, kode, petugaspoli, kategori) VALUES ('$nama_pasien', '$dokter_rawat', '$perawatan', '$_POST[kamar]', '$jenis_kunjungan', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]', '$shift', '$kode', '$poli', 'offline')");
+//   }
+
+//   // $koneksi->query("INSERT INTO log_user 
+
+//   // (status_log, username_admin, idadmin)
+
+//   // VALUES ('$status_log', '$username_admin', '$idadmin')
+
+//   // ");
+//   // $getToken = curl_init();
+//   // curl_setopt_array($getToken, array(
+//   //   CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/oauth2/v1/accesstoken?grant_type=client_credentials',
+//   //   CURLOPT_RETURNTRANSFER => true,
+//   //   CURLOPT_ENCODING => '',
+//   //   CURLOPT_MAXREDIRS => 10,
+//   //   CURLOPT_TIMEOUT => 0,
+//   //   CURLOPT_FOLLOWLOCATION => true,
+//   //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//   //   CURLOPT_CUSTOMREQUEST => 'POST',
+//   //   CURLOPT_POSTFIELDS => 'client_id=pnZFT0j4Hs1FKIqQKeRspG1ncJwauPVKNnrT2OeiuPpP2E3l&client_secret=FNTJCctvzsWjmjb7VHGbdzLT1xLG9FcV8bAWql27GKJ8o9S5iXxHvOQYpi85qzzv',
+//   //   CURLOPT_HTTPHEADER => array(
+//   //     'Content-Type: application/x-www-form-urlencoded',
+//   //     'Authorization: Bearer WVqDq4p8tYLyaNtYtCDytoaJLNJj'
+//   //   ),
+//   // ));
+
+//   // $responseToken = curl_exec($getToken);
+
+//   // curl_close($getToken);
+//   // // echo $responseToken;
+//   // $pecahToken = json_decode($responseToken, true);
+//   // $token = $pecahToken['access_token'];
+
+//   // // ID PASIEN
+//   // $curl = curl_init();
+//   // curl_setopt_array($curl, array(
+//   //   CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/fhir-r4/v1/Patient?identifier=https%3A%2F%2Ffhir.kemkes.go.id%2Fid%2Fnik%7C'.$_POST['no_identitas'],
+//   //   CURLOPT_RETURNTRANSFER => true,
+//   //   CURLOPT_ENCODING => '',
+//   //   CURLOPT_MAXREDIRS => 10,
+//   //   CURLOPT_TIMEOUT => 0,
+//   //   CURLOPT_FOLLOWLOCATION => true,
+//   //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//   //   CURLOPT_CUSTOMREQUEST => 'GET',
+//   //   CURLOPT_HTTPHEADER => array(
+//   //     'Content-Type: application/json',
+//   //     'Authorization: Bearer '.$token,
+//   //   ),
+//   // ));
+
+//   // $response = curl_exec($curl);
+//   // curl_close($curl);
+//   // $getIHS = json_decode($response, true);
+
+//   // $IHSpasien = $getIHS['entry'][0]['resource']['id'];
+//   // $koneksi->query("UPDATE pasien SET ihs_id='$IHSpasien' WHERE no_identitas='$_POST[no_identitas]' ");
+
+
+//   if ($perawatan == "Rawat Jalan") {
+
+//     echo "
+//     <script>
+
+//     alert('Data berhasil didaftarkan!');
+//     document.location.href='index.php?halaman=daftarregistrasi&day';
+
+//     </script>
+
+//     ";
+//   } else {
+//     echo "
+//       <script>
+
+//       alert('Data berhasil didaftarkan!');
+//       document.location.href='index.php?halaman=daftarigd';
+
+//       </script>
+
+//       ";
+//   }
+
+//   if (mysqli_affected_rows($koneksi) > 0) {
+//   }
+// }
 
 ?>
