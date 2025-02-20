@@ -13,12 +13,14 @@
     </div>
     <div class="card shadow-sm p-2 mb-1">
         <div class="table-responsive">
-            <table class="table table-hover table-striped" style="font-size: 12px;">
+            <table class="table table-hover table-striped" style="font-size: 11px;">
                 <thead>
                     <tr>
-                        <th>Tanggal</th>
+                        <th>Tanggal Beli</th>
+                        <th>Tanggal Expired</th>
                         <th>Nama Obat</th>
                         <th>Kode Obat</th>
+                        <th>Tipe</th>
                         <th>Jumlah</th>
                         <th>Harga Beli</th>
                         <th>Diskon</th>
@@ -76,8 +78,10 @@
                     ?>
                         <tr>
                             <td><?= $data['tgl_beli']?></td>
+                            <td><?= $data['tgl_expired']?></td>
                             <td><?= $data['nama_obat']?></td>
                             <td><?= $data['id_obat']?></td>
+                            <td><?= $data['tipe']?></td>
                             <td><?= $data['jml_obat']?></td>
                             <td>Rp<?= $data['harga_beli']?></td>
                             <td>Rp<?= $data['diskon']?></td>

@@ -13,7 +13,7 @@
         ";
     }
 
-    $single = $koneksi->query("SELECT * FROM pembelian_obat INNER JOIN apotek ON apotek.id_obat = pembelian_obat.id_obat WHERE id_beli = '$id' GROUP BY apotek.id_obat")->fetch_assoc();
+    $single = $koneksi->query("SELECT pembelian_obat.* FROM pembelian_obat INNER JOIN apotek ON apotek.id_obat = pembelian_obat.id_obat WHERE id_beli = '$id' GROUP BY apotek.id_obat")->fetch_assoc();
 ?>
 <a href="index.php?halaman=apotek_terima" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;"><i class="bi bi-arrow-left"></i> Kembali</a>
 <div class="card shadow-sm p-2">
@@ -22,23 +22,23 @@
         <div class="row">
             <div class="col-md-6">
                 <label for="">Jumlah : </label>
-                <input type="number" name="jml_obat" class="form-control mb-2" placeholder="Jumlah Obat Diterima">
+                <input type="number" name="jml_obat" class="form-control mb-2" placeholder="Jumlah Obat Diterima" required>
             </div>
             <div class="col-md-6">
                 <label for="">Tanggal Diterima : </label>
-                <input type="date" name="tgl_datang" class="form-control mb-2" placeholder="Jumlah Obat Diterima">
+                <input type="date" name="tgl_datang" class="form-control mb-2" placeholder="Jumlah Obat Diterima" required>
             </div>
             <div class="col-md-12">
                 <label for="">Batch : </label>
-                <input type="text" name="batch" id="" class="form-control mb-2" placeholder="Batch">
+                <input type="text" name="batch" id="" class="form-control mb-2" placeholder="Batch" required>
             </div>
             <div class="col-md-6">
                 <label for="">Foto Barang : </label>
-                <input type="file" name="foto_barang" class="form-control mb-2">
+                <input type="file" name="foto_barang" class="form-control mb-2" required>
             </div>
             <div class="col-md-6">
                 <label for="">Foto Faktur :</label>
-                <input type="file" name="foto_faktur" class="form-control mb-2">
+                <input type="file" name="foto_faktur" class="form-control mb-2" required>
             </div>
             <div class="col-md-12">
                 <button class="btn btn-sm btn-primary float-end" name="terima">Terima</button>
@@ -50,11 +50,12 @@
     if(isset($_POST['terima'])){
         $nama_obat = $single['nama_obat'];
         $id_obat = $single['id_obat'];
-        $margininap = $single['margininap'] ?? 100;
-        $margin_jual = $single['margin_jual'] ?? 100;
+        $margininap = $single['margininap'] == '' ? 100 : $single['margininap'];
+        $margin_jual = $single['margin_jual'] == '' ? 100 : $single['margin_jual'];
         $jml_obat_minim = $single['jml_obat_minim'];
         $tipe = $single['tipe'];
         $tgl_beli = $single['tgl_beli'];
+        $tgl_expired = $single['tgl_expired'];
         $bentuk = $single['bentuk'];
         $jml_obat = htmlspecialchars($_POST['jml_obat']);
         $tgl_datang = htmlspecialchars($_POST['tgl_datang']);
@@ -86,7 +87,7 @@
         $filePath1 = $uploadDir1 . $foto_faktur;
         move_uploaded_file($tmpName1, $filePath1);
 
-        $koneksi->query("INSERT INTO apotek (jml_obat_minim, nama_obat, id_obat, jml_obat, produsen, bentuk, tipe, harga_beli, margininap, tgl_beli, margin_jual, pembelian_id, tgl_datang, batch, foto_faktur, foto_barang) VALUES ('$jml_obat_minim', '$nama_obat', '$id_obat', '$jml_obat', '$produsen', '$bentuk', '$tipe', '$harga_beli', '$margininap', '$tgl_beli', '$margin_jual', '$id', '$tgl_datang', '$batch', '$foto_faktur', '$foto_barang') ");
+        $koneksi->query("INSERT INTO apotek (jml_obat_minim, nama_obat, id_obat, jml_obat, produsen, bentuk, tipe, harga_beli, margininap, tgl_beli, tgl_expired, margin_jual, pembelian_id, tgl_datang, batch, foto_faktur, foto_barang) VALUES ('$jml_obat_minim', '$nama_obat', '$id_obat', '$jml_obat', '$produsen', '$bentuk', '$tipe', '$harga_beli', '$margininap', '$tgl_beli', '$tgl_expired', '$margin_jual', '$id', '$tgl_datang', '$batch', '$foto_faktur', '$foto_barang') ");
 
         echo "
             <script>

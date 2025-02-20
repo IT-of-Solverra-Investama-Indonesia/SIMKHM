@@ -32,10 +32,11 @@ $username = $_SESSION['admin']['username'];
       <a href="index.php?halaman=daftarapotek " class="btn btn-sm btn-dark mb-2">Kembali</a>
       <div class="card shadow-sm p-2">
         <div class="table-responsive">
-          <table class="table table-striped table-hover">
+          <table class="table table-striped table-hover" style="font-size: 12px;">
             <thead>
               <tr>
-                <th>Tgl</th>
+                <th>Tgl Beli</th>
+                <th>Tgl Expired</th>
                 <th>Nama Obat</th>
                 <th>Tipe</th>
                 <th>Id Obat</th>
@@ -59,6 +60,7 @@ $username = $_SESSION['admin']['username'];
               ?>
                 <tr>
                   <td><?= $obat['tgl_beli'] ?></td>
+                  <td><?= $obat['tgl_expired'] ?></td>
                   <td><?= $obat['nama_obat'] ?></td>
                   <td><?= $obat['tipe'] ?></td>
                   <td><?= $obat['id_obat'] ?></td>

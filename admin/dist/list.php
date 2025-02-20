@@ -143,6 +143,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="apotek_terima"){include '../apotek/apotek_terima.php';}
                    elseif ($hal=="apotek_terima_penerimaan"){include '../apotek/apotek_terima_penerimaan.php';}
                    elseif ($hal=="apotek_terima_riwayatpenerimaan"){include '../apotek/apotek_terima_riwayatpenerimaan.php';}
+                   elseif ($hal=="apotek_obat_expired"){include '../apotek/apotek_obat_expired.php';}
 
                     //laporan
                    elseif ($hal=="laporanmedis"){include '../laporan/laporanmedis.php';}
