@@ -411,6 +411,12 @@ if(!isset($_SESSION['login'])){
               <span>Pendaftaran (Diagnosis)</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="index.php?halaman=kyc_satusehat">
+          <i class="bi bi-person"></i>
+              <span>Kyc (Know Your Customer)</span>
+        </a>
+      </li>
       
 
       <!-- End Profile Page Nav -->

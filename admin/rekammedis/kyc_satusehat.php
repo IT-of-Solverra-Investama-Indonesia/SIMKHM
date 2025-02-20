@@ -23,62 +23,10 @@
 </div>
 <?php
     if(isset($_POST['open'])){
-        include "../rawatjalan/api_satusehat.php";
-        // Get Token From API Satu Sehat 
-            $getToken = curl_init();
-            curl_setopt_array($getToken, array(
-                CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/oauth2/v1/accesstoken?grant_type=client_credentials',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => 'client_id=' . $clientKey . '&client_secret=' . $secretKey . '',
-                CURLOPT_HTTPHEADER => array(
-                    'Content-Type: application/x-www-form-urlencoded'
-                ),
-            ));
-            $responseToken = curl_exec($getToken);
-            curl_close($getToken);
-            $pecahToken = json_decode($responseToken, true);
-            $token = $pecahToken['access_token'];
-        // End Get Token From API Satu Sehat 
-        
-        echo $bearerToken = $token; // Ganti dengan token akses yang Anda miliki
-        
-        // $data = array(
-        //     "agent_name" => "$_POST[nama]",
-        //     "agent_nik" => "$_POST[nik]",
-        //     "public_key" => "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwqoicEXIYWYV3PvLIdvB\nqFkHn2IMhPGKTiB2XA56enpPb0UbI9oHoetRF41vfwMqfFsy5Yd5LABxMGyHJBbP\n+3fk2/PIfv+7+9/dKK7h1CaRTeT4lzJBiUM81hkCFlZjVFyHUFtaNfvQeO2OYb7U\nkK5JrdrB4sgf50gHikeDsyFUZD1o5JspdlfqDjANYAhfz3aam7kCjfYvjgneqkV8\npZDVqJpQA3MHAWBjGEJ+R8y03hs0aafWRfFG9AcyaA5Ct5waUOKHWWV9sv5DQXmb\nEAoqcx0ZPzmHJDQYlihPW4FIvb93fMik+eW8eZF3A920DzuuFucpblWU9J9o5w+2\noQIDAQAB\n-----END PUBLIC KEY-----"
-        // );
-        
-        // $ch = curl_init();
-        
-        // curl_setopt_array($ch, array(
-        //     CURLOPT_URL => 'https://api-satusehat.dto.kemkes.go.id/kyc/v1/generate-url',
-        //     CURLOPT_RETURNTRANSFER => true,
-        //     CURLOPT_ENCODING => '',
-        //     CURLOPT_MAXREDIRS => 10,
-        //     CURLOPT_TIMEOUT => 0,
-        //     CURLOPT_FOLLOWLOCATION => true,
-        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        //     CURLOPT_CUSTOMREQUEST => 'POST',
-        //     CURLOPT_POSTFIELDS => json_encode($data),
-        //     CURLOPT_HTTPHEADER => array(
-        //         'Content-Type: application/json',
-        //         'Authorization: Bearer ' . $bearerToken
-        //     ),
-        // ));
-        
-        // $response = curl_exec($ch);
-        
-        // curl_close($ch);
-        
-        // $responseData = json_decode($response, true);
-        
-        // // Lakukan sesuatu dengan responseData
-        // print_r($responseData);
+        echo "
+          <script>
+            document.location.href='../rekammedis?agent_name=".htmlspecialchars($_POST['nama'])."&agent_nik=".htmlspecialchars($_POST['nik'])."';
+          </script>  
+        ";
     }
 ?>
