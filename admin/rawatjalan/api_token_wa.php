@@ -1,7 +1,11 @@
 <?php
     // Wonorejo
-    $token = "yy2YJNMSV6ukymA9ESSJZgzET9934vntnlefVRlv3i7qLHpWR1MWAXdY4FjOniU6.kDnTH35X";
-    $mes = "Terimakasih telah berkunjung ke KHM Wonorejo. Demi meningkatkan pelayanan kami, mohon berikan penilaian kepada staf kami. Klik link berikut: www.simkhm.id/wonorejo/admin/rating/rating.php?id=";
+    // $token = "yy2YJNMSV6ukymA9ESSJZgzET9934vntnlefVRlv3i7qLHpWR1MWAXdY4FjOniU6.kDnTH35X";
+    // $mes = "Terimakasih telah berkunjung ke KHM Wonorejo. Demi meningkatkan pelayanan kami, mohon berikan penilaian kepada staf kami. Klik link berikut: www.simkhm.id/wonorejo/admin/rating/rating.php?id=";
+
+    // KUNIR
+    $token = "Z8ziaT2eJGsWqLu99IhcZyAa3V6GUtVA58nsFIrkMGt8dYa8Dw9oASO.qQotwuaD";
+    $mes = "Terimakasih telah berkunjung ke KHM Kunir. Demi meningkatkan pelayanan kami, mohon berikan penilaian kepada staf kami. Klik link berikut: www.simkhm.id/kunir/admin/rating/rating.php?id=";
 
     // Klakah
     // $token = "o4lREoqBdejIiazuXL1LUoR4DQmEuFYAyHLpsNG6XLE95gQ0Ki6OyEe3LwbzETfP.RXfzTcve";
