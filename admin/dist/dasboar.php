@@ -1,76 +1,40 @@
 <?php 
-
-$username=$_SESSION['admin']['username'];
-
-$ambil=$koneksi->query("SELECT * FROM log_user ORDER BY idlog DESC;");
-// $user=$ambil->fetch_assoc();
-
-if(!isset($_SESSION['login'])){
-
-  header("location:login.php");
-
-  exit;}
-
-
-?>
-
-
-
-<!--memasukkan kamar dan lain2 otomatis begitu halaman dibuka-->
-
-<?php 
-
-$tgl = date('Y-m-d');
-$data=$koneksi->query("SELECT * from registrasi_rawat where status_antri != 'Pulang'  and perawatan = 'Rawat Inap'");
-
-$arr=$data->fetch_assoc();
-
-$row=$data->num_rows;
-
-
-
-//jika lebih nol, masukkan semua yang kamarnya kosong ke biayadetail
-
-if ($row>=0) {
-
-	// $d=$koneksi->query("SELECT rawatinap.id, rawatinap.nama, rawatinap.noRM, kamar, tarif, tglmasuk from rawatinap left outer JOIN rawatinapsudah ON rawatinap.id=rawatinapsudah.id join kamar on kamar.namakamar=rawatinap.kamar where tglkeluar='' and rawatinapsudah.id is null ");
-  $d=$koneksi->query("SELECT * from registrasi_rawat join kamar on kamar.namakamar=registrasi_rawat.kamar where status_antri != 'Pulang'  and perawatan = 'Rawat Inap' ");
-
-	
-
-	while ($i=$d->fetch_assoc())  {
-
-		 $id=$i['idrawat']; 
-
-		 $tgl;
-
-		 $tarif=$i['tarif'];
-
-		
-  $cekTgl = $koneksi->query("SELECT COUNT(*) as jumlah FROM rawatinapdetail WHERE tgl = '$tgl' AND id = '$id'")->fetch_assoc();
-
-  if($cekTgl['jumlah'] == 0){
-    //kamar
-  
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'sewa kamar', '$tarif') ");
-  
-    //jasa servis
-  
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'jasa servis', '15000') ");
-  
-    //BHP
-  
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'BHP', '10000') ");
-  
-    //administrasi
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'Administrasi', '3000') ");
+  $username=$_SESSION['admin']['username'];
+  $ambil=$koneksi->query("SELECT * FROM log_user ORDER BY idlog DESC;");
+  // $user=$ambil->fetch_assoc();
+  if(!isset($_SESSION['login'])){
+    header("location:login.php");
+    exit;
   }
-
-	}
-
-}
-
- ?>
+?>
+<!--memasukkan kamar dan lain2 otomatis begitu halaman dibuka-->
+<?php 
+  $tgl = date('Y-m-d');
+  $data=$koneksi->query("SELECT * from registrasi_rawat where status_antri != 'Pulang'  and perawatan = 'Rawat Inap'");
+  $arr=$data->fetch_assoc();
+  $row=$data->num_rows;
+  //jika lebih nol, masukkan semua yang kamarnya kosong ke biayadetail
+  if ($row>=0) {
+    // $d=$koneksi->query("SELECT rawatinap.id, rawatinap.nama, rawatinap.noRM, kamar, tarif, tglmasuk from rawatinap left outer JOIN rawatinapsudah ON rawatinap.id=rawatinapsudah.id join kamar on kamar.namakamar=rawatinap.kamar where tglkeluar='' and rawatinapsudah.id is null ");
+    $d=$koneksi->query("SELECT * from registrasi_rawat join kamar on kamar.namakamar=registrasi_rawat.kamar where status_antri != 'Pulang'  and perawatan = 'Rawat Inap' ");
+    while ($i=$d->fetch_assoc())  {
+      $id=$i['idrawat']; 
+      $tgl;
+      $tarif=$i['tarif'];
+      $cekTgl = $koneksi->query("SELECT COUNT(*) as jumlah FROM rawatinapdetail WHERE tgl = '$tgl' AND id = '$id'")->fetch_assoc();
+      if($cekTgl['jumlah'] == 0){
+        //kamar
+        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'sewa kamar', '$tarif') ");
+        //jasa servis
+        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'jasa servis', '15000') ");
+        //BHP
+        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'BHP', '10000') ");
+        //administrasi
+        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'Administrasi', '3000') ");
+      }
+    }
+  }
+?>
 
 
 <!DOCTYPE html>

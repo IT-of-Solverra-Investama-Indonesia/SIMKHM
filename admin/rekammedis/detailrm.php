@@ -142,7 +142,23 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                       <br>
                     </div>
                     <hr>
-
+                    <?php
+                    $getLabPoli = $koneksi->query("SELECT * FROM lab_poli WHERE jadwal = '$rm[jadwal]'");
+                    foreach ($getLabPoli as $labpoli) {
+                    ?>
+                      <div class="col-md-4">
+                        <label for=""><b>Gula Darah</b></label>
+                        <h6><?= $labpoli['gula_darah'] ?></h6>
+                      </div>
+                      <div class="col-md-4">
+                        <label for=""><b>Kolestrol</b></label>
+                        <h6><?= $labpoli['kolestrol'] ?></h6>
+                      </div>
+                      <div class="col-md-4">
+                        <label for=""><b>Asam Urat</b></label>
+                        <h6><?= $labpoli['asam_urat'] ?></h6>
+                      </div>
+                    <?php } ?>
                     <div class="col-md-6">
                       <b><label for="h6City" class="form-label">Keluhan Utama </label></b>
                       <h6 type="text" id="h6City" placeholder="Masukkan No. HP Pasien" name="keluhan_utama"><?php echo $pasien['keluhan_utama'] ?></h6>
@@ -473,8 +489,8 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                     </div>
                     <?php
 
-                    $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '".htmlspecialchars($_GET['idrekammedis'])."' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
-                    $obatP = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '".htmlspecialchars($_GET['idrekammedis'])."' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                    $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                    $obatP = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
 
                     ?>
                     <!-- <?php
@@ -844,7 +860,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                         </div>
 
                         <?php
-                        $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '".htmlspecialchars($_GET['idrekammedis'])."' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                        $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
 
                         ?>
                         <form action="" method="post">
@@ -944,8 +960,8 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                           <br>
                           <br>
                           <?php
-                              $cek = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM resep INNER JOIN rekam_medis ON rekam_medis.norm = resep.no_rm WHERE resep.no_rm = '$_GET[id]' AND resep.jadwal = '$_GET[tgl]'")->fetch_assoc();
-                            // var_dump($cek);
+                          $cek = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM resep INNER JOIN rekam_medis ON rekam_medis.norm = resep.no_rm WHERE resep.no_rm = '$_GET[id]' AND resep.jadwal = '$_GET[tgl]'")->fetch_assoc();
+                          // var_dump($cek);
                           ?>
                           <div class="row">
                             <div class="col-6">
@@ -962,43 +978,75 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                   <tr>
                                     <td>Verifikasi Resep</td>
                                     <td>
-                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
-                                        <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
+                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if ($cek2['petugas'] == '') {
+                                                                                                                        echo $_SESSION['admin']['namalengkap'];
+                                                                                                                      } else {
+                                                                                                                        echo $cek2['petugas'];
+                                                                                                                      }  ?>.png" alt=""><br>
+                                        <p style="font-size:12px">(<?php if ($cek2['petugas'] == '') {
+                                                                      echo $_SESSION['admin']['namalengkap'];
+                                                                    } else {
+                                                                      echo $cek2['petugas'];
+                                                                    }  ?>)</p>
 
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>Dispensing</td>
                                     <td>
-                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
-                                        <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
+                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if ($cek2['petugas'] == '') {
+                                                                                                                        echo $_SESSION['admin']['namalengkap'];
+                                                                                                                      } else {
+                                                                                                                        echo $cek2['petugas'];
+                                                                                                                      }  ?>.png" alt=""><br>
+                                        <p style="font-size:12px">(<?php if ($cek2['petugas'] == '') {
+                                                                      echo $_SESSION['admin']['namalengkap'];
+                                                                    } else {
+                                                                      echo $cek2['petugas'];
+                                                                    }  ?>)</p>
 
-                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">TTD</a></center> -->
+                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis'] ?>">TTD</a></center> -->
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>Verifikasi Obat</td>
                                     <td>
-                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
-                                        <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
+                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if ($cek2['petugas'] == '') {
+                                                                                                                        echo $_SESSION['admin']['namalengkap'];
+                                                                                                                      } else {
+                                                                                                                        echo $cek2['petugas'];
+                                                                                                                      }  ?>.png" alt=""><br>
+                                        <p style="font-size:12px">(<?php if ($cek2['petugas'] == '') {
+                                                                      echo $_SESSION['admin']['namalengkap'];
+                                                                    } else {
+                                                                      echo $cek2['petugas'];
+                                                                    }  ?>)</p>
 
-                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">TTD</a></center> -->
+                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis'] ?>">TTD</a></center> -->
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>Penerimaan Obat</td>
                                     <td>
-                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>.png" alt=""><br>
-                                        <p style="font-size:12px">(<?php if($cek2['petugas'] == ''){echo $_SESSION['admin']['namalengkap'];}else{echo $cek2['petugas'];}  ?>)</p>
+                                      <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?php if ($cek2['petugas'] == '') {
+                                                                                                                        echo $_SESSION['admin']['namalengkap'];
+                                                                                                                      } else {
+                                                                                                                        echo $cek2['petugas'];
+                                                                                                                      }  ?>.png" alt=""><br>
+                                        <p style="font-size:12px">(<?php if ($cek2['petugas'] == '') {
+                                                                      echo $_SESSION['admin']['namalengkap'];
+                                                                    } else {
+                                                                      echo $cek2['petugas'];
+                                                                    }  ?>)</p>
 
-                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">TTD</a></center> -->
+                                        <!-- <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis'] ?>">TTD</a></center> -->
                                     </td>
                                   </tr>
                                   <tr>
                                     <td></td>
                                     <td>
                                       <center>
-                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPet&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                       </center>
                                     </td>
                                   </tr>
@@ -1280,7 +1328,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                               </table>
                               <br>
                               <?php
-                                $obatt = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '".htmlspecialchars($_GET['idrekammedis'])."' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                              $obatt = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
                               ?>
                               <center>
                                 <p></p>PIO</p>
@@ -1309,7 +1357,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <td style="margin-top:10px;">
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $_SESSION['admin']['namalengkap'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $_SESSION['admin']['namalengkap'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                         </center>
                                       </td>
                                     </tr>
@@ -1340,7 +1388,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                     <td>
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $p['nama_lengkap'] ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?= $p['nama_lengkap'] ?>)</p>
-                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                       </center>
                                     </td>
                                   </tr>
@@ -1355,7 +1403,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Persetujuan Perubahan Resep</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $_SESSION['admin']['namalengkap'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $_SESSION['admin']['namalengkap'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
@@ -1364,7 +1412,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Petugas Farmasi</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $_SESSION['admin']['namalengkap'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $_SESSION['admin']['namalengkap'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
@@ -1577,7 +1625,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                               </table>
                               <br>
                               <?php
-                              $obatt = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '".htmlspecialchars($_GET['idrekammedis'])."' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                              $obatt = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
 
                               ?>
                               <center>
@@ -1607,7 +1655,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                       <td style="margin-top:10px;">
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $cekr['petugas'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $cekr['petugas'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPio&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                         </center>
                                       </td>
                                     </tr>
@@ -1640,7 +1688,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                     <td>
                                       <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $p['nama_lengkap'] ?>.png" alt=""><br>
                                         <p style="font-size:12px">(<?= $p['nama_lengkap'] ?>)</p>
-                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                        <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdPas&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                       </center>
                                     </td>
                                   </tr>
@@ -1655,7 +1703,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Persetujuan Perubahan Resep</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $cekr['petugas'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $cekr['petugas'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdSet&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
@@ -1664,13 +1712,13 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                         <h6>Petugas Farmasi</h6><br>
                                         <center><img style="max-width: 60px; margin: 0px 0px 0px 0px;" src="img-qrcode/<?= $cekr['petugas'] ?>.png" alt=""><br>
                                           <p style="font-size:12px">(<?= $cekr['petugas'] ?>)</p>
-                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar&&idrekammedis=<?= $_GET['idrekammedis']?>">Paraf</a>
+                                          <a class="btn btn-sm btn-success" href="index.php?halaman=detailrm&id=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&racik&ttdFar&&idrekammedis=<?= $_GET['idrekammedis'] ?>">Paraf</a>
                                         </center>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                <a target="_blank" href="../rekammedis/e-resep.php?id=<?= $_GET['id']?>&tgl=<?= $_GET['tgl']?>&idrekammedis=<?= $_GET['idrekammedis'] ?>" class="btn btn-secondary mt-3"><i class="bi bi-printer mt-3"></i> Print</a>
+                                <a target="_blank" href="../rekammedis/e-resep.php?id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>&idrekammedis=<?= $_GET['idrekammedis'] ?>" class="btn btn-secondary mt-3"><i class="bi bi-printer mt-3"></i> Print</a>
                               </center>
                               <br>
 
@@ -1764,14 +1812,14 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
               ";
                         }
 
-            if (isset($_POST['save'])) {
+                        if (isset($_POST['save'])) {
 
-              // var_dump('hasil');
-            $koneksi->query("INSERT INTO resep 
+                          // var_dump('hasil');
+                          $koneksi->query("INSERT INTO resep 
 
               (serah_obat, tepat1, tepat2, tepat3, tepat4, tepat5, no_rm, jadwal, noresep, adminid, petugas)
           
-              VALUES ('$_POST[serah_obat]', '$_POST[tepat1]', '$_POST[tepat2]', '$_POST[tepat3]', '$_POST[tepat4]', '$_POST[tepat5]', '$_GET[id]', '$_GET[tgl]', '$_POST[noresep]', '".$_SESSION['admin']['idadmin']."', '".$_SESSION['admin']['namalengkap']."')
+              VALUES ('$_POST[serah_obat]', '$_POST[tepat1]', '$_POST[tepat2]', '$_POST[tepat3]', '$_POST[tepat4]', '$_POST[tepat5]', '$_GET[id]', '$_GET[tgl]', '$_POST[noresep]', '" . $_SESSION['admin']['idadmin'] . "', '" . $_SESSION['admin']['namalengkap'] . "')
           
               ");
                           echo "
@@ -1781,15 +1829,15 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                   document.location.href='index.php?halaman=detailrm&id=$_GET[id]&tgl=$_GET[tgl]&racik&idrekammedis=$_GET[idrekammedis]';
               </script>
               ";
-              }
+                        }
 
-              if (isset($_POST['tel'])) {
+                        if (isset($_POST['tel'])) {
 
-            $koneksi->query("INSERT INTO telaah_resep 
+                          $koneksi->query("INSERT INTO telaah_resep 
 
               (pa1, pa2, pa3, pa4, pa5, pa6,pa7,pa8,pa9,pa10,pa11,pa12,pa13,pa14,pa15,pa16,pa17, edukasi, no_rm, jadwal, adminid, petugas)
           
-              VALUES ('$_POST[pa1]', '$_POST[pa2]', '$_POST[pa3]', '$_POST[pa4]', '$_POST[pa5]', '$_POST[pa6]','$_POST[pa7]','$_POST[pa8]','$_POST[pa9]','$_POST[pa10]','$_POST[pa11]','$_POST[pa12]','$_POST[pa13]','$_POST[pa14]','$_POST[pa15]','$_POST[pa16]', '$_POST[pa17]', '$_POST[edukasi]', '$_GET[id]', '$_GET[tgl]', '".$_SESSION['admin']['idadmin']."', '".$_SESSION['admin']['namalengkap']."')
+              VALUES ('$_POST[pa1]', '$_POST[pa2]', '$_POST[pa3]', '$_POST[pa4]', '$_POST[pa5]', '$_POST[pa6]','$_POST[pa7]','$_POST[pa8]','$_POST[pa9]','$_POST[pa10]','$_POST[pa11]','$_POST[pa12]','$_POST[pa13]','$_POST[pa14]','$_POST[pa15]','$_POST[pa16]', '$_POST[pa17]', '$_POST[edukasi]', '$_GET[id]', '$_GET[tgl]', '" . $_SESSION['admin']['idadmin'] . "', '" . $_SESSION['admin']['namalengkap'] . "')
           
               ");
 

@@ -381,8 +381,8 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                         <option value="">Pilih Diagnosis</option>
                         <option value="Diagnosis Baru">Diagnosis Baru</option>
                         <?php
-                          $getAllDiagnosis = $koneksi->query("SELECT * FROM rekam_medis GROUP BY diagnosis ORDER BY diagnosis ASC");
-                          foreach ($getAllDiagnosis as $allDiagnosis) {
+                        $getAllDiagnosis = $koneksi->query("SELECT * FROM rekam_medis GROUP BY diagnosis ORDER BY diagnosis ASC");
+                        foreach ($getAllDiagnosis as $allDiagnosis) {
                         ?>
                           <option value="<?= $allDiagnosis['diagnosis'] ?>"><?= $allDiagnosis['diagnosis'] ?></option>
                         <?php } ?>
@@ -555,114 +555,39 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                     </select>
                   </div>
 
-                  <!-- Add Data Modal Tindakan -->
-                  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+                  <!-- end -->
+
+                  <!-- Add Data Modal Obat -->
+                  <div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel">Tambah Layanan/Tindakan</h5>
+                          <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form id="userEntry" method="post" enctype="multipart/form-data">
-                          <div class="modal-body">
-                            <div class="col-md-12">
-                              <label for="inputName5" class="form-label">Layanan/Tindakan</label>
-                              <select name="layanan" class="form-control" id="selLay" onchange="SelLay(this)">
-                                <option hidden>Pilih Layanan</option>
-                                <option value="glukosa"><span style="text-transform: 'capitalize';">glukosa</span></option>
-                                <option value="asam urat"><span style="text-transform: 'capitalize';">asam urat</span></option>
-                                <option value="kolestrol"><span style="text-transform: 'capitalize';">kolestrol</span></option>
-                                <option value="irigasi mata"><span style="text-transform: 'capitalize';">irigasi mata</span></option>
-                                <option value="irigasi telinga"><span style="text-transform: 'capitalize';">irigasi telinga</span></option>
-                                <option value="suntik kb"><span style="text-transform: 'capitalize';">suntik kb</span></option>
-                                <option value="lain-lain"><span style="text-transform: 'capitalize';">lain-lain</span></option>
-                              </select>
-                              <script>
-                                function SelLay(selectElement) {
-                                  var otherInput = document.getElementById('inpLay');
-                                  var hrgInput = document.getElementById('hrgLay');
-
-                                  if (selectElement.value === 'lain-lain') {
-                                    otherInput.style.display = 'block';
-                                    hrgInput.value = '';
+                        <form method="post" enctype="multipart/form-data">
+                          <div class="control-group after-add-more">
+                            <!-- <div class="modal-body"> -->
+                            <div class="row">
+                              <div class="col-md-12">
+                                <label for="inputName5" class="form-label">Nama Obat</label>
+                                <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
+                                <!-- <select name="nama_obat[]" id="" class="form-select"> -->
+                                <select class="form-select" style="height: 20px;" aria-label="Default select example" name="nama_obat[]">
+                                  <?php
+                                  if (!isset($_GET['inap'])) {
+                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                   } else {
-                                    otherInput.style.display = 'none';
+                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                   }
-
-                                  if (selectElement.value === 'glukosa') {
-                                    hrgInput.value = '15000';
-                                  }
-                                  if (selectElement.value === 'asam urat') {
-                                    hrgInput.value = '15000';
-                                  }
-                                  if (selectElement.value === 'kolestrol') {
-                                    hrgInput.value = '25000';
-                                  }
-                                  if (selectElement.value === 'irigasi mata') {
-                                    hrgInput.value = '35000';
-                                  }
-                                  if (selectElement.value === 'irigasi kuping') {
-                                    hrgInput.vallue = '100000';
-                                  }
-                                  if (selectElement.value === 'suntik kb') {
-                                    hrgInput.value = '25000';
-                                  }
-                                }
-                              </script>
-                              <input type="text" name="layanan2" style="display: none;" class="form-control" id="inpLay" placeholder="Layanan/Tindakan Lain">
-                            </div>
-                            <div class="col-md-12" style="margin-top:20px">
-                              <label for="inputName5" class="form-label">Harga Layanan</label>
-                              <input type="text" name="harga_layanan" class="form-control" id="hrgLay" placeholder="Harga Layanan">
-                            </div>
-                            <div class="col-md-12" style="margin-top:0px; height: 0.1px; visibility : hidden;">
-                              <label for="inputName5" class="form-label">Jumlah</label>
-                              <input type="text" name="jumlah_layanan" value="1" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
-                            </div>
-                            <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>">
-                            <!-- <input type="hidden" name="idrm" value="<?php echo $pecah['norm'] ?>"> -->
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <input type="submit" class="btn btn-primary" name="savelay" value="Save changes" />
-
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-    <!-- end -->
-
-    <!-- Add Data Modal Obat -->
-    <div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form method="post" enctype="multipart/form-data">
-            <div class="control-group after-add-more">
-              <!-- <div class="modal-body"> -->
-              <div class="row">
-                <div class="col-md-12">
-                  <label for="inputName5" class="form-label">Nama Obat</label>
-                  <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                  <!-- <select name="nama_obat[]" id="" class="form-select"> -->
-                  <select class="form-select" style="height: 20px;" aria-label="Default select example" name="nama_obat[]">
-                    <?php
-                    if (!isset($_GET['inap'])) {
-                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                    } else {
-                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                    }
-                    foreach ($getObat as $data) {
-                    ?>
-                      <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                    <?php } ?>
-                  </select>
-                </div>
-                <!-- <div class="col-md-12" style="margin-top:20px">
+                                  foreach ($getObat as $data) {
+                                  ?>
+                                    <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                  <?php } ?>
+                                </select>
+                              </div>
+                              <!-- <div class="col-md-12" style="margin-top:20px">
                   <label for="inputName5" class="form-label">Kode Obat</label>
                     <select name="kode_obat[]" id="" class="form-select">
                       <?php
@@ -674,40 +599,40 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                     </select>
 
           </div> -->
-                <script>
+                              <script>
 
-                </script>
-                <div class="col-md-12" style="margin-top:20px">
-                  <label for="">Jumlah Obat</label>
-                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
-                </div>
-              </div>
-            </div>
-            <button class="btn btn-warning add-more" type="button">
-              <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-            </button>
-            <hr>
+                              </script>
+                              <div class="col-md-12" style="margin-top:20px">
+                                <label for="">Jumlah Obat</label>
+                                <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
+                              </div>
+                            </div>
+                          </div>
+                          <button class="btn btn-warning add-more" type="button">
+                            <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                          </button>
+                          <hr>
 
-            <div class="copy invisible">
-              <br>
-              <div class="control-group">
+                          <div class="copy invisible">
+                            <br>
+                            <div class="control-group">
 
-                <label for="inputName5" class="form-label">Nama Obat</label>
-                <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                <select class="form-select" aria-label="Default select example" name="nama_obat[]">
-                  <?php
-                  if (!isset($_GET['inap'])) {
-                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                  } else {
-                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                  }
-                  foreach ($getObat as $data) {
-                  ?>
-                    <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                  <?php } ?>
-                </select>
+                              <label for="inputName5" class="form-label">Nama Obat</label>
+                              <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
+                              <select class="form-select" aria-label="Default select example" name="nama_obat[]">
+                                <?php
+                                if (!isset($_GET['inap'])) {
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                } else {
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                }
+                                foreach ($getObat as $data) {
+                                ?>
+                                  <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                <?php } ?>
+                              </select>
 
-                <!-- <label for="inputName5" class="form-label">Kode Obat</label>
+                              <!-- <label for="inputName5" class="form-label">Kode Obat</label>
                     <select name="kode_obat[]" id="" class="form-select">
                       <?php
                       $getObat = $koneksi->query("SELECT * FROM apotek ORDER BY nama_obat ASC");
@@ -717,62 +642,62 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                       <?php } ?>
                     </select> -->
 
-                <div class="col-md-12" style="margin-top:20px">
-                  <label for="">Jumlah Obat</label>
-                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
-                </div>
-                <br>
-                <button class="btn btn-danger remove" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
-                <hr>
-              </div>
-            </div>
+                              <div class="col-md-12" style="margin-top:20px">
+                                <label for="">Jumlah Obat</label>
+                                <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
+                              </div>
+                              <br>
+                              <button class="btn btn-danger remove" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
+                              <hr>
+                            </div>
+                          </div>
 
-            <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-              <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
-              <input type="text" name="catatan_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
-            </div>
-            <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
-              <label for="inputName5" class="form-label">Jenis Obat</label>
-              <select name="jenis_obat[]" class="form-select">
-                <option value="Racik">Racik</option>
-                <!-- <option value="Jadi">Jadi</option> -->
-              </select>
-            </div>
-            <label for="inputName5" class="form-label">Dosis</label>
-            <div class="col-md-6">
-              <div class="input-group mb-6">
-                <input type="text" class="form-control" id="dosis1_obat" name="dosis1_obat[]">
-                <input type="text" style="text-align: center;" class="form-control" placeholder="X">
-                <input type="text" class="form-control" id="dosis2_obat" name="dosis2_obat[]">
-              </div>
-            </div>
+                          <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                            <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
+                            <input type="text" name="catatan_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
+                          </div>
+                          <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
+                            <label for="inputName5" class="form-label">Jenis Obat</label>
+                            <select name="jenis_obat[]" class="form-select">
+                              <option value="Racik">Racik</option>
+                              <!-- <option value="Jadi">Jadi</option> -->
+                            </select>
+                          </div>
+                          <label for="inputName5" class="form-label">Dosis</label>
+                          <div class="col-md-6">
+                            <div class="input-group mb-6">
+                              <input type="text" class="form-control" id="dosis1_obat" name="dosis1_obat[]">
+                              <input type="text" style="text-align: center;" class="form-control" placeholder="X">
+                              <input type="text" class="form-control" id="dosis2_obat" name="dosis2_obat[]">
+                            </div>
+                          </div>
 
-            <div class="col-md-6">
-              <select id="inputState" name="per_obat[]" class="form-select">
-                <option>Per Hari</option>
-                <option>Per Jam</option>
-              </select>
-            </div>
-            <div class="col-md-12" style="margin-top:20px">
-              <label for="inputCity" class="form-label">Durasi</label>
-              <div class="input-group mb-3">
-                <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
-                <span class="input-group-text" id="basic-addon2">Hari</span>
-              </div>
-            </div>
-            <div class="col-md-12" style="margin-top:10px">
-              <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
-              <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
-            </div>
-            <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
-            <input type="hidden" name="idrm" value="<?php echo $_GET['id'] ?>">
+                          <div class="col-md-6">
+                            <select id="inputState" name="per_obat[]" class="form-select">
+                              <option>Per Hari</option>
+                              <option>Per Jam</option>
+                            </select>
+                          </div>
+                          <div class="col-md-12" style="margin-top:20px">
+                            <label for="inputCity" class="form-label">Durasi</label>
+                            <div class="input-group mb-3">
+                              <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
+                              <span class="input-group-text" id="basic-addon2">Hari</span>
+                            </div>
+                          </div>
+                          <div class="col-md-12" style="margin-top:10px">
+                            <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
+                            <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                          </div>
+                          <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
+                          <input type="hidden" name="idrm" value="<?php echo $_GET['id'] ?>">
 
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
-      </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                      <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
+                    </div>
       </form>
     </div>
     </div>
@@ -919,6 +844,83 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
               </form>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Data Modal Tindakan -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Tambah Layanan/Tindakan</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="userEntry" method="post" enctype="multipart/form-data">
+            <div class="modal-body">
+              <div class="col-md-12">
+                <label for="inputName5" class="form-label">Layanan/Tindakan</label>
+                <select name="layanan" class="form-control" id="selLay" onchange="SelLay(this)">
+                  <option hidden>Pilih Layanan</option>
+                  <option value="glukosa"><span style="text-transform: 'capitalize';">glukosa</span></option>
+                  <option value="asam urat"><span style="text-transform: 'capitalize';">asam urat</span></option>
+                  <option value="kolestrol"><span style="text-transform: 'capitalize';">kolestrol</span></option>
+                  <option value="irigasi mata"><span style="text-transform: 'capitalize';">irigasi mata</span></option>
+                  <option value="irigasi telinga"><span style="text-transform: 'capitalize';">irigasi telinga</span></option>
+                  <option value="suntik kb"><span style="text-transform: 'capitalize';">suntik kb</span></option>
+                  <option value="lain-lain"><span style="text-transform: 'capitalize';">lain-lain</span></option>
+                </select>
+                <script>
+                  function SelLay(selectElement) {
+                    var otherInput = document.getElementById('inpLay');
+                    var hrgInput = document.getElementById('hrgLay');
+
+                    if (selectElement.value === 'lain-lain') {
+                      otherInput.style.display = 'block';
+                      hrgInput.value = '';
+                    } else {
+                      otherInput.style.display = 'none';
+                    }
+
+                    if (selectElement.value === 'glukosa') {
+                      hrgInput.value = '15000';
+                    }
+                    if (selectElement.value === 'asam urat') {
+                      hrgInput.value = '15000';
+                    }
+                    if (selectElement.value === 'kolestrol') {
+                      hrgInput.value = '25000';
+                    }
+                    if (selectElement.value === 'irigasi mata') {
+                      hrgInput.value = '35000';
+                    }
+                    if (selectElement.value === 'irigasi kuping') {
+                      hrgInput.vallue = '100000';
+                    }
+                    if (selectElement.value === 'suntik kb') {
+                      hrgInput.value = '25000';
+                    }
+                  }
+                </script>
+                <input type="text" name="layanan2" style="display: none;" class="form-control" id="inpLay" placeholder="Layanan/Tindakan Lain">
+              </div>
+              <div class="col-md-12" style="margin-top:20px">
+                <label for="inputName5" class="form-label">Harga Layanan</label>
+                <input type="text" name="harga_layanan" class="form-control" id="hrgLay" placeholder="Harga Layanan">
+              </div>
+              <div class="col-md-12" style="margin-top:0px; height: 0.1px; visibility : hidden;">
+                <label for="inputName5" class="form-label">Jumlah</label>
+                <input type="text" name="jumlah_layanan" value="1" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
+              </div>
+              <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>">
+              <!-- <input type="hidden" name="idrm" value="<?php echo $pecah['norm'] ?>"> -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <input type="submit" class="btn btn-primary" name="savelay" value="Save changes" />
+
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -1466,9 +1468,9 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
               <?php $getRawat = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm = '$item[norm]' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$item[tgl]' LIMIT 1")->fetch_assoc(); ?>
               <td>
                 <form method="POST">
-                  <?php if($_SESSION['admin']['level'] == 'rekam medis'){?>
-                    <a href="index.php?halaman=editrm&id=<?= $item['id_rm']?>" targe="_blank" class="btn btn-sm btn-success"><i class="bi bi-pencil"></i></a>
-                  <?php }?>
+                  <?php if ($_SESSION['admin']['level'] == 'rekam medis' or $_SESSION['admin']['level'] == 'sup') { ?>
+                    <a href="index.php?halaman=editrm&id=<?= $item['id_rm'] ?>" targe="_blank" class="btn btn-sm btn-success"><i class="bi bi-pencil"></i></a>
+                  <?php } ?>
                   <a href="index.php?halaman=detailrm&id=<?php echo $item["norm"]; ?>&tgl=<?php echo $item["tgl"]; ?>&rawat=<?php echo $getRawat["idrawat"]; ?>&cekrm&idrekammedis=<?= $item['id_rm'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
                   <input type="text" name="idRawatSekarang" value="<?= $jadwal['idrawat'] ?>" hidden>
                   <input type="datetime-local" name="jadwalSekarang" value="<?= $jadwal['jadwal'] ?>" hidden>
