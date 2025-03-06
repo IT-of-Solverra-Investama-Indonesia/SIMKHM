@@ -912,7 +912,7 @@ if (isset($_POST['savelay'])) {
             <tbody>
                 <?php $no = 1 ?>
                 <?php
-                $getPlan = $koneksi->query("SELECT * FROM layanan WHERE idrm = '$rmSingle[norm]' AND tgl_layanan = '$rmSingle[jadwal]'");
+                $getPlan = $koneksi->query("SELECT * FROM layanan WHERE idrm = '$rmSingle[norm]' AND DATE_FORMAT(tgl_layanan,'%Y-%m-%d') = '" . date('Y-m-d', strtotime($rmSingle['jadwal'])) . "'");
                 ?>
                 <?php foreach ($getPlan as $plan) : ?>
                     <tr>
