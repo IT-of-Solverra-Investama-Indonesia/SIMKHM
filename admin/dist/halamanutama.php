@@ -14,7 +14,7 @@ if (!isset($_SESSION['login'])) {
 <!--memasukkan kamar dan lain2 otomatis begitu halaman dibuka-->
 <?php
 $tgl = date('Y-m-d');
-$getDataReg = $koneksi->query("SELECT * from registrasi_rawat JOIN kamar ON kamar.namakamar=registrasi_rawat.kamar where (status_antri != 'Pulang' AND status_antri != 'Pembayaran') and perawatan = 'Rawat Inap'");
+$getDataReg = $koneksi->query("SELECT * from registrasi_rawat WHERE (status_antri != 'Pulang') AND perawatan = 'Rawat Inap'");
 //   $arr = $data->fetch_assoc();
 $row = $getDataReg->num_rows;
 //jika lebih nol, masukkan semua yang kamarnya kosong ke biayadetail
@@ -24,9 +24,10 @@ if ($row > 0) {
   foreach ($getDataReg as $i) {
     $id = $i['idrawat'];
     // $tgl;
-    $tarif = $i['tarif'];
+    $getKamarSingle = $koneksi->query("SELECT * FROM kamar WHERE namakamar = '$i[kamar]' ORDER BY urut ASC LIMIT 1")->fetch_array();
+    $tarif = $getKamarSingle['tarif'] ?? 100000;
 
-    $cekTgl = $koneksi->query("SELECT COUNT(*) as jumlah FROM rawatinapdetail WHERE tgl = '$tgl' AND id = '$id'")->fetch_assoc();
+    $cekTgl = $koneksi->query("SELECT COUNT(*) as jumlah FROM rawatinapdetail WHERE tgl = '$tgl' AND id = '$id' AND (biaya = 'sewa kamar' OR biaya = 'jasa servis' OR biaya = 'BHP' OR biaya = 'Administrasi')")->fetch_assoc();
 
     if ($cekTgl['jumlah'] == '0') {
       //kamar

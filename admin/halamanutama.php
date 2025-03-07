@@ -34,37 +34,28 @@ $row=$data->num_rows;
 if ($row>=0) {
 
 	// $d=$koneksi->query("SELECT rawatinap.id, rawatinap.nama, rawatinap.noRM, kamar, tarif, tglmasuk from rawatinap left outer JOIN rawatinapsudah ON rawatinap.id=rawatinapsudah.id join kamar on kamar.namakamar=rawatinap.kamar where tglkeluar='' and rawatinapsudah.id is null ");
-  $d=$koneksi->query("SELECT * from registrasi_rawat join kamar on kamar.namakamar=registrasi_rawat.kamar where status_antri != 'Pulang'  and perawatan = 'Rawat Inap' ");
+  $d=$koneksi->query("SELECT * from registrasi_rawat join kamar on kamar.namakamar=registrasi_rawat.kamar where status_antri = 'Datang'  and perawatan = 'Rawat Inap' ");
 
 	
 
 	while ($i=$d->fetch_assoc())  {
-
-		 $id=$i['idrawat']; 
-
-		 $tgl;
-
-		 $tarif=$i['tarif'];
-
-		
-  $cekTgl = $koneksi->query("SELECT COUNT(*) as jumlah FROM rawatinapdetail WHERE tgl = '$tgl' AND id = '$id'")->fetch_assoc();
-
-  if($cekTgl['jumlah'] == 0){
-    //kamar
-  
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'sewa kamar', '$tarif') ");
-  
-    //jasa servis
-  
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'jasa servis', '15000') ");
-  
-    //BHP
-  
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'BHP', '10000') ");
-  
-    //administrasi
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'Administrasi', '3000') ");
-  }
+    $id=$i['idrawat']; 
+    $tgl;
+    $tarif=$i['tarif'];
+    $cekTgl = $koneksi->query("SELECT COUNT(*) as jumlah FROM rawatinapdetail WHERE tgl = '$tgl' AND id = '$id'")->fetch_assoc();
+    if($cekTgl['jumlah'] == 0){
+      //kamar
+      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'sewa kamar', '$tarif') ");
+    
+      //jasa servis
+      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'jasa servis', '15000') ");
+    
+      //BHP
+      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'BHP', '10000') ");
+    
+      //administrasi
+      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$id', '$tgl', 'Administrasi', '3000') ");
+    }
 
 	}
 
