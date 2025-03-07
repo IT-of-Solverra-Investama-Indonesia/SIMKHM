@@ -5,8 +5,10 @@ $date = date("Y-m-d");
 // $pasien=$koneksi->query("SELECT * FROM rekam_medis JOIN pasien WHERE nama_lengkap = nama_pasien;"); 
 $queryKey = '';
 if (isset($_POST['src'])) {
-  $queryKey = " AND (nama_pasien LIKE '%$_POST[key]%' or perawatan LIKE '%$_POST[key]%' or dokter_rawat LIKE '%$_POST[key]%' or no_rm LIKE '%$_POST[key]%' or jadwal LIKE '%$_POST[key]%' or antrian LIKE '%$_POST[key]%' or status_antri LIKE '%$_POST[key]%')";
+  $queryKey .= " AND (nama_pasien LIKE '%$_POST[key]%' or perawatan LIKE '%$_POST[key]%' or dokter_rawat LIKE '%$_POST[key]%' or no_rm LIKE '%$_POST[key]%' or jadwal LIKE '%$_POST[key]%' or antrian LIKE '%$_POST[key]%' or status_antri LIKE '%$_POST[key]%')";
 }
+
+
 
 if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Jalan';");
@@ -22,7 +24,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
 
   //   Pagination
   // Parameters for pagination
-  $limit = 100; // Number of entries to show in a page
+  $limit = 30; // Number of entries to show in a page
   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
   $start = ($page - 1) * $limit;
 
@@ -60,12 +62,21 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
     $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0' or status_antri='Pembayaran' or status_antri='Selesai') and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]' and perawatan ='Rawat Jalan' order by idrawat desc Limit 1;");
   }
 } elseif (isset($_GET['all'])) {
+  if (isset($_GET['perawatan'])) {
+    $queryKey .= " AND perawatan = '" . htmlspecialchars($_GET['perawatan']) . "'";
+    $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&fil=';
+    if (isset($_GET['bulan'])) {
+      $queryKey .= " AND DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['bulan']) . "'";
+      $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&fil=&bulan=' . htmlspecialchars($_GET['bulan']) . '';
+    }
+  } else {
+    $linkPage = "index.php?halaman=daftarrmedis&all";
+  }
   // if(isset($_GET['rajal']))
-
   $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri!='') " . $queryKey . " order by idrawat desc";
   //   Pagination
   // Parameters for pagination
-  $limit = 100; // Number of entries to show in a page
+  $limit = 30; // Number of entries to show in a page
   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
   $start = ($page - 1) * $limit;
 
@@ -89,7 +100,6 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   } else {
     $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
   }
-  $linkPage = "index.php?halaman=daftarrmedis&all";
 } else {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Inap';");
   $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' order by idrawat desc ;");
@@ -530,6 +540,22 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                   <?php } else { ?>
                     <p style="margin-top: -20px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data seluruh pasien dari semua waktu</p>
                     <a href="index.php?halaman=daftarrmedis" class="btn btn-sm btn-primary mb-2">Pasien Sekarang</a>
+                    <form action="" method="get" class="mb-2">
+                      <input type="text" name="halaman" id="" value="daftarrmedis" hidden>
+                      <input type="text" name="all" id="" value="" hidden>
+                      <div class="row">
+                        <div class="col-9">
+                          <select name="perawatan" class="form-select" id="">
+                            <option value="All">All</option>
+                            <option value="Rawat Jalan">Rawat Jalan</option>
+                            <option value="Rawat Inap">Rawat Inap</option>
+                          </select>
+                        </div>
+                        <div class="col-3">
+                          <button type="submit" class="btn btn-primary" name="fil"><i class="bi bi-filter"></i></button>
+                        </div>
+                      </div>
+                    </form>
                   <?php } ?>
                   <?php if (isset($_GET['all']) or isset($_GET['racik'])) { ?>
                     <form method="POST">

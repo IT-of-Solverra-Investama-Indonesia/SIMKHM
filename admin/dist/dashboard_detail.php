@@ -1,11 +1,40 @@
 <h3>Detail Dashboard</h3>
-<a href="index.php?halaman=dashboard_detail&Poli" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Poli</a>
+<div class="card shadow p-2">
+  <form method="post">
+    <div class="row">
+      <div class="col-9">
+        <select name="hal" id="" class="form-control">
+          <option value="Poli">Poli</option>
+          <option value="verif">Verif</option>
+          <option value="polibulan">Poli Bulan</option>
+          <option value="polibpjs">Poli BPJS</option>
+          <option value="omsetKHM">Omset KHM Lama</option>
+          <option value="RekapPasienOnlineOffline">Rekap Pasien Online Offline</option>
+        </select>
+      </div>
+      <div class="col-3">
+        <button name="searching" class="btn btn-primary"><i class="bi bi-search"></i></button>
+      </div>
+    </div>
+  </form>
+</div>
+<?php
+include "../dist/baseUrlAPI.php";
+if (isset($_POST['searching'])) {
+  $hal = htmlspecialchars($_POST['hal']);
+  if ($hal == 'polibulan' or $hal == 'polibpjs') {
+    echo "<script>document.location='index.php?halaman=dashboard_detail&$hal=" . date('y/m') . "'</script>";
+  } else {
+    echo "<script>document.location='index.php?halaman=dashboard_detail&$hal'</script>";
+  }
+}
+?>
+<!-- <a href="index.php?halaman=dashboard_detail&Poli" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Poli</a>
 <a href="index.php?halaman=dashboard_detail&verif" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Verif</a>
 <a href="index.php?halaman=dashboard_detail&polibulan=<?= date('y/m') ?>" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Poli Bulan</a>
 <a href="index.php?halaman=dashboard_detail&polibpjs=<?= date('y/m') ?>" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Poli Bpjs</a>
 <a href="index.php?halaman=dashboard_detail&omsetKHM" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Omset KHM</a>
-<a href="index.php?halaman=dashboard_detail&RekapPasienOnlineOffline" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Rekap Pasien Online Offline</a>
-<br>
+<a href="index.php?halaman=dashboard_detail&RekapPasienOnlineOffline" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Rekap Pasien Online Offline</a> -->
 <br>
 <?php if (isset($_GET['Poli'])) { ?>
   <?php
@@ -137,7 +166,9 @@
               $getRanap = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND DATE_FORMAT(jadwal, '%y/%m') = '$bulan'")->fetch_assoc();
               ?>
               <td>
-                <?= $getRanap['jum'] ?> || <?= number_format($getRanap['jum'] / $poli['harii'], 2) ?>
+                <a href="index.php?halaman=daftarrmedis&all&perawatan=Rawat Inap&bulan=<?= $bulan ?>">
+                  <?= $getRanap['jum'] ?> || <?= number_format($getRanap['jum'] / $poli['harii'], 2) ?>
+                </a>
               </td>
               <!-- <td><?php echo $poli['kosmetik'] ?>  ||  <?php echo number_format($poli['kosmetik'] / $poli['harii'], 2) ?></td>
                           <td><a href="index.php?halaman=kasir1shift&gigiumum=<?php echo $bulan = $poli['bulan'] ?> "><?php echo $poli['gigiumum'] ?> ||  <?php echo number_format($poli['gigiumum'] / $poli['harii'], 2) ?></a></td>
@@ -161,7 +192,7 @@
               </td>
               <td>
                 <?php
-                $apiUrl = "https://husadamulia.com/kunir/api_personal/api_dashboard.php?randomToken=" . htmlspecialchars($randomToken) . "&pendapatanpoliakuntan&bulan=" . $poli['bulan'] . "";
+                $apiUrl = $baseUrlLama . "api_personal/api_dashboard.php?randomToken=" . htmlspecialchars($randomToken) . "&pendapatanpoliakuntan&bulan=" . $poli['bulan'] . "";
                 $params = [
                   'randomToken' => $randomToken,
                   'pendapatanpoliakuntan' => true,
@@ -237,7 +268,7 @@
     </div>
   </div>
 <?php } elseif (isset($_GET['polibulan'])) { ?>
-  <div class="card shadow-sm p-2">
+  <div class="card shadow p-2">
     <div class="table-responsive">
       <table class="table table-hover table-striped">
         <thead>
@@ -271,7 +302,7 @@
     </div>
   </div>
 <?php } elseif (isset($_GET['polibpjs'])) { ?>
-  <div class="card shadow-sm p-2">
+  <div class="card shadow p-2">
     <div class="table-responsive">
       <table class="table table-hover table-striped">
         <thead>
@@ -307,7 +338,7 @@
 <?php } elseif (isset($_GET['omsetKHM'])) { ?>
   <?php
   // Panggil API
-  $url = "https://husadamulia.com/kunir/api_personal/api_dashboard_omset.php?OmsetKHM";
+  $url = $baseUrlLama . "api_personal/api_dashboard_omset.php?OmsetKHM";
   $response = file_get_contents($url);
   $data = json_decode($response, true);
   ?>
@@ -383,5 +414,9 @@
         <!-- </div> -->
       </div>
     </div>
+  </div>
+<?php } else { ?>
+  <div class="card shadow p-2">
+    <span><i>Pilih Terlebih Dahulu Dashboard Yang Ingin Anda Lihat</i></span>
   </div>
 <?php } ?>
