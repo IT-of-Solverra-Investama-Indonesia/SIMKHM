@@ -785,7 +785,7 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
     <div class="row" id="plan">
       <div class="table-responsive">
         <div align="right">
-          <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal">Add</button>
+          <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal">Add</button>
         </div>
         <br>
         <div id="userList">
@@ -829,9 +829,9 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
       <div class="table-responsive">
         <h5 class="card-title">Tambah Obat Untuk Jadwal <?= $jadwal['jadwal'] ?></h5>
         <div align="right">
-          <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi <?= $getLastRM['id_rm'] ?></button>
-          <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-          <a type="button" class="btn btn-info text-right" href="index.php?halaman=tambahpuyer2&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>">Add Racik Paket</a>
+          <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi <?= $getLastRM['id_rm'] ?></button>
+          <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+          <a type="button" class="btn btn-sm btn-info text-right" href="index.php?halaman=tambahpuyer2&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>">Add Racik Paket</a>
         </div>
         <br>
         <?php $subtotal = 0; ?>
@@ -839,14 +839,14 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
           <table class="table table-striped table-hover" style="font-size: 13px;">
             <thead>
               <tr>
-                <th width="5%">No.</th>
-                <th width="50%">Obat</th>
-                <th width="50%">Kode Obat</th>
-                <th width="50%">Jumlah Obat</th>
-                <th width="20%">Dosis</th>
-                <th width="20%">Jenis</th>
-                <th width="20%">Durasi</th>
-                <th width="20%"></th>
+                <th>No.</th>
+                <th>Obat</th>
+                <th>Kode Obat</th>
+                <th>Jumlah Obat</th>
+                <th>Dosis</th>
+                <th>Jenis</th>
+                <th>Durasi</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -890,11 +890,11 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                   <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
                   <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td>
                   <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
-                  <td style="margin-top:10px;"> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button>
+                  <td style="margin-top:10px;"> <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button>
                     <?php if (isset($_GET['inap'])) { ?>
-                      <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus&inap=<?= $_GET['inap'] ?>" class="btn btn-danger text-right"><i class="bi bi-trash"></i></a>
+                      <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus&inap=<?= $_GET['inap'] ?>" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
                     <?php } else { ?>
-                      <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus" class="btn btn-danger text-right"><i class="bi bi-trash"></i></a>
+                      <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
                     <?php } ?>
                   </td>
                   <?php $subtotal += $subharga; ?>
@@ -1079,7 +1079,7 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
   <!-- Riwayat Rekam Medis -->
   <div class="card shadow p-3">
     <h5 class="card-title">Riwayat Rekam Medis</h5>
-    <div class="table-responsive">
+    <div class="table-responsizve">
       <table class="table table-hover table-striped" style="font-size: 13px;">
         <thead>
           <tr>
@@ -1176,8 +1176,8 @@ if (isset($_POST['save'])) {
   $kolestrol = htmlspecialchars($_POST['kolestrol']);
   $asam_urat = htmlspecialchars($_POST['asam_urat']);
 
-  if($_POST['diagnosis'] == 'Diagnosis Baru'){
-    $koneksimaster->query("INSERT INTO icds_diagnosis (diagnosis, icd, unit, petugas) VALUES ('$diagnosis', '$icd', 'KHM 1', '".$_SESSION['admin']['namalengkap']."')");
+  if ($_POST['diagnosis'] == 'Diagnosis Baru') {
+    $koneksimaster->query("INSERT INTO icds_diagnosis (diagnosis, icd, unit, petugas) VALUES ('$diagnosis', '$icd', 'KHM 1', '" . $_SESSION['admin']['namalengkap'] . "')");
   }
 
   if ($prognosa == 'Prognosis good') {

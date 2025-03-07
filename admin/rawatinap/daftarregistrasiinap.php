@@ -1,29 +1,23 @@
 <?php
-
 $date = date("Y-m-d");
-
 $queryKey = '';
 
-
-if (!isset($_GET['day'])) {
+if (isset($_GET['all'])) {
   if (isset($_POST['src'])) {
-    $queryKey = " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' 
-    OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%'
-    OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
-
-    $pasiens_search = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' " . $queryKey . " ORDER BY idrawat DESC";
+    $queryKey .= " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' 
+      OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%'
+      OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
   }
-  $pasiens = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' ORDER BY idrawat DESC";
+  $pasiens = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' " . $queryKey . " ORDER BY idrawat DESC";
+  $urlPage = 'index.php?halaman=daftarregistrasiinap&all';
 } else {
   if (isset($_POST['src'])) {
-    $queryKey = " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' 
-    OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%'OR status_antri LIKE '%$_POST[key]%'
-    OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
-
-    $pasiens_search = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' WHERE date%d') = '$date' " . $queryKey . " ORDER BY idrawat DESC";
+    $queryKey .= " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' 
+      OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%'OR status_antri LIKE '%$_POST[key]%'
+      OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
   }
-
-  $pasiens = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' WHERE date%d') = '$date' ORDER BY idrawat DESC";
+  $pasiens = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap'  AND status_antri != 'Pulang' " . $queryKey . " ORDER BY idrawat DESC";
+  $urlPage = 'index.php?halaman=daftarregistrasiinap';
 }
 // var_dump($pasien);
 
@@ -49,12 +43,7 @@ if (isset($_POST['src'])) {
 } else {
   $pasien = $koneksi->query($pasiens . " LIMIT $start, $limit;");
 }
-
 ?>
-
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -95,7 +84,7 @@ if (isset($_POST['src'])) {
 
 <body>
   <main>
-    <div class="container">
+    <div class="container-fluid">
       <div class="pagetitle">
         <h1>Daftar Registrasi</h1>
         <nav>
@@ -105,8 +94,8 @@ if (isset($_POST['src'])) {
         </nav>
       </div><!-- End Page Title -->
 
-      <section class="section  py-4">
-        <div class="container">
+      <section class="section">
+        <div class="container-fluid">
           <div class="row">
             <div class="col-lg-12 col-md-12">
               <div class="card">
@@ -117,6 +106,7 @@ if (isset($_POST['src'])) {
 
                 </div> -->
                   <h5 class="card-title">Data Registrasi</h5>
+                  <a href="index.php?halaman=daftarregistrasiinap&all" class="btn btn-sm btn-primary mb-2">All Registrasi Inap</a>
                   <form method="POST">
                     <div class="row">
                       <div class="col-9">
@@ -159,12 +149,8 @@ if (isset($_POST['src'])) {
                             <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                             <?php
-
-
                             $jadwal = strtotime($pecah['jadwal']) - (3600 * 7);
                             $date = $jadwal;
-                            // date_add($date, date_interval_create_from_date_string('-2 hours'));
-                            // echo date_format($date, 'Y-m-d\TH:i:s');
                             ?>
                             <td style="margin-top:10px;"> <?= $pecah['jadwal'] ?></td>
                             <!-- <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td> -->
@@ -217,7 +203,7 @@ if (isset($_POST['src'])) {
 
                   // Back button
                   if ($page > 1) {
-                    echo '<li class="page-item"><a class="page-link" href="index.php?halaman=daftarregistrasiinap&page=' . ($page - 1) . '">Back</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page - 1) . '">Back</a></li>';
                   }
 
                   // Determine the start and end page
@@ -225,7 +211,7 @@ if (isset($_POST['src'])) {
                   $end_page = min($total_pages, $page + 2);
 
                   if ($start_page > 1) {
-                    echo '<li class="page-item"><a class="page-link" href="index.php?halaman=daftarregistrasiinap&page=1">1</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=1">1</a></li>';
                     if ($start_page > 2) {
                       echo '<li class="page-item"><span class="page-link">...</span></li>';
                     }
@@ -235,7 +221,7 @@ if (isset($_POST['src'])) {
                     if ($i == $page) {
                       echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
                     } else {
-                      echo '<li class="page-item"><a class="page-link" href="index.php?halaman=daftarregistrasiinap&page=' . $i . '">' . $i . '</a></li>';
+                      echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $i . '">' . $i . '</a></li>';
                     }
                   }
 
@@ -243,12 +229,12 @@ if (isset($_POST['src'])) {
                     if ($end_page < $total_pages - 1) {
                       echo '<li class="page-item"><span class="page-link">...</span></li>';
                     }
-                    echo '<li class="page-item"><a class="page-link" href="index.php?halaman=daftarregistrasiinap&page=' . $total_pages . '">' . $total_pages . '</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
                   }
 
                   // Next button
                   if ($page < $total_pages) {
-                    echo '<li class="page-item"><a class="page-link" href="index.php?halaman=daftarregistrasiinap&page=' . ($page + 1) . '">Next</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page + 1) . '">Next</a></li>';
                   }
 
                   echo '</ul>';
