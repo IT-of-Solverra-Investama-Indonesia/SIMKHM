@@ -431,7 +431,7 @@ $pecah=$pasien->fetch_assoc();
                     <select name="kamar" class="form-select" id="">
                         <option hidden value="">Pilih Kamar</option>
                         <?php
-                          $getKamar = $koneksi->query("SELECT * FROM kamar WHERE urut <= '10'");
+                          $getKamar = $koneksi->query("SELECT * FROM kamar");
                           foreach($getKamar as $kamar){
                         ?>
                           <?php $cekKamar = $koneksi->query("SELECT * FROM registrasi_rawat WHERE kamar = '$kamar[namakamar]' ORDER BY idrawat DESC LIMIT 1");?>
