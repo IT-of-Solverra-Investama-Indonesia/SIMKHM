@@ -142,6 +142,7 @@ if (isset($_POST['searching'])) {
             <th class="text-capitalize">pendapatan <br>(akuntan)</th>
             <th class="text-capitalize">Rp/hr <br>(akuntan)</th>
             <th class="text-capitalize">Rp/umum <br>(akuntan)</th>
+            <th class="text-capitalize">ODC</th>
             <!-- <th class="text-capitalize">obat/pasien <br>(akuntan)</th>
                         <th class="text-capitalize">igd</th> -->
 
@@ -215,6 +216,26 @@ if (isset($_POST['searching'])) {
               </td>
               <td>
                 <?= number_format($poli['umum'] != 0 ? $totalAkuntan / $poli['umum'] : 0, 0, 0, '.') ?>
+              </td>
+              <td>
+                <?php
+                $apiUrl = $baseUrlLama . "api_personal/api_dashboard.php?randomToken=" . htmlspecialchars($randomToken) . "&odc&bulan=" . $poli['bulan'] . "";
+                $params = [
+                  'randomToken' => $randomToken,
+                  'pendapatanpoliakuntan' => true,
+                  'bulan' => $poli['bulan'], // Contoh format bulan (ubah sesuai kebutuhan)
+                ];
+                $response = callAPI($apiUrl, "GET", $params);
+                $responseData = json_decode($response, true);
+                if ($responseData['status'] === "Successfully" && !empty($responseData['data'])) {
+                  echo number_format($totalAkuntan = $responseData['data'][0]['total'], 2);
+                } else {
+                  echo $totalAkuntan = 0;
+                }
+                // echo htmlspecialchars($response)." ".$randomToken." ";
+                // echo $decryptedData = decrypt($randomToken, $key , $iv);;
+
+                ?>
               </td>
               <!-- <td>
 
