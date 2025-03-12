@@ -1,5 +1,5 @@
 <?php
-// error_reporting(0);
+error_reporting(0);
 $date = date("Y-m-d");
 date_default_timezone_set('Asia/Jakarta');
 
