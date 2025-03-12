@@ -12,12 +12,18 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 7px;
+        }
+
+        .nota {
+            width: 23.625rem;
+            height: 30.75rem;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            /* margin-bottom: 20px; */
+            font-size: 13px;
         }
 
         .section-title {
@@ -28,6 +34,7 @@
 
         .content {
             margin-top: 20px;
+            font-size: 12px;
         }
 
         .table-1 th,
@@ -98,16 +105,17 @@
     <!-- <script>
         window.print()
     </script> -->
-    <div class="" style="">
+    <div class="nota" style="">
         <div class="header">
-            <h4>KLINIK HUSADA MULIA</h4>
-            <p>Instansi Farmasi</p>
+            <b>
+                <p>KLINIK HUSADA MULIA <br /> Instansi Farmasi</p>
+            </b>
             <hr>
         </div>
         <div class="content">
             <table>
                 <tr>
-                    <td>No. RM / No. RW</td>
+                    <td>No. RM</td>
                     <td>:</td>
                     <td><?= $pasien['no_rm'] ?></td>
                 </tr>
@@ -137,7 +145,7 @@
                     <td><?= $registrasi['carabayar'] ?></td>
                 </tr>
             </table>
-            <table class="table mt-3">
+            <!-- <table class="table mt-3">
                 <thead>
                     <tr>
                         <td>No.</td>
@@ -158,7 +166,23 @@
                         </tr>
                     <?php } ?>
                 </tbody>
-            </table>
+            </table> -->
+
+            <div class="list-obat mt-3">
+                <h6>Daftar Obat</h6>
+                <?php
+                $no = 1;
+                foreach ($dataObat as $obat) { ?>
+                    <div class="item-obat">
+                        <?= $no++ ?>. <?= htmlspecialchars($obat['nama_obat']) ?> <br>
+                        <span style="margin-left: 20px; padding-left: 10px; margin-right: 5px;">
+                            <?= htmlspecialchars($obat['dosis1_obat']) ?>x<?= htmlspecialchars($obat['dosis2_obat']) ?> <?= htmlspecialchars($obat['per_obat']) ?> (<?= htmlspecialchars($obat['petunjuk_obat']) ?>)
+                        </span>
+                        <?= htmlspecialchars($obat['jml_dokter']) ?> pcs
+                    </div>
+                    <br>
+                <?php } ?>
+            </div>
         </div>
     </div>
     <!-- <div class="page">
