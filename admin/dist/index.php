@@ -449,6 +449,10 @@ if(!isset($_SESSION['login'])){
           <i class="bi bi-capsule"></i>
           <span>Rekap Obat</span>
         </a>
+        <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
+          <i class="bi bi-capsule"></i>
+          <span>Entri Obat Inap</span>
+        </a>
       </li><!-- End Profile Page Nav -->
       <?php } ?>
 
@@ -462,6 +466,10 @@ if(!isset($_SESSION['login'])){
         <a class="nav-link collapsed" href="index.php?halaman=apotek_terima">
           <i class="bi bi-capsule"></i>
           <span>Terima Obat</span>
+        </a>
+        <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
+          <i class="bi bi-capsule"></i>
+          <span>Entri Obat Inap</span>
         </a>
       </li><!-- End Profile Page Nav -->
       <?php } ?>

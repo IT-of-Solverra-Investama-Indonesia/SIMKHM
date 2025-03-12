@@ -467,6 +467,8 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                               <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                               <ul class="dropdown-menu">
                                                 <li><a href="index.php?halaman=detailrm&id=<?php echo $kamar["no_rm"]; ?>&tgl=<?php echo $kamar["jadwal"]; ?>&racik" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                                <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $kamar["no_rm"] ?>&inap&tgl=<?php echo $kamar["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
+                                                <li><a href="index.php?halaman=lpo&id=<?php echo $kamar["no_rm"] ?>&inap&tgl=<?php echo $kamar["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Observasi Perawat</a></li>
                                               <?php } else { ?>
                                                 <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                                 <ul class="dropdown-menu">
@@ -573,7 +575,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                   <div class="table-responsive">
                     <table <?php if (!isset($_GET['all']) and !isset($_GET['racik'])) {
                               echo "id='myTable'";
-                            } ?> class="table table-striped" style="width:100%">
+                            } ?> class="table table-striped" style="width:100%; font-size: 12px;">
                       <thead>
                         <tr>
                           <th>No</th>
@@ -636,9 +638,11 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                   <ul class="dropdown-menu">
                                     <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
-
+                                    <?php if($pecah['perawatan'] == 'Rawat Inap'){?>
+                                      <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
+                                      <li><a href="index.php?halaman=lpo&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Observasi Perawat</a></li>
+                                    <?php }?>
                                   <?php } else { ?>
-
                                     <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                     <ul class="dropdown-menu">
                                       <?php if ($pecah['perawatan'] == 'Rawat Jalan') { ?>

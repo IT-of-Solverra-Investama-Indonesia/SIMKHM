@@ -1,3 +1,3 @@
 <?php
 $baseUrlSIMKHM = "https://simkhm.id/tunjung/";
-$baseUrlLama = "https://localhost/khm/";
+$baseUrlLama = "https://husadamulia.com/wonorejo/";
