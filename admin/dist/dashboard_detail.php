@@ -133,6 +133,8 @@ if (isset($_POST['searching'])) {
                         <th class="text-capitalize">Gigi Umum</th>
                         <th class="text-capitalize">Gigi BPJS</th>-->
             <th class="text-capitalize">Lab poli</th>
+            <th class="text-capitalize">ODC</th>
+
             <!--<th class="text-capitalize">Vit C</th>
                         <th class="text-capitalize">ODC</th>
                         <th class="text-capitalize">Homecare</th> -->
@@ -142,7 +144,6 @@ if (isset($_POST['searching'])) {
             <th class="text-capitalize">pendapatan <br>(akuntan)</th>
             <th class="text-capitalize">Rp/hr <br>(akuntan)</th>
             <th class="text-capitalize">Rp/umum <br>(akuntan)</th>
-            <th class="text-capitalize">ODC</th>
             <!-- <th class="text-capitalize">obat/pasien <br>(akuntan)</th>
                         <th class="text-capitalize">igd</th> -->
 
@@ -179,6 +180,26 @@ if (isset($_POST['searching'])) {
                 $getJumlahLab = $koneksi->query("SELECT COUNT(*) as jumlahLab FROM registrasi_rawat INNER JOIN lab ON lab.id_lab_inap = registrasi_rawat.idrawat WHERE DATE_FORMAT(jadwal, '%y/%m') = '$poli[bulan]'")->fetch_assoc();
                 ?>
                 <?php echo $getJumlahLab['jumlahLab'] ?> || <?php echo number_format($getJumlahLab['jumlahLab'] / $poli['harii'], 2) ?>
+              </td>
+              <td>
+                <?php
+                $apiUrl = $baseUrlLama . "api_personal/api_dashboard.php?randomToken=" . htmlspecialchars($randomToken) . "&odc&bulan=" . $poli['bulan'] . "";
+                $params = [
+                  'randomToken' => $randomToken,
+                  'pendapatanpoliakuntan' => true,
+                  'bulan' => $poli['bulan'], // Contoh format bulan (ubah sesuai kebutuhan)
+                ];
+                $response = callAPI($apiUrl, "GET", $params);
+                $responseData = json_decode($response, true);
+                if ($responseData['status'] === "Successfully" && !empty($responseData['data'])) {
+                  echo number_format($totalAkuntan = $responseData['data'][0]['total'], 2);
+                } else {
+                  echo $totalAkuntan = 0;
+                }
+                // echo htmlspecialchars($response)." ".$randomToken." ";
+                // echo $decryptedData = decrypt($randomToken, $key , $iv);;
+
+                ?>
               </td>
               <!-- <td><?php echo $poli['vitc'] ?>  ||  <?php echo number_format($poli['vitc'] / $poli['harii'], 2) ?></td>
                           <td><?php echo $poli['ODC'] ?>  ||  <?php echo number_format($poli['ODC'] / $poli['harii'], 2) ?></td>
@@ -217,26 +238,7 @@ if (isset($_POST['searching'])) {
               <td>
                 <?= number_format($poli['umum'] != 0 ? $totalAkuntan / $poli['umum'] : 0, 0, 0, '.') ?>
               </td>
-              <td>
-                <?php
-                $apiUrl = $baseUrlLama . "api_personal/api_dashboard.php?randomToken=" . htmlspecialchars($randomToken) . "&odc&bulan=" . $poli['bulan'] . "";
-                $params = [
-                  'randomToken' => $randomToken,
-                  'pendapatanpoliakuntan' => true,
-                  'bulan' => $poli['bulan'], // Contoh format bulan (ubah sesuai kebutuhan)
-                ];
-                $response = callAPI($apiUrl, "GET", $params);
-                $responseData = json_decode($response, true);
-                if ($responseData['status'] === "Successfully" && !empty($responseData['data'])) {
-                  echo number_format($totalAkuntan = $responseData['data'][0]['total'], 2);
-                } else {
-                  echo $totalAkuntan = 0;
-                }
-                // echo htmlspecialchars($response)." ".$randomToken." ";
-                // echo $decryptedData = decrypt($randomToken, $key , $iv);;
 
-                ?>
-              </td>
               <!-- <td>
 
                             </td> -->
