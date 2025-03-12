@@ -441,6 +441,10 @@ if(!isset($_SESSION['login'])){
           <i class="bi bi-capsule"></i>
           <span>Tambah Paket Racik</span>
         </a>
+        <a class="nav-link collapsed" href="index.php?halaman=daftarpuyerjadi">
+          <i class="bi bi-capsule"></i>
+          <span>Tambah Paket Jadi</span>
+        </a>
         <a class="nav-link collapsed" href="index.php?halaman=rekapobat">
           <i class="bi bi-capsule"></i>
           <span>Rekap Obat</span>

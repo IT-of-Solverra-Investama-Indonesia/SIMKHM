@@ -132,6 +132,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="hapusapotek"){include '../apotek/hapusapotek.php';}
                    elseif ($hal=="racik"){include '../apotek/racik.php';}
                    elseif ($hal=="daftarpuyer"){include '../apotek/daftarpuyer.php';}
+                   elseif ($hal=="daftarpuyerjadi"){include '../apotek/daftarpuyerjadi.php';}
                    elseif ($hal=="tambahpuyer"){include '../apotek/tambahpuyer.php';}
                    elseif ($hal=="tambahpuyer2"){include '../apotek/tambahpuyer2.php';}
                    elseif ($hal=="rekapobat"){include '../apotek/rekapobat.php';}
