@@ -21,6 +21,7 @@
                 </select>
                 <script>
                     $(document).ready(function() {
+                        $('.js-example-basic-singlee').select2();
                         $('.js-example-basic-single').select2();
                         $('.js-example-basic-singleee').select2();
 
@@ -52,7 +53,16 @@
                 </script>
             </div>
             <div class="col-8">
-                <input type="text" name="nama_obat_new" id="nama_obat_new_id" class="form-control mt-2 w-100" placeholder="Masukan Nama Obat Baru">
+                <!-- <input type="text" name="nama_obat_new" id="nama_obat_new_id" class="form-control mt-2 w-100" placeholder="Masukan Nama Obat Baru"> -->
+                <select name="nama_obat_new" id="nama_obat_new_id" class="form-control  mt-2 w-100">
+                    <option value="" hidden>Pilih Obat Baru (Data Dari Master)</option>
+                    <?php 
+                        $getMasterObat = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
+                        foreach($getMasterObat as $masterObat) {
+                    ?>
+                    <option value="<?= $masterObat['obat_master']?>"><?= $masterObat['obat_master']?></option>
+                    <?php }?>
+                </select>
             </div>
             <div class="col-4">
                 <input type="number" name="id_obat_new" id="id_obat_id" class="form-control mt-2 w-100" placeholder="Masukan Kode Obat Baru">

@@ -86,7 +86,6 @@ if (isset($_GET['detail'])) {
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
   <title>KHM WONOREJO</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
@@ -365,12 +364,57 @@ if (isset($_GET['detail'])) {
 
               <div class="card">
                 <div class="card-body">
-                  <!--   <div style="margin-top: 50px; margin-bottom: 30px; text-align: right;">
-               
-                <a href="index.php?halaman=pasien" class="btn btn-primary"><i class="bi bi-plus"></i> Pasien</a>
+                  <h5 class="card-title mb-1">Data Registrasi Diagnosis</h5>
+                  <button class="btn btn-sm btn-primary mb-2 mt-1" data-bs-toggle="modal" data-bs-target="#showKamar">Lihat Kamar Terpakai</button>
+                  <!-- Modal -->
+                  <div class="modal fade" id="showKamar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Kamar Terpakai</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                              <thead>
+                                <tr>
+                                  <th>Nama Pasien</th>
+                                  <th>Jenis Perawatan</th>
+                                  <th>Dokter</th>
+                                  <th>NoRm</th>
+                                  <th>Jadwal</th>
+                                  <th>Kamar</th>
+                                  <th>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                $getPasienKamar = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri = 'Belum Datang') and perawatan ='Rawat Inap'  order by idrawat desc;");
+                                foreach ($getPasienKamar as $kamar) {
+                                ?>
+                                  <tr>
+                                    <td><?= $kamar['nama_pasien'] ?></td>
+                                    <td><?= $kamar['perawatan'] ?></td>
+                                    <td><?= $kamar['dokter_rawat'] ?></td>
+                                    <td><?= $kamar['no_rm'] ?></td>
+                                    <td><?= $kamar['jadwal'] ?></td>
+                                    <td><?= $kamar['kamar'] ?></td>
+                                    <td><?= $kamar['status_antri'] ?></td>
+                                  </tr>
+                                <?php } ?>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <!-- <button type="button" class="btn btn-primary">Understood</button> -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                </div> -->
-                  <h5 class="card-title">Data Registrasi Diagnosis</h5>
                   <form method="POST">
                     <div class="row">
                       <div class="col-9">
@@ -570,7 +614,7 @@ if (isset($_GET['detail'])) {
 
   if ($getBPJS['carabayar'] == 'bpjs') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
-  }elseif($getBPJS['carabayar'] == 'malam') {
+  } elseif ($getBPJS['carabayar'] == 'malam') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('50000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } else {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('20000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");

@@ -12,17 +12,6 @@ $pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GR
   <meta content="" name="keywords">
   <!-- DATATABLES -->
   <!-- !-- DataTables  -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
-  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  <link src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
-  <link src="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
 </head>
 
 <body>
@@ -114,11 +103,32 @@ $pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GR
 
 </html>
 
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.0/css/buttons.dataTables.css" />
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.0/js/dataTables.buttons.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.0/js/buttons.html5.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.0/js/buttons.print.js"></script>
+
 <script>
   $(document).ready(function() {
     $('#myTable').DataTable({
-      search: true,
-      pagination: true
+      dom: 'Bfrtip',
+      buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+      paging: false,
+      order: false,
     });
   });
 </script>
+<style>
+  .dt-button {
+    float: right !important;
+    border: none;
+    padding: 8px 16px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    margin-left: 10px !important;
+  }
+</style>
