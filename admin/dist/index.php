@@ -435,6 +435,10 @@ if (!isset($_SESSION['login'])) {
             <i class="bi bi-capsule"></i>
             <span>Apotek</span>
           </a>
+          <a class="nav-link collapsed" href="index.php?halaman=margin_obat">
+            <i class="bi bi-cash-coin"></i>
+            <span>Setting Margin Obat</span>
+          </a>
           <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&all">
             <i class="bi bi-capsule"></i>
             <span>Petugas Racik</span>
@@ -519,12 +523,6 @@ if (!isset($_SESSION['login'])) {
       <hr>
       </hr>
       <?php if ($level == 'ceo'  or $level == 'sup') { ?>
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=margin_obat">
-            <i class="bi bi-cash-coin"></i>
-            <span>Setting Margin Obat</span>
-          </a>
-        </li>
 
         <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=kamar_inap">
