@@ -12,14 +12,14 @@
     $('#myTable').DataTable({
       dom: 'Bfrtip',
       buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-      paging: false,
+      // paging: false,
       order: false,
     });
   });
 </script>
 <style>
   .dt-button {
-    float:right !important;
+    float: right !important;
     border: none;
     padding: 8px 16px !important;
     border-radius: 4px !important;
@@ -38,8 +38,11 @@
 <div class="card shadow-sm p-2">
   <form method="post">
     <a href="index.php?halaman=daftarapotek" class="btn btn-sm btn-dark mt-0  me-2" style="max-width: 100px;">Kembali</a>
-    <button onclick="return confirm('Data obat master akan ditambahkan semua ke data obat lokal, apakah anda yakin ?')" type="submit" name="masukanSemua" class="btn btn-sm btn-warning mt-0 " style="max-width: 170px;">Masukan Local Semua</button>
-    <button type="button" data-bs-target="#add" data-bs-toggle="modal" class="btn btn-sm btn-primary" style="max-width: 100px;">[+] Add</button>
+    <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+      <a href="index.php?halaman=daftar_obat_master&PenyamaanAllBung" onclick="return confirm('Data obat master akan ditambahkan semua ke data obat lokal, apakah anda yakin ?')" class="btn btn-sm btn-warning mt-0 " style="max-width: 170px;">Masukan Local Semua</a>
+      <a href="index.php?halaman=daftar_obat_master&MelengkapiKode" onclick="return confirm('Data obat master akan ditambahkan semua ke data obat lokal, apakah anda yakin ?')" class="btn btn-sm btn-success mt-0 " style="max-width: 300px;">Generate Code For Null Code</a>
+      <button type="button" data-bs-target="#add" data-bs-toggle="modal" class="btn btn-sm btn-primary" style="max-width: 100px;">[+] Add</button>
+    <?php } ?>
   </form>
   <?php
   if (isset($_POST['masukanSemua'])) {
@@ -103,6 +106,7 @@
           <th>Kode</th>
           <th>Margin Jual</th>
           <th>Margin Inap</th>
+          <th>Margin Resep</th>
           <th>PBF1</th>
           <th>PBF2</th>
           <th>PBF3</th>
@@ -119,24 +123,82 @@
             <td><?= $data['obat_master'] ?></td>
             <td><?= $data['kode_obat'] ?></td>
             <td>
-              <button class="btn btn-sm btn-warning" data-bs-target="#setMargin" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_jual'] == '' ? '0' : $data['margin_jual'] ?>', 'jual')" data-bs-toggle="modal">
-                <?= $data['margin_jual'] == '' ? '0' : $data['margin_jual'] ?> %
-              </button>
+              <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                <button class="btn btn-sm btn-warning" data-bs-target="#setMargin" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_jual'] == '' ? '0' : $data['margin_jual'] ?>', 'jual')" data-bs-toggle="modal">
+                  <?= $data['margin_jual'] == '' ? '0' : $data['margin_jual'] ?> %
+                </button>
+              <?php } else { ?>
+                <button class="btn btn-sm btn-warning" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_jual'] == '' ? '0' : $data['margin_jual'] ?>', 'jual')" data-bs-toggle="modal">
+                  <?= $data['margin_jual'] == '' ? '0' : $data['margin_jual'] ?> %
+                </button>
+              <?php } ?>
             </td>
             <td>
-              <button class="btn btn-sm btn-warning" data-bs-target="#setMargin" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_inap'] == '' ? '0' : $data['margin_inap'] ?>', 'inap')" data-bs-toggle="modal">
-                <?= $data['margin_inap'] == '' ? '0' : $data['margin_inap'] ?> %
-              </button>
+              <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                <button class="btn btn-sm btn-warning" data-bs-target="#setMargin" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_inap'] == '' ? '0' : $data['margin_inap'] ?>', 'inap')" data-bs-toggle="modal">
+                  <?= $data['margin_inap'] == '' ? '0' : $data['margin_inap'] ?> %
+                </button>
+              <?php } else { ?>
+                <button class="btn btn-sm btn-warning" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_inap'] == '' ? '0' : $data['margin_inap'] ?>', 'inap')" data-bs-toggle="modal">
+                  <?= $data['margin_inap'] == '' ? '0' : $data['margin_inap'] ?> %
+                </button>
+              <?php } ?>
+            </td>
+            <td>
+              <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                <button class="btn btn-sm btn-warning" data-bs-target="#setMargin" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_resep'] == '' ? '0' : $data['margin_resep'] ?>', 'resep')" data-bs-toggle="modal">
+                  <?= $data['margin_resep'] == '' ? '0' : $data['margin_resep'] ?> %
+                </button>
+              <?php } else { ?>
+                <button class="btn btn-sm btn-warning" onclick="upMargin('<?= $data['id'] ?>', '<?= $data['margin_resep'] == '' ? '0' : $data['margin_resep'] ?>', 'resep')" data-bs-toggle="modal">
+                  <?= $data['margin_resep'] == '' ? '0' : $data['margin_resep'] ?> %
+                </button>
+              <?php } ?>
             </td>
             <td><?= $data['pbf_master1'] ?></td>
             <td><?= $data['pbf_master2'] ?></td>
             <td><?= $data['pbf_master3'] ?></td>
             <td><?= $data['pbf_master4'] ?></td>
             <td>
-              <button onclick="upData('<?= $data['id'] ?>','<?= $data['obat_master'] ?>','<?= $data['kode_obat'] ?>','<?= $data['pbf_master1'] ?>','<?= $data['pbf_master2'] ?>','<?= $data['pbf_master3'] ?>','<?= $data['pbf_master4'] ?>')" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Edit</button>
-              <a href="index.php?halaman=daftar_obat_master&del=<?= $data['id'] ?>" onclick="return confirm('Apakah anda yakin ingin menghapus data ini ?')" class="btn btn-sm btn-danger">Hapus</a>
+              <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                <button onclick="upData('<?= $data['id'] ?>','<?= $data['obat_master'] ?>','<?= $data['kode_obat'] ?>','<?= $data['pbf_master1'] ?>','<?= $data['pbf_master2'] ?>','<?= $data['pbf_master3'] ?>','<?= $data['pbf_master4'] ?>')" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Edit</button>
+                <a href="index.php?halaman=daftar_obat_master&del=<?= $data['id'] ?>" onclick="return confirm('Apakah anda yakin ingin menghapus data ini ?')" class="btn btn-sm btn-danger">Hapus</a>
+              <?php } ?>
             </td>
           </tr>
+          <?php
+          if (isset($_GET['PenyamaanAllBung'])) {
+            if ($data['kode_obat'] != '') {
+              $getSingleApotek = $koneksi->query("SELECT *, COUNT(*) AS total FROM apotek WHERE id_obat = '$data[kode_obat]' LIMIT 1")->fetch_assoc();
+
+              if ($getSingleApotek['total'] != 0) {
+                $koneksi->query("UPDATE apotek SET nama_obat= '$data[obat_master]', margininap='$data[margin_inap]', margin_jual='$data[margin_jual]', margin_resep='$data[margin_resep]' WHERE id_obat = '$data[kode_obat]' ");
+              } else {
+                $koneksi->query("INSERT INTO apotek (nama_obat, tipe, id_obat, bentuk, jml_obat, jml_obat_minim, harga_beli, tgl_beli, margininap, margin_jual, margin_resep, produsen, pembelian_id, tgl_datang, batch, foto_faktur, foto_barang, tgl_expired) VALUES ('$data[obat_master]','Rajal','$data[kode_obat]', 'Box','1', '1', '0', '" . date('Y-m-d') . "','$data[margin_inap]', '$data[margin_jual]', '$data[margin_resep]','$data[pbf_master1]', '0', '" . date('Y-m-d') . "', 'IT', 'IT', 'IT', '" . date('Y-m-d', strtotime('+2 Years')) . "')");
+              }
+            }
+            // echo "
+            //   <script>
+            //     alert('Successfully');
+            //     document.location.href='index.php?halaman=daftar_obat_master';
+            //   </script>
+            // ";
+          }
+
+          if (isset($_GET['MelengkapiKode'])) {
+            if ($data['kode_obat'] == '') {
+              $newKode = substr($data['obat_master'], 0, 1) . '.' . mt_rand(100, 999) . mt_rand(1000, 9999);
+
+              $koneksimaster->query("UPDATE master_obat SET kode_obat = '$newKode' WHERE id = '$data[id]'");
+            }
+            // echo "
+            //     <script>
+            //       alert('Successfully');
+            //       document.location.href='index.php?halaman=daftar_obat_master';
+            //     </script>
+            // ";
+          }
+          ?>
         <?php } ?>
       </tbody>
     </table>
