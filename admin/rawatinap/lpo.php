@@ -153,7 +153,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                                   <option value="">Pilih</option>
                                   <?php
 
-                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY id_obat, nama_obat ORDER BY nama_obat ASC");
 
                                   foreach ($getObat as $data) {
                                   ?>
@@ -221,7 +221,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
 
 
                                 <?php
-                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY id_obat, nama_obat ORDER BY nama_obat ASC");
                                 foreach ($getObat as $data) {
                                 ?>
                                   <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
@@ -315,7 +315,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                                 <select name="nama_obat[]" class="form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
                                   <option value="">Pilih</option>
                                   <?php
-                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY id_obat, nama_obat ORDER BY nama_obat ASC");
                                   foreach ($getObat as $data) {
                                   ?>
                                     <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
@@ -343,7 +343,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                                 <option value="">Pilih</option>
 
                                 <?php
-                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
+                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY id_obat, nama_obat ORDER BY nama_obat ASC");
                                 foreach ($getObat as $data) {
                                 ?>
                                   <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
@@ -495,9 +495,13 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                           <th>Obat</th>
                           <th>Kode Obat</th>
                           <th>Jumlah</th>
+                          <th>Harga</th>
+                          <th>Sub</th>
                           <th>Dosis</th>
                           <th>Jenis</th>
                           <th>Durasi</th>
+                          <th>Tanggal</th>
+                          <th>Petugas</th>
                           <th>Act</th>
                         </tr>
                       </thead>
@@ -514,16 +518,29 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                         foreach ($injek as $in) {
                         ?>
                           <tr>
-                            <td><?php echo $noo; ?></td>
+                            <td><?php echo $noo++; ?></td>
                             <td><?php echo $in["nama_obat"]; ?></td>
                             <td><?php echo $in["kode_obat"]; ?></td>
                             <td><?php echo $in["jml_dokter"]; ?></td>
+                            <td>
+                              <?php
+                              $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($in['created_at'])) . "' AND nama_obat = '$in[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                              ?>
+                              Rp <?= $harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100) ?>
+                            </td>
+                            <td>
+                              Rp <?= $harga * $in['jml_dokter'] ?>
+                            </td>
                             <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
                             <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
                             <td><?php echo $in["durasi_obat"]; ?> hari</td>
+                            <td><?php echo date('Y-m-d', strtotime($in["created_at"])) ?></td>
+                            <td><?= $in['petugas'] ?></td>
                             <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
                             <td>
-                              <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                              <?php if ($_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'sup') { ?>
+                                <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                              <?php } ?>
                             </td>
                           </tr>
                         <?php } ?>
@@ -547,9 +564,14 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                           <th>Obat</th>
                           <th>Kode Obat</th>
                           <th>Jumlah</th>
+                          <th>Harga</th>
+                          <th>Sub</th>
                           <th>Dosis</th>
                           <th>Jenis</th>
                           <th>Durasi</th>
+                          <th>Tanggal</th>
+                          <th>Petugas</th>
+                          <th>Act</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -563,16 +585,29 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                         foreach ($oral as $or) {
                         ?>
                           <tr>
-                            <td><?php echo $no; ?></td>
+                            <td><?php echo $no++; ?></td>
                             <td><?php echo $or["nama_obat"]; ?></td>
                             <td><?php echo $or["kode_obat"]; ?></td>
                             <td><?php echo $or["jml_dokter"]; ?></td>
+                            <td>
+                              <?php
+                              $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND nama_obat = '$or[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                              ?>
+                              Rp <?= $harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100) ?>
+                            </td>
+                            <td>
+                              Rp <?= $harga * $or['jml_dokter'] ?>
+                            </td>
                             <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
                             <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
                             <td><?php echo $or["durasi_obat"]; ?> hari</td>
+                            <td><?php echo date('Y-m-d', strtotime($or["created_at"])) ?></td>
+                            <td><?= $or['petugas'] ?></td>
                             <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
                             <td>
-                              <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                              <?php if ($_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'sup') { ?>
+                                <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                              <?php } ?>
                             </td>
                           </tr>
                         <?php } ?>
@@ -632,7 +667,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
             </div>
           </div>
         </div>
-      </from>
+        </from>
     </div>
   </main>
   <?php
@@ -742,7 +777,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                   $tanggal = date('Y-m-d');
                   $biaya = 'biayaobat igd';
                   $id = $_POST["idrm"];
-                  $resep = 'Resep' . ' ' . $id . ' '. $uniqueId;
+                  $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
 
                   $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
 
@@ -750,7 +785,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
 
                   // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
 
-                  $koneksi->query("INSERT INTO obat_rm SET idobat = '$uniqueId' catatan_obat = '$catatan_obat', nama_obat = '$nama[$i]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$_GET[idigd]', tgl_pasien = '$_GET[tgl]', obat_igd = '$_POST[jenis]', racik = '$racik', idrm = '$_GET[id]'");
+                  $koneksi->query("INSERT INTO obat_rm SET idobat = '$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$nama[$i]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$_GET[idigd]', tgl_pasien = '$_GET[tgl]', obat_igd = '$_POST[jenis]', racik = '$racik', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
                 }
               }
             }
@@ -809,7 +844,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
 
       $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
 
-      $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$nama[$i]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]'");
+      $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$nama[$i]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
     }
 
     if (isset($_GET['igd'])) {
@@ -827,12 +862,12 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
     }
   }
 
-  if(isset($_GET['idObat'])){
+  if (isset($_GET['idObat'])) {
     $idObat = $_GET['idObat'];
     $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$idObat'");
     $koneksi->query("DELETE FROM rawatinapdetail WHERE TRIM(SUBSTRING_INDEX(ket, ' ', -1)) = '$idObat'");
     echo "<script>alert('Successfully')</script>";
-    echo "<script>document.location.href='".$urlBase."'</script>";
+    echo "<script>document.location.href='" . $urlBase . "'</script>";
   }
   ?>
 <?php } else { ?>

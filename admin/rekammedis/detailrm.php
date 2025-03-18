@@ -921,7 +921,13 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                                     <?php endforeach ?>
 
                                   </tbody>
-
+                                  <?php if ($obat["status_obat"] == "selesai") {
+                                    echo "<p>Status Obat: <b><span>Obat Sudah diKonfirmasi<span></b> </p>";
+                                  } else {
+                                    echo "<p>Status Obat: <b><span>Menunggu Konfirmasi Dokter<span></b> </p>";
+                                  }
+                                  ?>
+                                  <h6></h6>
                                 </table>
                               </div>
                             </div>

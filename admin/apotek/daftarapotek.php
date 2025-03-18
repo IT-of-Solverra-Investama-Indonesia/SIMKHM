@@ -1,5 +1,5 @@
 <?php
-$pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GROUP BY nama_obat, id_obat order by idapotek desc;");
+$pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GROUP BY id_obat order by nama_obat ASC");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,9 +32,7 @@ $pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GR
           <a href="index.php?halaman=apotek_terima" class="btn btn-sm mb-1 btn-primary"><i class="bi bi-plus"></i> Terima Obat</a>
           <a href="index.php?halaman=daftar_obat_selaras" class="btn btn-sm mb-1 btn-warning">Penyelarasan</a>
           <a href="index.php?halaman=harga_beli_tarakhir" class="btn btn-sm mb-1 btn-success">Harga Beli Terakhir</a>
-          <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-            <a href="index.php?halaman=daftar_obat_master" class="btn btn-sm mb-1 btn-danger">Obat Master</a>
-          <?php } ?>
+          <a href="index.php?halaman=daftar_obat_master" class="btn btn-sm mb-1 btn-danger">Obat Master</a>
         </div>
       </div>
       <div class="card">

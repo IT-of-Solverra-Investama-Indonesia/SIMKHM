@@ -1,18 +1,16 @@
 
 <?php 
-$date= date("Y-m-d");
-date_default_timezone_set('Asia/Jakarta');
+  $date= date("Y-m-d");
+  date_default_timezone_set('Asia/Jakarta');
 
-$username=$_SESSION['admin']['username'];
-$petugas=$_SESSION['admin']['namalengkap'];
-$ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
+  $username=$_SESSION['admin']['username'];
+  $petugas=$_SESSION['admin']['namalengkap'];
+  $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 
   $pasien=$koneksi->query("SELECT * FROM pasien  WHERE no_rm='$_GET[id]';")->fetch_assoc();
   
   $jadwal=$koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ")->fetch_assoc();
-
-
- ?>
+?>
 
 
 <!DOCTYPE html>

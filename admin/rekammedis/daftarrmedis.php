@@ -114,13 +114,11 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
   <title>KHM</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
   <!-- DATATABLES -->
   <!-- !-- DataTables  -->
-
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
   <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <link src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
@@ -132,10 +130,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
-
-
 </head>
-
 
 <body>
   <main>
@@ -491,7 +486,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                                     $cekKajian = $koneksi->query("SELECT COUNT(*) as jumlah FROM kajian_awal_inap WHERE norm = '$kamar[no_rm]'")->fetch_assoc();
                                                     if ($cekKajian['jumlah'] != 0) {
                                                     ?>
-                                                      <li><a href="index.php?halaman=pengkajian&inap&norm=<?php echo $kamar["no_rm"]; ?>&id=<?php echo $kamar["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail Pengkajian</a></li>
+                                                      <li><a href="index.php?halaman=pengkajian&inap&norm=<?php echo $kamar["no_rm"]; ?>&id=<?php echo $kamar["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail Pengkajian</a></li>
                                                     <?php } ?>
 
                                                     <?php
@@ -607,10 +602,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           ?>
                           <?php
                           $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+                          $obatData = $koneksi->query("SELECT * FROM obat_rm WHERE rekam_medis_id = '$getLastRM[id_rm]'")->fetch_assoc();
                           ?>
 
                           <tr>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')"><?php echo $no; ?></td>
+                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" 
+                            <?php if (($_SESSION['admin']['level'] == 'apoteker' || $_SESSION['admin']['level'] == 'racik') && isset($obatData["status_obat"]) && $obatData["status_obat"] == "selesai") { echo 'class="bg-success text-light"'; } ?>>
+                            <?php echo $no; ?></td>
                             <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
                             <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
                             <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
@@ -638,10 +636,10 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                   <ul class="dropdown-menu">
                                     <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
-                                    <?php if($pecah['perawatan'] == 'Rawat Inap'){?>
+                                    <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                       <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
                                       <li><a href="index.php?halaman=lpo&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Observasi Perawat</a></li>
-                                    <?php }?>
+                                    <?php } ?>
                                   <?php } else { ?>
                                     <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                     <ul class="dropdown-menu">
@@ -670,7 +668,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                         $cekKajian = $koneksi->query("SELECT COUNT(*) as jumlah FROM kajian_awal_inap WHERE norm = '$pecah[no_rm]'")->fetch_assoc();
                                         if ($cekKajian['jumlah'] != 0) {
                                         ?>
-                                          <li><a href="index.php?halaman=pengkajian&inap&norm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail Pengkajian</a></li>
+                                          <li><a href="index.php?halaman=pengkajian&inap&norm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail Pengkajian</a></li>
                                         <?php } ?>
 
                                         <?php

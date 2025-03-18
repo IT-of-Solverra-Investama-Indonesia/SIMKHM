@@ -877,12 +877,15 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
     <div>
       <div class="table-responsive">
         <h5 class="card-title">Tambah Obat Untuk Jadwal <?= $jadwal['jadwal'] ?></h5>
+        <?php $obatData = $obat->fetch_assoc(); ?>
+        <?php if ($obatData['status_obat'] != "selesai") { ?>
         <div align="right">
-          <button type="button" class="btn btn-sm mb-2 btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi <?= $getLastRM['id_rm'] ?></button>
+          <button type="button" class="btn btn-sm mb-2 btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45" disable>Add Jadi <?= $getLastRM['id_rm'] ?></button>
           <button type="button" class="btn btn-sm mb-2 btn-success text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
           <a type="button" class="btn btn-sm mb-2 btn-info text-right" href="index.php?halaman=tambahpuyer2&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>">Add Racik Paket</a>
           <span type="button" class="btn btn-sm mb-2 btn-warning text-right" data-bs-toggle="modal" data-bs-target="#addPaketJadi">Add Paket Jadi</span>
         </div>
+        <?php } ?>
         <br>
         <?php $subtotal = 0; ?>
         <div id="employee_table">
@@ -940,13 +943,15 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                   <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
                   <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td>
                   <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
-                  <td style="margin-top:10px;"> <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button>
-                    <?php if (isset($_GET['inap'])) { ?>
-                      <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus&inap=<?= $_GET['inap'] ?>" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
-                    <?php } else { ?>
-                      <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
-                    <?php } ?>
-                  </td>
+                  <?php if($obat["status_obat"] != "selesai") {?>
+                    <td style="margin-top:10px;"> <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button>
+                      <?php if (isset($_GET['inap'])) { ?>
+                        <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus&inap=<?= $_GET['inap'] ?>" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
+                      <?php } else { ?>
+                        <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
+                      <?php } ?>
+                    </td>
+                  <?php } ?>
                   <?php $subtotal += $subharga; ?>
 
                 </tr>
@@ -1089,6 +1094,25 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
               <?php endforeach ?>
             </tbody>
           </table>
+        </div>
+        <div>
+          <div>
+            <form method="post">
+              <button type="submit" name="selesai" class="btn btn-sm btn-primary" onclick="return confirm('Apakah anda untuk menyelesaikan rekam medis ini ???')">Selesai</button>
+            </form>
+          </div>
+
+          <?php
+          if (isset($_POST['selesai'])) {
+            $koneksi->query("UPDATE obat_rm SET status_obat='selesai' WHERE rekam_medis_id='$getLastRM[id_rm]'");
+            echo "
+              <script>
+                alert('Status berhasil diubah menjadi selesai');
+                document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
+              </script>
+            ";
+          }
+          ?>
         </div>
       </div>
     </div>
