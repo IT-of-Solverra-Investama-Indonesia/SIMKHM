@@ -10,13 +10,13 @@
             <div class="col-md-12">
                 <label for="">Pilih Obat :</label>
                 <select required name="nama_obat" class="js-example-basic-single w-100" id="nama_obat_id">
-                    <option value="" hidden>Pilih Obat / Tambah Baru</option>
-                    <option value="Obat Baru">Tambah Obat Baru</option>
+                    <option value="" hidden>Pilih Obat</option>
+                    <!-- <option value="Obat Baru">Tamba    h Obat Baru</option> -->
                     <?php
-                    $getObat = $koneksi->query("SELECT * FROM apotek GROUP BY id_obat ORDER BY nama_obat ASC");
+                    $getObat = $koneksimaster->query("SELECT * FROM master_obat GROUP BY kode_obat ORDER BY obat_master ASC");
                     foreach ($getObat as $obat) {
                     ?>
-                        <option value="<?= $obat['id_obat'] ?>"><?= $obat['id_obat'] ?> | <?= $obat['nama_obat'] ?></option>
+                        <option value="<?= $obat['kode_obat'] ?>"><?= $obat['kode_obat'] ?> | <?= $obat['obat_master'] ?></option>
                     <?php } ?>
                 </select>
                 <script>
@@ -56,12 +56,12 @@
                 <!-- <input type="text" name="nama_obat_new" id="nama_obat_new_id" class="form-control mt-2 w-100" placeholder="Masukan Nama Obat Baru"> -->
                 <select name="nama_obat_new" id="nama_obat_new_id" class="form-control  mt-2 w-100">
                     <option value="" hidden>Pilih Obat Baru (Data Dari Master)</option>
-                    <?php 
-                        $getMasterObat = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
-                        foreach($getMasterObat as $masterObat) {
+                    <?php
+                    $getMasterObat = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
+                    foreach ($getMasterObat as $masterObat) {
                     ?>
-                    <option value="<?= $masterObat['obat_master']?>"><?= $masterObat['obat_master']?></option>
-                    <?php }?>
+                        <option value="<?= $masterObat['obat_master'] ?>"><?= $masterObat['obat_master'] ?></option>
+                    <?php } ?>
                 </select>
             </div>
             <div class="col-4">

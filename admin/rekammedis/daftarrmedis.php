@@ -335,6 +335,11 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <td><?= $obat['nama_obat'] ?></td>
                                   <td><?= $obat['jml_dokter'] ?></td>
                                   <td><?= $obat['dosis1_obat'] ?> x <?= $obat['dosis2_obat'] ?></td>
+                                  <?php if ($_SESSION['admin']['level'] == 'apoteker' OR $_SESSION['admin']['level'] == 'racik') { ?>
+                                    <td>
+                                      <a href="index.php?halaman=daftarrmedis&detail=<?=$_GET['detail']?>&hapus_obat=<?= $obat['idobat'] ?>" class="btn btn-sm btn-danger text-right" onclick="return confirm('Anda yakin mau menghapus obat ini?')"><i class="bi bi-trash"></i></a>
+                                    </td>
+                                  <?php } ?>
                                 </tr>
                               <?php } ?>
                             </tbody>
@@ -346,6 +351,8 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                 </table>
               </div>
             </div>
+
+
             <?php if (isset($_GET['inap'])) { ?>
               <div class="card p-2 mb-2">
                 <h5><b>Riwayat Terapi <?= $detailPasien['nama_pasien'] ?></b></h5>
@@ -606,9 +613,11 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           ?>
 
                           <tr>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" 
-                            <?php if (($_SESSION['admin']['level'] == 'apoteker' || $_SESSION['admin']['level'] == 'racik') && isset($obatData["status_obat"]) && $obatData["status_obat"] == "selesai") { echo 'class="bg-success text-light"'; } ?>>
-                            <?php echo $no; ?></td>
+                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')"
+                              <?php if (($_SESSION['admin']['level'] == 'apoteker' || $_SESSION['admin']['level'] == 'racik') && isset($obatData["status_obat"]) && $obatData["status_obat"] == "selesai") {
+                                echo 'class="bg-success text-light"';
+                              } ?>>
+                              <?php echo $no; ?></td>
                             <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
                             <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
                             <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
@@ -776,6 +785,16 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
 </body>
 
 </html>
+
+<?php
+  if (isset($_GET['hapus_obat'])){
+    $id = $_GET['hapus_obat'];
+    $idrm = $_GET['detail'];
+    $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$id'");
+    echo "<script>alert('Data berhasil dihapus');</script>";
+    echo "<script>location='index.php?halaman=daftarrmedis&detail=$idrm';</script>";
+  }
+?>
 
 <script>
   $(document).ready(function() {
