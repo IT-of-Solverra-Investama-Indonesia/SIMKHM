@@ -9,7 +9,7 @@ $poli = $_SESSION['admin']['username'];
 $ambil = $koneksi->query("SELECT * FROM pasien WHERE idpasien='$_GET[id]' ");
 $pecah = $ambil->fetch_assoc();
 date_default_timezone_set('Asia/Jakarta');
-if(isset($_GET['confirm'])){
+if (isset($_GET['confirm'])) {
   echo "
     <script>
       alert('Input Ulang Jika Memang Datang 2x');
@@ -217,6 +217,8 @@ if(isset($_GET['confirm'])){
                         <option value="bpjs">bpjs</option>
                         <option selected value="umum">umum</option>
                         <option value="malam">malam</option>
+                        <option value="spesialis anak">spesialis anak</option>
+                        <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
                       </select>
                     </div>
                     <div class="col-md-6">
@@ -309,7 +311,7 @@ if (isset($_POST['save'])) {
   $id_get = isset($_GET['id']) ? $_GET['id'] : '';
 
   // Periksa apakah pasien sudah terdaftar hari ini
-  $cekDouble = $koneksi->query("SELECT * FROM registrasi_rawat WHERE id_pasien = '$id_pasien' AND jadwal LIKE '%".date('Y-m-d')."%'");
+  $cekDouble = $koneksi->query("SELECT * FROM registrasi_rawat WHERE id_pasien = '$id_pasien' AND jadwal LIKE '%" . date('Y-m-d') . "%'");
   if (!$cekDouble) {
     die("Query Error: " . $koneksi->error);
   }

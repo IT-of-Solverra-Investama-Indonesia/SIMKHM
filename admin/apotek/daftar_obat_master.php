@@ -172,7 +172,7 @@
               $getSingleApotek = $koneksi->query("SELECT *, COUNT(*) AS total FROM apotek WHERE id_obat = '$data[kode_obat]' LIMIT 1")->fetch_assoc();
 
               if ($getSingleApotek['total'] != 0) {
-                $koneksi->query("UPDATE apotek SET nama_obat= '$data[obat_master]', margininap='$data[margin_inap]', margin_jual='$data[margin_jual]', margin_resep='$data[margin_resep]' WHERE id_obat = '$data[kode_obat]' ");
+                $koneksi->query("UPDATE apotek SET nama_obat= '$data[obat_master]', margininap='$data[margin_inap]', margin_jual='$data[margin_jual]', margin_resep='$data[margin_resep]' WHERE nama_obat = '$data[obat_master]' ");
               } else {
                 $koneksi->query("INSERT INTO apotek (nama_obat, tipe, id_obat, bentuk, jml_obat, jml_obat_minim, harga_beli, tgl_beli, margininap, margin_jual, margin_resep, produsen, pembelian_id, tgl_datang, batch, foto_faktur, foto_barang, tgl_expired) VALUES ('$data[obat_master]','Rajal','$data[kode_obat]', 'Box','1', '1', '0', '" . date('Y-m-d') . "','$data[margin_inap]', '$data[margin_jual]', '$data[margin_resep]','$data[pbf_master1]', '0', '" . date('Y-m-d') . "', 'IT', 'IT', 'IT', '" . date('Y-m-d', strtotime('+2 Years')) . "')");
               }

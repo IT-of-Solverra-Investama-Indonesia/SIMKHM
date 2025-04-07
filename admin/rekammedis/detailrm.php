@@ -876,7 +876,10 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
                             <?php if ($cekk['jumlah'] == 0) { ?>
                               <div class="col-md-6">
                                 <b><label for="h6State" class="form-label">No. Resep</label></b><br>
-                                <input type="text" id="h6City" placeholder="" name="noresep"></input>
+                                <?php
+                                $getNotaPembayaranSingle = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$start[idrawat]'")->fetch_assoc();
+                                ?>
+                                <input type="text" id="h6City" placeholder="" name="noresep" value="<?= $getNotaPembayaranSingle['nota'] ?>">
                               </div>
                             <?php } else { ?>
                               <div class="col-md-6">

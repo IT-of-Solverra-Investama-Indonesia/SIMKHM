@@ -417,13 +417,13 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                       <option value="">Pilih</option>
                       <?php
                       if (!isset($_GET['inap'])) {
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' AND aktif_poli = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       } else {
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       }
                       foreach ($getObat as $data) {
                       ?>
-                        <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                        <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                       <?php } ?>
                     </select>
                   </div>
@@ -459,13 +459,13 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
 
                     <?php
                     if (!isset($_GET['inap'])) {
-                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' AND aktif_poli = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                     } else {
-                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                     }
                     foreach ($getObat as $data) {
                     ?>
-                      <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                     <?php } ?>
                   </select>
                   <!-- <label for="inputName5" class="form-label">Kode Obat</label>
@@ -636,13 +636,13 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                       <option value="">Pilih</option>
                       <?php
                       if (!isset($_GET['inap'])) {
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' AND aktif_poli = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       } else {
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                       }
                       foreach ($getObat as $data) {
                       ?>
-                        <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                        <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                       <?php } ?>
                     </select>
                   </div>
@@ -716,13 +716,13 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
 
                     <?php
                     if (!isset($_GET['inap'])) {
-                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' AND aktif_poli = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                     } else {
-                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                     }
                     foreach ($getObat as $data) {
                     ?>
-                      <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                     <?php } ?>
                   </select>
 
@@ -879,12 +879,12 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
         <h5 class="card-title">Tambah Obat Untuk Jadwal <?= $jadwal['jadwal'] ?></h5>
         <?php $obatData = $obat->fetch_assoc(); ?>
         <?php if ($obatData['status_obat'] != "selesai") { ?>
-        <div align="right">
-          <button type="button" class="btn btn-sm mb-2 btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45" disable>Add Jadi <?= $getLastRM['id_rm'] ?></button>
-          <button type="button" class="btn btn-sm mb-2 btn-success text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-          <a type="button" class="btn btn-sm mb-2 btn-info text-right" href="index.php?halaman=tambahpuyer2&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>">Add Racik Paket</a>
-          <span type="button" class="btn btn-sm mb-2 btn-warning text-right" data-bs-toggle="modal" data-bs-target="#addPaketJadi">Add Paket Jadi</span>
-        </div>
+          <div align="right">
+            <button type="button" class="btn btn-sm mb-2 btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45" disable>Add Jadi <?= $getLastRM['id_rm'] ?></button>
+            <button type="button" class="btn btn-sm mb-2 btn-success text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+            <a type="button" class="btn btn-sm mb-2 btn-info text-right" href="index.php?halaman=tambahpuyer2&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>">Add Racik Paket</a>
+            <span type="button" class="btn btn-sm mb-2 btn-warning text-right" data-bs-toggle="modal" data-bs-target="#addPaketJadi">Add Paket Jadi</span>
+          </div>
         <?php } ?>
         <br>
         <?php $subtotal = 0; ?>
@@ -943,7 +943,7 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                   <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
                   <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td>
                   <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
-                  <?php if($obat["status_obat"] != "selesai") {?>
+                  <?php if ($obat["status_obat"] != "selesai") { ?>
                     <td style="margin-top:10px;"> <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button>
                       <?php if (isset($_GET['inap'])) { ?>
                         <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus&inap=<?= $_GET['inap'] ?>" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
@@ -980,7 +980,7 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
                                     $getObat = $koneksi->query("SELECT * FROM apotek ORDER BY nama_obat ASC");
                                     foreach ($getObat as $data) {
                                     ?>
-                                      <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                     <?php } ?>
                                   </select>
                                 </div>
@@ -1333,7 +1333,7 @@ if (isset($_POST['editrm'])) {
 if (isset($_GET['hapus'])) {
   // Mengambil Obat RM dan Data Stok Sekarang
   $getObatById = $koneksi->query("SELECT * FROM obat_rm WHERE idobat= '$_GET[id]' LIMIT 1")->fetch_assoc();
-  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
+  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
 
   // Membuat Penambahan obat yang sebelumnya di kurangi saat nambah obat
   $stokAkhir = $ObatKode['jml_obat'] + $getObatById['jml_dokter'];
@@ -1433,6 +1433,8 @@ if (isset($_POST['saveob'])) {
     $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
   } elseif ($cekPemOb['carabayar'] == 'malam') {
     $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
   }
 
   for ($i = 0; $i < count($nama) - 1; $i++) {
@@ -1444,7 +1446,7 @@ if (isset($_POST['saveob'])) {
               foreach ($_POST['petunjuk_obat'] as $petunjuk_obat) {
                 foreach ($_POST['jenis_obat'] as $jenis_obat) {
                   if (isset($_GET['inap'])) {
-                    $ObatKode = $koneksi->query("SELECT harga_beli, margininap FROM apotek WHERE tipe = 'Ranap' AND nama_obat= '" . $nama[$i] . "'")->fetch_assoc();
+                    $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE tipe = 'Ranap' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
                     // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
                     $m = $ObatKode['margininap'] ?? 0;
                     if ($m < 100) {
@@ -1465,11 +1467,11 @@ if (isset($_POST['saveob'])) {
                     // $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$jadwal[idrawat]','" . date('Y-m-d') . "','Obat Inap Apotek " . $nama[$i] . "', '$harga','" . $nama[$i] . "','" . $_SESSION['admin']['username'] . "', '" . $_SESSION['shift'] . "')");
                     $subtotal += $harga;
                   } else {
-                    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE tipe = 'Rajal' AND nama_obat= '" . $nama[$i] . "'")->fetch_assoc();
+                    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe = 'Rajal' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
                     $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
                   }
 
-                  $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$nama[$i]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$value2', dosis2_obat = '$value3', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idrm = '$_GET[id]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', racik = '$_POST[racik]';");
+                  $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$value2', dosis2_obat = '$value3', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idrm = '$_GET[id]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', racik = '$_POST[racik]';");
                 }
               }
             }
@@ -1523,11 +1525,13 @@ if (isset($_POST['saveobnew'])) {
     $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
   } elseif ($cekPemOb['carabayar'] == 'malam') {
     $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
   }
 
   for ($i = 0; $i < count($nama) - 1; $i++) {
     if (isset($_GET['inap'])) {
-      $ObatKode = $koneksi->query("SELECT harga_beli, margininap FROM apotek WHERE tipe = 'Ranap' AND nama_obat= '" . $nama[$i] . "'")->fetch_assoc();
+      $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE tipe = 'Ranap' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
       // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
       $m = $ObatKode['margininap'] ?? 0;
       if ($m < 100) {
@@ -1548,11 +1552,11 @@ if (isset($_POST['saveobnew'])) {
       // $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$jadwal[idrawat]','" . date('Y-m-d') . "','Obat Inap Apotek " . $nama[$i] . "', '$harga','" . $nama[$i] . "','" . $_SESSION['admin']['username'] . "', '" . $_SESSION['shift'] . "')");
       $subtotal += $harga;
     } else {
-      $ObatKode = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE tipe = 'Rajal' AND nama_obat= '" . $nama[$i] . "'")->fetch_assoc();
+      $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
       $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
     }
 
-    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat[$i]', nama_obat = '$nama[$i]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
+    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat[$i]', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
   }
 
 
@@ -1579,11 +1583,13 @@ if (isset($_POST['saveobpaketjadi'])) {
     $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
   } elseif ($cekPemOb['carabayar'] == 'malam') {
     $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
   }
 
   foreach ($getPaketObat as $obat) {
     if (isset($_GET['inap'])) {
-      $ObatKode = $koneksi->query("SELECT harga_beli, margininap FROM apotek WHERE nama_obat= '" . $obat['nama_obat'] . "'")->fetch_assoc();
+      $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE id_obat= '" . $obat['kode_obat'] . "'")->fetch_assoc();
       // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
       $m = $ObatKode['margininap'] ?? 0;
       if ($m < 100) {
@@ -1604,7 +1610,7 @@ if (isset($_POST['saveobpaketjadi'])) {
       // $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$jadwal[idrawat]','" . date('Y-m-d') . "','Obat Inap Apotek " . $nama[$i] . "', '$harga','" . $nama[$i] . "','" . $_SESSION['admin']['username'] . "', '" . $_SESSION['shift'] . "')");
       $subtotal += $harga;
     } else {
-      $ObatKode = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE tipe = 'Rajal' AND nama_obat= '" . $obat['nama_obat'] . "'")->fetch_assoc();
+      $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe = 'Rajal' AND nama_obat= '" . $obat['nama_obat'] . "'")->fetch_assoc();
       $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
     }
 
@@ -1641,7 +1647,7 @@ if (isset($_POST['edt'])) {
 
   // Mengambil Obat RM dan Data Stok Sekarang
   $getObatById = $koneksi->query("SELECT * FROM obat_rm WHERE idobat= '$_POST[id_obat_sebelum]' LIMIT 1")->fetch_assoc();
-  $ObatKodeUp = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
+  $ObatKodeUp = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
 
   // Membuat Penambahan obat yang sebelumnya di kurangi saat nambah obat
   $stokAkhirUp = $ObatKodeUp['jml_obat'] + $getObatById['jml_dokter'];
@@ -1650,7 +1656,7 @@ if (isset($_POST['edt'])) {
   // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhirUp' WHERE id_obat = '$ObatKodeUp[id_obat]'");
 
   $koneksi->query("UPDATE registrasi_rawat SET end='$end' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE nama_obat= '" . $nama . "'")->fetch_assoc();
+  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '" . $nama . "'")->fetch_assoc();
   $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
   // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
 
@@ -1738,14 +1744,18 @@ if (isset($_POST['copy'])) {
 
     $end = date("H:i:s");
     $koneksi->query("UPDATE registrasi_rawat SET end='$end' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat FROM apotek WHERE nama_obat= '" . $nama . "'")->fetch_assoc();
+    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '" . $nama . "'")->fetch_assoc();
     $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
     // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
 
     $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
 
-    if ($cekPemOb['carabayar'] != 'bpjs') {
+    if ($cekPemOb['carabayar'] == 'umum') {
       $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
+    } elseif ($cekPemOb['carabayar'] == 'malam') {
+      $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+    } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+      $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
     }
 
     $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$nama', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$dataOb[jenis_obat]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
