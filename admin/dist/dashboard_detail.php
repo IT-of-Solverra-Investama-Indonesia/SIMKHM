@@ -94,7 +94,6 @@ if (isset($_POST['searching'])) {
     return $response;
   }
 
-
   // Mengenkripsi token untuk dikirim
   function encrypt($data, $key, $iv)
   {
@@ -327,7 +326,7 @@ if (isset($_POST['searching'])) {
 <?php } elseif (isset($_GET['polibpjs'])) { ?>
   <div class="card shadow p-2">
     <div class="table-responsive">
-      <table class="table table-hover table-striped">
+      <table class="table table-hover table-striped" id="myTable" style="font-size: 12px;">
         <thead>
           <tr>
             <th>IdRawat</th>
@@ -358,6 +357,36 @@ if (isset($_POST['searching'])) {
       </table>
     </div>
   </div>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.0/css/buttons.dataTables.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+  <script src="https://cdn.datatables.net/buttons/3.1.0/js/dataTables.buttons.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/3.1.0/js/buttons.html5.js"></script>
+  <script src="https://cdn.datatables.net/buttons/3.1.0/js/buttons.print.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      $('#myTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+        paging: false,
+        order: false,
+        searching: true,
+      });
+    });
+  </script>
+  <style>
+    .dt-button {
+      float: right !important;
+      border: none;
+      padding: 8px 16px !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+      margin-left: 10px !important;
+    }
+  </style>
 <?php } elseif (isset($_GET['omsetKHM'])) { ?>
   <?php
   // Panggil API

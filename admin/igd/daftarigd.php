@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-$pasien=$koneksi->query("SELECT * FROM igd;"); 
+$pasien = $koneksi->query("SELECT * FROM igd;");
 
 ?>
 
@@ -15,113 +15,113 @@ $pasien=$koneksi->query("SELECT * FROM igd;");
   <title>KHM WONOREJO</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
- <!-- DATATABLES -->
-      <!-- !-- DataTables  -->
+  <!-- DATATABLES -->
+  <!-- !-- DataTables  -->
 
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
-<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<link src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
-<link src="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
-<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
+  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <link src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
+  <link src="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
 
 
 </head>
 
 
- <body>
-   <main>
-    <div class="container">
+<body>
+  <main>
+    <div class="">
       <div class="pagetitle">
-      <h1>Daftar IGD</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.php?halaman=daftarigd" style="color:blue;">IGD</a></li>
-        </ol>
-      </nav>
-    </div><!-- End Page Title -->
+        <h1>Daftar IGD</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php?halaman=daftarigd" style="color:blue;">IGD</a></li>
+          </ol>
+        </nav>
+      </div><!-- End Page Title -->
 
       <section class="section  py-4">
-        <div class="container">
+        <div class="">
 
-              
+
           <div class="row">
             <div class="col-lg-12 col-md-12">
 
-            <div class="card">
-            <div class="card-body">
-                 
-              <h5 class="card-title">Data IGD</h5>
+              <div class="card">
+                <div class="card-body">
 
-              <!-- Multi Columns Form -->
-            <div class="table-responsive">
-            <table id="myTable" class="table table-striped" style="width:100%">
-            <thead>
-            <tr>
-                <th>No</th>
-                <th>No RM</th>
-                <th>Nama Pasien</th>
-                <th>Nama Pengantar</th>
-                <th>Tanggal Masuk</th>
-                <th>Jam Masuk</th>
-                <th></th>
-                <!-- <th>Aksi</th> -->
-               
-            </tr>
-            </thead>
-           <tbody>
+                  <h5 class="card-title">Data IGD</h5>
 
-        <?php $no=1 ?>
+                  <!-- Multi Columns Form -->
+                  <div class="table-responsive">
+                    <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+                      <thead>
+                        <tr>
+                          <th>No</th>
+                          <th>No RM</th>
+                          <th>Nama Pasien</th>
+                          <th>Nama Pengantar</th>
+                          <th>Tanggal Masuk</th>
+                          <th>Jam Masuk</th>
+                          <th></th>
+                          <!-- <th>Aksi</th> -->
 
-        <?php foreach ($pasien as $pecah) : ?>
+                        </tr>
+                      </thead>
+                      <tbody>
 
-        <tr>
-            <td><?php echo $no; ?></td>
-            <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
-            <td style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
-            <td style="margin-top:10px;"><?php echo $pecah["nama_pengantar"]; ?></td>
-            <td style="margin-top:10px;"><?php echo $pecah["tgl_masuk"]; ?></td>
-            <td style="margin-top:10px;"><?php echo $pecah["jam_masuk"]; ?></td>
-            <td>
-            <div class="dropdown">
-             <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
-             <ul class="dropdown-menu">
-             <li><a href="index.php?halaman=detailigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
-             <li><a href="index.php?halaman=ubahigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-hospital" style="color:black;"></i> Kajian IGD</a></li>
-             <li><a href="index.php?halaman=lpo&igd&id=<?php echo $pecah["no_rm"]?>&idigd=<?php echo $pecah["idigd"]?>&tgl=<?php echo $pecah["tgl_masuk"]?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i> Observasi Perawat</a></li>
-             <li><a href="../pasien/gen_con.php?id=<?php echo $pecah["no_rm"]; ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> General Consent</a></li>
-             <li><a href="index.php?halaman=falanak&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk Pediatri (Anak)</a></li>
-             <li><a href="index.php?halaman=faldewasa&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk (Dewasa)</a></li>
-             <li><a href="index.php?halaman=ivl&id=<?php echo $pecah["no_rm"]?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-bandaid-fill" style="color:brown;"></i> IVL</a></li>
-             <li><a href="index.php?halaman=hapusigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
+                        <?php $no = 1 ?>
 
-                <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
-             </ul>
+                        <?php foreach ($pasien as $pecah) : ?>
+
+                          <tr>
+                            <td><?php echo $no; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["nama_pengantar"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["tgl_masuk"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["jam_masuk"]; ?></td>
+                            <td>
+                              <div class="dropdown">
+                                <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
+                                <ul class="dropdown-menu">
+                                  <li><a href="index.php?halaman=detailigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                  <li><a href="index.php?halaman=ubahigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-hospital" style="color:black;"></i> Kajian IGD</a></li>
+                                  <li><a href="index.php?halaman=lpo&igd&id=<?php echo $pecah["no_rm"] ?>&idigd=<?php echo $pecah["idigd"] ?>&tgl=<?php echo $pecah["tgl_masuk"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i> Observasi Perawat</a></li>
+                                  <li><a href="../pasien/gen_con.php?id=<?php echo $pecah["no_rm"]; ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> General Consent</a></li>
+                                  <li><a href="index.php?halaman=falanak&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk Pediatri (Anak)</a></li>
+                                  <li><a href="index.php?halaman=faldewasa&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk (Dewasa)</a></li>
+                                  <li><a href="index.php?halaman=ivl&id=<?php echo $pecah["no_rm"] ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-bandaid-fill" style="color:brown;"></i> IVL</a></li>
+                                  <li><a href="index.php?halaman=hapusigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
+
+                                      <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
+                                </ul>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <?php $no += 1 ?>
+                        <?php endforeach ?>
+
+                      </tbody>
+                    </table>
+
+                  </div>
+                </div>
+              </div>
             </div>
-            </td>
-        </tr>
 
-        <?php $no +=1 ?>
-        <?php endforeach ?>
-
-    </tbody>
-        </table>
-                    
-            </div>
           </div>
         </div>
-        </div>
-    
-            </div>
-          </div>
-        </div>
+    </div>
 
-      </section>
+    </section>
 
     </div>
   </main><!-- End #main -->
@@ -134,10 +134,11 @@ $pasien=$koneksi->query("SELECT * FROM igd;");
 </html>
 
 <script>
-    $(document).ready(function() {
-        $('#myTable').DataTable( {
-         search: true,
-         pagination: true
-        } );
-    } );
+  $(document).ready(function() {
+    $('#myTable').DataTable({
+      search: true,
+      order: [0, 'desc'],
+      pagination: true
+    });
+  });
 </script>

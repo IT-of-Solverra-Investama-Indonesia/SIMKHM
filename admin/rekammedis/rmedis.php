@@ -394,6 +394,7 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
       <?php } ?>
     </form>
   </div>
+  
   <!-- Add Data Modal Obat Racik -->
   <div class="modal  fade" role="dialog" id="exampleModal2" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">

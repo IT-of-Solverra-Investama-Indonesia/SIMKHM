@@ -153,13 +153,13 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                                   <option value="">Pilih</option>
                                   <?php
                                   if (!isset($_GET['inap'])) {
-                                    $getObat = $koneksimaster->query("SELECT * FROM master_obat GROUP BY obat_master, kode_obat ORDER BY obat_master ASC");
+                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                   } else {
-                                    $getObat = $koneksimaster->query("SELECT * FROM master_obat GROUP BY obat_master, kode_obat ORDER BY obat_master ASC");
+                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                   }
                                   foreach ($getObat as $data) {
                                   ?>
-                                    <option value="<?= $data['kode_obat'] ?>"><?= $data['obat_master'] ?></option>
+                                    <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                   <?php } ?>
                                 </select>
                               </div>
@@ -222,13 +222,13 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
 
                                 <?php
                                 if (!isset($_GET['inap'])) {
-                                  $getObat = $koneksimaster->query("SELECT * FROM master_obat GROUP BY obat_master, kode_obat ORDER BY obat_master ASC");
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                 } else {
-                                  $getObat = $koneksimaster->query("SELECT * FROM master_obat GROUP BY obat_master, kode_obat ORDER BY obat_master ASC");
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                 }
                                 foreach ($getObat as $data) {
                                 ?>
-                                  <option value="<?= $data['kode_obat'] ?>"><?= $data['obat_master'] ?></option>
+                                  <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                 <?php } ?>
                               </select>
 
@@ -332,10 +332,10 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                                 <select name="nama_obat[]" class="form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
                                   <option value="">Pilih</option>
                                   <?php
-                                  $getObat = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
+                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                   foreach ($getObat as $data) {
                                   ?>
-                                    <option value="<?= $data['kode_obat'] ?>"><?= $data['obat_master'] ?></option>
+                                    <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                   <?php } ?>
                                 </select>
                               </div>
@@ -359,10 +359,10 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                                 <option value="">Pilih</option>
 
                                 <?php
-                                $getObat = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
+                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                 foreach ($getObat as $data) {
                                 ?>
-                                  <option value="<?= $data['kode_obat'] ?>"><?= $data['obat_master'] ?></option>
+                                  <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                 <?php } ?>
                               </select>
                               <div class="col-md-12" style="margin-top:20px">
