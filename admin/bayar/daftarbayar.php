@@ -132,7 +132,7 @@ date_default_timezone_set('Asia/Jakarta');
                             <th>Total Biaya Lain</th>
                             <th>Potongan</th>
                             <th>Total</th>
-                            <th></th>
+                            <th>Aksi</th>
                             <!-- <th>Aksi</th> -->
 
                           </tr>
@@ -245,11 +245,18 @@ date_default_timezone_set('Asia/Jakarta');
                                     <li>
                                       <a href="index.php?halaman=bayarrawat&rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-currency-dollar" style="color:blue;"></i> Bayar</a>
                                     </li>
-                                    <li><a href="index.php?halaman=rujuklab2&rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:hotpink;"></i> Rujuk Lab</a></li>
-
-                                    <li><a href="../bayar/rekappoli.php?rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&dr=<?php echo $pecah['dokter_rawat'] ?>&shift=<?php echo $pecah['shift'] ?>&kasir=<?= $pecah['kasir'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:hotpink;" target="_blank"></i> Rekap Shift</a></li>
-
-                                    <li><a href="../bayar/rekappolikasir.php?rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&dr=<?php echo $pecah['dokter_rawat'] ?>&shift=<?php echo $pecah['shift'] ?>&kasir=<?= $pecah["kasir"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:hotpink;" target="_blank"></i> Rekap Kasir</a></li>
+                                    <li>
+                                      <a href="../bayar/printNota.php?id=<?= $pecah['idrawat']?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer"></i> Print</a>
+                                    </li>
+                                    <li>
+                                      <a href="index.php?halaman=rujuklab2&rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:hotpink;"></i> Rujuk Lab</a>
+                                    </li>
+                                    <li>
+                                      <a href="../bayar/rekappoli.php?rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&dr=<?php echo $pecah['dokter_rawat'] ?>&shift=<?php echo $pecah['shift'] ?>&kasir=<?= $pecah['kasir'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:hotpink;" target="_blank"></i> Rekap Shift</a>
+                                    </li>
+                                    <li>
+                                      <a href="../bayar/rekappolikasir.php?rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&dr=<?php echo $pecah['dokter_rawat'] ?>&shift=<?php echo $pecah['shift'] ?>&kasir=<?= $pecah["kasir"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:hotpink;" target="_blank"></i> Rekap Kasir</a>
+                                    </li>
                                   </ul>
                                 </div>
                               </td>
@@ -266,7 +273,7 @@ date_default_timezone_set('Asia/Jakarta');
 
                             <td></td>
 
-                            <td colspan="11">
+                            <td colspan="12">
 
                               TOTAL
 

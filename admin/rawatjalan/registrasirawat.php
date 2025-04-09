@@ -38,44 +38,51 @@ if (isset($_GET['confirm'])) {
 </head>
 
 <body>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      // Fungsi untuk melakukan permintaan AJAX dengan tanggal tertentu
-      function fetchAntrian(tanggal) {
-        $.ajax({
-          url: '../../pasien/antrian_api.php',
-          type: 'POST',
-          data: {
-            tanggal: tanggal
-          },
-          success: function(response) {
-            $('#antrian').html(response);
-          }
+
+  <?php if (isset($_GET['perbaikiNomorAntrian'])) { ?>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        // Fungsi untuk melakukan permintaan AJAX dengan tanggal tertentu
+        function fetchAntrian(tanggal) {
+          $.ajax({
+            url: '../../pasien/antrian_api.php',
+            type: 'POST',
+            data: {
+              tanggal: tanggal
+            },
+            success: function(response) {
+              // $('#antrian').html(response);
+            }
+          });
+        }
+
+        // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+        var today = new Date();
+        var year = today.getFullYear();
+        var month = String(today.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
+        var day = String(today.getDate()).padStart(2, '0');
+        var formattedToday = year + '-' + month + '-' + day;
+
+        // Memanggil fungsi fetchAntrian dengan tanggal hari ini saat halaman dimuat
+        fetchAntrian(formattedToday);
+
+        // Menambahkan event listener untuk perubahan pada elemen dengan ID 'jadwal'
+        $('#jadwal').change(function() {
+          var tanggal = $(this).val();
+          fetchAntrian(tanggal);
         });
-      }
-
-      // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
-      var today = new Date();
-      var year = today.getFullYear();
-      var month = String(today.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
-      var day = String(today.getDate()).padStart(2, '0');
-      var formattedToday = year + '-' + month + '-' + day;
-
-      // Memanggil fungsi fetchAntrian dengan tanggal hari ini saat halaman dimuat
-      fetchAntrian(formattedToday);
-
-      // Menambahkan event listener untuk perubahan pada elemen dengan ID 'jadwal'
-      $('#jadwal').change(function() {
-        var tanggal = $(this).val();
-        fetchAntrian(tanggal);
       });
-    });
-  </script>
+    </script>
+    <script>
+      alert('Successfully');
+      document.location.href = 'index.php?halaman=registrasirawat&id=<?= htmlspecialchars($_GET['id']) ?>';
+    </script>
+  <?php } ?>
 
 
   <main>
-    <div class="container">
+    <div class="">
       <div class="pagetitle">
         <h1>Rawat Jalan</h1>
         <nav>
@@ -87,12 +94,12 @@ if (isset($_GET['confirm'])) {
         </nav>
       </div><!-- End Page Title -->
 
-      <section class="section  py-4">
-        <div class="container">
+      <section class="section">
+        <div class="">
           <div class="row">
-            <div class="col-lg-12 col-md-12 d-flex">
-
-              <div class="card" style="max-width: 70%; display: inline-flex; position: absolute;">
+            <div class="col-12">
+              <a href="index.php?halaman=registrasirawat&id=<?= htmlspecialchars($_GET['id']) ?>&perbaikiNomorAntrian" class="btn btn-sm btn-primary mb-2" onclick="return confirm('Pebaiki Nomor Antrian ?')">Perbaiki No Antrian</a><br>
+              <div class="card" style="">
                 <div class="card-body">
                   <h5 class="card-title">Jenis Pendaftaran</h5>
                   <form class="row g-3" method="post" enctype="multipart/form-data">
@@ -183,14 +190,12 @@ if (isset($_GET['confirm'])) {
                         $time = date('Hi') - 300;
                         //var_dump($time);
 
-                        $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat WHERE registrasi_rawat.kode = tgltab.kode) AND tgl=$date AND jam>=$time AND shift = '$sif' ORDER BY tgltab.no ASC");
+                        $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat WHERE registrasi_rawat.kode = tgltab.kode) AND tgl=$date AND jam>=$time AND shift='$sif' ORDER BY tgltab.no ASC");
                         //   $k = $koneksi->query("SELECT * FROM tgltab WHERE tgl>=$tg AND jam>$time ORDER BY tgltab.no ASC");
                         ?>
                         <option value="" width="40">Silahkan Pilih Antrian</option>
                         <?php foreach ($k as $row3) { ?>
-
                           <option value="<?php echo $row3['urut']; ?>" width="40"><?php echo $row3['ket']; ?> </option>
-
                         <?php } ?>
                       </select>
                       <!-- <?= $time ?>
