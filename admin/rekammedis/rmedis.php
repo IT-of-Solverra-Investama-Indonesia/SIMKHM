@@ -383,15 +383,15 @@ $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[i
       $getRMinDate = $koneksi->query("SELECT * FROM rekam_medis WHERE jadwal = '$jadwal[jadwal]'");
       if ($getRMinDate->num_rows == 0) {
       ?>
-        <div class="text-center" style="margin-top: -10px; margin-bottom: 40px;">
-          <?php if (!isset($_GET['ed'])) { ?>
-            <button type="submit" name="save" class="btn btn-primary">Tambah</button>
-          <?php } else { ?>
-            <button type="submit" name="editrm" class="btn btn-warning">Edit</button>
-          <?php } ?>
-          <button type="reset" class="btn btn-secondary">Reset</button>
-        </div>
       <?php } ?>
+      <div class="text-center" style="margin-top: -10px; margin-bottom: 40px;">
+        <?php if (!isset($_GET['ed'])) { ?>
+          <button type="submit" name="save" class="btn btn-primary">Tambah</button>
+        <?php } else { ?>
+          <button type="submit" name="editrm" class="btn btn-warning">Edit</button>
+        <?php } ?>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+      </div>
     </form>
   </div>
   

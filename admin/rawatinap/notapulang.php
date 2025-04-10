@@ -149,7 +149,7 @@ function getFullUrl()
 				</div>
 				<p align="right">
 					<?php if (isset($_SESSION['shift'])) { ?>
-						<a href="index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
+						<a href="../index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
 						<?php
 						$getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $ambilSingle['no_rm'] . "'")->fetch_assoc();
 						?>
