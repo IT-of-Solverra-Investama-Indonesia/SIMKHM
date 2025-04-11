@@ -39,6 +39,40 @@ if (isset($_GET['confirm'])) {
 
 <body>
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Fungsi untuk melakukan permintaan AJAX dengan tanggal tertentu
+      function fetchAntrian(tanggal) {
+        $.ajax({
+          url: '../../pasien/antrian_api.php',
+          type: 'POST',
+          data: {
+            tanggal: tanggal
+          },
+          success: function(response) {
+            $('#antrian').html(response);
+          }
+        });
+      }
+
+      // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = String(today.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
+      var day = String(today.getDate()).padStart(2, '0');
+      var formattedToday = year + '-' + month + '-' + day;
+
+      // Memanggil fungsi fetchAntrian dengan tanggal hari ini saat halaman dimuat
+      fetchAntrian(formattedToday);
+
+      // Menambahkan event listener untuk perubahan pada elemen dengan ID 'jadwal'
+      $('#jadwal').change(function() {
+        var tanggal = $(this).val();
+        fetchAntrian(tanggal);
+      });
+    });
+  </script>
   <?php if (isset($_GET['perbaikiNomorAntrian'])) { ?>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
@@ -52,7 +86,7 @@ if (isset($_GET['confirm'])) {
               tanggal: tanggal
             },
             success: function(response) {
-              // $('#antrian').html(response);
+              $('#antrian').html(response);
             }
           });
         }

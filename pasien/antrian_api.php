@@ -589,11 +589,23 @@
     $koneksi->query("DELETE FROM tgltab WHERE tgl='19700101'");
     mysqli_query($koneksi, "DELETE FROM tgltab WHERE tgl = '19700101'");
 
-    // Query untuk mendapatkan antrian yang tersedia pada tanggal tersebut
-    $query = "SELECT kode, urut, ket FROM tgltab 
+if (isset($_SESSION['shift'])) {
+    if ($_SESSION['shift'] == 'Pagi') {
+        $sif = 'pagi';
+    } elseif ($_SESSION['shift'] == 'Sore') {
+        $sif = 'sore';
+    } elseif ($_SESSION['shift'] == 'Malam') {
+        $sif = 'malam';
+    }
+
+    $whereShiftCondition = "AND tgltab.shift='$sif'";
+}
+
+// Query untuk mendapatkan antrian yang tersedia pada tanggal tersebut
+$query = "SELECT kode, urut, ket FROM tgltab 
             WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
                             WHERE registrasi_rawat.kode = tgltab.kode) 
-            AND tgl=$date AND jam>=$time 
+            AND tgl=$date AND jam>=$time $whereShiftCondition
             ORDER BY tgltab.no ASC";
 
     $result = mysqli_query($koneksi, $query);

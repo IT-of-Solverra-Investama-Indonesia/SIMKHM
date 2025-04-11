@@ -47,120 +47,199 @@ function getFullUrl()
 	<title>Nota Rawat Inap</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-	<style>
-		body {
-			display: flex;
-			justify-content: center;
-			/* Memusatkan secara horizontal */
-			align-items: center;
-			/* Memusatkan secara vertikal */
-			height: 100vh;
-			/* Pastikan body memiliki tinggi penuh viewport */
-			margin: 0;
-			background: linear-gradient(to bottom, #3b7c47 50%, #ffffff 50%);
-			/* Jika menggunakan gradien */
-		}
-	</style>
 </head>
 
 <body>
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css" />
-	<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-	<script>
-		$(document).ready(function() {
-			$('#myTable').DataTable({
-				"paging": false,
-				"info": false,
-				"searching": false,
-				"ordering": false,
-				"scrollY": "200px",
-				"scrollCollapse": true
+	<?php if (!isset($_GET['print'])) { ?>
+		<style>
+			body {
+				display: flex;
+				justify-content: center;
+				/* Memusatkan secara horizontal */
+				align-items: center;
+				/* Memusatkan secara vertikal */
+				height: 100vh;
+				/* Pastikan body memiliki tinggi penuh viewport */
+				margin: 0;
+				background: linear-gradient(to bottom, #3b7c47 50%, #ffffff 50%);
+				/* Jika menggunakan gradien */
+			}
+		</style>
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css" />
+		<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('#myTable').DataTable({
+					"paging": false,
+					"info": false,
+					"searching": false,
+					"ordering": false,
+					"scrollY": "200px",
+					"scrollCollapse": true
+				});
 			});
-		});
-	</script>
-	<div class="container">
-		<center>
-			<div class="card shadow py-2 px-3 mt-0" style="max-width: 600px;">
-				<center>
-					<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 20%; margin-bottom: 10px;" alt="">
-					<h5>Nota TRNSKS-<?= $id ?></h5>
-				</center>
-				<table>
-					<thead>
-						<tr>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>Nama </td>
-							<td>: <?= $ambilSingle['nama_pasien'] ?></td>
-						</tr>
-						<tr>
-							<td>Nomor RM </td>
-							<td>: <?= $ambilSingle['no_rm'] ?></td>
-						</tr>
-						<tr>
-							<td>Jadwal Kunjungan</td>
-							<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
-						</tr>
-						<tr>
-							<td>Dokter </td>
-							<td>: <?= $ambilSingle['dokter_rawat'] ?></td>
-						</tr>
-					</tbody>
-				</table>
-				<div class="">
-					<table class="table table-bordered" id="myTable" style="font-size: 12px;">
+		</script>
+		<div class="container">
+			<center>
+				<div class="card shadow py-2 px-3 mt-0" style="max-width: 600px;">
+					<center>
+						<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 20%; margin-bottom: 10px;" alt="">
+						<h5>Nota TRNSKS-<?= $id ?></h5>
+					</center>
+					<table>
 						<thead>
 							<tr>
-								<th>Tgl</th>
-								<th>Biaya</th>
-								<th>Besaran</th>
-								<th>Ket</th>
-								<!-- <th>Petugas</th> -->
+								<th></th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
-							<?php $subtotal = 0; ?>
-							<?php while ($pecah = $ambil->fetch_assoc()) { ?>
-								<tr>
-									<td><?php echo $pecah["tgl"]; ?></td>
-									<td><?php echo $pecah["biaya"]; ?></td>
-									<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
-									<td><?php echo $pecah["ket"]; ?></td>
-									<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
-								</tr>
-								<?php $subtotal += $pecah['besaran']; ?>
-							<?php } ?>
-						</tbody>
-						<tfoot>
 							<tr>
-								<td colspan="2">TOTAL</td>
-								<td>
-									<b>Rp.<?php echo number_format($subtotal) ?></b>
-								</td>
-								<td colspan="2"></td>
+								<td>Nama </td>
+								<td>: <?= $ambilSingle['nama_pasien'] ?></td>
 							</tr>
-						</tfoot>
+							<tr>
+								<td>Nomor RM </td>
+								<td>: <?= $ambilSingle['no_rm'] ?></td>
+							</tr>
+							<tr>
+								<td>Jadwal Kunjungan</td>
+								<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
+							</tr>
+							<tr>
+								<td>Dokter </td>
+								<td>: <?= $ambilSingle['dokter_rawat'] ?></td>
+							</tr>
+						</tbody>
 					</table>
+					<div class="">
+						<table class="table table-bordered" id="myTable" style="font-size: 12px;">
+							<thead>
+								<tr>
+									<th>Tgl</th>
+									<th>Biaya</th>
+									<th>Besaran</th>
+									<th>Ket</th>
+									<!-- <th>Petugas</th> -->
+								</tr>
+							</thead>
+							<tbody>
+								<?php $subtotal = 0; ?>
+								<?php while ($pecah = $ambil->fetch_assoc()) { ?>
+									<tr>
+										<td><?php echo $pecah["tgl"]; ?></td>
+										<td><?php echo $pecah["biaya"]; ?></td>
+										<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
+										<td><?php echo $pecah["ket"]; ?></td>
+										<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
+									</tr>
+									<?php $subtotal += $pecah['besaran']; ?>
+								<?php } ?>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="2">TOTAL</td>
+									<td>
+										<b>Rp.<?php echo number_format($subtotal) ?></b>
+									</td>
+									<td colspan="2"></td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+					<p align="right">
+						<?php if (isset($_SESSION['shift'])) { ?>
+							<a href="../index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
+							<a href="<?= getFullUrl() ?>&print" class="btn btn-sm btn-warning" target="_blank"><i class="bi bi-printer"></i></a>
+							<?php
+							$getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $ambilSingle['no_rm'] . "'")->fetch_assoc();
+							?>
+							<a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
+						<?php } ?>
+					</p>
 				</div>
-				<p align="right">
-					<?php if (isset($_SESSION['shift'])) { ?>
-						<a href="../index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
-						<?php
-						$getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $ambilSingle['no_rm'] . "'")->fetch_assoc();
-						?>
-						<a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp'])?>?text=Berikut Nota Online Anda <?= getFullUrl()?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
+			</center>
+		</div>
+	<?php } else { ?>
+		<style>
+			body {
+				font-family: monospace;
+				/* letter-spacing: px; */
+			}
+		</style>
+		<div style="max-width: 58mm; padding: 2mm;">
+			<center>
+				<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px;" alt="">
+				<h6>Nota TRNSKS-<?= $id ?></h6>
+			</center>
+			<table style="font-size: 8px;">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Nama </td>
+						<td>: <?= $ambilSingle['nama_pasien'] ?></td>
+					</tr>
+					<tr>
+						<td>Nomor RM </td>
+						<td>: <?= $ambilSingle['no_rm'] ?></td>
+					</tr>
+					<tr>
+						<td>Jadwal Kunjungan</td>
+						<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
+					</tr>
+					<tr>
+						<td>Dokter </td>
+						<td>: <?= $ambilSingle['dokter_rawat'] ?></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="table table-bordered" id="myTable" style="font-size: 8px;">
+				<thead>
+					<tr>
+						<th>Tgl</th>
+						<th>Biaya</th>
+						<th>Besaran</th>
+						<th>Ket</th>
+						<!-- <th>Petugas</th> -->
+					</tr>
+				</thead>
+				<tbody>
+					<?php $subtotal = 0; ?>
+					<?php while ($pecah = $ambil->fetch_assoc()) { ?>
+						<tr>
+							<td><?php echo $pecah["tgl"]; ?></td>
+							<td><?php echo $pecah["biaya"]; ?></td>
+							<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
+							<td><?php echo $pecah["ket"]; ?></td>
+							<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
+						</tr>
+						<?php $subtotal += $pecah['besaran']; ?>
 					<?php } ?>
-				</p>
-			</div>
-		</center>
-	</div>
-
-
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="2">TOTAL</td>
+						<td>
+							<b>Rp.<?php echo number_format($subtotal) ?></b>
+						</td>
+						<td colspan="2"></td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+		<script>
+			window.print();
+			setTimeout(function() {
+				window.close();
+			}, 1000); // Menutup jendela setelah 1 detik
+		</script>
+	<?php } ?>
 </body>
 
 </html>
