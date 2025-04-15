@@ -50,7 +50,7 @@ if ($row >= 0) {
 		$('#myTable').DataTable({
 			"paging": false,
 			"info": false,
-			"searching": true	,
+			"searching": true,
 			"ordering": false,
 			"scrollY": "400px",
 			"scrollCollapse": true
@@ -66,14 +66,14 @@ if ($row >= 0) {
 			<table class="table table-bordered" id="myTable" style="font-size: 12px;">
 				<thead>
 					<tr>
-						<th>id</th>
-						<th>noRM</th>
-						<th>nama</th>
-						<th>tgl</th>
-						<th>biaya</th>
-						<th>besaran</th>
-						<th>keterangan</th>
-						<th>petugas</th>
+						<th>Id</th>
+						<th>NoRM</th>
+						<th>Nama</th>
+						<th>Tgl</th>
+						<th>Biaya</th>
+						<th>Besaran</th>
+						<th>Keterangan</th>
+						<th>Petugas</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -84,8 +84,19 @@ if ($row >= 0) {
 							<td><?php echo $pecah["no_rm"]; ?></td>
 							<td><?php echo $pecah["nama_pasien"]; ?></td>
 							<td><?php echo $pecah["tgl"]; ?></td>
-							<td><?php echo $pecah["biaya"]; ?></td>
-							<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
+							<td>
+								<?php echo $pecah["biaya"]; ?>
+							</td>
+							<td>
+								Rp. <?php echo number_format($pecah["besaran"]) ?>
+								<?php if ($_SESSION['admin']['level']=='sup') { ?>
+									<?php if ($pecah["biaya"] == "sewa kamar") { ?>
+										<button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#updateHarga" onclick="upDataHarga('<?= $pecah['id_data'] ?>', '<?= $pecah['besaran'] ?>')">
+											<i class="bi bi-pencil"></i>
+										</button>
+									<?php } ?>
+								<?php } ?>
+							</td>
 							<td><?php echo $pecah["ket"]; ?></td>
 							<td><?php echo $pecah["petugas"]; ?></td>
 						</tr>
@@ -105,3 +116,37 @@ if ($row >= 0) {
 		</div>
 	</div>
 </div>
+<!-- Modal Update Harga -->
+ <script>
+	function upDataHarga(id, besaran) {
+		$("#id_data").val(id);
+		$("#besaran").val(besaran);
+	}
+ </script>
+<div class="modal fade" id="updateHarga" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="staticBackdropLabel">Update Harga</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<form method="post">
+				<div class="modal-body">
+					<input type="text" name="id_data" id="id_data" class="form-control" hidden>
+					<input type="text" name="besaran" id="besaran" class="form-control">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="submit" name="updateHarga" class="btn btn-sm btn-primary">Update</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<?php 
+	if(isset($_POST['updateHarga'])){
+		$koneksi->query("UPDATE rawatinapdetail SET besaran = '$_POST[besaran]' WHERE id_data = '$_POST[id_data]'");
+		echo "<script>alert('Data Berhasil Diupdate');</script>";
+		echo "<script>location='index.php?halaman=rekapinap&id=$_GET[id]';</script>";
+	}
+?>

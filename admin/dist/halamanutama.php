@@ -167,13 +167,44 @@ if ($row > 0) {
                 </div>
               </div>
 
-            </div><!-- End Customers Card -->
+            </div>
+            <?php if($_SESSION['admin']['level'] == 'sup'){?>
+              <div class="col-xxl-12 col-xl-12">
+                <div class="card info-card customers-card">
+                  <div class="card-body">
+                    <h5 class="card-title">Cashflow <span>| <?= date('Y-m-01') ?> - <?= date('Y-m-d') ?></span></h5>
+                    <div class="d-flex align-items-center">
+                      <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="bi bi-currency-dollar"></i>
+                      </div>
+                      <div class="ps-3">
+                        <?php
+                        require '../dist/baseUrlAPI.php';
+                        $url = $baseUrlLama . 'api_personal/api_cashflow.php?getAllCashflow&date_start=' . date('Y-m') . '-01&date_end=' . date('Y-m-d');
+                        $response = file_get_contents($url);
+                        $data = json_decode($response, true);
+                        if ($data['status'] == "Successfully") {
+                          $cashflow = $data['data'];
+                        } else {
+                          $cashflow = 0;
+                        }
+  
+                        ?>
+                        <h6>Rp <?= number_format($cashflow, 0, 0, '.') ?></h6>
+                        <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php }?>
+            <!-- End Customers Card -->
             <?php
             $bulanSaatIni = date('y/m');
             ?>
             <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
               <?php
-              
+
               // $koneksi->query("
               // CREATE TABLE IF NOT EXISTS inap_jumlah  
               // SELECT DATE_FORMAT(jadwal, '%y/%m') as bulan, 
@@ -204,7 +235,7 @@ if ($row > 0) {
               //     FROM registrasi_rawat where status_antri = 'Datang' or status_antri = 'Pembayaran'  AND DATE_FORMAT(jadwal, '%y/%m') >= '$bulan6Lalu' AND DATE_FORMAT(jadwal, '%y/%m') <= '$bulanSaatIni' group by bulan order by bulan desc
               // ");
 
-              
+
 
               //pendapatan poli
               //  $koneksiakuntansi->query("DROP TABLE pendapatanpoli");
@@ -224,7 +255,7 @@ if ($row > 0) {
 
             <?php } ?>
             <div class="col-12">
-              
+
               </a>
               <!-- Vendor JS Files -->
               <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
@@ -240,10 +271,10 @@ if ($row > 0) {
               <script src="assets/js/main.js"></script>
 
               <!-- rekap obat verif -->
-              
+
 
               <!-- rekap pasien online offline -->
-      
+
 
               <!-- </a> -->
 

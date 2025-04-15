@@ -9,7 +9,7 @@ $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $pasien = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm <= '$awal[norm]' AND jadwal LIKE '%$awal[tgl_rm]%' ORDER BY jadwal DESC LIMIT 1");
 $pasien = $pasien->fetch_assoc();
 
-$p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$awal[norm]';");
+$p = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm)='$awal[norm]';");
 $p = $p->fetch_assoc();
 
 date_default_timezone_set("asia/jakarta");

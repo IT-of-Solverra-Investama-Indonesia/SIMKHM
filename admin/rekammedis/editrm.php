@@ -812,7 +812,7 @@ if (isset($_GET['hapus'])) {
                         <input type="text" name="jumlah_layanan" value="1" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
                     </div>
                     <?php
-                    $pasienSingle = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$rmSingle[norm]' LIMIT 1")->fetch_assoc();
+                    $pasienSingle = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm) = '$rmSingle[norm]' LIMIT 1")->fetch_assoc();
                     ?>
                     <input type="hidden" name="id_pasien" value="<?php echo $pasienSingle['idpasien'] ?>">
                     <!-- <input type="hidden" name="idrm" value="<?php echo $pecah['norm'] ?>"> -->

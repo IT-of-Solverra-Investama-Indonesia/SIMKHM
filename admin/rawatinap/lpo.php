@@ -8,6 +8,14 @@ if (!isset($_GET['igd'])) {
 }
 
 $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' AND perawatan = 'Rawat Inap' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+
+$ConditionCopy = 0;
+
+if (isset($_GET['idlpo'])) {
+  $ConditionCopy = htmlspecialchars($_GET['idlpo']);
+  $dataCopy = $koneksi->query("SELECT * FROM lpo WHERE id_lpo = '$ConditionCopy'")->fetch_assoc();
+}
+
 ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <?php if (!isset($_GET['view'])) { ?>
@@ -68,52 +76,52 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                 </div>
               </div>
               <br>
-              <div class="card shadow p-3">
+              <div class="card shadow p-3" id="observasiZone">
                 <h5 class="card-title">OBSERVASI PERAWAT</h5>
                 <div class="row">
                   <div class="col-md-6">
                     <label for="">Diagnosa</label>
-                    <input type="text" class="form-control mb-3" name="diagnosa" id="" placeholder="Diagnosa">
+                    <input type="text" class="form-control mb-3" name="diagnosa" <?= $ConditionCopy != 0 ? "value='$dataCopy[diagnosa]'" : "" ?> id="" placeholder="Diagnosa">
                   </div>
                   <div class="col-md-6">
                     <label for="">Tanggal & Waktu</label>
-                    <input type="datetime-local" class="form-control mb-3" name="tgl_waktu" id="" placeholder="Tanggal dan Waktu">
+                    <input type="datetime-local" class="form-control mb-3" name="tgl_waktu" <?= $ConditionCopy != 0 ? "value='$dataCopy[tgl_waktu]'" : "" ?> id="" placeholder="Tanggal dan Waktu">
                   </div>
                   <div class="col-md-6">
                     <label for="">Tensi Darah</label>
-                    <input type="text" class="form-control mb-3" name="tensi" id="" placeholder="Tensi Darah">
+                    <input type="text" class="form-control mb-3" name="tensi" <?= $ConditionCopy != 0 ? "value='$dataCopy[tensi]'" : "" ?> id="" placeholder="Tensi Darah">
                   </div>
                   <div class="col-md-6">
                     <label for="">Suhu Tubuh</label>
-                    <input type="text" class="form-control mb-3" name="suhu" id="" placeholder="Suhu Tubuh">
+                    <input type="text" class="form-control mb-3" name="suhu" <?= $ConditionCopy != 0 ? "value='$dataCopy[suhu]'" : "" ?> id="" placeholder="Suhu Tubuh">
                   </div>
                   <div class="col-md-6">
                     <label for="">Cairan Ke</label>
-                    <input type="text" class="form-control mb-3" name="cairan" id="" placeholder="Cairan Ke">
+                    <input type="text" class="form-control mb-3" name="cairan" <?= $ConditionCopy != 0 ? "value='$dataCopy[cairan]'" : "" ?> id="" placeholder="Cairan Ke">
                   </div>
                   <div class="col-md-6">
                     <label for="">Volume Cairan</label>
-                    <input type="text" class="form-control mb-3" name="volume" id="" placeholder="Volume Cairan">
+                    <input type="text" class="form-control mb-3" name="volume" <?= $ConditionCopy != 0 ? "value='$dataCopy[volume]'" : "" ?> id="" placeholder="Volume Cairan">
                   </div>
                   <div class="col-md-6">
                     <label for="">Keadaan Umum</label>
-                    <input type="text" class="form-control mb-3" name="keadaan_umum" id="" placeholder="Keadaan Umum">
+                    <input type="text" class="form-control mb-3" name="keadaan_umum" <?= $ConditionCopy != 0 ? "value='$dataCopy[keadaan_umum]'" : "" ?> id="" placeholder="Keadaan Umum">
                   </div>
                   <div class="col-md-6">
                     <label for="">Keluhan Pasien</label>
-                    <textarea name="keluhan_pasien" id="" class="form-control mb-2" placeholder="Keluahan Pasien"></textarea>
+                    <textarea name="keluhan_pasien" id="" class="form-control mb-2" placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
                   </div>
                   <div class="col-md-6">
                     <label for="">Cairan Infus</label>
-                    <input type="text" class="form-control mb-3" name="infus" id="" placeholder="Cairan Infus">
+                    <input type="text" class="form-control mb-3" name="infus" <?= $ConditionCopy != 0 ? "value='$dataCopy[infus]'" : "" ?> id="" placeholder="Cairan Infus">
                   </div>
                   <div class="col-md-6">
                     <label for="">Tindakan</label>
-                    <textarea name="tindakan" id="" class="form-control mb-2" placeholder="Tindakan"></textarea>
+                    <textarea name="tindakan" id="" class="form-control mb-2" placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
                   </div>
                   <div class="col-md-6">
                     <label for="">Perawat</label>
-                    <input type="text" class="form-control mb-3" name="perawat" readonly value="<?= $petugas ?>" placeholder="">
+                    <input type="text" class="form-control mb-3" name="perawat" <?= $ConditionCopy != 0 ? "value='$dataCopy[perawat]'" : "" ?> readonly value="<?= $petugas ?>" placeholder="">
                   </div>
                   <!-- <button class="btn btn-primary w-40" name="save">Simpan</button> -->
                 </div>
@@ -582,6 +590,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                   </div>
                 </div>
               </div>
+
               <div class="col-md-12">
                 <div class="card shadow p-3">
                   <h5 class="card-title">Riwayat Observasi</h5>
@@ -619,6 +628,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
                             <td>
                               <?php if (!isset($_GET['igd'])) { ?>
                                 <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i class="bi bi-eye"></i></a>
+                                <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone" class="btn btn-sm btn-warning">Copy</a>
                               <?php } else { ?>
                                 <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i class="bi bi-eye"></i></a>
                               <?php } ?>

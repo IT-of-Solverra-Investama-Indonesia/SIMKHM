@@ -7,8 +7,14 @@ $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $pasien = $koneksi->query("SELECT * FROM pasien  WHERE no_rm='$_GET[id]';")->fetch_assoc();
 
 $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ")->fetch_assoc();
-?>
+function getFullUrl()
+{
+  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ||
+    $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 
+  return $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -64,7 +70,7 @@ $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id
                           <td><?php echo $no; ?></td>
                           <td style="margin-top:10px;"><?php echo $pecah["tgl"]; ?></td>
                           <!-- <td style="margin-top:10px;"><?php echo $pecah["ctt_dokter"]; ?></td> -->
-                          <td style="margin-top:10px;"><?php echo $pecah["ctt_tedis"]; ?></td>
+                          <td style="margin-top:10px;"><?php echo $pecah["ctt_tedis"]; ?> <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="btn btn-sm btn-warning">Copy</a></td>
                           <td style="margin-top:10px;"><?php echo $pecah["petugas"]; ?></td>
                           <td style="margin-top:10px;">
                             <?php if ($pecah['petugas'] === $petugas) { ?>
@@ -141,7 +147,7 @@ $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id
                 </div>
                 <div class="card">
                   <div class="card-body">
-                    <div style="margin-bottom:1px; margin-top:30px">
+                    <div style="margin-bottom:1px; margin-top:30px" id="editorZone">
                       <h6 class="card-title">Hasil Pemeriksaan, Analisa & Rencana Penatalaksanaan Pasien </h6>
                     </div>
                     <p>(Instruksi ditulis dengan rinci dan jelas)</p>
@@ -153,7 +159,11 @@ $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id
                       </div>
                       <div class="col-md-12" style="margin-top:20px;">
                         <label for="inputName5" class="form-label">Catatan</label>
-                        <textarea name="ctt_tedis" id="editor" style="width:100%; height:150px"></textarea>
+                        <textarea name="ctt_tedis" id="editor" style="width:100%; height:150px">
+                            <?php if (isset($_GET['ctt'])) { ?>
+                              <?= $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE id = '$_GET[ctt]'")->fetch_assoc()['ctt_tedis'] ?>
+                            <?php } ?>
+                        </textarea>
 
                       </div>
                       <div class="col-md-12" style="margin-top:20px;">
@@ -317,7 +327,7 @@ $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id
 if (isset($_POST['update'])) {
   //  $koneksi->query("INSERT INTO ctt_penyakit_inap(tgl, norm, ctt_dokter, ctt_tedis, petugas, kamar, pasien) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[ctt_dokter]', '$_POST[ctt_tedis]', '$petugas', '$_POST[kamar]', '$_POST[pasien]')");
 
-  $koneksi->query("UPDATE ctt_penyakit_inap SET tgl='$_POST[tgl]', norm='$_GET[id]', ctt_dokter='$_POST[ctt_dokter]', ctt_tedis='". $koneksi->real_escape_string($_POST['ctt_tedis'])."', petugas='$petugas', kamar='$_POST[kamar]', pasien='$_POST[pasien]' WHERE id = '$_GET[idcct]'");
+  $koneksi->query("UPDATE ctt_penyakit_inap SET tgl='$_POST[tgl]', norm='$_GET[id]', ctt_dokter='$_POST[ctt_dokter]', ctt_tedis='" . $koneksi->real_escape_string($_POST['ctt_tedis']) . "', petugas='$petugas', kamar='$_POST[kamar]', pasien='$_POST[pasien]' WHERE id = '$_GET[idcct]'");
 
   $koneksi->query("UPDATE registrasi_rawat SET kamar='$_POST[kamar]' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
   echo "

@@ -20,7 +20,7 @@ if (isset($_GET['inap'])) {
   $lab = $koneksi->query("SELECT * FROM lab_hasil JOIN daftartes WHERE id_lab_h='$jadwal[idrawat]' AND nama_periksa=nama_tes");
 }
 
-$pas = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$_GET[id]' ORDER BY idpasien DESC LIMIT 1 ")->fetch_assoc();
+$pas = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm) = '$_GET[id]' ORDER BY idpasien DESC LIMIT 1 ")->fetch_assoc();
 $rm = $koneksi->query("SELECT * FROM rekam_medis WHERE rekam_medis.norm='$_GET[id]' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$_GET[tgl]';")->fetch_assoc();
 ?>
 

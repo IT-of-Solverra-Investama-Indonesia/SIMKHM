@@ -99,7 +99,7 @@
 
     $telaah = $koneksi->query("SELECT * FROM telaah_resep WHERE no_rm = '$_GET[id]' AND jadwal = '$_GET[tgl]'")->fetch_assoc();
 
-    $pasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . htmlspecialchars($_GET['id']) . "'")->fetch_assoc();
+    $pasien = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm) = '" . htmlspecialchars($_GET['id']) . "'")->fetch_assoc();
     ?>
 
     <!-- <script>

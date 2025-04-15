@@ -6,7 +6,7 @@
   $pasien = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE idrawat='$_GET[id]';");
   $pasien = $pasien->fetch_assoc();
 
-  $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[norm]';");
+  $p = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm)='$_GET[norm]';");
   $p = $p->fetch_assoc();
 
   $rm = $koneksi->query("SELECT * FROM rekam_medis  WHERE norm='$_GET[norm]';");

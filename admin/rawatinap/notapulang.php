@@ -150,8 +150,9 @@ function getFullUrl()
 					</div>
 					<p align="right">
 						<?php if (isset($_SESSION['shift'])) { ?>
-							<a href="../index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
-							<a href="<?= getFullUrl() ?>&print" class="btn btn-sm btn-warning" target="_blank"><i class="bi bi-printer"></i></a>
+							<a href="../dist/index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
+							<a href="<?= getFullUrl() ?>&print=thermal" class="btn btn-sm btn-warning" target="_blank"><i class="bi bi-printer"></i> Thermal</a>
+							<a href="<?= getFullUrl() ?>&print=hvs" class="btn btn-sm btn-primary" target="_blank"><i class="bi bi-printer-fill"></i> HVS</a>
 							<?php
 							$getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $ambilSingle['no_rm'] . "'")->fetch_assoc();
 							?>
@@ -162,83 +163,155 @@ function getFullUrl()
 			</center>
 		</div>
 	<?php } else { ?>
-		<style>
-			body {
-				font-family: monospace;
-				/* letter-spacing: px; */
-			}
-		</style>
-		<div style="max-width: 58mm; padding: 2mm;">
-			<center>
-				<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px;" alt="">
-				<h6>Nota TRNSKS-<?= $id ?></h6>
-			</center>
-			<table style="font-size: 8px;">
-				<thead>
-					<tr>
-						<th></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>Nama </td>
-						<td>: <?= $ambilSingle['nama_pasien'] ?></td>
-					</tr>
-					<tr>
-						<td>Nomor RM </td>
-						<td>: <?= $ambilSingle['no_rm'] ?></td>
-					</tr>
-					<tr>
-						<td>Jadwal Kunjungan</td>
-						<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
-					</tr>
-					<tr>
-						<td>Dokter </td>
-						<td>: <?= $ambilSingle['dokter_rawat'] ?></td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="table table-bordered" id="myTable" style="font-size: 8px;">
-				<thead>
-					<tr>
-						<th>Tgl</th>
-						<th>Biaya</th>
-						<th>Besaran</th>
-						<th>Ket</th>
-						<!-- <th>Petugas</th> -->
-					</tr>
-				</thead>
-				<tbody>
-					<?php $subtotal = 0; ?>
-					<?php while ($pecah = $ambil->fetch_assoc()) { ?>
+		<?php if ($_GET['print'] == 'thermal') { ?>
+			<style>
+				body {
+					font-family: monospace;
+					/* letter-spacing: px; */
+				}
+			</style>
+			<div style="max-width: 58mm; padding: 2mm;">
+				<center>
+					<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px;" alt="">
+					<h6>Nota TRNSKS-<?= $id ?></h6>
+				</center>
+				<table style="font-size: 8px;">
+					<thead>
 						<tr>
-							<td><?php echo $pecah["tgl"]; ?></td>
-							<td><?php echo $pecah["biaya"]; ?></td>
-							<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
-							<td><?php echo $pecah["ket"]; ?></td>
-							<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
+							<th></th>
+							<th></th>
 						</tr>
-						<?php $subtotal += $pecah['besaran']; ?>
-					<?php } ?>
-				</tbody>
-				<tfoot>
-					<tr>
-						<td colspan="2">TOTAL</td>
-						<td>
-							<b>Rp.<?php echo number_format($subtotal) ?></b>
-						</td>
-						<td colspan="2"></td>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-		<script>
-			window.print();
-			setTimeout(function() {
-				window.close();
-			}, 1000); // Menutup jendela setelah 1 detik
-		</script>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Nama </td>
+							<td>: <?= $ambilSingle['nama_pasien'] ?></td>
+						</tr>
+						<tr>
+							<td>Nomor RM </td>
+							<td>: <?= $ambilSingle['no_rm'] ?></td>
+						</tr>
+						<tr>
+							<td>Jadwal Kunjungan</td>
+							<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
+						</tr>
+						<tr>
+							<td>Dokter </td>
+							<td>: <?= $ambilSingle['dokter_rawat'] ?></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="table table-bordered" id="myTable" style="font-size: 8px;">
+					<thead>
+						<tr>
+							<th>Tgl</th>
+							<th>Biaya</th>
+							<th>Besaran</th>
+							<th>Ket</th>
+							<!-- <th>Petugas</th> -->
+						</tr>
+					</thead>
+					<tbody>
+						<?php $subtotal = 0; ?>
+						<?php while ($pecah = $ambil->fetch_assoc()) { ?>
+							<tr>
+								<td><?php echo $pecah["tgl"]; ?></td>
+								<td><?php echo $pecah["biaya"]; ?></td>
+								<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
+								<td><?php echo $pecah["ket"]; ?></td>
+								<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
+							</tr>
+							<?php $subtotal += $pecah['besaran']; ?>
+						<?php } ?>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="2">TOTAL</td>
+							<td>
+								<b>Rp.<?php echo number_format($subtotal) ?></b>
+							</td>
+							<td colspan="2"></td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			<script>
+				window.print();
+				setTimeout(function() {
+					window.close();
+				}, 1000);
+			</script>
+		<?php } elseif ($_GET['print'] == 'hvs') { ?>
+			<div class="container mt-2">
+				<center>
+					<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 15%; margin-bottom: 10px;" alt="">
+					<h4>Nota TRNSKS-<?= $id ?></h4>
+				</center>
+				<table>
+					<thead>
+						<tr>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Nama </td>
+							<td>: <?= $ambilSingle['nama_pasien'] ?></td>
+						</tr>
+						<tr>
+							<td>Nomor RM </td>
+							<td>: <?= $ambilSingle['no_rm'] ?></td>
+						</tr>
+						<tr>
+							<td>Jadwal Kunjungan</td>
+							<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
+						</tr>
+						<tr>
+							<td>Dokter </td>
+							<td>: <?= $ambilSingle['dokter_rawat'] ?></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="table table-bordered table-striped mt-2 table-sm">
+					<thead>
+						<tr>
+							<th>Tgl</th>
+							<th>Biaya</th>
+							<th>Besaran</th>
+							<th>Ket</th>
+							<!-- <th>Petugas</th> -->
+						</tr>
+					</thead>
+					<tbody>
+						<?php $subtotal = 0; ?>
+						<?php while ($pecah = $ambil->fetch_assoc()) { ?>
+							<tr>
+								<td><?php echo $pecah["tgl"]; ?></td>
+								<td><?php echo $pecah["biaya"]; ?></td>
+								<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
+								<td><?php echo $pecah["ket"]; ?></td>
+								<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
+							</tr>
+							<?php $subtotal += $pecah['besaran']; ?>
+						<?php } ?>
+						<tr>
+							<td colspan="2">TOTAL</td>
+							<td>
+								<b>Rp.<?php echo number_format($subtotal) ?></b>
+							</td>
+							<td colspan="2"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<script>
+				window.print();
+				setTimeout(function() {
+					window.close();
+				}, 1000);
+			</script>
+		<?php } ?>
 	<?php } ?>
 </body>
 

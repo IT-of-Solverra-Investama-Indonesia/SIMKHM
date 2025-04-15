@@ -8,7 +8,7 @@ date_default_timezone_set('Asia/Jakarta');
     $shift = $_GET["shift"];
     // var_dump($shift); 
     // $pasien=$koneksi->query("SELECT * FROM registrasi_rawat INNER JOIN biaya_rawat WHERE idregis=idrawat and (status_antri = 'Datang' or status_antri = 'Pembayaran') and registrasi_rawat.shift = '$shift' and perawatan = 'Rawat Jalan' and (date_format(jadwal, '%Y-%m-%d') = '$date' or date_format(jadwal, '%Y-%m-%d') = DATE(NOW() - INTERVAL 1 DAY));"); 
-    $pasien = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND registrasi_rawat.shift = '$shift' and (status_antri = 'Datang' or status_antri = 'Pembayaran') and date_format(jadwal, '%Y-%m-%d') = '$date' GROUP BY registrasi_rawat.idrawat;");
+    $pasien = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND registrasi_rawat.shift = '$shift' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$date' GROUP BY registrasi_rawat.idrawat;");
   } else {
     $shift = $_SESSION["shift"];
     if (date('Hi') > '0730') {
@@ -18,7 +18,7 @@ date_default_timezone_set('Asia/Jakarta');
     }
     // var_dump($shift);
     // $pasien=$koneksi->query("SELECT * FROM registrasi_rawat LEFT JOIN biaya_rawat WHERE idregis=idrawat and (status_antri = 'Datang' or status_antri = 'Pembayaran') and registrasi_rawat.shift = '$shift' and perawatan = 'Rawat Jalan' and (date_format(jadwal, '%Y-%m-%d') = '$date' or date_format(jadwal, '%Y-%m-%d') = DATE(NOW() - INTERVAL 1 DAY));"); 
-    $pasien = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran') " . $jamCondition . " GROUP BY registrasi_rawat.idrawat;");
+    $pasien = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') " . $jamCondition . " GROUP BY registrasi_rawat.idrawat;");
   }
   ?>
   <!DOCTYPE html>

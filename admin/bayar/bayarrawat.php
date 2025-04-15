@@ -2,7 +2,7 @@
   $username=$_SESSION['admin']['username'];
   $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
   $nota=$koneksi->query("SELECT * FROM biaya_rawat WHERE idregis='$_GET[id]';")->fetch_assoc();
-  $pasien=$koneksi->query("SELECT * FROM pasien INNER JOIN rekam_medis  WHERE norm='$_GET[rm]';");
+  $pasien=$koneksi->query("SELECT * FROM pasien INNER JOIN rekam_medis ON rekam_medis.norm=pasien.no_rm WHERE TRIM(norm)='$_GET[rm]';");
   $pecah=$pasien->fetch_assoc();
 ?>
 
