@@ -1,4 +1,3 @@
-<?php error_reporting(0)?>
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
@@ -16,15 +15,14 @@
 <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.colVis.min.js"></script>
 
 <script>
-    $(document).ready( function () {
-        $('#myTable').DataTable( {
+    $(document).ready(function() {
+        $('#myTable').DataTable({
             dom: 'Bfrtip',
-            buttons: [ {
-            extend: 'excelHtml5'     
-            }
-            ]
-        } );
-    } );
+            buttons: [{
+                extend: 'excelHtml5'
+            }]
+        });
+    });
 </script>
 <div class="pagetitle mb-0">
     <h1>Rekap Obat</h1>
@@ -52,7 +50,7 @@
                 <button class="btn btn-primary" name="src"><i class="bi bi-search"></i> Filter</button>
                 <!-- <button style="float:left; margin-right: 10px;" class="btn btn-info" name="src2"><i class="bi bi-search"></i> Inap</button> -->
             </div>
-         
+
         </div>
     </form>
 </div>
@@ -62,64 +60,45 @@
             <thead>
                 <tr>
                     <th>Nama Obat</th>
-                    <th>Keluar</th>
-                    <th>Harga Beli</th>
-                    <th>Jumlah<br>(Terbaru)</th>
+                    <th>Masuk <br> (By Tanggal)</th>
+                    <th>Keluar <br> (By Tanggal)</th>
+                    <th>Harga Beli <br> (Terbaru By Tanggal)</th>
+                    <th>Sisa</th>
                     <th>Total</th>
                 </tr>
             </thead>
             <tbody>
-                <?php 
-                    if(isset($_POST['src'])){ 
-                        $getObat = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GROUP BY nama_obat, id_obat order by idapotek desc");
+                <?php
+                    if (isset($_POST['src'])) {
+                        $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar  FROM (
+                                SELECT SUM(jml_dokter) as jml_dokter, kode_obat , obat_rm.nama_obat FROM obat_rm INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = obat_rm.idrm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien WHERE obat_rm.tgl_pasien >= '$_POST[mulai]' AND obat_rm.tgl_pasien <= '$_POST[hingga]' AND perawatan = 'Rawat Inap' GROUP BY kode_obat
+                                UNION ALL
+                                SELECT SUM(jml_dokter) as jml_dokter, kode_obat , obat_rm.nama_obat FROM obat_rm INNER JOIN rekam_medis ON rekam_medis.id_rm = obat_rm.rekam_medis_id WHERE obat_rm.tgl_pasien >= '$_POST[mulai]' AND obat_rm.tgl_pasien <= '$_POST[hingga]' AND idigd = '0' GROUP BY kode_obat
+                                ) as a GROUP BY kode_obat ORDER BY nama_obat DESC");
                     }
-                    if(isset($_POST['srcInap'])){ 
-                        $getObat = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat, id_obat order by idapotek desc");
+                    if (isset($_POST['srcInap'])) {
+                        $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = obat_rm.idrm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien WHERE obat_rm.tgl_pasien >= '$_POST[mulai]' AND obat_rm.tgl_pasien <= '$_POST[hingga]' AND perawatan = 'Rawat Inap' GROUP BY kode_obat ORDER BY nama_obat DESC");
                     }
-                    if(isset($_POST['srcPoli'])){ 
-                        $getObat = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat, id_obat order by idapotek desc");
+                    if (isset($_POST['srcPoli'])) {
+                        $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN rekam_medis ON rekam_medis.id_rm = obat_rm.rekam_medis_id WHERE obat_rm.tgl_pasien >= '$_POST[mulai]' AND obat_rm.tgl_pasien <= '$_POST[hingga]' AND idigd = '0' GROUP BY kode_obat ORDER BY nama_obat DESC");
                     }
-                    // elseif(isset($_POST['src2'])){
-                    //     $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' ORDER BY nama_obat ASC");
-                    // }
                 ?>
-                
-                <?php foreach($getObat as $obat){ ?>
-                    <?php
-                        if(isset($_POST['src'])){
-                            $getKeluar = $koneksi->query("SELECT *, SUM(jml_dokter) as jumKeluar FROM obat_rm WHERE kode_obat = '$obat[id_obat]' AND tgl_pasien >= '$_POST[mulai]' AND tgl_pasien <= '$_POST[hingga]' GROUP BY kode_obat")->fetch_assoc();    
-                        }
-                        if(isset($_POST['srcInap'])){
-                            $getKeluar = $koneksi->query("SELECT *, SUM(jml_dokter) as jumKeluar FROM obat_rm WHERE kode_obat = '$obat[id_obat]' AND tgl_pasien >= '$_POST[mulai]' AND tgl_pasien <= '$_POST[hingga]' AND idigd != '0' GROUP BY kode_obat")->fetch_assoc();    
-                        }
-                        if(isset($_POST['srcPoli'])){
-                            $getKeluar = $koneksi->query("SELECT *, SUM(jml_dokter) as jumKeluar FROM obat_rm WHERE kode_obat = '$obat[id_obat]' AND tgl_pasien >= '$_POST[mulai]' AND tgl_pasien <= '$_POST[hingga]' AND idigd = '0' GROUP BY kode_obat")->fetch_assoc();    
-                        }
-                        // elseif(isset($_POST['src2'])){
-                        //     // $getKeluar = $koneksi->query("SELECT *, SUM(jml_dokter) as jumKeluar FROM obat_rm WHERE kode_obat = '$obat[id_obat]' and obat_igd = '' GROUP BY kode_obat")->fetch_assoc();    
-                        //     $getKeluar = $koneksi->query("SELECT *, SUM(jml_dokter) as jumKeluar FROM obat_rm WHERE kode_obat = '$obat[id_obat]' AND tgl_pasien >= '$_POST[mulai]' AND tgl_pasien <= '$_POST[hingga]' and obat_igd != '' GROUP BY kode_obat")->fetch_assoc();    
-                        // }
+
+                <?php foreach ($getObat as $obat) { ?>
+                    <?php 
+                        $getObatMasuk = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_masuk, (SELECT harga_beli FROM apotek WHERE id_obat = '$obat[kode_obat]' AND tgl_beli >= '$_POST[mulai]' AND tgl_beli <= '$_POST[hingga]' ORDER BY idapotek DESC LIMIT 1) as harga_beli FROM apotek WHERE id_obat = '$obat[kode_obat]' AND tgl_beli >= '$_POST[mulai]' AND tgl_beli <= '$_POST[hingga]'")->fetch_assoc();    
                     ?>
                     <tr>
-                        <td><?= $obat['nama_obat']?></td>
+                        <td><?= $obat['nama_obat'] ?></td>
+                        <td><?= $getObatMasuk['jumlah_masuk']?></td>
                         <td>
-                            <?php
-                                if($getKeluar['jumKeluar'] == '' or $getKeluar['jumKeluar'] == '0'){
-                                    echo "0";
-                                    $keluar = 0;
-                                } else{
-                                    echo $getKeluar['jumKeluar'];
-                                    $keluar = $getKeluar['jumKeluar'];
-                                }
-                            ?>
+                            <?= $obat['jumlah_keluar'] ?>
                         </td>
-                        <td>Rp<?= number_format($obat['harga_beli'],0,0,'.')?></td>
-                        <td><?= $obat['jml_obat']?></td>
-                        <td>
-                            Rp<?= number_format($obat['harga_beli']*$keluar,0,0,'.')?>
-                        </td>
+                        <td>Rp<?= number_format($getObatMasuk['harga_beli'],0,0,'.')?></td>
+                        <td><?=  $sisa = $getObatMasuk['jumlah_masuk'] - $obat['jumlah_keluar']?></td>
+                        <td>Rp<?= number_format($sisa*$getObatMasuk['harga_beli'],0,0,'.')?></td>
                     </tr>
-                <?php }?>
+                <?php } ?>
             </tbody>
         </table>
     </div>
