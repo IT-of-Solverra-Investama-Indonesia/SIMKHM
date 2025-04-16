@@ -34,6 +34,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="masukkeluar"){include '../rawatinap/masukkeluar.php';}
                    elseif ($hal=="lpo"){include '../rawatinap/lpo.php';}
                    elseif ($hal=="kajianawalinap"){include '../rawatinap/kajianawalinap.php';}
+                   elseif ($hal=="rekappasienpulang"){include '../rawatinap/rekappasienpulang.php';}
 
                    elseif ($hal=="cttpenyakit"){include '../rawatinap/cttpenyakit.php';}
                    elseif ($hal=="rekonobat"){include '../rawatinap/rekonobat.php';}

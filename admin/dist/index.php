@@ -182,6 +182,11 @@ if (!isset($_SESSION['login'])) {
                 <i class="bi bi-circle"></i><span>Visite Dokter</span>
               </a>
             </li>
+            <li>
+              <a href="index.php?halaman=rekappasienpulang">
+                <i class="bi bi-circle"></i><span>Rekap Pasien Pulang</span>
+              </a>
+            </li>
             <!-- <li>
             <a href="index.php?halaman=reservasirawat">
               <i class="bi bi-circle"></i><span>Reservasi</span>
