@@ -42,8 +42,9 @@ function getFullUrl()
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nota TRNSKS-<?= $id ?></title>
+    <title>Nota TRNSKS-<?= $biaya['nota'] == '' ? $id : $biaya['nota'] ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="shortcut icon" href="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 </head>
 
@@ -121,12 +122,51 @@ function getFullUrl()
 
                     <p align="right">
                         <?php if (isset($_SESSION['shift'])) { ?>
-                            <a href="../index.php?halaman=rekapinap&id=<?= $id ?>" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
+                            <a href="../dist/index.php?halaman=daftarbayar" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left"></i></a>
                             <?php
                             $getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $dataRawat['no_rm'] . "'")->fetch_assoc();
                             ?>
                             <a href="<?= getFullUrl() ?>&print" target="_blank" class="btn btn-sm btn-warning"><i class="bi bi-printer"></i></a>
-                            <a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
+                            <a href="<?= getFullUrl() ?>&sendWA" target="_blank" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
+                            <!-- <a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a> -->
+                            <?php
+                            if (isset($_GET['sendWA'])) {
+                                $curl = curl_init();
+                                include '../rawatjalan/api_token_wa.php';
+                                $curl = curl_init();
+                                $data = [
+                                    'phone' => konversiNomorHP($getPasien['nohp']),
+                                    'message' => 'Berikut Nota Online Anda ' . getFullUrl() . '',
+
+                                ];
+                                curl_setopt(
+                                    $curl,
+                                    CURLOPT_HTTPHEADER,
+                                    array(
+                                        "Authorization: $token",
+                                    )
+                                );
+                                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
+                                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+                                curl_setopt($curl, CURLOPT_URL,  "https://jogja.wablas.com/api/send-message");
+                                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+                                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+                                $result = curl_exec($curl);
+                                curl_close($curl);
+                                echo "<pre>";
+                                print_r($result);
+
+                                $koneksi->query("UPDATE biaya_rawat SET send_at = NOW() WHERE nota = '" . $biaya['nota'] . "'");
+
+                                echo "
+                                    <script>
+                                        alert('Berhasil Kirim!');
+                                        document.location.href='printNota.php?id=$_GET[id]';
+                                    </script>
+                                ";
+                            }
+                            ?>
                         <?php } ?>
                     </p>
                 </div>

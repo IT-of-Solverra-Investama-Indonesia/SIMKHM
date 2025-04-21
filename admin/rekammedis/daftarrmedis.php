@@ -603,7 +603,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           <th>CaraBayar</th>
                           <?php if (!isset($_GET['racik'])) { ?>
                             <th>Status</th>
-                          <?php } elseif (isset($_GET['racik'])) { ?>
+                          <?php } elseif (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
                             <th>Status Telaah</th>
                           <?php } ?>
                           <th></th>
@@ -649,7 +649,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                               <td style="margin-top:10px;">
                                 <?= $pecah['status_antri'] ?>
                               </td>
-                            <?php } elseif (isset($_GET['racik'])) { ?>
+                            <?php } elseif (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
                               <td style="margin-top:10px;">
                                 <?php if (!empty($tel["jadwal"])) { ?>
                                   <h6 style="color:success">Selesai</h6>
