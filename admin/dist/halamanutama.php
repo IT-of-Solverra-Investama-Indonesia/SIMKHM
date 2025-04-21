@@ -168,8 +168,8 @@ if ($row > 0) {
               </div>
 
             </div>
-            <?php if($_SESSION['admin']['level'] == 'sup'){?>
-              <div class="col-xxl-12 col-xl-12">
+            <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+              <div class="col-xxl-12 col-xl-12" onclick="location.href='index.php?halaman=dashboard_detail&cashflow&date_start=<?= date('Y-m-01') ?>&date_end=<?= date('Y-m-d') ?>'">
                 <div class="card info-card customers-card">
                   <div class="card-body">
                     <h5 class="card-title">Cashflow <span>| <?= date('Y-m-01') ?> - <?= date('Y-m-d') ?></span></h5>
@@ -188,7 +188,7 @@ if ($row > 0) {
                         } else {
                           $cashflow = 0;
                         }
-  
+
                         ?>
                         <h6>Rp <?= number_format($cashflow, 0, 0, '.') ?></h6>
                         <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
@@ -197,7 +197,7 @@ if ($row > 0) {
                   </div>
                 </div>
               </div>
-            <?php }?>
+            <?php } ?>
             <!-- End Customers Card -->
             <?php
             $bulanSaatIni = date('y/m');

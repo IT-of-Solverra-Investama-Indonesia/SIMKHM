@@ -58,6 +58,8 @@ if (isset($_POST['searching'])) {
         SUM(IF(carabayar='umum',1,0)) AS umum,
         SUM(IF(carabayar='bpjs',1,0)) AS bpjs,
         SUM(IF(carabayar='malam',1,0)) AS malam,
+        SUM(IF(carabayar='spesialis anak',1,0)) AS spesialisAnak,
+        SUM(IF(carabayar='spesialis penyakit dalam',1,0)) AS spesialisPenyakitDalam,
         SUM(IF(kategori='online',1,0)) AS online,
         SUM(IF(kategori='offline',1,0)) AS offline,
         COUNT(no_rm) AS jumlah
@@ -126,6 +128,8 @@ if (isset($_POST['searching'])) {
             <th class="text-capitalize">hari</th>
             <th class="text-capitalize">umum</th>
             <th class="text-capitalize">bpjs</th>
+            <th class="text-capitalize">Anak</th>
+            <th class="text-capitalize">PenyakitDalam</th>
             <th class="text-capitalize">malam</th>
             <th class="text-capitalize">Ranap</th>
             <!--<th class="text-capitalize">kosmetik</th>
@@ -162,6 +166,8 @@ if (isset($_POST['searching'])) {
                   <?php echo $poli['bpjs'] ?> || <?php echo number_format($poli['bpjs'] / $poli['harii'], 2) ?>
                 </a>
               </td>
+              <td><?php echo $poli['spesialisAnak'] ?> || <?php echo number_format($poli['spesialisAnak'] / $poli['harii'], 2) ?></td>
+              <td><?php echo $poli['spesialisPenyakitDalam'] ?> || <?php echo number_format($poli['spesialisPenyakitDalam'] / $poli['harii'], 2) ?></td>
               <td><?php echo $poli['malam'] ?> || <?php echo number_format($poli['malam'] / $poli['harii'], 2) ?></td>
               <?php
               $getRanap = $koneksi->query("SELECT COUNT(*) as jum FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND DATE_FORMAT(jadwal, '%y/%m') = '$bulan'")->fetch_assoc();
@@ -466,6 +472,38 @@ if (isset($_POST['searching'])) {
         <!-- </div> -->
       </div>
     </div>
+  </div>
+<?php } elseif (isset($_GET['cashflow'])) { ?>
+  <div class="card shadow p-2 mb-2">
+    <form method="POST">
+      <div class="row">
+        <div class="col-6">
+          Dari Tanggal
+          <input type="date" class="form-control" name="date_start" id="date_start" value="<?= htmlspecialchars($_GET['date_start']) ?? '' ?>">
+        </div>
+        <div class="col-6">
+          Hingga Tanggal
+          <input type="date" class="form-control" name="date_end" id="date_end" value="<?= htmlspecialchars($_GET['date_end']) ?? date('Y-m-d') ?>">
+        </div>
+        <div class="col-12">
+          <p align="right">
+            <button class="btn btn-primary mt-2 mb-0" name="fil" type="submit"><i class="bi bi-search"></i> Cari</button>
+          </p>
+        </div>
+      </div>
+    </form>
+  </div>
+  <?php
+  if (isset($_POST['fil'])) {
+    echo "
+        <script>
+          document.location.href='index.php?halaman=dashboard_detail&cashflow&date_start=" . htmlspecialchars($_POST['date_start']) . "&date_end=" . htmlspecialchars($_POST['date_end']) . "';
+        </script>
+      ";
+  }
+  ?>
+  <div class="card shadow p-2">
+    <?= file_get_contents($baseUrlLama . "api_personal/api_cashflow.php?getAllCashflow&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "&html") ?>
   </div>
 <?php } else { ?>
   <div class="card shadow p-2">
