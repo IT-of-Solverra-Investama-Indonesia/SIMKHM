@@ -105,7 +105,7 @@
     <!-- <script>
         window.print()
     </script> -->
-    <div class="nota" style="">
+    <div class="nota">
         <div class="header">
             <b>
                 <p>KLINIK HUSADA MULIA <br /> Instansi Farmasi</p>
@@ -133,6 +133,11 @@
                     <td>Nama Dokter</td>
                     <td>:</td>
                     <td><?= $dokter['namalengkap'] ?></td>
+                </tr>
+                <tr>
+                    <td>SIP Dokter</td>
+                    <td>:</td>
+                    <td><?= $dokter['SIP'] ?></td>
                 </tr>
                 <tr>
                     <td>Poliklinik</td>
