@@ -15,57 +15,28 @@ $tenaga = $koneksi->query("SELECT * FROM admin;");
 </head>
 
 <body>
-	<!-- <h3>Daftar User</h3> -->
-	<!-- <div class="card shadow-lg w-100 p-3">
+	<?php
+	if (isset($_POST['tambah'])) {
+		$nama = $_POST['nama'];
+		$alamat = $_POST['alamat'];
+		$jabatan = $_POST['jabatan'];
+		$NIP = $_POST['nip'];
 
-  		<form method="post">
-  			<div class="mb-3">
-			  <input type="text" class="form-control" name="nama" placeholder="Nama Lengkap">
-			</div>
-			<div class="mb-3">
-			  <textarea class="form-control" placeholder="Alamat" name="alamat"></textarea>
-			</div>
-			<div class="mb-3">
-			  <select class="form-select" name="jabatan" aria-label="Default select example">
-				  <option hidden>Jabatan</option>
-				  <option value="dokter">Dokter</option>
-				  <option value="perawat">Perawat</option>
-				  <option value="tenaga medis">Tenaga Medis</option>
-				  <option value="dll">DLL</option>
-				</select>
-			</div>
-			<div class="mb-3">
-			  <input type="number" class="form-control" name="nip" placeholder="NIP">
-			</div>
-			<center>
-				<button class="btn btn-primary" name="tambah">Tambahkan</button>
-			</center>
-  		</form>
-  	</div>
-
-  	<?php
-
-		if (isset($_POST['tambah'])) {
-			$nama = $_POST['nama'];
-			$alamat = $_POST['alamat'];
-			$jabatan = $_POST['jabatan'];
-			$NIP = $_POST['nip'];
-
-			$koneksi->query("INSERT INTO tenaga_medis (nama_tenaga, alamat_tenaga, jabatan, NIP, level) VALUES ('$nama', '$alamat', '$jabatan', '$NIP', '$_POST[level]')");
-			echo "
+		$koneksi->query("INSERT INTO tenaga_medis (nama_tenaga, alamat_tenaga, jabatan, NIP, level) VALUES ('$nama', '$alamat', '$jabatan', '$NIP', '$_POST[level]')");
+		echo "
   			<script>
   				document.location.href='index.php?halaman=tenagamedis';	
   			</script>
   		";
-		}
+	}
 
-		?> -->
+	?>
 	<div class="card p-3 shadow">
 		<h4>Daftar User</h4>
-		<a href="index.php?halaman=dokter_konsul"> <button class="btn btn-success">Dokter Konsul</button>
+		<a href="index.php?halaman=dokter_konsul"> <button class="btn btn-sm btn-success">Dokter Konsul</button>
 		</a>
 		<div class="w-100 table-responsive">
-			<table class="table table-striped w-100">
+			<table class="table table-striped w-100" style="font-size: 12px;">
 				<thead>
 					<tr>
 						<th scope="col">Nama</th>
@@ -80,27 +51,38 @@ $tenaga = $koneksi->query("SELECT * FROM admin;");
 				<tbody>
 					<?php foreach ($tenaga as $data) : ?>
 						<tr>
-							<th scope="row"><?php echo $data["namalengkap"]; ?></th>
+							<th scope="row">
+								<?php echo $data["namalengkap"]; ?> <br>
+								<?php if ($data["level"] == 'dokter' && !$query['count'] > 0) { ?>
+									<span style="font-size: 10px;" class="badge bg-warning" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#updateSIP" onclick="upSIP('<?= $data['SIP'] ?>', '<?= $data['idadmin'] ?>')">SIP: <?= $data['SIP'] ?></span>
+								<?php } ?>
+							</th>
 							<td><?php echo $data["username"]; ?></td>
 							<td><?php echo $data["password"]; ?></td>
 							<td><?php echo $data["level"]; ?></td>
 							<td><?php echo $data["NIK"]; ?></td>
-							<td><img src="../tenagamedis/foto/<?php echo $data["foto"]; ?>" alt="" width="80px"></td>
+							<td>
+								<?php if ($data["foto"] != '') { ?>
+									<a href="../tenagamedis/foto/<?php echo $data["foto"]; ?>" class="btn btn-sm btn-warning">
+										<i class="bi bi-eye"></i>
+									</a>
+								<?php } ?>
+							</td>
 							<td>
 								<button type="button" class="btn btn-sm btn-success mb-1" data-bs-toggle="modal" data-bs-target="#edit<?php echo $data["idadmin"]; ?>">
-									Update
+									<i class="bi bi-pencil-square"></i>
 								</button>
 								<button type="button" class="btn btn-sm btn-danger mb-1" data-bs-toggle="modal" data-bs-target="#del<?php echo $data["idadmin"]; ?>">
-									Hapus
+									<i class="bi bi-trash"></i>
 								</button>
 								<?php
-									$query = $koneksi->query("SELECT COUNT(*) as count FROM dokter_konsul 
+								$query = $koneksi->query("SELECT COUNT(*) as count FROM dokter_konsul 
 									WHERE namalengkap = '$data[namalengkap]'")->fetch_assoc();
 								?>
 
 								<?php if ($data["level"] == 'dokter' && !$query['count'] > 0) { ?>
-									<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#dokterkonsul<?= $data['idadmin']?>">
-										Add Dokter Konsul
+									<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#dokterkonsul<?= $data['idadmin'] ?>">
+										[+] Dr Konsul
 									</button>
 								<?php } ?>
 
@@ -111,6 +93,50 @@ $tenaga = $koneksi->query("SELECT * FROM admin;");
 			</table>
 		</div>
 	</div>
+
+	<!-- Update SIP Dokter-->
+	<script>
+		function upSIP(sip, id) {
+			document.getElementById('sip').value = sip;
+			document.getElementById('id').value = id;
+		}
+	</script>
+	<!-- Modal -->
+	<div class="modal fade" id="updateSIP" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="staticBackdropLabel">Update SIP</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<form method="post">
+					<div class="modal-body">
+						<input type="number" name="idadmin" id="id" class="form-control" hidden>
+						<input type="number" name="SIP" id="sip" class="form-control">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="submit" name="updateSIP" class="btn btn-primary">Understood</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<?php 
+		if(isset($_POST['updateSIP'])){
+			$id = htmlspecialchars($_POST['idadmin']);
+			$sip = htmlspecialchars($_POST['SIP']);
+			$koneksi->query("UPDATE admin SET SIP='$sip' WHERE idadmin='$id'");
+			echo "
+				<script>
+
+					document.location.href='index.php?halaman=tenagamedis';	
+				</script>
+			";
+		}
+	?>
+	<!--Update SIP Dokter END -->
+
 
 	<?php foreach ($tenaga as $data) : ?>
 		<div class="modal fade" id="edit<?php echo $data["idadmin"]; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -141,35 +167,23 @@ $tenaga = $koneksi->query("SELECT * FROM admin;");
 								<label for="">Level</label>
 								<select name="level" id="" class="form-control">
 									<option value="<?php echo $data["level"]; ?>" hidden><?php echo $data["level"]; ?></option>
-
 									<option value="perawat">perawat</option>
-
 									<option value="igd">igd</option>
-
 									<!-- <option value="apotik">apotik</option> -->
-
 									<option value="apoteker">apoteker</option>
-
 									<option value="daftar">daftar</option>
-
 									<option value="dokter">dokter</option>
-
 									<option value="kasir">kasir</option>
-
 									<option value="inap">inap</option>
-
 									<option value="kosmetik">kosmetik</option>
 									<option value="sup">sup</option>
 									<option value="lab">lab</option>
 								</select>
 							</div>
-
 							<div class="mb-3">
 								<label for="">Foto</label>
 								<input type="file" class="form-control" name="foto" placeholder="foto" value="<?php echo $data["foto"]; ?>">
 							</div>
-
-
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 								<button class="btn btn-primary" name="update">Update</button>
@@ -205,7 +219,7 @@ $tenaga = $koneksi->query("SELECT * FROM admin;");
 	<?php endforeach; ?>
 
 	<?php foreach ($tenaga as $data) : ?>
-		<div class="modal fade" id="dokterkonsul<?= $data['idadmin']?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal fade" id="dokterkonsul<?= $data['idadmin'] ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
