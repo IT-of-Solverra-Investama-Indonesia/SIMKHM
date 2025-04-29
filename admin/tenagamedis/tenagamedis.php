@@ -112,7 +112,7 @@ $tenaga = $koneksi->query("SELECT * FROM admin;");
 				<form method="post">
 					<div class="modal-body">
 						<input type="number" name="idadmin" id="id" class="form-control" hidden>
-						<input type="number" name="SIP" id="sip" class="form-control">
+						<input type="text" name="SIP" id="sip" class="form-control">
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
