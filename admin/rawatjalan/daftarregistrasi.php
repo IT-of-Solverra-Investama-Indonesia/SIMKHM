@@ -28,6 +28,7 @@ if (isset($_GET['day'])) {
   }
 } else {
   $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY kode DESC";
+  $limit = 300; // Number of entries to show in a page
   $linkPage = "index.php?halaman=daftarregistrasi";
 }
 

@@ -155,8 +155,9 @@ function getFullUrl()
 							<a href="<?= getFullUrl() ?>&print=hvs" class="btn btn-sm btn-primary" target="_blank"><i class="bi bi-printer-fill"></i> HVS</a>
 							<?php
 							$getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $ambilSingle['no_rm'] . "'")->fetch_assoc();
+							include '../rawatjalan/api_token_wa.php';
 							?>
-							<a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
+							<a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=<?= $newMes = str_replace('rating.php', 'ratinginap.php', $mes); ?><?= $_GET['id']?>. Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
 						<?php } ?>
 					</p>
 				</div>

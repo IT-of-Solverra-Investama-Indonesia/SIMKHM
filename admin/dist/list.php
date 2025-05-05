@@ -171,6 +171,8 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                   elseif ($hal=="daftarpasienkosmetik"){include '../dist/daftarpasienkosmetik.php';}
                   elseif ($hal=="editdaftarpasienkosmetik"){include '../dist/editdaftarpasienkosmetik.php';}
 
+                  elseif ($hal=="profile"){include '../dist/profile.php';}  
+
 
 
                    ELSE {

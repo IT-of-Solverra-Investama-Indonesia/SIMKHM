@@ -1,37 +1,4 @@
 <?php
-if (isset($_GET['submit'])) {
-  $keyword = $_GET['keyword'];
-  $query = "SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek WHERE nama_obat LIKE '%$keyword%' OR id_obat LIKE '%$keyword%' GROUP BY id_obat order by nama_obat ASC";
-  $urlPage = "index.php?halaman=daftarapotek&keyword=" . htmlspecialchars($_GET['keyword']) . "";
-} else {
-  $query = "SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GROUP BY id_obat order by nama_obat ASC";
-  $urlPage = "index.php?halaman=daftarapotek";
-}
-
-
-//   Pagination
-// Parameters for pagination
-$limit = 30; // Number of entries to show in a page
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$start = ($page - 1) * $limit;
-
-// Get the total number of records
-$result = $koneksi->query($query);
-$total_records = $result->num_rows;
-
-// Calculate total pages
-$total_pages = ceil($total_records / $limit);
-
-$cekPage = '';
-if (isset($_GET['page'])) {
-  $cekPage = $_GET['page'];
-} else {
-  $cekPage = '1';
-}
-// End Pagination
-
-// $tgl_mulai = date('2024-03-28');
-$pasien = $koneksi->query($query . " LIMIT $start, $limit;");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,18 +37,6 @@ $pasien = $koneksi->query($query . " LIMIT $start, $limit;");
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Data Apotek</h5>
-          <form method="GET">
-            <div class="form-group row">
-              <div class="col-md-6">
-                <input type="text" name="halaman" id="" value="daftarapotek" hidden>
-                <input type="text" name="submit" id="" value="" hidden>
-                <input type="text" name="keyword" placeholder="Cari Obat" class="form-control" id="keyword">
-              </div>
-              <div class="col-md-3">
-                <button type="submit" class="btn btn-primary" name="submit">Cari</button>
-              </div>
-            </div>
-          </form>
 
           <form method="POST">
             <!-- Multi Columns Form -->
@@ -93,113 +48,21 @@ $pasien = $koneksi->query($query . " LIMIT $start, $limit;");
                     <th>No</th>
                     <th>Nama Obat</th>
                     <th>Kode Obat</th>
-                    <!-- <th>Tipe Obat</th> -->
                     <th>Jumlah Obat</th>
-                    <!-- <th>Margin Inap</th> -->
-                    <!-- <th>Margin Non Inap</th> -->
                     <th>Harga Beli</th>
                     <th>Aktif Ranap</th>
                     <th>Aktif Poli</th>
-                    <th></th>
-                    <!-- <th>Aksi</th> -->
+                    <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php $no = 1 ?>
-                  <?php foreach ($pasien as $pecah) : ?>
-                    <?php
-                    $single = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$pecah[id_obat]' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-                    ?>
-                    <tr>
-                      <td>
-                        <input type="checkbox" name="selectedIds[]" value="<?= $pecah['id_obat'] ?>">
-                      </td>
-                      <td><?php echo $no; ?></td>
-                      <td style="margin-top:10px;"><?php echo $pecah["nama_obat"]; ?></td>
-                      <td style="margin-top:10px;"><?php echo $pecah["id_obat"]; ?></td>
-                      <!-- <td style="margin-top:10px;"><?php echo $pecah["tipe"]; ?></td> -->
-                      <td style="margin-top:10px;"><?php echo $pecah["jumlah_beli"]; ?></td>
-                      <!-- <td style="margin-top:10px;"><?php echo $pecah["margininap"]; ?></td> -->
-                      <!-- <td style="margin-top:10px;"><?php echo $pecah["marginnoninap"]; ?></td> -->
-                      <td style="margin-top:10px;"><?php echo $single["harga_beli"]; ?></td>
-                      <td>
-                        <?php if ($pecah["aktif_ranap"] == "aktif") { ?>
-                          <a href="index.php?halaman=daftarapotek&aktifranap=nonaktif&kode_obat=<?= $pecah["id_obat"] ?>" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
-                        <?php } else { ?>
-                          <a href="index.php?halaman=daftarapotek&aktifranap=aktif&kode_obat=<?= $pecah["id_obat"] ?>" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
-                        <?php } ?>
-                      </td>
-                      <td>
-                        <?php if ($pecah["aktif_poli"] == "aktif") { ?>
-                          <a href="index.php?halaman=daftarapotek&aktifpoli=nonaktif&kode_obat=<?= $pecah["id_obat"] ?>" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
-                        <?php } else { ?>
-                          <a href="index.php?halaman=daftarapotek&aktifpoli=aktif&kode_obat=<?= $pecah["id_obat"] ?>" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
-                        <?php } ?>
-                      </td>
-                      <td>
-                        <a href="index.php?halaman=detailapotek&id=<?php echo $pecah["id_obat"]; ?>" class="btn btn-sm btn-primary" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye"></i></a>
-                        <!-- <div class="dropdown"> -->
-                        <!-- <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i> -->
-                        <!-- <ul class="dropdown-menu">
-                            <li></li> -->
-                        <!-- <li><a href="index.php?halaman=ubahapotek&id=<?php echo $pecah["idapotek"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-pencil" style="color:blueviolet;"></i> Ubah</a></li> -->
-                        <!-- <li><a href="index.php?halaman=hapusapotek&id=<?php echo $pecah["idapotek"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
-                              <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li> -->
-                        <!-- </ul> -->
-                        <!-- </div> -->
-                      </td>
-                    </tr>
-                    <?php $no += 1 ?>
-                  <?php endforeach ?>
-
+                  <!-- Data akan diisi oleh DataTables via AJAX -->
                 </tbody>
               </table>
             </div>
 
-            <?php
-            // Display pagination
-            echo '<nav>';
-            echo '<ul class="pagination justify-content-center">';
 
-            // Back button
-            if ($page > 1) {
-              echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page - 1) . '">Back</a></li>';
-            }
 
-            // Determine the start and end page
-            $start_page = max(1, $page - 2);
-            $end_page = min($total_pages, $page + 2);
-
-            if ($start_page > 1) {
-              echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=1">1</a></li>';
-              if ($start_page > 2) {
-                echo '<li class="page-item"><span class="page-link">...</span></li>';
-              }
-            }
-
-            for ($i = $start_page; $i <= $end_page; $i++) {
-              if ($i == $page) {
-                echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-              } else {
-                echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $i . '">' . $i . '</a></li>';
-              }
-            }
-
-            if ($end_page < $total_pages) {
-              if ($end_page < $total_pages - 1) {
-                echo '<li class="page-item"><span class="page-link">...</span></li>';
-              }
-              echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
-            }
-
-            // Next button
-            if ($page < $total_pages) {
-              echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page + 1) . '">Next</a></li>';
-            }
-
-            echo '</ul>';
-            echo '</nav>';
-            ?>
             <div class="row mb-3 mt-3">
               <div class="col-4">
                 <select name="selectedItem" class="form-control" id="">
@@ -279,7 +142,7 @@ if (isset($_POST['status'])) {
 
 ?>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.0/css/dataTables.dataTables.css" />
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.0/css/buttons.dataTables.css" />
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
@@ -291,11 +154,75 @@ if (isset($_POST['status'])) {
 <script>
   $(document).ready(function() {
     $('#myTable').DataTable({
-      dom: 'Bfrtip',
-      buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-      paging: false,
-      order: false,
-      searching: false,
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: '../apotek/daftarapotek_api.php?getData',
+        type: 'POST'
+      },
+      lengthMenu: [10, 30, 50, 100, 10000],
+      pageLength: 30,
+      // dom: 'Bfrtip',
+      // buttons: [
+      //   'excel', // Tombol Export Excel
+      //   'print' // Tombol Print
+      // ],
+      columns: [{
+          data: null,
+          render: function(data, type, row) {
+            return `<input type="checkbox" name="selectedIds[]" value="${row.id_obat}">`;
+          },
+          orderable: false
+        },
+        {
+          data: null,
+          render: function(data, type, row, meta) {
+            return meta.row + meta.settings._iDisplayStart + 1;
+          },
+          orderable: false
+        },
+        {
+          data: 'nama_obat'
+        },
+        {
+          data: 'id_obat'
+        },
+        {
+          data: 'jumlah_beli'
+        },
+        {
+          data: 'harga_beli'
+        },
+        {
+          data: 'aktif_ranap',
+          render: function(data, type, row) {
+            if (data === 'aktif') {
+              return `<a href="index.php?halaman=daftarapotek&aktifranap=nonaktif&kode_obat=${row.id_obat}" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>`;
+            } else {
+              return `<a href="index.php?halaman=daftarapotek&aktifranap=aktif&kode_obat=${row.id_obat}" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>`;
+            }
+          },
+          orderable: false
+        },
+        {
+          data: 'aktif_poli',
+          render: function(data, type, row) {
+            if (data === 'aktif') {
+              return `<a href="index.php?halaman=daftarapotek&aktifpoli=nonaktif&kode_obat=${row.id_obat}" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>`;
+            } else {
+              return `<a href="index.php?halaman=daftarapotek&aktifpoli=aktif&kode_obat=${row.id_obat}" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>`;
+            }
+          },
+          orderable: false
+        },
+        {
+          data: 'id_obat',
+          render: function(data) {
+            return `<a href="index.php?halaman=detailapotek&id=${data}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>`;
+          },
+          orderable: false
+        }
+      ]
     });
   });
 </script>

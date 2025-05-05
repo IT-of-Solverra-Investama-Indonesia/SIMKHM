@@ -48,7 +48,7 @@
 <?php
   //   Pagination
     // Parameters for pagination
-    $limit = 10; // Number of entries to show in a page
+    $limit = 50; // Number of entries to show in a page
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $start = ($page - 1) * $limit;
 

@@ -604,6 +604,10 @@ if (!isset($_SESSION['login'])) {
             <span>Rating Per User</span>
           </a>
         <?php } ?>
+        <a class="nav-link collapsed" href="index.php?halaman=profile">
+          <i class="bi bi-person-circle"></i>
+          <span>Profile</span>
+        </a>
         <a class="nav-link collapsed" href="logout.php">
           <i class="bi bi-box-arrow-in-right"></i>
           <span>Logout</span>
