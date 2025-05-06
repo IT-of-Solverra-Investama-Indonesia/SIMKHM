@@ -225,10 +225,10 @@ if ($pas['jenis_kelamin'] == '1') {
                       <div id="anamnesa">
                         <div class="row g-1">
                           <div>
-                            <h6 class="mt-2 mb-0"><b>Anamnesa <sup data-bs-toggle="modal" data-bs-target="#masterAssesment" class="text-primary">M</sup></b></h6>
+                            <h6 class="mt-2 mb-0"><b>Anamnesa</b></h6>
                           </div>
                           <!-- Modal -->
-                          <div class="modal fade" id="masterAssesment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                          <!-- <div class="modal fade" id="masterAssesment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                               <div class="modal-content">
                                 <div class="modal-header">
@@ -283,7 +283,7 @@ if ($pas['jenis_kelamin'] == '1') {
                                 modal.hide();
                               }
                             }
-                          </script>
+                          </script> -->
                           <!-- end Modal  -->
                           <div class="col-md-6">
                             <label for="inputName5" class="form-label mt-2 mb-0">Keluhan Utama</label>
@@ -291,13 +291,14 @@ if ($pas['jenis_kelamin'] == '1') {
                             <textarea name="keluhan_utama" placeholder="Keluhan Utama" id="keluhanUtama" class="form-control form-control-sm"><?php echo $pecah['keluhan_utama'] ?></textarea>
                           </div>
                           <div class="col-md-6">
+                            <label for="inputName5" class="form-label mt-2 mb-0">Keluhan Tambahan</label>
+                            <!-- <input type="text" class="form-control form-control-sm" id="inputName5" name="anamnesa" value="<?php echo $rm['anamnesa'] ?>" placeholder="Anamnesa"> -->
+                            <textarea name="anamnesa" id="inputName5" placeholder="Anamnesa" class="form-control form-control-sm"><?php echo $rm['anamnesa'] ?></textarea>
+                          </div>
+                          <div class="col-md-12">
                             <label for="inputName5" class="form-label mt-2 mb-0">Objective</label>
                             <!-- <input type="text" class="form-control form-control-sm" id="inputName5" name="objective" value="<?php echo $pecah['objective'] ?? '' ?>" placeholder="Objectieve"> -->
                             <textarea name="objective" id="objectiveText" class="form-control form-control-sm"><?php echo $rm['objective'] ?></textarea>
-                          </div>
-                          <div class="col-md-12">
-                            <label for="inputName5" class="form-label mt-2 mb-0">Keluhan Tambahan</label>
-                            <input type="text" class="form-control form-control-sm" id="inputName5" name="anamnesa" value="<?php echo $rm['anamnesa'] ?>" placeholder="Anamnesa">
                           </div>
                         </div>
                       </div>
@@ -764,7 +765,6 @@ if ($pas['jenis_kelamin'] == '1') {
                     <label for="inputName5" class="form-label">Racik Ke-</label><br>
                     <input type="number" name="racik" class="form-control form-control-sm w-100" style="width:100%;" aria-label="Default select example">
                     <label for="inputName5" class="form-label">Nama Obat</label><br>
-                    <!-- <input type="text" name="nama_obat" class="form-control form-control-sm" id="inputName5" placeholder="Layanan/Tindakan"> -->
                     <select name="nama_obat[]" class="form-control form-control-sm w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
                       <option value="">Pilih</option>
                       <?php
@@ -779,17 +779,6 @@ if ($pas['jenis_kelamin'] == '1') {
                       <?php } ?>
                     </select>
                   </div>
-                  <!-- <div class="col-md-12" style="margin-top:20px">
-                      <label for="inputName5" class="form-label">Kode Obat</label>
-                      <select name="kode_obat[]" id="" class="form-select">
-                        <?php
-                        $getObat = $koneksi->query("SELECT * FROM apotek ORDER BY nama_obat ASC");
-                        foreach ($getObat as $data) {
-                        ?>
-                          <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] . " || " . $data['id_obat'] ?></option>
-                        <?php } ?>
-                      </select>
-                  </div> -->
                   <script></script>
                   <div class="col-md-12" style="margin-top:20px">
                     <label for="">Jumlah Obat</label>
@@ -805,7 +794,6 @@ if ($pas['jenis_kelamin'] == '1') {
                 <br>
                 <div class="control-group">
                   <label for="inputName5" class="form-label">Nama Obat</label>
-                  <!-- <input type="text" name="nama_obat" class="form-control form-control-sm" id="inputName5" placeholder="Layanan/Tindakan"> -->
                   <select name="nama_obat[]" class="form-control form-control-sm " id="selObat1" aria-label="Default select example">
                     <option value="">Pilih</option>
 
@@ -820,15 +808,6 @@ if ($pas['jenis_kelamin'] == '1') {
                       <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                     <?php } ?>
                   </select>
-                  <!-- <label for="inputName5" class="form-label">Kode Obat</label>
-                  <select name="kode_obat[]" id="" class="form-select">
-                      <?php
-                      $getObat = $koneksi->query("SELECT * FROM apotek ORDER BY nama_obat ASC");
-                      foreach ($getObat as $data) {
-                      ?>
-                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] . " || " . $data['id_obat'] ?></option>
-                      <?php } ?>
-                  </select> -->
                   <div class="col-md-12" style="margin-top:20px">
                     <label for="">Jumlah Obat</label>
                     <input type="number" name="jml_dokter[]" class="form-control form-control-sm" id="inputName5" placeholder="jumlah obat">
@@ -839,14 +818,12 @@ if ($pas['jenis_kelamin'] == '1') {
                 </div>
               </div>
               <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                <!-- <label for="inputName5" class="form-label">Catatan Interaksi Obat</label> -->
                 <input type="text" name="catatan_obat[]" value="-" hidden class="form-control form-control-sm" id="inputName5" placeholder="Masukkan Jumlah">
               </div>
               <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
                 <label for="inputName5" class="form-label">Jenis Obat</label>
                 <select name="jenis_obat[]" class="form-control form-control-sm">
                   <option value="Racik">Racik</option>
-                  <!-- <option value="Jadi">Jadi</option> -->
                 </select>
               </div>
               <label for="inputName5" class="form-label">Dosis</label>
