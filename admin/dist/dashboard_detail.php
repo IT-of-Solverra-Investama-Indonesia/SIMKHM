@@ -508,7 +508,9 @@ if (isset($_POST['searching'])) {
     $urlFormApp = "index.php?halaman=dashboard_detail&cashflow&&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "";
     ?>
     <div class="card shadow p-2">
-      <?= file_get_contents($baseUrlLama . "api_personal/api_cashflow.php?getAllCashflow&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "&html") ?>
+      <div class="table-responsive">
+        <?= file_get_contents($baseUrlLama . "api_personal/api_cashflow.php?getAllCashflow&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "&html") ?>
+      </div>
     </div>
   <?php } else { ?>
     <?php
