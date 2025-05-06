@@ -74,9 +74,32 @@ $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
                     <div class="col-md-6">
                       <label for="inputName5" class="form-label">No RM*</label>
                       <?php
-                      $norm = $koneksi->query("SELECT * FROM pasien WHERE no_rm REGEXP '^[0-9]+$' ORDER BY no_rm DESC LIMIT 1")->fetch_assoc();
+                      include
+                        include "../dist/baseUrlAPI.php";
+                      $api_url = $baseUrlLama . "api_personal/api_rekamMedis.php?newRekamMedis";
+
+                      // Inisialisasi cURL
+                      $ch = curl_init();
+                      curl_setopt($ch, CURLOPT_URL, $api_url);
+                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                      curl_setopt($ch, CURLOPT_HEADER, false);
+
+                      // Eksekusi request
+                      $response = curl_exec($ch);
+
+                      // Cek error
+                      if (curl_errno($ch)) {
+                        echo 'Error: ' . curl_error($ch);
+                      } else {
+                        $noRM = $response;
+                        // echo "Nomor Rekam Medis berikutnya: " . $noRM;
+                      }
+
+                      // Tutup koneksi
+                      curl_close($ch);
+                      // $norm = $koneksi->query("SELECT * FROM pasien WHERE no_rm REGEXP '^[0-9]+$' ORDER BY no_rm DESC LIMIT 1")->fetch_assoc();
                       ?>
-                      <input type="text" class="form-control" name="no_rm" value="<?= $norm['no_rm'] + 1 ?>" id="inputName5" placeholder="Masukkan RM Pasien" required>
+                      <input type="text" class="form-control" name="no_rm" value="<?= $noRM ?>" id="inputName5" placeholder="Masukkan RM Pasien" required>
                     </div>
                     <div class="col-md-6">
                       <label for="inputName5" class="form-label">Tanggal Lahir*</label>
