@@ -6,7 +6,7 @@ $perawat = $_SESSION['admin']['username'];
 $date = date("Y-m-d");
 $queryKey = '';
 
-$limit = 30; // Number of entries to show in a page
+$limit = 20; // Number of entries to show in a page
 
 
 if (isset($_POST['src'])) {
@@ -21,14 +21,14 @@ if (isset($_GET['day'])) {
   // $queryPasien = "SELECT * FROM registrasi_rawat INNER JOIN rekam_medis ON rekam_medis.jadwal = registrasi_rawat.jadwal WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY idrawat DESC";
   $linkPage = "index.php?halaman=daftarregistrasi&all";
   if (isset($_POST['filter'])) {
-    $limit = 30;
+    $limit = 20;
     $tgl_awal = $_POST['tgl_awal'];
     $tgl_akhir = $_POST['tgl_akhir'];
     $queryPasien = "SELECT * FROM registrasi_rawat INNER JOIN rekam_medis ON rekam_medis.jadwal = registrasi_rawat.jadwal WHERE perawatan = 'Rawat Jalan' AND registrasi_rawat.jadwal BETWEEN '$tgl_awal' AND '$tgl_akhir' " . $queryKey . " ORDER BY idrawat DESC";
   }
 } else {
   $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' " . $queryKey . " ORDER BY kode DESC";
-  $limit = 300; // Number of entries to show in a page
+  $limit = 20; // Number of entries to show in a page
   $linkPage = "index.php?halaman=daftarregistrasi";
 }
 
@@ -446,7 +446,7 @@ if (isset($_GET['detail'])) {
                   </form>
                   <!-- Multi Columns Form -->
                   <div class="table-responsive">
-                    <table class="table table-striped" style="width:100%; font-size: 13px;">
+                    <table class="table table-striped" style="width:100%; font-size: 12px;">
                       <thead>
                         <tr>
                           <th>No</th>
@@ -457,13 +457,12 @@ if (isset($_GET['detail'])) {
                           <th>Jenis Perawatan</th>
                           <th>Dokter</th>
                           <th>No RM</th>
-                          <th>Jadwal</th>
+                          <!-- <th>Jadwal</th> -->
                           <th>Antrian</th>
                           <th>Cara Bayar</th>
                           <th>Status</th>
                           <th></th>
                           <!-- <th>Aksi</th> -->
-
                         </tr>
                       </thead>
                       <tbody>
@@ -471,7 +470,9 @@ if (isset($_GET['detail'])) {
                         <?php $no = 1 ?>
 
                         <?php foreach ($pasien as $pecah) : ?>
-
+                          <?php
+                          $getSinglePasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$pecah[no_rm]' LIMIT 1")->fetch_assoc();
+                          ?>
                           <tr>
                             <?php if ($pecah['kategori'] == 'offline') { ?>
                               <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')"><?php echo $no; ?></td>
@@ -480,32 +481,36 @@ if (isset($_GET['detail'])) {
                               <!-- <td style="background-color: green; color:white;"><?php echo $no; ?></td> -->
                             <?php } ?>
                             <?php if ($pecah['kategori'] == 'offline') { ?>
-                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;" onMouseOver="this.style.background-color='red'"><?php echo $pecah["nama_pasien"]; ?><br><span style="font-size: 9px;"><?= $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$pecah[no_rm]' LIMIT 1")->fetch_assoc()['no_bpjs']; ?></span></td>
+                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;" onMouseOver="this.style.background-color='red'"><?php echo $pecah["nama_pasien"]; ?><br>
+                                <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
+                              </td>
                             <?php } else { ?>
-                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px; background-color: green; color:white;"><?php echo $pecah["nama_pasien"]; ?><br><span style="font-size: 9px;"><?= $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$pecah[no_rm]' LIMIT 1")->fetch_assoc()['no_bpjs']; ?></span></td>
+                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px; background-color: green; color:white;"><?php echo $pecah["nama_pasien"]; ?><br>
+                                <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
+                              </td>
                             <?php } ?>
                             <?php if (isset($_GET['all'])) { ?>
-                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["diagnosis"]; ?></td>
+                              <td style="margin-top:10px;"><?php echo $pecah["diagnosis"]; ?></td>
                             <?php } ?>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                             <?php
                             $jadwal = strtotime($pecah['jadwal']) - (3600 * 7);
                             $date = $jadwal;
                             // date_add($date, date_interval_create_from_date_string('-2 hours'));
                             // echo date_format($date, 'Y-m-d\TH:i:s');
                             ?>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;"> <?= $pecah['jadwal'] ?></td>
+                            <!-- <td style="margin-top:10px;"> <?= $pecah['jadwal'] ?></td> -->
                             <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
                             <td>
                               <?= $pecah['carabayar'] ?>
                             </td>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px;">
+                            <td style="margin-top:10px;">
                               <?php if ($pecah["status_antri"] == 'Datang') { ?>
-                                <h6 style="color:green"><?php echo $pecah["status_antri"]; ?></h6>
+                                <span style="color:green"><?php echo $pecah["status_antri"]; ?></span>
                               <?php } else { ?>
-                                <h6 style="color:red"><?php echo $pecah["status_antri"]; ?></h6>
+                                <span style="color:red"><?php echo $pecah["status_antri"]; ?></span>
                               <?php }  ?>
                             </td>
                             <td>
@@ -617,7 +622,7 @@ if (isset($_GET['detail'])) {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } elseif ($getBPJS['carabayar'] == 'malam') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('50000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
-  } elseif ($getBPJS['carabayar'] == 'spesialis anak' OR $getBPJS['carabayar'] == 'spesialis penyakit dalam') {
+  } elseif ($getBPJS['carabayar'] == 'spesialis anak' or $getBPJS['carabayar'] == 'spesialis penyakit dalam') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('100000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } else {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('20000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");

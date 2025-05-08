@@ -347,15 +347,21 @@ if (isset($_POST['searching'])) {
         </thead>
         <tbody>
           <?php
-          $getData = $koneksi->query("SELECT registrasi_rawat.*, pasien.nama_lengkap, pasien.nohp FROM registrasi_rawat INNER JOIN pasien ON pasien.no_rm = registrasi_rawat.no_rm WHERE DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['polibpjs']) . "' AND carabayar = 'bpjs' ORDER BY idrawat DESC");
+          //   $getData = $koneksi->query("SELECT registrasi_rawat.*, pasien.nama_lengkap, pasien.nohp FROM registrasi_rawat INNER JOIN pasien ON pasien.no_rm = registrasi_rawat.no_rm WHERE DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['polibpjs']) . "' AND carabayar = 'bpjs' ORDER BY idrawat DESC");
+          $getData = $koneksi->query("SELECT registrasi_rawat.* FROM registrasi_rawat WHERE DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['polibpjs']) . "' AND carabayar = 'bpjs' ORDER BY idrawat DESC");
           foreach ($getData as $data) {
           ?>
             <tr>
               <td><?= $data['idrawat'] ?></td>
               <td><?= $data['jadwal'] ?></td>
-              <td><?= $data['nama_lengkap'] ?></td>
+              <td><?= $data['nama_pasien'] ?></td>
               <td><?= $data['no_rm'] ?></td>
-              <td><?= $data['nohp'] ?></td>
+              <td>
+                <?php
+                $getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$data[no_rm]'")->fetch_assoc();
+                ?>
+                <?= $getPasien['nohp'] ?? 'Data Tidak Cocok' ?>
+              </td>
               <td><?= $data['carabayar'] ?></td>
               <td><?= $data['status_antri'] ?></td>
             </tr>
@@ -514,7 +520,7 @@ if (isset($_POST['searching'])) {
     </div>
   <?php } else { ?>
     <?php
-    $url = $baseUrlLama . "api_personal/api_cashflow.php?&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "&akun=". htmlspecialchars($_GET['akun'])."&hal=" . htmlspecialchars($_GET['hal']) . "&cashflowDetail";
+    $url = $baseUrlLama . "api_personal/api_cashflow.php?&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "&akun=" . htmlspecialchars($_GET['akun']) . "&hal=" . htmlspecialchars($_GET['hal']) . "&cashflowDetail";
     $response = file_get_contents($url);
     $data = json_decode($response, true);
     if ($data['status'] == 'Successfully') {
@@ -543,10 +549,10 @@ if (isset($_POST['searching'])) {
                 <td><?= $item['namaakun'] ?></td>
                 <td><?= number_format($item['debet'], 0, ',', '.') ?></td>
                 <td><?= number_format($item['kredit'], 0, ',', '.') ?></td>
-                <td><?= $item['ket1']?></td>
-                <td><?= $item['ket2']?></td>
+                <td><?= $item['ket1'] ?></td>
+                <td><?= $item['ket2'] ?></td>
               </tr>
-              <?php 
+              <?php
               $totalDebet += $item['debet'];
               $totalKredit += $item['kredit'];
               ?>

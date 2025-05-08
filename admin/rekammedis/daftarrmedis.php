@@ -24,7 +24,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
 
   //   Pagination
   // Parameters for pagination
-  $limit = 30; // Number of entries to show in a page
+  $limit = 20; // Number of entries to show in a page
   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
   $start = ($page - 1) * $limit;
 
@@ -76,7 +76,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri!='') " . $queryKey . " order by idrawat desc";
   //   Pagination
   // Parameters for pagination
-  $limit = 30; // Number of entries to show in a page
+  $limit = 20; // Number of entries to show in a page
   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
   $start = ($page - 1) * $limit;
 
@@ -181,7 +181,6 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                   </thead>
                   <tbody>
                     <?php
-
                     $getRm = $koneksi->query("SELECT * FROM rekam_medis WHERE norm='$_GET[detail]' ORDER BY jadwal DESC LIMIT 5");
                     foreach ($getRm as $data) {
                     ?>
@@ -428,7 +427,6 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
             <div class="col-lg-12 col-md-12">
               <div class="card">
                 <div class="card-body">
-
                   <h5 class="card-title mb-0" style="margin-bottom: -10px;">Daftar Pasien</h5>
                   <?php if (!isset($_GET['all'])) { ?>
                     <p style="margin-top: -20px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data pasien datang pada hari ini saja</p>
@@ -597,9 +595,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           <th>Jenis Perawatan</th>
                           <th>Dokter</th>
                           <th>No RM</th>
-                          <th>Jadwal</th>
+                          <!-- <th>Jadwal</th> -->
                           <th>Antrian</th>
-                          <th>Diagnosis</th>
+                          <!-- <th>Diagnosis</th> -->
                           <th>CaraBayar</th>
                           <?php if (!isset($_GET['racik'])) { ?>
                             <th>Status</th>
@@ -631,7 +629,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 echo 'class="bg-success text-light"';
                               } ?>>
                               <?php echo $no; ?></td>
-                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?><br><span style="font-size: 9px;"><?= $getPasien['alamat'] ?></span></td>
+                            <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?><br>
+                              <p class="mt-0 mb-0" style="font-size: 8px; line-height: 10px;"><?= $getPasien['alamat'] ?> | <?php echo $getLastRM["diagnosis"]; ?> <br> <?php echo $pecah["jadwal"]; ?></p>
+                            </td>
                             <td style="margin-top:10px;">
                               <?php echo $pecah["perawatan"]; ?>
                               <?php if ($pecah["perawatan"] == "Rawat Inap") { ?>
@@ -641,9 +641,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                             </td>
                             <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
-                            <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td>
+                            <!-- <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td> -->
                             <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
-                            <td style="margin-top:10px;"><?php echo $getLastRM["diagnosis"]; ?></td>
+                            <!-- <td style="margin-top:10px;"><?php echo $getLastRM["diagnosis"]; ?></td> -->
                             <td style="margin-top:10px;"><?php echo $pecah["carabayar"]; ?></td>
                             <?php if (!isset($_GET['racik'])) { ?>
                               <td style="margin-top:10px;">

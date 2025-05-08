@@ -16,8 +16,54 @@ if (isset($_GET['idlpo'])) {
   $dataCopy = $koneksi->query("SELECT * FROM lpo WHERE id_lpo = '$ConditionCopy'")->fetch_assoc();
 }
 
+function getFullUrl()
+{
+  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ||
+    $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+  return $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+}
+function getUniqeIdObat($koneksi)
+{
+  $newId = $koneksi->query("SELECT * FROM obat_rm ORDER BY idobat DESC LIMIT 1")->fetch_assoc()['idobat'] + 1;
+  while ($koneksi->query("SELECT COUNT(*) FROM obat_rm WHERE idobat = $newId")->fetch_row()[0] > 0) {
+    $newId++;
+  }
+  return $newId;
+}
+
+function getLastWord($inputString)
+{
+  // Trim the input string to remove any leading or trailing whitespace
+  $trimmedString = trim($inputString);
+
+  // Check if the trimmed string is empty
+  if (empty($trimmedString)) {
+    return "The input string is empty.";
+  }
+
+  // Split the string into an array of words using space as the delimiter
+  $wordsArray = explode(' ', $trimmedString);
+
+  // Count the number of words in the array
+  $wordCount = count($wordsArray);
+
+  // Check if the string contains exactly three words
+  if ($wordCount !== 3) {
+    return "The input string does not contain exactly three words.";
+  }
+
+  // Get the last word from the array
+  $lastWord = $wordsArray[$wordCount - 1];
+
+  // Return the last word
+  return $lastWord;
+}
 ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <?php if (!isset($_GET['view'])) { ?>
   <main>
     <div class="">
@@ -30,6 +76,7 @@ if (isset($_GET['idlpo'])) {
           </ol>
         </nav>
       </div><!-- End Page Title -->
+
       <form class="row g-3" method="post" enctype="multipart/form-data">
         <div class="container">
           <div class="row">
@@ -37,37 +84,41 @@ if (isset($_GET['idlpo'])) {
               <div class="card" style="margin-top:10px">
                 <div class="card-body col-md-12">
                   <h5 class="card-title">Data Pasien</h5>
-                  <!-- Multi Columns Form -->
+                  <h5 class="card-title"><?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir: <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?> <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK: <?php if ($pasien["jenis_kelamin"] == 1) {
+                                                                                                                                                                                                                                                                                                                                          echo "Laki-Laki";
+                                                                                                                                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                                                                                                                                          echo "Perempuan";
+                                                                                                                                                                                                                                                                                                                                        } ?></h5>
                   <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-6" style="margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Nama Pasien</label>
                       <input type="text" class="form-control" name="pasien" id="inputName5" value="<?php echo $pasien['nama_lengkap'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
-                    <div class="col-md-6" style="margin-bottom:20px;">
+                    <div class="col-md-6" style="margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">No RM</label>
                       <input type="text" class="form-control" id="inputName5" name="norm" value="<?php echo $pasien['no_rm'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
-                    <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
+                    <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Tanggal Lahir</label>
                       <input type="text" class="form-control" id="inputName5" name="tgl_lahir" value="<?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
-                    <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
+                    <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Alamat</label>
                       <input type="text" class="form-control" id="inputName5" name="alamat" value="<?php echo $pasien['alamat'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
                     <?php if (!isset($_GET['igd'])) { ?>
-                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
+                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                         <label for="inputName5" class="form-label">Ruangan</label>
                         <input type="text" class="form-control" id="inputName5" name="kamar" value="<?php echo $jadwal['kamar'] ?>" placeholder="Masukkan Nama Pasien">
                       </div>
                     <?php } ?>
                     <?php if ($pasien["jenis_kelamin"] == 1) { ?>
-                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
+                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                         <label for="inputName5" class="form-label">Jenis Kelamin</label>
                         <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Laki-laki" placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                     <?php } else { ?>
-                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
+                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                         <label for="inputName5" class="form-label">Jenis Kelamin</label>
                         <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Perempuan" placeholder="Masukkan Nama Pasien" readonly>
                       </div>
@@ -75,90 +126,158 @@ if (isset($_GET['idlpo'])) {
                   </div>
                 </div>
               </div>
-              <br>
-              <div class="card shadow p-3" id="observasiZone">
-                <h5 class="card-title">OBSERVASI PERAWAT</h5>
-                <div class="row">
-                  <div class="col-md-6">
-                    <label for="">Diagnosa</label>
-                    <input type="text" class="form-control mb-3" name="diagnosa" <?= $ConditionCopy != 0 ? "value='$dataCopy[diagnosa]'" : "" ?> id="" placeholder="Diagnosa">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Tanggal & Waktu</label>
-                    <input type="datetime-local" class="form-control mb-3" name="tgl_waktu" <?= $ConditionCopy != 0 ? "value='$dataCopy[tgl_waktu]'" : "" ?> id="" placeholder="Tanggal dan Waktu">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Tensi Darah</label>
-                    <input type="text" class="form-control mb-3" name="tensi" <?= $ConditionCopy != 0 ? "value='$dataCopy[tensi]'" : "" ?> id="" placeholder="Tensi Darah">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Suhu Tubuh</label>
-                    <input type="text" class="form-control mb-3" name="suhu" <?= $ConditionCopy != 0 ? "value='$dataCopy[suhu]'" : "" ?> id="" placeholder="Suhu Tubuh">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Cairan Ke</label>
-                    <input type="text" class="form-control mb-3" name="cairan" <?= $ConditionCopy != 0 ? "value='$dataCopy[cairan]'" : "" ?> id="" placeholder="Cairan Ke">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Volume Cairan</label>
-                    <input type="text" class="form-control mb-3" name="volume" <?= $ConditionCopy != 0 ? "value='$dataCopy[volume]'" : "" ?> id="" placeholder="Volume Cairan">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Keadaan Umum</label>
-                    <input type="text" class="form-control mb-3" name="keadaan_umum" <?= $ConditionCopy != 0 ? "value='$dataCopy[keadaan_umum]'" : "" ?> id="" placeholder="Keadaan Umum">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Keluhan Pasien</label>
-                    <textarea name="keluhan_pasien" id="" class="form-control mb-2" placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Cairan Infus</label>
-                    <input type="text" class="form-control mb-3" name="infus" <?= $ConditionCopy != 0 ? "value='$dataCopy[infus]'" : "" ?> id="" placeholder="Cairan Infus">
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Tindakan</label>
-                    <textarea name="tindakan" id="" class="form-control mb-2" placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="">Perawat</label>
-                    <input type="text" class="form-control mb-3" name="perawat" <?= $ConditionCopy != 0 ? "value='$dataCopy[perawat]'" : "" ?> readonly value="<?= $petugas ?>" placeholder="">
-                  </div>
-                  <!-- <button class="btn btn-primary w-40" name="save">Simpan</button> -->
-                </div>
-                <div class="text-center" style="margin-top: 10px; margin-bottom: 40px;">
-                  <button type="submit" name="save" class="btn btn-primary">Simpan Dulu</button>
-                  <button type="reset" class="btn btn-secondary">Reset</button>
-                </div>
-              </div>
-              <script>
-                function changeJenis(jenisObat) {
-                  var jenis3 = document.getElementById('jenis3');
-                  var jenis2 = document.getElementById('jenis2');
-                  jenis3.value = jenisObat;
-                  jenis2.value = jenisObat;
-                }
-              </script>
-
-              <!-- Add Data Modal Obat -->
-              <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <?php if (!isset($_GET['entriObat'])) { ?>
+                <div class="card shadow p-3" id="observasiZone">
+                  <h5 class="card-title">OBSERVASI PERAWAT</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label for="">Diagnosa</label>
+                      <input type="text" class="form-control mb-3" name="diagnosa" <?= $ConditionCopy != 0 ? "value='$dataCopy[diagnosa]'" : "" ?> id="" placeholder="Diagnosa">
                     </div>
-                    <div class="modal-body">
-                      <div class="row">
-                        <form method="post" enctype="multipart/form-data">
-                          <div class="control-group">
-                            <!-- <div class="modal-body"> -->
-                            <div class="row">
-                              <div class="col-md-12">
-                                <label for="inputName5" class="form-label">Nama Obat</label><br>
-                                <input type="text" name="jenis" id="jenis3" hidden>
+                    <div class="col-md-6">
+                      <label for="">Tanggal & Waktu</label>
+                      <input type="datetime-local" class="form-control mb-3" name="tgl_waktu" <?= $ConditionCopy != 0 ? "value='$dataCopy[tgl_waktu]'" : "" ?> id="" placeholder="Tanggal dan Waktu">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Tensi Darah</label>
+                      <input type="text" class="form-control mb-3" name="tensi" <?= $ConditionCopy != 0 ? "value='$dataCopy[tensi]'" : "" ?> id="" placeholder="Tensi Darah">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Suhu Tubuh</label>
+                      <input type="text" class="form-control mb-3" name="suhu" <?= $ConditionCopy != 0 ? "value='$dataCopy[suhu]'" : "" ?> id="" placeholder="Suhu Tubuh">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Cairan Ke</label>
+                      <input type="text" class="form-control mb-3" name="cairan" <?= $ConditionCopy != 0 ? "value='$dataCopy[cairan]'" : "" ?> id="" placeholder="Cairan Ke">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Volume Cairan</label>
+                      <input type="text" class="form-control mb-3" name="volume" <?= $ConditionCopy != 0 ? "value='$dataCopy[volume]'" : "" ?> id="" placeholder="Volume Cairan">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Keadaan Umum</label>
+                      <input type="text" class="form-control mb-3" name="keadaan_umum" <?= $ConditionCopy != 0 ? "value='$dataCopy[keadaan_umum]'" : "" ?> id="" placeholder="Keadaan Umum">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Keluhan Pasien</label>
+                      <textarea name="keluhan_pasien" id="" class="form-control mb-2" placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Cairan Infus</label>
+                      <input type="text" class="form-control mb-3" name="infus" <?= $ConditionCopy != 0 ? "value='$dataCopy[infus]'" : "" ?> id="" placeholder="Cairan Infus">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Tindakan</label>
+                      <textarea name="tindakan" id="" class="form-control mb-2" placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="">Perawat</label>
+                      <input type="text" class="form-control mb-3" name="perawat" <?= $ConditionCopy != 0 ? "value='$dataCopy[perawat]'" : "" ?> readonly value="<?= $petugas ?>" placeholder="">
+                    </div>
+                  </div>
+                  <div class="text-center" style="margin-top: 10px; margin-bottom: 40px;">
+                    <button type="submit" name="save" class="btn btn-primary">Simpan Dulu</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                  </div>
+                </div>
+                <script>
+                  function changeJenis(jenisObat) {
+                    var jenis3 = document.getElementById('jenis3');
+                    var jenis2 = document.getElementById('jenis2');
+                    jenis3.value = jenisObat;
+                    jenis2.value = jenisObat;
+                  }
+                </script>
+
+                <!-- Add Data Modal Obat  Jadi -->
+                <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Obat <sup class="badge bg-primary text-light"><a href="<?= getFullUrl() ?>&entriObat=Jadi" class="text-light">NewTab</a></sup></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row">
+                          <form method="post" enctype="multipart/form-data">
+                            <div class="control-group">
+                              <!-- <div class="modal-body"> -->
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <label for="inputName5" class="form-label">Nama Obat</label><br>
+                                  <input type="text" name="jenis" id="jenis3" hidden>
+                                  <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
+                                  <select name="nama_obat[]" class="form-select mb-2 w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                    <option value="">Pilih</option>
+                                    <?php
+                                    if (!isset($_GET['inap'])) {
+                                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                    } else {
+                                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                    }
+                                    foreach ($getObat as $data) {
+                                    ?>
+                                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </div>
+                                <div class="col-md-6">
+                                  <label for="inputName5">Dosis</label>
+                                  <div class="input-group">
+                                    <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
+                                    <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X" disabled>X</span>
+                                    <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
+                                  </div>
+                                </div>
+                                <div class="col-md-6">
+                                  Per
+                                  <select id="inputState" name="per_obat[]" class="form-select">
+                                    <option>Per Hari</option>
+                                    <option>Per Jam</option>
+                                  </select>
+                                </div>
+                                <div class="col-md-12">
+                                  <label for="">Jumlah Obat</label>
+                                  <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5" placeholder="Jumlah Obat">
+                                </div>
+                                <div class="col-md-12">
+                                  <label for="inputName5" class="">Petunjuk Pemakaian</label>
+                                  <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                                </div>
+                                <div class="col-md-12">
+                                  <!-- <label for="inputName5" class="">Catatan Interaksi Obat</label> -->
+                                  <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2" id="inputName5" placeholder="Masukkan Jumlah">
+                                </div>
+                                <div class="col-md-12">
+                                  <label for="inputName5" class="">Jenis Obat</label>
+                                  <select name="jenis_obat[]" class="form-select mb-2">
+                                    <option value="Jadi">Jadi</option>
+                                    <!-- <option value="Jadi">Jadi</option> -->
+                                  </select>
+                                </div>
+                                <div class="col-md-12">
+                                  <label for="inputCity" class="">Durasi</label>
+                                  <div class="input-group mb-3">
+                                    <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
+                                    <span class="input-group-text" id="basic-addon2">Hari</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <hr>
+                            </div>
+                            <button class="btn btn-warning add-more2" type="button">
+                              <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                            </button>
+                            <hr>
+                            <div class="after-add-more2"></div>
+                            <div class="copy2 invisible" style="display: none;">
+                              <br>
+                              <div class="control-group2">
+                                <label for="inputName5" class="form-label">Nama Obat</label>
                                 <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                <select name="nama_obat[]" class="form-select mb-2 w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                <select name="nama_obat[]" class="form-select mb-2" id="selObat1" aria-label="Default select example">
                                   <option value="">Pilih</option>
+
                                   <?php
                                   if (!isset($_GET['inap'])) {
                                     $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
@@ -170,175 +289,133 @@ if (isset($_GET['idlpo'])) {
                                     <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                   <?php } ?>
                                 </select>
-                              </div>
-                              <div class="col-md-6">
-                                <label for="inputName5">Dosis</label>
-                                <div class="input-group">
-                                  <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                                  <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X" disabled>X</span>
-                                  <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
-                                </div>
-                              </div>
-                              <div class="col-md-6">
-                                Per
-                                <select id="inputState" name="per_obat[]" class="form-select">
-                                  <option>Per Hari</option>
-                                  <option>Per Jam</option>
-                                </select>
-                              </div>
-                              <div class="col-md-12">
-                                <label for="">Jumlah Obat</label>
-                                <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5" placeholder="Jumlah Obat">
-                              </div>
-                              <div class="col-md-12">
-                                <label for="inputName5" class="">Petunjuk Pemakaian</label>
-                                <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
-                              </div>
-                              <div class="col-md-12">
-                                <!-- <label for="inputName5" class="">Catatan Interaksi Obat</label> -->
-                                <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2" id="inputName5" placeholder="Masukkan Jumlah">
-                              </div>
-                              <div class="col-md-12">
-                                <label for="inputName5" class="">Jenis Obat</label>
-                                <select name="jenis_obat[]" class="form-select mb-2">
-                                  <option value="Jadi">Jadi</option>
-                                  <!-- <option value="Jadi">Jadi</option> -->
-                                </select>
-                              </div>
-                              <div class="col-md-12">
-                                <label for="inputCity" class="">Durasi</label>
-                                <div class="input-group mb-3">
-                                  <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
-                                  <span class="input-group-text" id="basic-addon2">Hari</span>
-                                </div>
-                              </div>
-                            </div>
-                            <hr>
-                          </div>
-                          <button class="btn btn-warning add-more2" type="button">
-                            <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                          </button>
-                          <hr>
-                          <div class="after-add-more2"></div>
-                          <div class="copy2 invisible" style="display: none;">
-                            <br>
-                            <div class="control-group2">
-                              <label for="inputName5" class="form-label">Nama Obat</label>
-                              <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                              <select name="nama_obat[]" class="form-select mb-2" id="selObat1" aria-label="Default select example">
-                                <option value="">Pilih</option>
 
-                                <?php
-                                if (!isset($_GET['inap'])) {
-                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                } else {
-                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                }
-                                foreach ($getObat as $data) {
-                                ?>
-                                  <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                <?php } ?>
-                              </select>
-
-                              <div class="row">
-                                <div class="col-md-6">
-                                  <label for="inputName5" class="">Dosis</label>
-                                  <div class="input-group">
-                                    <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                                    <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X">X</span>
-                                    <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
+                                <div class="row">
+                                  <div class="col-md-6">
+                                    <label for="inputName5" class="">Dosis</label>
+                                    <div class="input-group">
+                                      <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
+                                      <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X">X</span>
+                                      <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
+                                    </div>
+                                  </div>
+                                  <div class="col-md-6">
+                                    <label for="inputName5" class="">Per</label>
+                                    <select id="inputState" name="per_obat[]" class="form-select">
+                                      <option>Per Hari</option>
+                                      <option>Per Jam</option>
+                                    </select>
                                   </div>
                                 </div>
-                                <div class="col-md-6">
-                                  <label for="inputName5" class="">Per</label>
-                                  <select id="inputState" name="per_obat[]" class="form-select">
-                                    <option>Per Hari</option>
-                                    <option>Per Jam</option>
+                                <div class="col-md-12">
+                                  <label for="">Jumlah Obat</label>
+                                  <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5" placeholder="jumlah obat">
+                                </div>
+                                <div class="col-md-12">
+                                  <label for="inputName5">Petunjuk Pemakaian</label>
+                                  <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                                </div>
+                                <div class="col-md-12">
+                                  <!-- <label for="inputName5">Catatan Interaksi Obat</label> -->
+                                  <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2" id="inputName5" placeholder="Masukkan Jumlah">
+                                </div>
+                                <div class="col-md-12">
+                                  <label for="inputName5">Jenis Obat</label>
+                                  <select name="jenis_obat[]" class="form-select mb-2">
+                                    <option value="Jadi">Jadi</option>
+                                    <!-- <option value="Jadi">Jadi</option> -->
                                   </select>
                                 </div>
-                              </div>
-                              <div class="col-md-12">
-                                <label for="">Jumlah Obat</label>
-                                <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5" placeholder="jumlah obat">
-                              </div>
-                              <div class="col-md-12">
-                                <label for="inputName5">Petunjuk Pemakaian</label>
-                                <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
-                              </div>
-                              <div class="col-md-12">
-                                <!-- <label for="inputName5">Catatan Interaksi Obat</label> -->
-                                <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2" id="inputName5" placeholder="Masukkan Jumlah">
-                              </div>
-                              <div class="col-md-12">
-                                <label for="inputName5">Jenis Obat</label>
-                                <select name="jenis_obat[]" class="form-select mb-2">
-                                  <option value="Jadi">Jadi</option>
-                                  <!-- <option value="Jadi">Jadi</option> -->
-                                </select>
-                              </div>
 
-                              <div class="col-md-12">
-                                <label for="inputCity">Durasi</label>
-                                <div class="input-group mb-3">
-                                  <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi" aria-describedby="basic-addon2">
-                                  <span class="input-group-text" id="basic-addon2">Hari</span>
+                                <div class="col-md-12">
+                                  <label for="inputCity">Durasi</label>
+                                  <div class="input-group mb-3">
+                                    <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi" aria-describedby="basic-addon2">
+                                    <span class="input-group-text" id="basic-addon2">Hari</span>
+                                  </div>
                                 </div>
+                                <button class="btn btn-danger remove2" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
+                                <button class="btn btn-warning" onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
+                                  <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                                </button>
+                                <hr>
                               </div>
-                              <button class="btn btn-danger remove2" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
-                              <button class="btn btn-warning" onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
-                                <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                              </button>
-                              <hr>
                             </div>
-                          </div>
 
-                          <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
-                          <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-                          <input type="hidden" class="form-control" id="inputName5" name="id" value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <input type="submit" class="btn btn-primary" name="saveobnew" value="Save changes">
-                          </div>
-                        </form>
+                            <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
+                            <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
+                            <input type="hidden" class="form-control" id="inputName5" name="id" value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                              <input type="submit" class="btn btn-primary" name="saveobnew" value="Save changes">
+                            </div>
+                          </form>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <script type="text/javascript">
-                $(document).ready(function() {
-                  $(".add-more2").click(function() {
-                    var html = $(".copy2").html();
-                    $(".after-add-more2").after(html);
-                  });
+                <script type="text/javascript">
+                  $(document).ready(function() {
+                    $(".add-more2").click(function() {
+                      var html = $(".copy2").html();
+                      $(".after-add-more2").after(html);
+                    });
 
-                  // saat tombol remove dklik control group akan dihapus 
-                  $("body").on("click", ".remove2", function() {
-                    $(this).parents(".control-group2").remove();
+                    // saat tombol remove dklik control group akan dihapus 
+                    $("body").on("click", ".remove2", function() {
+                      $(this).parents(".control-group2").remove();
+                    });
                   });
-                });
-              </script>
-              <!-- end -->
+                </script>
+                <!-- end -->
 
-              <!-- Add Data Modal Obat -->
-              <div class="modal  fade" role="dialog" id="exampleModal2" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <div class="row">
-                        <form method="post" enctype="multipart/form-data">
-                          <div class="control-group after-add-more">
-                            <!-- <div class="modal-body"> -->
-                            <div class="row">
-                              <div class="col-md-12">
-                                <input hidden type="text" id="jenis2" name="jenis" class="form-control">
-                                <label for="inputName5" class="form-label">Nama Obat</label><br>
-                                <select name="nama_obat[]" class="form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                <!-- Add Data Modal Obat Racik -->
+                <div class="modal  fade" role="dialog" id="exampleModal2" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row">
+                          <form method="post" enctype="multipart/form-data">
+                            <div class="control-group after-add-more">
+                              <!-- <div class="modal-body"> -->
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <input hidden type="text" id="jenis2" name="jenis" class="form-control">
+                                  <label for="inputName5" class="form-label">Nama Obat</label><br>
+                                  <select name="nama_obat[]" class="form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                    <option value="">Pilih</option>
+                                    <?php
+                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                    foreach ($getObat as $data) {
+                                    ?>
+                                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </div>
+
+                                <script></script>
+                                <div class="col-md-12" style="margin-top:20px">
+                                  <label for="">Jumlah Obat</label>
+                                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
+                                </div>
+                              </div>
+                            </div>
+                            <button class="btn btn-warning add-more" type="button">
+                              <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                            </button>
+                            <hr>
+                            <div class="copy invisible" style="display: none;">
+                              <br>
+                              <div class="control-group">
+                                <label for="inputName5" class="form-label">Nama Obat</label>
+                                <select name="nama_obat[]" class="form-control " id="selObat1" aria-label="Default select example">
                                   <option value="">Pilih</option>
+
                                   <?php
                                   $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                   foreach ($getObat as $data) {
@@ -346,344 +423,480 @@ if (isset($_GET['idlpo'])) {
                                     <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
                                   <?php } ?>
                                 </select>
-                              </div>
-
-                              <script></script>
-                              <div class="col-md-12" style="margin-top:20px">
-                                <label for="">Jumlah Obat</label>
-                                <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
-                              </div>
-                            </div>
-                          </div>
-                          <button class="btn btn-warning add-more" type="button">
-                            <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                          </button>
-                          <hr>
-                          <div class="copy invisible" style="display: none;">
-                            <br>
-                            <div class="control-group">
-                              <label for="inputName5" class="form-label">Nama Obat</label>
-                              <select name="nama_obat[]" class="form-control " id="selObat1" aria-label="Default select example">
-                                <option value="">Pilih</option>
-
-                                <?php
-                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                foreach ($getObat as $data) {
-                                ?>
-                                  <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                <?php } ?>
-                              </select>
-                              <div class="col-md-12" style="margin-top:20px">
-                                <label for="">Jumlah Obat</label>
-                                <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
-                              </div>
-                              <br>
-                              <button class="btn btn-danger remove" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
-                              <hr>
-                            </div>
-                          </div>
-                          <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                            <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
-                            <input type="text" name="catatan_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
-                          </div>
-                          <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
-                            <label for="inputName5" class="form-label">Jenis Obat</label>
-                            <select name="jenis_obat[]" class="form-control">
-                              <option value="Racik">Racik</option>
-                              <!-- <option value="Jadi">Jadi</option> -->
-                            </select>
-                          </div>
-                          <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                            <label for="inputName5" class="form-label">Racik Ke - </label>
-                            <input type="number" name="racik[]" class="form-control" id="inputName5" placeholder="Masukkan racik">
-                          </div>
-                          <label for="inputName5" class="form-label">Dosis</label>
-                          <div class="row">
-                            <div class="col-md-6">
-                              <div class="input-group mb-6">
-                                <input type="text" class="form-control" id="dosis1_obat[]" name="dosis1_obat">
-                                <input type="text" style="text-align: center;" class="form-control" placeholder="X">
-                                <input type="text" class="form-control" id="dosis2_obat[]" name="dosis2_obat">
+                                <div class="col-md-12" style="margin-top:20px">
+                                  <label for="">Jumlah Obat</label>
+                                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
+                                </div>
+                                <br>
+                                <button class="btn btn-danger remove" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
+                                <hr>
                               </div>
                             </div>
-                            <div class="col-md-6">
-                              <select id="inputState" name="per_obat[]" class="form-control">
-                                <option>Per Hari</option>
-                                <option>Per Jam</option>
+                            <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                              <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
+                              <input type="text" name="catatan_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
+                            </div>
+                            <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
+                              <label for="inputName5" class="form-label">Jenis Obat</label>
+                              <select name="jenis_obat[]" class="form-control">
+                                <option value="Racik">Racik</option>
+                                <!-- <option value="Jadi">Jadi</option> -->
                               </select>
                             </div>
-                          </div>
-
-                          <div class="col-md-12" style="margin-top:20px">
-                            <label for="inputCity" class="form-label">Durasi</label>
-                            <div class="input-group mb-3">
-                              <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
-                              <span class="input-group-text" id="basic-addon2">Hari</span>
+                            <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                              <label for="inputName5" class="form-label">Racik Ke - </label>
+                              <input type="number" name="racik[]" class="form-control" id="inputName5" placeholder="Masukkan racik">
                             </div>
-                          </div>
-                          <div class="col-md-12" style="margin-top:10px">
-                            <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
-                            <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
-                          </div>
-                          <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
-                          </div>
-                        </form>
+                            <label for="inputName5" class="form-label">Dosis</label>
+                            <div class="row">
+                              <div class="col-md-6">
+                                <div class="input-group mb-6">
+                                  <input type="text" class="form-control" id="dosis1_obat[]" name="dosis1_obat">
+                                  <input type="text" style="text-align: center;" class="form-control" placeholder="X">
+                                  <input type="text" class="form-control" id="dosis2_obat[]" name="dosis2_obat">
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <select id="inputState" name="per_obat[]" class="form-control">
+                                  <option>Per Hari</option>
+                                  <option>Per Jam</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div class="col-md-12" style="margin-top:20px">
+                              <label for="inputCity" class="form-label">Durasi</label>
+                              <div class="input-group mb-3">
+                                <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
+                                <span class="input-group-text" id="basic-addon2">Hari</span>
+                              </div>
+                            </div>
+                            <div class="col-md-12" style="margin-top:10px">
+                              <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
+                              <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                            </div>
+                            <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                              <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
+                            </div>
+                          </form>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <script type="text/javascript">
-                $(document).ready(function() {
-                  $(".add-more").click(function() {
-                    var html = $(".copy").html();
-                    $(".after-add-more").after(html);
+                <script type="text/javascript">
+                  $(document).ready(function() {
+                    $(".add-more").click(function() {
+                      var html = $(".copy").html();
+                      $(".after-add-more").after(html);
+                    });
+                    // saat tombol remove dklik control group akan dihapus 
+                    $("body").on("click", ".remove", function() {
+                      $(this).parents(".control-group").remove();
+                    });
                   });
-                  // saat tombol remove dklik control group akan dihapus 
-                  $("body").on("click", ".remove", function() {
-                    $(this).parents(".control-group").remove();
-                  });
-                });
-              </script>
-              <!-- end -->
+                </script>
+                <!-- end -->
 
-              <div class="col-md-12">
-                <div class="card shadow p-2 mb-1">
-                  <label for="">Obat Injeksi</label>
-                  <div>
-                    <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                    <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-hover table-striped" style="font-size: 12px;">
-                      <thead>
-                        <tr>
-                          <th>No</th>
-                          <th>Obat</th>
-                          <th>Kode Obat</th>
-                          <th>Jumlah</th>
-                          <th>Harga</th>
-                          <th>Sub</th>
-                          <th>Dosis</th>
-                          <th>Jenis</th>
-                          <th>Durasi</th>
-                          <th>Tanggal</th>
-                          <th>Petugas</th>
-                          <th>Act</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        if (isset($_GET['igd'])) {
-                          $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi'");
-                          $urlBase = "index.php?halaman=lpo&igd&id=" . htmlspecialchars($_GET['id']) . "&idigd=" . htmlspecialchars($_GET['idigd']) . "&tgl=" . htmlspecialchars($_GET['tgl']);
-                        } else {
-                          $urlBase = "index.php?halaman=lpo&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']);
-                          $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi'");
-                        }
-                        $noo = 1;
-                        foreach ($injek as $in) {
-                        ?>
+                <div class="col-md-12">
+                  <div class="card shadow p-2 mb-1">
+                    <label for="">Obat Injeksi </label>
+                    <div>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover table-striped" style="font-size: 12px;">
+                        <thead>
                           <tr>
-                            <td><?php echo $noo++; ?></td>
-                            <td><?php echo $in["nama_obat"]; ?></td>
-                            <td><?php echo $in["kode_obat"]; ?></td>
-                            <td><?php echo $in["jml_dokter"]; ?></td>
-                            <td>
-                              <?php
-                              $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($in['created_at'])) . "' AND nama_obat = '$in[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
-                              ?>
-                              Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
-                            </td>
-                            <td>
-                              Rp <?= number_format($harga * $in['jml_dokter'], 0, 0, '.') ?>
-                            </td>
-                            <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
-                            <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
-                            <td><?php echo $in["durasi_obat"]; ?> hari</td>
-                            <td><?php echo date('Y-m-d', strtotime($in["created_at"])) ?></td>
-                            <td><?= $in['petugas'] ?></td>
-                            <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
-                            <td>
-                              <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                              <?php } else { ?>
-                                <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
-                              <?php } ?>
-                            </td>
+                            <th>No</th>
+                            <th>Obat</th>
+                            <th>Kode Obat</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Sub</th>
+                            <th>Dosis</th>
+                            <th>Jenis</th>
+                            <th>Durasi</th>
+                            <th>Tanggal</th>
+                            <th>Petugas</th>
+                            <th>Act</th>
                           </tr>
-                        <?php } ?>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div><br>
-              <div class="col-md-12">
-                <div class="card shadow p-2">
-                  <label for="">Obat Oral</label>
-                  <div align="left">
-                    <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                    <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-hover table-striped" style="font-size: 12px;">
-                      <thead>
-                        <tr>
-                          <th>No</th>
-                          <th>Obat</th>
-                          <th>Kode Obat</th>
-                          <th>Jumlah</th>
-                          <th>Harga</th>
-                          <th>Sub</th>
-                          <th>Dosis</th>
-                          <th>Jenis</th>
-                          <th>Durasi</th>
-                          <th>Tanggal</th>
-                          <th>Petugas</th>
-                          <th>Act</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        if (isset($_GET['igd'])) {
-                          $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral'");
-                        } else {
-                          $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral'");
-                        }
-                        $no = 1;
-                        foreach ($oral as $or) {
-                        ?>
-                          <tr>
-                            <td><?php echo $no++; ?></td>
-                            <td><?php echo $or["nama_obat"]; ?></td>
-                            <td><?php echo $or["kode_obat"]; ?></td>
-                            <td><?php echo $or["jml_dokter"]; ?></td>
-                            <td>
-                              <?php
-                              $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
-                              ?>
-                              Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
-                            </td>
-                            <td>
-                              Rp <?= number_format($harga * $or['jml_dokter'], 0, 0, '.') ?>
-                            </td>
-                            <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
-                            <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
-                            <td><?php echo $or["durasi_obat"]; ?> hari</td>
-                            <td><?php echo date('Y-m-d', strtotime($or["created_at"])) ?></td>
-                            <td><?= $or['petugas'] ?></td>
-                            <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
-                            <td>
-                              <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                              <?php } else { ?>
-                                <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
-                              <?php } ?>
-                            </td>
-                          </tr>
-                        <?php } ?>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-12">
-                <div class="card shadow p-3">
-                  <h5 class="card-title">Riwayat Observasi</h5>
-                  <div class="row">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th>Pasien</th>
-                          <th>Diagnosa</th>
-                          <th>Tanggal</th>
-                          <th>Jam</th>
-                          <th>Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        if (isset($_GET['igd'])) {
-                          $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'igd'");
-                        } else {
-                          $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap'");
-                        }
-                        ?>
-                        <?php foreach ($getlpo as $data) { ?>
+                        </thead>
+                        <tbody>
                           <?php
-                          $datetimeString = "$data[tgl_waktu]";
-                          $datetimeObject = date_create($datetimeString);
-                          $tanggal = date_format($datetimeObject, "Y-m-d");
-                          $jam = date_format($datetimeObject, "H:i:s");
+                          if (isset($_GET['igd'])) {
+                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi'");
+                            $urlBase = "index.php?halaman=lpo&igd&id=" . htmlspecialchars($_GET['id']) . "&idigd=" . htmlspecialchars($_GET['idigd']) . "&tgl=" . htmlspecialchars($_GET['tgl']);
+                          } else {
+                            $urlBase = "index.php?halaman=lpo&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']);
+                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi'");
+                          }
+                          $noo = 1;
+                          foreach ($injek as $in) {
                           ?>
+                            <tr>
+                              <td><?php echo $noo++; ?></td>
+                              <td><?php echo $in["nama_obat"]; ?></td>
+                              <td><?php echo $in["kode_obat"]; ?></td>
+                              <td><?php echo $in["jml_dokter"]; ?></td>
+                              <td>
+                                <?php
+                                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($in['created_at'])) . "' AND nama_obat = '$in[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                                ?>
+                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
+                              </td>
+                              <td>
+                                Rp <?= number_format($harga * $in['jml_dokter'], 0, 0, '.') ?>
+                              </td>
+                              <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
+                              <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
+                              <td><?php echo $in["durasi_obat"]; ?> hari</td>
+                              <td><?php echo date('Y-m-d', strtotime($in["created_at"])) ?></td>
+                              <td><?= $in['petugas'] ?></td>
+                              <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
+                              <td>
+                                <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                  <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                <?php } else { ?>
+                                  <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
+                                <?php } ?>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div><br>
+                <div class="col-md-12">
+                  <div class="card shadow p-2">
+                    <label for="">Obat Oral</label>
+                    <div align="left">
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover table-striped" style="font-size: 12px;">
+                        <thead>
                           <tr>
-                            <td><?= $data['pasien'] ?></td>
-                            <td><?= $data['diagnosa'] ?></td>
-                            <td><?= $tanggal ?></td>
-                            <td><?= $jam ?></td>
-                            <td>
-                              <?php if (!isset($_GET['igd'])) { ?>
-                                <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i class="bi bi-eye"></i></a>
-                                <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone" class="btn btn-sm btn-warning">Copy</a>
-                              <?php } else { ?>
-                                <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i class="bi bi-eye"></i></a>
-                              <?php } ?>
-                            </td>
+                            <th>No</th>
+                            <th>Obat</th>
+                            <th>Kode Obat</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Sub</th>
+                            <th>Dosis</th>
+                            <th>Jenis</th>
+                            <th>Durasi</th>
+                            <th>Tanggal</th>
+                            <th>Petugas</th>
+                            <th>Act</th>
                           </tr>
-                        <?php } ?>
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          <?php
+                          if (isset($_GET['igd'])) {
+                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral'");
+                          } else {
+                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral'");
+                          }
+                          $no = 1;
+                          foreach ($oral as $or) {
+                          ?>
+                            <tr>
+                              <td><?php echo $no++; ?></td>
+                              <td><?php echo $or["nama_obat"]; ?></td>
+                              <td><?php echo $or["kode_obat"]; ?></td>
+                              <td><?php echo $or["jml_dokter"]; ?></td>
+                              <td>
+                                <?php
+                                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                                ?>
+                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
+                              </td>
+                              <td>
+                                Rp <?= number_format($harga * $or['jml_dokter'], 0, 0, '.') ?>
+                              </td>
+                              <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
+                              <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
+                              <td><?php echo $or["durasi_obat"]; ?> hari</td>
+                              <td><?php echo date('Y-m-d', strtotime($or["created_at"])) ?></td>
+                              <td><?= $or['petugas'] ?></td>
+                              <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
+                              <td>
+                                <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                  <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                <?php } else { ?>
+                                  <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
+                                <?php } ?>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                <div class="col-md-12">
+                  <div class="card shadow p-3">
+                    <h5 class="card-title">Riwayat Observasi</h5>
+                    <div class="row">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Pasien</th>
+                            <th>Diagnosa</th>
+                            <th>Tanggal</th>
+                            <th>Jam</th>
+                            <th>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php
+                          if (isset($_GET['igd'])) {
+                            $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'igd'");
+                          } else {
+                            $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap'");
+                          }
+                          ?>
+                          <?php foreach ($getlpo as $data) { ?>
+                            <?php
+                            $datetimeString = "$data[tgl_waktu]";
+                            $datetimeObject = date_create($datetimeString);
+                            $tanggal = date_format($datetimeObject, "Y-m-d");
+                            $jam = date_format($datetimeObject, "H:i:s");
+                            ?>
+                            <tr>
+                              <td><?= $data['pasien'] ?></td>
+                              <td><?= $data['diagnosa'] ?></td>
+                              <td><?= $tanggal ?></td>
+                              <td><?= $jam ?></td>
+                              <td>
+                                <?php if (!isset($_GET['igd'])) { ?>
+                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i class="bi bi-eye"></i></a>
+                                  <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone" class="btn btn-sm btn-warning">Copy</a>
+                                <?php } else { ?>
+                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i class="bi bi-eye"></i></a>
+                                <?php } ?>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              <?php } else { ?>
+                <div class="card shadow-sm mb-2 p-2">
+                  <h5><b>Entri Obat Jadi</b></h5>
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label>Nama Obat</label>
+                      <select name="nama_obat" class=" form-control form-control-sm mb-2 w-100" style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
+                        <option value="">Pilih</option>
+                        <?php
+                        if (!isset($_GET['inap'])) {
+                          $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                        } else {
+                          $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                        }
+                        foreach ($getObat as $data) {
+                        ?>
+                          <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                        <?php } ?>
+                      </select>
+                    </div>
+                    <div class="col-md-1">
+                      <label for="">Jenis</label>
+                      <select name="jenis_obat_2" class="form-control form-control-sm" id="">
+                        <option value="Oral">Oral</option>
+                        <option value="Injeksi">Injeksi</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <label for="">Dosis</label>
+                      <div class="input-group input-group-sm ">
+                        <input type="text" class="form-control form-control-sm mb-2" id="dosis1_obat" name="dosis1_obat">
+                        <span type="text" style="text-align: center;" class="form-control form-control-sm mb-2" placeholder="X" disabled>X</span>
+                        <input type="text" class="form-control form-control-sm mb-2" id="dosis2_obat" name="dosis2_obat">
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <label for="">Per</label>
+                      <select id="inputState" name="per_obat" class=" form-control form-control-sm">
+                        <option>Per Hari</option>
+                        <option>Per Jam</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <label for="">Jumlah</label>
+                      <input type="number" name="jml_dokter" class="form-control form-control-sm mb-2" id="inputName5" placeholder="Jumlah Obat">
+                    </div>
+                    <div class="col-md-2">
+                      <label for="inputName5" class="">Petunjuk</label>
+                      <input type="text" name="petunjuk_obat" class="form-control form-control-sm mb-2" id="inputName5" placeholder=" Petunjuk Pemakaian">
+                      <input type="text" name="catatan_obat" value="-" hidden class="form-control form-control-sm mb-2" id="inputName5" placeholder="Masukkan Jumlah">
+                      <select name="jenis_obat" hidden class=" form-control form-control-sm mb-2">
+                        <option value="Jadi">Jadi</option>
+                      </select>
+                    </div>
+                    <div class="col-md-1">
+                      <label for="inputCity" class="">Durasi</label>
+                      <div class="input-group mb-3">
+                        <input type="text" name="durasi_obat" class="form-control form-control-sm" placeholder="Durasi" aria-describedby="basic-addon2">
+                      </div>
+                    </div>
+                    <div class="col-md-12 text-end">
+                      <button class="btn btn-sm btn-primary" name="addToSession">Tambah [+]</button>
+                    </div>
+                  </div>
+                  <?php
+                  // Proses tambah ke session
+                  if (isset($_POST['addToSession'])) {
+                    // Inisialisasi session jika belum ada
+                    if (!isset($_SESSION['temp_obat'])) {
+                      $_SESSION['temp_obat'] = array();
+                    }
+
+                    // Ambil data obat dari database untuk mendapatkan nama obat
+                    $id_obat = $_POST['nama_obat'];
+                    $query = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$id_obat'");
+                    $data_obat = $query->fetch_assoc();
+
+                    // Tambahkan data ke session
+                    $_SESSION['temp_obat'][] = array(
+                      'id_obat' => $id_obat,
+                      'nama_obat' => $data_obat['nama_obat'],
+                      'dosis1_obat' => $_POST['dosis1_obat'],
+                      'dosis2_obat' => $_POST['dosis2_obat'],
+                      'per' => $_POST['per_obat'],
+                      'jumlah' => $_POST['jml_dokter'],
+                      'petunjuk' => $_POST['petunjuk_obat'],
+                      'catatan' => $_POST['catatan_obat'],
+                      'jenis' => $_POST['jenis_obat'],
+                      'jenis2' => $_POST['jenis_obat_2'],
+                      'durasi' => $_POST['durasi_obat']
+                    );
+                  }
+
+                  // Proses hapus dari session
+                  if (isset($_GET['hapusObatSession'])) {
+                    $index = $_GET['hapusObatSession'];
+                    unset($_SESSION['temp_obat'][$index]);
+                  }
+
+                  if (isset($_GET['clear_session'])) {
+                    unset($_SESSION['temp_obat']);
+                    echo "<script>window.location.href = 'index.php?halaman=rmedis&id=" . htmlspecialchars($_GET['id']) . "&tgl=" . htmlspecialchars($_GET['tgl']) . "&entriObat=" . htmlspecialchars($_GET['entriObat']) . "';</script>";
+                  }
+
+                  if (isset($_GET['saveToDatabase'])) {
+                    if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0) {
+                      foreach ($_SESSION['temp_obat'] as $obatSave) {
+
+                        // $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '', kode_obat = '', nama_obat = '', jml_dokter = '', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
+
+                        $uniqueId = getUniqeIdObat($koneksi);
+                        $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '$_GET[idigd]', obat_igd = '$obatSave[jenis2]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+
+                        $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
+                        $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
+                        $m = $ObatKode['margininap'];
+                        if ($m < 100) {
+                          $margin = 1.30;
+                        } else {
+                          $margin = $m / 100;
+                        }
+                        $subtotal = 0;
+                        $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
+                        $subtotal += $harga;
+                        date_default_timezone_set('Asia/Jakarta');
+                        $tanggal = date('Y-m-d');
+                        $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
+                        $id = $_GET["idrm"];
+                        $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
+                        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '" . $_SESSION['admin']['namalengkap'] . "') ");
+                        // $koneksi->query("INSERT INTO rmedis_obat (id_rm, id_obat, dosis1_obat, dosis2_obat, per_obat, jumlah_obat, petunjuk_obat, catatan_obat, jenis_obat, durasi_obat) VALUES ('" . htmlspecialchars($_GET['id']) . "', '" . $obat['id_obat'] . "', '" . $obat['dosis1_obat'] . "', '" . $obat['dosis2_obat'] . "', '" . $obat['per'] . "', '" . $obat['jumlah'] . "', '" . $obat['petunjuk'] . "', '" . $obat['catatan'] . "', '" . $obat['jenis'] . "', '" . $obat['durasi'] . "')");
+                      }
+                      unset($_SESSION['temp_obat']);
+                      echo "<script>alert('Data berhasil disimpan ke database.'); window.location.href = 'index.php?halaman=lpo&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']) . "';</script>";
+                    } else {
+                      echo "<script>alert('Tidak ada data obat untuk disimpan.');</script>";
+                    }
+                  }
+                  ?>
+                  <br>
+                  <div class="table-responsive">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
+                        <thead>
+                          <tr>
+                            <th>Obat</th>
+                            <th>Kode</th>
+                            <th>Dosis</th>
+                            <th>Per</th>
+                            <th>Jumlah</th>
+                            <th>Petunjuk</th>
+                            <th>Catatan</th>
+                            <th>Durasi</th>
+                            <th>JenisObat</th>
+                            <th>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0): ?>
+                            <?php foreach ($_SESSION['temp_obat'] as $index => $obat): ?>
+                              <tr>
+                                <td><?= $obat['nama_obat'] ?></td>
+                                <td><?= $obat['id_obat'] ?></td>
+                                <td><?= $obat['dosis1_obat'] ?> X <?= $obat['dosis2_obat'] ?></td>
+                                <td><?= $obat['per'] ?></td>
+                                <td><?= $obat['jumlah'] ?></td>
+                                <td><?= $obat['petunjuk'] ?></td>
+                                <td><?= $obat['catatan'] ?></td>
+                                <td><?= $obat['durasi'] ?></td>
+                                <td><?= $obat['jenis2'] ?></td>
+                                <td>
+                                  <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&hapusObatSession=<?= $index ?>" class="btn btn-danger btn-sm">Hapus</a>
+                                </td>
+                              </tr>
+                            <?php endforeach; ?>
+                          <?php else: ?>
+                            <tr>
+                              <td colspan="10" class="text-center">Tidak ada data obat</td>
+                            </tr>
+                          <?php endif; ?>
+                        </tbody>
+                      </table>
+                      <?php if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0): ?>
+                        <div class="text-end mt-3">
+                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&saveToDatabase" class="btn btn-sm btn-success">Simpan ke Database</a>
+                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&clear_session=true" class="btn btn-sm btn-danger">Bersihkan Session</a>
+                        </div>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                  <script>
+                    $(document).ready(function() {
+                      $('#selectObatJadiEntriObat').select2();
+                    });
+                  </script>
+                </div>
+              <?php } ?>
             </div>
           </div>
         </div>
         </from>
+
     </div>
   </main>
   <?php
   // Fungsi untuk mendapatkan ID obat berikutnya yang unik
-  function getUniqeIdObat($koneksi)
-  {
-    $newId = $koneksi->query("SELECT * FROM obat_rm ORDER BY idobat DESC LIMIT 1")->fetch_assoc()['idobat'] + 1;
-    while ($koneksi->query("SELECT COUNT(*) FROM obat_rm WHERE idobat = $newId")->fetch_row()[0] > 0) {
-      $newId++;
-    }
-    return $newId;
-  }
 
-  function getLastWord($inputString)
-  {
-    // Trim the input string to remove any leading or trailing whitespace
-    $trimmedString = trim($inputString);
-
-    // Check if the trimmed string is empty
-    if (empty($trimmedString)) {
-      return "The input string is empty.";
-    }
-
-    // Split the string into an array of words using space as the delimiter
-    $wordsArray = explode(' ', $trimmedString);
-
-    // Count the number of words in the array
-    $wordCount = count($wordsArray);
-
-    // Check if the string contains exactly three words
-    if ($wordCount !== 3) {
-      return "The input string does not contain exactly three words.";
-    }
-
-    // Get the last word from the array
-    $lastWord = $wordsArray[$wordCount - 1];
-
-    // Return the last word
-    return $lastWord;
-  }
 
   // Panggil fungsi untuk mendapatkan ID obat yang unik
   // $uniqueId = getUniqueId($koneksi);
