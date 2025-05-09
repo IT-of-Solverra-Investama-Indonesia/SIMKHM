@@ -277,6 +277,18 @@ if (!isset($_SESSION['login'])) {
               <p class="my-2 mx-1"><?= $belumbayar ?></p>
             </sup>
           </a>
+          <a class="nav-link collapsed" href="index.php?halaman=daftarpuyer">
+            <i class="bi bi-capsule"></i>
+            <span>Tambah Paket Racik</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=daftarpuyerjadi">
+            <i class="bi bi-capsule"></i>
+            <span>Tambah Paket Jadi</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=master_poli">
+            <i class="bi bi-database-check"></i>
+            <span>Master Poli</span>
+          </a>
         </li>
       <?php } ?>
 

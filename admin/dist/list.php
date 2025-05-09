@@ -75,6 +75,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="editrm"){include '../rekammedis/editrm.php';}
                    elseif ($hal=="verif_obat"){include '../rekammedis/verif_obat.php';}
                    elseif ($hal=="kyc_satusehat"){include '../rekammedis/kyc_satusehat.php';}
+                   elseif ($hal=="master_poli"){include '../rekammedis/master_poli.php';}
 
                    //pembayaran
                    elseif ($hal=="bayarrawat"){include '../bayar/bayarrawat.php';}
