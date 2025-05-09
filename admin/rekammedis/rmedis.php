@@ -226,10 +226,10 @@ if ($pas['jenis_kelamin'] == '1') {
                         <div id="anamnesa">
                           <div class="row g-1">
                             <div>
-                              <h6 class="mt-2 mb-0"><b>Anamnesa</b></h6>
+                              <h6 class="mt-2 mb-0"><b>Anamnesa</b> <sup class="badge bg-primary text-light" data-bs-toggle="modal" data-bs-target="#masterAssesment"> Copy Master</sup> </h6>
                             </div>
                             <!-- Modal -->
-                            <!-- <div class="modal fade" id="masterAssesment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal fade" id="masterAssesment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                               <div class="modal-dialog">
                                 <div class="modal-content">
                                   <div class="modal-header">
@@ -237,55 +237,58 @@ if ($pas['jenis_kelamin'] == '1') {
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                   </div>
                                   <div class="modal-body">
-                                    <select name="obj" id="masterSelect" class="form-select form-control form-control-sm" required>
+                                    <select name="obj" id="masterSelect" class="form-select form-control form-control-sm" required onchange="handleSelectChange(this)">
                                       <option value="" hidden>Pilih Master</option>
                                       <?php
-                                      $master = $koneksi->query("SELECT * FROM rekam_medis WHERE objective != '' GROUP BY diagnosis ORDER BY jadwal DESC");
-                                      ?>
-                                      <?php foreach ($master as $m) { ?>
-                                        <option value="<?= $m['id_rm'] ?>"><?= $m['diagnosis'] ?> | | <?= $m['objective'] ?></option>
+                                      $master = $koneksimaster->query("SELECT 
+                                mp.*, 
+                                i.name_en as icd_name 
+                                FROM master_poli mp
+                                LEFT JOIN icds i ON i.code = mp.icd10
+                                GROUP BY mp.diagnosis 
+                                ORDER BY mp.diagnosis ASC");
+                                      foreach ($master as $m) { ?>
+                                        <option value="<?= $m['id'] ?>"
+                                          data-diagnosis="<?= htmlspecialchars($m['diagnosis']) ?>"
+                                          data-keluhan-utama="<?= htmlspecialchars($m['keluhan_utama']) ?>"
+                                          data-keluhan-tambahan="<?= htmlspecialchars($m['keluhan_tambahan']) ?>"
+                                          data-icd10="<?= htmlspecialchars($m['icd10']) ?>"
+                                          data-icd-name="<?= htmlspecialchars($m['icd_name'] ?? '') ?>"
+                                          data-objective="<?= htmlspecialchars($m['objective']) ?>">
+                                          <?= htmlspecialchars($m['diagnosis']) ?>
+                                        </option>
                                       <?php } ?>
                                     </select>
+                                    <!-- <script>
+                                      function handleSelectChange(selectElement) {
+                                        const selectedOption = selectElement.options[selectElement.selectedIndex];
+                                        const diagnosisId = selectedOption.getAttribute('data-diagnosis');
+                                        const icd10 = selectedOption.getAttribute('data-icd10');
+                                        const keluhanUtama = selectedOption.getAttribute('data-keluhan-utama');
+                                        const keluhanTambahan = selectedOption.getAttribute('data-keluhan-tambahan');
+                                        const objective = selectedOption.getAttribute('data-objective');
+
+                                        $('#diagnosis_id').val(diagnosisId).trigger('change');
+                                        $('#selUser').val(icd10).trigger('change');
+                                        $('#keluhanUtama').val(keluhanUtama);
+                                        $('#keluhanTambahan').val(keluhanTambahan);
+                                        $('#objective').val(objective);
+
+                                        document.getElementById('getMasterClose').click();
+                                        copyDataMaster(diagnosisId, keluhanUtama, keluhanTambahan, objective);
+                                      }
+                                    </script> -->
                                   </div>
                                   <div class="modal-footer">
-                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-sm btn-primary" onclick="copyMasterData()">Copy</button>
+                                    <button type="button" id="getMasterClose" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                                   </div>
                                 </div>
                               </div>
                             </div>
                             <script>
-                              function copyMasterData() {
-                                // Dapatkan elemen select
-                                const selectElement = document.getElementById('masterSelect');
-  
-                                // Dapatkan text yang dipilih
-                                const selectedText = selectElement.options[selectElement.selectedIndex].text;
-  
-                                // Pisahkan text berdasarkan tanda pipe '|'
-                                const parts = selectedText.split('|').map(part => part.trim());
-  
-                                // Pastikan ada 3 bagian (diagnosis | anamnesa | objective)
-                                if (parts.length >= 3) {
-                                  // Masukkan bagian anamnesa (indeks 1) ke textarea keluhan utama
-                                  // document.getElementById('keluhanUtama').value = parts[1];
-  
-                                  // Masukkan bagian objective (indeks 2) ke textarea objective
-                                  document.getElementById('objectiveText').value = parts[2];
-                                } else if (parts.length === 2) {
-                                  // Jika hanya ada 2 bagian, asumsikan format: anamnesa | objective
-                                  document.getElementById('keluhanUtama').value = parts[0];
-                                  document.getElementById('objectiveText').value = parts[1];
-                                }
-  
-                                // Tutup modal (jika menggunakan Bootstrap modal)
-                                const modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
-                                if (modal) {
-                                  modal.hide();
-                                }
-                              }
-                            </script> -->
+                            </script>
                             <!-- end Modal  -->
+
                             <div class="col-md-6">
                               <label for="inputName5" class="form-label mt-2 mb-0">Keluhan Utama</label>
                               <!-- <input type="text" class="form-control form-control-sm" id="inputName5" name="keluhan_utama" value="<?php echo $pecah['keluhan_utama'] ?>" placeholder="Masukkan Keluhan Pasien"> -->
@@ -294,27 +297,29 @@ if ($pas['jenis_kelamin'] == '1') {
                             <div class="col-md-6">
                               <label for="inputName5" class="form-label mt-2 mb-0">Keluhan Tambahan</label>
                               <!-- <input type="text" class="form-control form-control-sm" id="inputName5" name="anamnesa" value="<?php echo $rm['anamnesa'] ?>" placeholder="Anamnesa"> -->
-                              <textarea name="anamnesa" id="inputName5" placeholder="Anamnesa" class="form-control form-control-sm"><?php echo $rm['anamnesa'] ?></textarea>
+                              <textarea name="anamnesa" id="keluhanTambahan" placeholder="Anamnesa" class="form-control form-control-sm"><?php echo $rm['anamnesa'] ?></textarea>
                             </div>
                             <div class="col-md-12">
                               <label for="inputName5" class="form-label mt-2 mb-0">Objective</label>
                               <!-- <input type="text" class="form-control form-control-sm" id="inputName5" name="objective" value="<?php echo $pecah['objective'] ?? '' ?>" placeholder="Objectieve"> -->
-                              <textarea name="objective" id="objectiveText" class="form-control form-control-sm"><?php echo $rm['objective'] ?></textarea>
+                              <textarea name="objective" id="objective" class="form-control form-control-sm"><?php echo $rm['objective'] ?></textarea>
                             </div>
                           </div>
                         </div>
                         <h6 class="mt-3 mb-0"><b>Assessment</b></h6>
                         <div class="form-group">
-                          <label class=" mb-0">Diagnosis</label>
+                          <label class="mb-0">Diagnosis</label>
                           <select name="diagnosis" required id="diagnosis_id" class="form-control form-control-sm">
-                            <option value="<?= $rm['diagnosis'] ?>"><?= $rm['diagnosis'] ?></option>
+                            <option value="<?= htmlspecialchars($rm['diagnosis']) ?>"><?= htmlspecialchars($rm['diagnosis']) ?></option>
                             <option value="">Pilih Diagnosis</option>
                             <option value="Diagnosis Baru">Diagnosis Baru</option>
                             <?php
-                            $getAllDiagnosis = $koneksi->query("SELECT * FROM rekam_medis GROUP BY diagnosis ORDER BY diagnosis ASC");
-                            foreach ($getAllDiagnosis as $allDiagnosis) {
+                            $getAllDiagnosis = $koneksi->query("SELECT DISTINCT diagnosis FROM rekam_medis ORDER BY diagnosis ASC");
+                            while ($allDiagnosis = $getAllDiagnosis->fetch_assoc()) {
                             ?>
-                              <option value="<?= $allDiagnosis['diagnosis'] ?>"><?= $allDiagnosis['diagnosis'] ?></option>
+                              <option value="<?= htmlspecialchars($allDiagnosis['diagnosis']) ?>">
+                                <?= htmlspecialchars($allDiagnosis['diagnosis']) ?>
+                              </option>
                             <?php } ?>
                           </select>
                           <textarea type="text" name="diagnosis_new" id="diagnosis_new_id" class="form-control form-control-sm mt-2" style="height: 100px;" value="<?php echo $rm['diagnosis'] ?>" placeholder="Diagnosis"><?php echo $rm['diagnosis'] ?></textarea>
@@ -335,29 +340,148 @@ if ($pas['jenis_kelamin'] == '1') {
                           <div class="col-md-12">
                             <label class="mt-2 mb-0">ICD 10</label>
                             <select class="form-select" id="selUser" aria-label="Default select example" name="icd">
-                              <option value="<?= $rm['icd'] ?>"><?= $rm['icd'] ?></option>
+                              <option value="<?= htmlspecialchars($rm['icd']) ?>"><?= htmlspecialchars($rm['icd']) ?></option>
                             </select>
                           </div>
                         </div>
                       </div>
                       <script>
+                        function handleSelectChange(selectElement) {
+                          const selectedOption = selectElement.options[selectElement.selectedIndex];
+                          const diagnosis = selectedOption.getAttribute('data-diagnosis');
+                          const icd10 = selectedOption.getAttribute('data-icd10');
+                          const icdName = selectedOption.getAttribute('data-icd-name') || '';
+                          const keluhanUtama = selectedOption.getAttribute('data-keluhan-utama');
+                          const keluhanTambahan = selectedOption.getAttribute('data-keluhan-tambahan');
+                          const objective = selectedOption.getAttribute('data-objective');
+
+                          // 1. Update diagnosis select
+                          $('#diagnosis_id').val(diagnosis).trigger('change.select2');
+                          const $diagnosisSelect = $('#diagnosis_id');
+
+                          // Cek apakah diagnosis sudah ada di dropdown
+                          if ($diagnosisSelect.find('option[value="' + diagnosis + '"]').length === 0) {
+                            // Jika tidak ada, tambahkan sebagai option baru
+                            $diagnosisSelect.append(new Option(diagnosis, diagnosis, true, true));
+                          }
+                          // $diagnosisSelect.val(diagnosis).trigger('change');
+
+                          // 2. Handle ICD select dengan cara yang benar
+                          const $icdSelect = $('#selUser');
+
+                          if (icd10) {
+                            // Cek apakah option sudah ada
+                            if ($icdSelect.find('option[value="' + icd10 + '"]').length === 0) {
+                              // Jika belum ada, tambahkan option baru
+                              const displayText = icd10 + (icdName ? ' - ' + icdName : '');
+                              const newOption = new Option(displayText, icd10, true, true);
+                              $icdSelect.append(newOption).trigger('change');
+                            }
+
+                            // Set nilai dan trigger change dengan timeout kecil
+                            setTimeout(() => {
+                              $icdSelect.val(icd10).trigger('change.select2');
+                            }, 50);
+                          }
+
+                          // 3. Update field lainnya
+                          $('#keluhanUtama').val(keluhanUtama || '');
+                          $('#keluhanTambahan').val(keluhanTambahan || '');
+                          $('#objective').val(objective || '');
+
+                          // 4. Tutup modal jika perlu
+                          $('#getMasterClose').trigger('click');
+                        }
+
+                        // $('#diagnosis_id').on('select2:select', function(e) {
+                        //   const selectedDiagnosis = $(this).val();
+                        //   const $icdSelect = $('#selUser');
+
+                        //   // Jika diagnosis tidak ada di master tapi dipilih langsung
+                        //   if (selectedDiagnosis && selectedDiagnosis !== 'Diagnosis Baru' && $icdSelect.find('option[value]').length <= 1) {
+                        //     $.ajax({
+                        //       url: '../rekammedis/get_icd_api.php',
+                        //       type: 'POST',
+                        //       data: {
+                        //         diagnosis: selectedDiagnosis
+                        //       },
+                        //       success: function(response) {
+                        //         $icdSelect.empty().append('<option value="">Pilih ICD</option>');
+
+                        //         if (response.length > 0) {
+                        //           response.forEach(function(icd) {
+                        //             $icdSelect.append(
+                        //               $('<option selected></option>').val(icd.icd).text(icd.icd + ' - ' + icd.name_en)
+                        //             );
+                        //           });
+                        //         } else {
+                        //           // Jika tidak ditemukan ICD, buat opsi kosong
+                        //           $icdSelect.append(
+                        //             $('<option></option>').val('').text('ICD tidak ditemukan')
+                        //           );
+                        //         }
+
+                        //         $icdSelect.trigger('change');
+                        //       }
+                        //     });
+                        //   }
+
+                        // });
+
+
+                        // Inisialisasi Select2 dan event handlers
+
                         $(document).ready(function() {
-                          $('#diagnosis_new_id').hide(); // Sembunyikan textarea
+                          $('#diagnosis_new_id').hide();
                           $('#selUser').select2();
                           $('#diagnosis_id').select2();
 
+                          $('#diagnosis_id').on('select2:select', function(e) {
+                            const selectedDiagnosis = $(this).val();
+                            const $icdSelect = $('#selUser');
+
+                            // Jika diagnosis tidak ada di master tapi dipilih langsung
+                            if (selectedDiagnosis && selectedDiagnosis !== 'Diagnosis Baru' && $icdSelect.find('option[value]').length <= 1) {
+                              $.ajax({
+                                url: '../rekammedis/get_icd_api.php',
+                                type: 'POST',
+                                data: {
+                                  diagnosis: selectedDiagnosis
+                                },
+                                success: function(response) {
+                                  $icdSelect.empty().append('<option value="">Pilih ICD</option>');
+
+                                  if (response.length > 0) {
+                                    response.forEach(function(icd) {
+                                      $icdSelect.append(
+                                        $('<option></option>').val(icd.icd).text(icd.icd + ' - ' + icd.name_en)
+                                      );
+                                    });
+                                  } else {
+                                    // Jika tidak ditemukan ICD, buat opsi kosong
+                                    $icdSelect.append(
+                                      $('<option></option>').val('').text('ICD tidak ditemukan')
+                                    );
+                                  }
+
+                                  $icdSelect.trigger('change');
+                                }
+                              });
+                            }
+                          });
+
+
+                          // Event handler untuk perubahan diagnosis
                           $('#diagnosis_id').on('change', function() {
                             const diagnosis = $(this).val();
-                            const icdDropdown = $('#selUser');
+                            const $icdDropdown = $('#selUser');
 
                             if (diagnosis === 'Diagnosis Baru') {
-                              $('#diagnosis_new_id').show(); // Tampilkan textarea jika Diagnosis Baru
+                              $('#diagnosis_new_id').show();
+                              $icdDropdown.empty().append('<option value="">Pilih ICD</option>');
 
-                              // Hapus semua opsi sebelumnya, kecuali opsi pertama
-                              icdDropdown.find('option').not(':first').remove();
-
-                              // Konfigurasi Select2 dengan AJAX untuk pencarian dinamis
-                              icdDropdown.select2({
+                              // Setup Select2 dengan AJAX
+                              $icdDropdown.select2({
                                 placeholder: 'Cari ICD...',
                                 allowClear: true,
                                 ajax: {
@@ -367,7 +491,7 @@ if ($pas['jenis_kelamin'] == '1') {
                                   delay: 250,
                                   data: function(params) {
                                     return {
-                                      search: params.term, // kirimkan input pencarian ke server
+                                      search: params.term,
                                       diagnosis: diagnosis
                                     };
                                   },
@@ -385,35 +509,35 @@ if ($pas['jenis_kelamin'] == '1') {
                                 }
                               });
                             } else {
-                              $('#diagnosis_new_id').hide(); // Sembunyikan textarea jika diagnosis bukan baru
+                              $('#diagnosis_new_id').hide();
 
-                              // Ambil data ICD berdasarkan diagnosis yang dipilih
-                              $.ajax({
-                                url: '../rekammedis/get_icd_api.php',
-                                type: 'POST',
-                                data: {
-                                  diagnosis: diagnosis
-                                },
-                                success: function(response) {
-                                  const icdData = JSON.parse(response);
+                              // Jika diagnosis dipilih (bukan baru), ambil ICD terkait
+                              if (diagnosis) {
+                                $.ajax({
+                                  url: '../rekammedis/get_icd_api.php',
+                                  type: 'POST',
+                                  data: {
+                                    diagnosis: diagnosis
+                                  },
+                                  dataType: 'json',
+                                  success: function(data) {
+                                    $icdDropdown.empty().append('<option value="">Pilih ICD</option>');
 
-                                  // Hapus semua opsi sebelumnya, kecuali opsi pertama
-                                  icdDropdown.find('option').not(':first').remove();
+                                    data.forEach(function(item) {
+                                      $icdDropdown.append(
+                                        $('<option selected></option>').val(item.icd).text(item.icd + ' - ' + item.name_en)
+                                      );
+                                    });
 
-                                  // Tambahkan opsi baru ke dropdown ICD
-                                  icdData.forEach(icd => {
-                                    icdDropdown.append(
-                                      `<option selected value="${icd.icd}">${icd.icd} - ${icd.name_en}</option>`
-                                    );
-                                  });
-
-                                  // Refresh dropdown
-                                  icdDropdown.select2();
-                                },
-                                error: function(error) {
-                                  console.error('Error fetching ICD data:', error);
-                                }
-                              });
+                                    $icdDropdown.trigger('change');
+                                  },
+                                  error: function(error) {
+                                    console.error('Error fetching ICD data:', error);
+                                  }
+                                });
+                              } else {
+                                $icdDropdown.empty().append('<option value="">Pilih ICD</option>').trigger('change');
+                              }
                             }
                           });
                         });
@@ -481,12 +605,12 @@ if ($pas['jenis_kelamin'] == '1') {
                     </div>
 
                     <?php
-                    $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+                    $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                     $getLastRM['jumm'] > 0 ? $whereConditionObatRm = "AND rekam_medis_id = '$getLastRM[id_rm]'" : $whereConditionObatRm = "AND rekam_medis_id IS NULL";
                     $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' " . $whereConditionObatRm . " ");
                     ?>
                     <div>
-                      <h6 class="mt-2 mb-0"><b>Tambah Obat Untuk Jadwal <?= $jadwal['jadwal'] ?></b></h6>
+                      <h6 class="mt-2 mb-0"><b>Tambah Obat Untuk Jadwal <?= $getLastRM['jadwall'] ?></b></h6>
                       <?php $obatData = $obat->fetch_assoc(); ?>
                       <?php if ($obatData['status_obat'] != "selesai") { ?>
                         <div align="right">
@@ -1122,6 +1246,7 @@ if ($pas['jenis_kelamin'] == '1') {
         </div>
       </div>
     </div>
+
     <!-- Add data Modal Paket Obat Jadi -->
     <div class="modal fade" id="addPaketJadi" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -1136,7 +1261,7 @@ if ($pas['jenis_kelamin'] == '1') {
               <select name="paket" id="" class="form-select">
                 <option value="" hidden>Pilih Paket</option>
                 <?php
-                $getPakek = $koneksi->query("SELECT * FROM puyerjadi GROUP BY nama_paket ORDER BY nama_paket ASC");
+                $getPakek = $koneksimaster->query("SELECT * FROM puyerjadi GROUP BY nama_paket ORDER BY nama_paket ASC");
                 foreach ($getPakek as $paket) {
                 ?>
                   <option value="<?= $paket['id'] ?>"><?= $paket['nama_paket'] ?></option>
@@ -1603,7 +1728,7 @@ if (isset($_POST['saveobnew'])) {
 }
 
 if (isset($_POST['saveobpaketjadi'])) {
-  $getPaketObat = $koneksi->query("SELECT puyerjadi_detail.* FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_POST['paket']) . "'");
+  $getPaketObat = $koneksimaster->query("SELECT puyerjadi_detail.* FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_POST['paket']) . "'");
 
   $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
   if ($cekPemOb['carabayar'] == 'umum') {
