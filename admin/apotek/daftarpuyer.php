@@ -1,6 +1,6 @@
 <?php 
 
-$obat=$koneksi->query("SELECT * FROM puyer;"); 
+$obat=$koneksimaster->query("SELECT * FROM puyer;"); 
 
 ?>
 
@@ -211,7 +211,7 @@ $obat=$koneksi->query("SELECT * FROM puyer;");
 <?php if (isset ($_POST['save'])) 
 {
 
-  $koneksi->query("INSERT INTO puyer 
+  $koneksimaster->query("INSERT INTO puyer 
 
   (nama_paket, dosis_paket1, dosis_paket2, durasi_paket, petunjuk_paket, ctt_paket)
 
@@ -231,7 +231,7 @@ $obat=$koneksi->query("SELECT * FROM puyer;");
 <?php if (isset ($_GET['hapus'])) 
 {
 
-    $koneksi->query("DELETE FROM puyer WHERE id = '$_GET[id]'");
+    $koneksimaster->query("DELETE FROM puyer WHERE id = '$_GET[id]'");
 
     echo "
     <script>

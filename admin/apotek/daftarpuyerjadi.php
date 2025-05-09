@@ -24,13 +24,13 @@
         if (isset($_POST['tambah'])) {
             $nama_paket = htmlspecialchars($_POST['nama_paket']);
             $deskripsi = htmlspecialchars($_POST['deskripsi']);
-            $koneksi->query("INSERT INTO puyerjadi (nama_paket, deskripsi) VALUES ('$nama_paket', '$deskripsi')");
+            $koneksimaster->query("INSERT INTO puyerjadi (nama_paket, deskripsi) VALUES ('$nama_paket', '$deskripsi')");
             echo "<script>alert('Data berhasil ditambahkan');</script>";
             echo "<script>location='index.php?halaman=daftarpuyerjadi';</script>";
         }
         ?>
     <?php } elseif (isset($_GET['edit'])) { ?>
-        <?php $single = $koneksi->query("SELECT * FROM puyerjadi WHERE id = '" . htmlspecialchars($_GET['id']) . "'")->fetch_assoc() ?>
+        <?php $single = $koneksimaster->query("SELECT * FROM puyerjadi WHERE id = '" . htmlspecialchars($_GET['id']) . "'")->fetch_assoc() ?>
         <a href="index.php?halaman=daftarpuyerjadi" class="btn btn-dark btn-sm mb-2">Kembali</a>
         <div class="card shadow p-2">
             <h5>Edit Paket Jadi</h5>
@@ -54,7 +54,7 @@
         if (isset($_POST['tambah'])) {
             $nama_paket = htmlspecialchars($_POST['nama_paket']);
             $deskripsi = htmlspecialchars($_POST['deskripsi']);
-            $koneksi->query("UPDATE puyerjadi SET nama_paket = '$nama_paket', deskripsi = '$deskripsi' WHERE id = '" . htmlspecialchars($_GET['id']) . "'");
+            $koneksimaster->query("UPDATE puyerjadi SET nama_paket = '$nama_paket', deskripsi = '$deskripsi' WHERE id = '" . htmlspecialchars($_GET['id']) . "'");
             echo "<script>alert('Data berhasil diedit');</script>";
             echo "<script>location='index.php?halaman=daftarpuyerjadi';</script>";
         }
@@ -62,8 +62,8 @@
 
     <?php } elseif (isset($_GET['delete'])) { ?>
         <?php
-        $koneksi->query("DELETE FROM puyerjadi WHERE id = '" . htmlspecialchars($_GET['id']) . "'");
-        $koneksi->query("DELETE FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_GET['id']) . "'");
+        $koneksimaster->query("DELETE FROM puyerjadi WHERE id = '" . htmlspecialchars($_GET['id']) . "'");
+        $koneksimaster->query("DELETE FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_GET['id']) . "'");
         echo "<script>alert('Data berhasil dihapus');</script>";
         echo "<script>location='index.php?halaman=daftarpuyerjadi';</script>";
         ?>
@@ -137,7 +137,7 @@
                     </thead>
                     <tbody>
                         <?php
-                        $getObatPuyer = $koneksi->query("SELECT * FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_GET['id']) . "'");
+                        $getObatPuyer = $koneksimaster->query("SELECT * FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_GET['id']) . "'");
                         foreach ($getObatPuyer as $obatPuyer) {
                         ?>
                             <tr>
@@ -169,7 +169,7 @@
             $durasi = htmlspecialchars($_POST['durasi']);
             $ctt_obat = htmlspecialchars($_POST['ctt_obat']);
 
-            $koneksi->query("INSERT INTO `puyerjadi_detail`(`puyer_id`, `kode_obat`, `nama_obat`, `jumlah`, `dosis1`, `dosis2`, `per`, `petunjuk_pemakaian`, `durasi`, `ctt_obat`) VALUES ('$puyer_id', '$kode_obat', '$nama_obat', '$jumlah', '$dosis1', '$dosis2', '$per', '$petunjuk_pemakaian', '$durasi', '$ctt_obat')");
+            $koneksimaster->query("INSERT INTO `puyerjadi_detail`(`puyer_id`, `kode_obat`, `nama_obat`, `jumlah`, `dosis1`, `dosis2`, `per`, `petunjuk_pemakaian`, `durasi`, `ctt_obat`) VALUES ('$puyer_id', '$kode_obat', '$nama_obat', '$jumlah', '$dosis1', '$dosis2', '$per', '$petunjuk_pemakaian', '$durasi', '$ctt_obat')");
 
             echo "
                     <script>
@@ -201,7 +201,7 @@
                     <tbody>
                         <?php
                         $no = 1;
-                        $getPuyerJadi = $koneksi->query("SELECT * FROM puyerjadi ORDER BY created_at DESC");
+                        $getPuyerJadi = $koneksimaster->query("SELECT * FROM puyerjadi ORDER BY created_at DESC");
                         foreach ($getPuyerJadi as $pj) {
                         ?>
                             <tr>

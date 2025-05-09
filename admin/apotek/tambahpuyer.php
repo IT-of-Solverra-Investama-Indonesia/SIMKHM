@@ -1,7 +1,7 @@
 <?php 
 
-$obat=$koneksi->query("SELECT * FROM puyer WHERE id = '$_GET[id]';")->fetch_assoc(); 
-$daftar=$koneksi->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_GET[id]';"); 
+$obat=$koneksimaster->query("SELECT * FROM puyer WHERE id = '$_GET[id]';")->fetch_assoc(); 
+$daftar=$koneksimaster->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_GET[id]';"); 
 
 ?>
 
@@ -203,7 +203,7 @@ $daftar=$koneksi->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_GET[id]'
                           <select name="nama_obat" class="form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
                           <option value="">Pilih</option>
                             <?php
-                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' ORDER BY nama_obat ASC");
+                              $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' ORDER BY nama_obat ASC");
 
                                 foreach ($getObat as $data) {
                             ?>
@@ -242,7 +242,7 @@ $daftar=$koneksi->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_GET[id]'
 <?php if (isset ($_POST['saveobat'])) 
 {
 
-  $koneksi->query("INSERT INTO puyer_detail 
+  $koneksimaster->query("INSERT INTO puyer_detail 
 
   (nama_obat, jml_obat, id_puyer)
 
@@ -263,7 +263,7 @@ $daftar=$koneksi->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_GET[id]'
 <?php if (isset ($_POST['editobat'])) 
 {
 
-    $koneksi->query("UPDATE puyer_detail SET
+    $koneksimaster->query("UPDATE puyer_detail SET
 
     nama_obat      = '$_POST[nama_obat]',
     jml_obat      = '$_POST[jml_obat]'
@@ -283,7 +283,7 @@ $daftar=$koneksi->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_GET[id]'
 <?php if (isset ($_GET['hapus'])) 
 {
 
-    $koneksi->query("DELETE FROM puyer_detail WHERE id = '$_GET[id]'");
+    $koneksimaster->query("DELETE FROM puyer_detail WHERE id = '$_GET[id]'");
 
     echo "
     <script>
