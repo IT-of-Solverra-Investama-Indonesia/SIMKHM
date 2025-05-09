@@ -1,6 +1,6 @@
 <?php 
 
-$obat=$koneksi->query("SELECT * FROM puyer;"); 
+$obat=$koneksimaster->query("SELECT * FROM puyer;"); 
 
 ?>
 
@@ -72,7 +72,7 @@ $obat=$koneksi->query("SELECT * FROM puyer;");
                           <option value="" hidden>Pilih</option>
 
                             <?php
-                                $getObat = $koneksi->query("SELECT * FROM puyer ORDER BY nama_paket ASC");
+                                $getObat = $koneksimaster->query("SELECT * FROM puyer ORDER BY nama_paket ASC");
   
                                 foreach ($getObat as $data) {
                             ?>
@@ -96,13 +96,15 @@ $obat=$koneksi->query("SELECT * FROM puyer;");
 </body>
 
 </html>
-
+<?php
+  $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+?>
 
 
 <?php if (isset ($_POST['save'])) 
 {
 
-  $ambil=$koneksi->query("SELECT * FROM puyer join puyer_detail on puyer.id=puyer_detail.id_puyer where puyer.id='$_POST[nama_obat]' ");
+  $ambil=$koneksimaster->query("SELECT * FROM puyer join puyer_detail on puyer.id=puyer_detail.id_puyer where puyer.id='$_POST[nama_obat]' ");
 
         foreach($ambil as $pecah){
 
@@ -132,6 +134,7 @@ $obat=$koneksi->query("SELECT * FROM puyer;");
               durasi_obat      = '$durasi_obat',
               petunjuk_obat      = '$petunjuk_obat',
               jenis_obat      = '$jenis_obat',
+              rekam_medis_id = '$getLastRM[id_rm]',
               tgl_pasien      = '$_GET[tgl]',
               idrm      = '$_GET[id]'
           ");
@@ -155,7 +158,7 @@ if (isset ($_POST['lihat'])) {
 
 $produkcopy=$_POST['nama_obat'];
 
-$ambilproduk=$koneksi->query("SELECT * FROM puyer join puyer_detail on puyer.id=puyer_detail.id_puyer where puyer.id='$produkcopy' ");
+$ambilproduk=$koneksimaster->query("SELECT * FROM puyer join puyer_detail on puyer.id=puyer_detail.id_puyer where puyer.id='$produkcopy' ");
 
 $pecahproduk=$ambilproduk->fetch_assoc();
 
