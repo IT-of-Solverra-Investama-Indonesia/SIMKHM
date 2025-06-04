@@ -2,18 +2,18 @@
     $id = htmlspecialchars($_GET['beli']);
     
     $getSinglePembelian = $koneksi->query("SELECT * FROM pembelian_obat WHERE id_beli = '$id'")->fetch_assoc();
-    $getSingleCek = $koneksi->query("SELECT * FROM apotek WHERE nama_obat = '$getSinglePembelian[nama_obat]'");
-    if ($getSingleCek->num_rows == 0) {
-        $koneksi->query("INSERT INTO apotek (nama_obat, tipe, id_obat, bentuk, jml_obat, jml_obat_minim, harga_beli, tgl_beli, margininap, margin_jual, produsen) VALUES ('$getSinglePembelian[nama_obat]', '$getSinglePembelian[tipe]', '$getSinglePembelian[id_obat]', '$getSinglePembelian[bentuk]', '0', '$getSinglePembelian[jml_obat_minim]', '$getSinglePembelian[harga_beli]', '$getSinglePembelian[tgl_beli]', '100', '100', '$getSinglePembelian[produsen]')");
-    
-        echo "
-            <script>
-                document.location.href='index.php?halaman=apotek_terima_penerimaan&beli=$_GET[beli]';
-            </script>
-        ";
-    }
+$getSingleCek = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$getSinglePembelian[id_obat]'")->fetch_assoc();
+// if ($getSingleCek->num_rows == 0) {
+//     $koneksi->query("INSERT INTO apotek (nama_obat, tipe, id_obat, bentuk, jml_obat, jml_obat_minim, harga_beli, tgl_beli, margininap, margin_jual, produsen) VALUES ('$getSinglePembelian[nama_obat]', '$getSinglePembelian[tipe]', '$getSinglePembelian[id_obat]', '$getSinglePembelian[bentuk]', '0', '$getSinglePembelian[jml_obat_minim]', '$getSinglePembelian[harga_beli]', '$getSinglePembelian[tgl_beli]', '100', '100', '$getSinglePembelian[produsen]')");
 
-    $single = $koneksi->query("SELECT pembelian_obat.* FROM pembelian_obat INNER JOIN apotek ON apotek.id_obat = pembelian_obat.id_obat WHERE id_beli = '$id' GROUP BY apotek.id_obat")->fetch_assoc();
+//     echo "
+//         <script>
+//             document.location.href='index.php?halaman=apotek_terima_penerimaan&beli=$_GET[beli]';
+//         </script>
+//     ";
+// }
+
+$single = $koneksi->query("SELECT pembelian_obat.* FROM pembelian_obat WHERE id_beli = '$id' GROUP BY id_obat")->fetch_assoc();
 ?>
 <a href="index.php?halaman=apotek_terima" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;"><i class="bi bi-arrow-left"></i> Kembali</a>
 <div class="card shadow-sm p-2">
@@ -48,11 +48,11 @@
 </div>
 <?php
     if(isset($_POST['terima'])){
-        $nama_obat = $single['nama_obat'];
-        $id_obat = $single['id_obat'];
-        $margininap = $single['margininap'] == '' ? 100 : $single['margininap'];
-        $margin_jual = $single['margin_jual'] == '' ? 100 : $single['margin_jual'];
-        $jml_obat_minim = $single['jml_obat_minim'];
+        $nama_obat = $getSingleCek['obat_master'];
+        $id_obat = $getSingleCek['kode_obat'];
+        $margininap = $getSingleCek['margin_inap'] == '' ? 100 : $getSingleCek['margin_inap'];
+        $margin_jual = $getSingleCek['margin_jual'] == '' ? 100 : $getSingleCek['margin_jual'];
+        $jml_obat_minim = '0';
         $tipe = $single['tipe'];
         $tgl_beli = $single['tgl_beli'];
         $tgl_expired = $single['tgl_expired'];
