@@ -160,6 +160,10 @@ if (isset($_GET['confirm'])) {
                         <option value="Rawat Inap">Rawat Inap</option>
                       </select>
                     </div>
+                    <!-- <div class="col-md-12">
+                      <label for="inputState" class="form-label">Keluhan</label>
+                      <textarea name="keluhan_utama" id="" class="form-control"></textarea>
+                    </div> -->
                     <!-- <div class="hidden" id="kamar">
                   <div class="row">
                     <div class="col-md-12">
@@ -194,10 +198,8 @@ if (isset($_GET['confirm'])) {
                       });
                     </script>
                     <div>
-                      <br>
                       <h5 class="card-title">Data Umum</h5>
                     </div>
-                    <!-- Multi Columns Form -->
                     <div class="col-md-6">
                       <label for="inputName5" class="form-label">Nama Pasien</label>
                       <input type="text" class="form-control" name="nama_pasien" id="inputName5" value="<?php echo $pecah['nama_lengkap'] ?>" placeholder="Masukkan Nama Pasien">
