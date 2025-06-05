@@ -45,9 +45,11 @@
               if($row2['level'] == 'dokter'){
                 echo "<script> location='index.php?halaman=daftarrmedis'; </script> ";
               }elseif($row2['level'] == 'racik'){
-                echo "<script> location='index.php?halaman=daftarrmedis&all'; </script> ";
+                echo "<script> location='index.php?halaman=daftarrmedis&racik'; </script> ";
               } elseif ($row2['level'] == 'apoteker') {
                 echo "<script> location='index.php?halaman=daftarapotek'; </script> ";
+              } elseif ($row2['level'] == 'kasir') {
+                echo "<script> location='index.php?halaman=daftarbayar'; </script> ";
               }else{
                 echo "<script> location='index.php'; </script> ";
               }

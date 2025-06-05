@@ -76,10 +76,13 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="verif_obat"){include '../rekammedis/verif_obat.php';}
                    elseif ($hal=="kyc_satusehat"){include '../rekammedis/kyc_satusehat.php';}
                    elseif ($hal=="master_poli"){include '../rekammedis/master_poli.php';}
+                   elseif ($hal=="master_layanan"){include '../rekammedis/master_layanan.php';}
+                   elseif ($hal=="rmedis_editObatJenis"){include '../rekammedis/rmedis_editObatJenis.php';}
 
                    //pembayaran
                    elseif ($hal=="bayarrawat"){include '../bayar/bayarrawat.php';}
                    elseif ($hal=="daftarbayar"){include '../bayar/daftarbayar.php';}
+                   elseif ($hal=="keuangan"){include '../bayar/keuangan.php';}
 
                    //log
                    elseif ($hal=="detaillog"){include '../log/detaillog.php';}
@@ -128,6 +131,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="biayaigd"){include '../igd/biayaigd.php';}
 
                     //apotek
+                   elseif ($hal=="dashboardapotek"){include '../apotek/dashboardapotek.php';}
                    elseif ($hal=="daftarapotek"){include '../apotek/daftarapotek.php';}
                    elseif ($hal=="tambahapotek"){include '../apotek/tambahapotek.php';}
                    elseif ($hal=="detailapotek"){include '../apotek/detailapotek.php';}
@@ -149,7 +153,18 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="apotek_terima_riwayatpenerimaan"){include '../apotek/apotek_terima_riwayatpenerimaan.php';}
                    elseif ($hal=="apotek_obat_expired"){include '../apotek/apotek_obat_expired.php';}
                    elseif ($hal=="entri_obat_inap"){include '../apotek/entri_obat_inap.php';}
-
+                   elseif ($hal=="stok_obat_apoteker"){include '../apotek/stok_obat_apoteker.php';}
+                   elseif ($hal=="penjualan_obat_umum"){include '../apotek/penjualan_obat_umum.php';}
+                   elseif ($hal=="penjualan_obat_resep"){include '../apotek/penjualan_obat_resep.php';}
+                   elseif ($hal=="penjualan_obat_internal"){include '../apotek/penjualan_obat_internal.php';}
+                   elseif ($hal=="penjualan_obat_rekanan"){include '../apotek/penjualan_obat_rekanan.php';}
+                   elseif ($hal=="penjualan_obat_umum_riwayat"){include '../apotek/penjualan_obat_umum_riwayat.php';}
+                   elseif ($hal=="penjualan_obat_resep_riwayat"){include '../apotek/penjualan_obat_resep_riwayat.php';}
+                   elseif ($hal=="penjualan_obat_all_riwayat"){include '../apotek/penjualan_obat_all_riwayat.php';}
+                   elseif ($hal=="setoran_shift_apoteker"){include '../apotek/setoran_shift_apoteker.php';}
+                   elseif ($hal=="apoteker_hpp"){include '../apotek/apoteker_hpp.php';}
+                   elseif ($hal=="retur_obat_inap"){include '../apotek/retur_obat_inap.php';}
+                    
                     //laporan
                    elseif ($hal=="laporanmedis"){include '../laporan/laporanmedis.php';}
                    elseif ($hal=="pendapatan"){include '../laporan/pendapatan.php';}

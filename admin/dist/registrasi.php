@@ -2,18 +2,15 @@
 
 session_start();
 include 'function.php';
-
+if (!isset($_SESSION['login'])) {
+  header("location:login.php");
+  exit;
+}
 
 //error_reporting(0);
-
-
-
 // if(!isset($_SESSION['login'])){
-
 //   header("location:login.php");
-
 //   exit;}
-
  ?>
 
 

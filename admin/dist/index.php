@@ -266,17 +266,7 @@ if (!isset($_SESSION['login'])) {
           </ul>
         </li><!-- End Forms Nav -->
         <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=konsultasi">
-            <i class="bi bi-journal-text"></i><span>Konsultasi</span></i>
-            <?php
-            $result = $koneksi->query("SELECT COUNT(*) AS jumlah FROM room_konsultasi WHERE dokter =''");
-            $row = $result->fetch_assoc();
-            $belumbayar = $row['jumlah'];
-            ?>
-            <sup style="background-color: blue; color: white; border-radius: 50px;">
-              <p class="my-2 mx-1"><?= $belumbayar ?></p>
-            </sup>
-          </a>
+
           <a class="nav-link collapsed" href="index.php?halaman=daftarpuyer">
             <i class="bi bi-capsule"></i>
             <span>Tambah Paket Racik</span>
@@ -289,54 +279,19 @@ if (!isset($_SESSION['login'])) {
             <i class="bi bi-database-check"></i>
             <span>Master Poli</span>
           </a>
+          <a class="nav-link collapsed" href="index.php?halaman=master_layanan">
+            <i class="bi bi-database-check"></i>
+            <span>Master Layanan</span>
+          </a>
         </li>
       <?php } ?>
 
 
-      <li class="nav-heading">Kosmetik</li>
-      <?php if ($level == 'ceo' or $level == 'kasir' or $level == 'sup') { ?>
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=konsultasiall">
-            <i class="bi bi-journal-text"></i><span>Konsultasi All </span></i>
-            <?php
-            $result = $koneksi->query("SELECT COUNT(*) AS jumlah FROM room_konsultasi WHERE dokter =''");
-            $row = $result->fetch_assoc();
-            $belumbayar = $row['jumlah'];
-            ?>
-            <sup style="background-color: blue; color: white; border-radius: 50px;">
-              <p class="my-2 mx-1"><?= $belumbayar ?></p>
-            </sup>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=produk_kosmetik">
-            <i class="bi bi-journal-text"></i><span>Produk Kosmetik</span></i>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=pemesanan">
-            <i class="bi bi-journal-text"></i><span>Pemesanan </span></i>
-            <?php
-            $result = $koneksi->query("SELECT COUNT(*) AS jumlah FROM pemesanan WHERE status = 'Menunggu_pembayaran'");
-            $row = $result->fetch_assoc();
-            $belumbayar = $row['jumlah'];
-            ?>
-            <sup style="background-color: blue; color: white; border-radius: 50px;">
-              <p class="my-2 mx-1"><?= $belumbayar ?></p>
-            </sup>
-          </a>
-        </li>
-      <?php } ?>
 
       <!-- End  -->
 
-
-
-
       <?php if ($level == 'igd') { ?>
-
         <li class="nav-heading">IGD</li>
-
         <li class="nav-item">
           <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
             <i class="bi bi-journal-text"></i><span>Rekam Medis</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -448,15 +403,27 @@ if (!isset($_SESSION['login'])) {
       <?php if ($level == 'apoteker' or $level == 'ceo'  or $level == 'sup') { ?>
         <li class="nav-heading">Apoteker</li>
         <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=daftarapotek">
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=daftarapotek">
             <i class="bi bi-capsule"></i>
-            <span>Apotek</span>
+            <span>Apoteker</span>
+          </a> -->
+          <a class="nav-link collapsed" href="index.php?halaman=dashboardapotek">
+            <i class="bi bi-capsule"></i>
+            <span>Dashboard Apotik</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=tambah_obatmasuk">
+            <i class="bi bi-capsule"></i>
+            <span>Pemesanan Obat</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=stok_obat_apoteker">
+            <i class="bi bi-capsule"></i>
+            <span>Stok Obat</span>
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=margin_obat">
             <i class="bi bi-cash-coin"></i>
             <span>Setting Margin Obat</span>
           </a>
-          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&all">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&racik">
             <i class="bi bi-capsule"></i>
             <span>Petugas Racik</span>
           </a>
@@ -472,21 +439,62 @@ if (!isset($_SESSION['login'])) {
             <i class="bi bi-capsule"></i>
             <span>Tambah Paket Jadi</span>
           </a>
-          <a class="nav-link collapsed" href="index.php?halaman=rekapobat">
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=rekapobat">
             <i class="bi bi-capsule"></i>
             <span>Rekap Obat</span>
-          </a>
+          </a> -->
           <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
             <i class="bi bi-capsule"></i>
             <span>Entri Obat Inap</span>
           </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_umum">
+            <i class="bi bi-cart-check"></i>
+            <span>Penjualan Obat Umum</span>
+          </a>
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_umum_riwayat">
+            <i class="bi bi-bar-chart"></i>
+            <span>Riwayat Penjualan Obat Umum</span>
+          </a> -->
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_resep">
+            <i class="bi bi-cart-check-fill"></i>
+            <span>Penjualan Obat Resep</span>
+          </a>
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_resep_riwayat">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Riwayat Penjualan Obat Resep</span>
+          </a> -->
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_rekanan">
+            <i class="bi bi-cart-dash"></i>
+            <span>Penjualan Obat Rekanan</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_internal">
+            <i class="bi bi-cart-dash-fill"></i>
+            <span>Penjualan Obat Internal</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_all_riwayat">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Riwayat Penjualan Obat All</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=setoran_shift_apoteker">
+            <i class="bi bi-clipboard-check"></i>
+            <span>Setoran Shift</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=rekapobat">
+            <i class="bi bi-bar-chart"></i>
+            <span>HPP Penggunaan Obat</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=daftar_obat_master">
+            <i class="bi bi-database"></i>
+            <span>Obat Master</span>
+          </a>
+
         </li><!-- End Profile Page Nav -->
       <?php } ?>
 
       <?php if ($level == 'racik') { ?>
         <li class="nav-heading">Petugas Racik</li>
         <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&all">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&racik">
             <i class="bi bi-capsule"></i>
             <span>Racik Obat</span>
           </a>
@@ -497,6 +505,38 @@ if (!isset($_SESSION['login'])) {
           <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
             <i class="bi bi-capsule"></i>
             <span>Entri Obat Inap</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_umum">
+            <i class="bi bi-cart-check"></i>
+            <span>Penjualan Obat Umum</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_umum_riwayat">
+            <i class="bi bi-bar-chart"></i>
+            <span>Riwayat Penjualan Obat Umum</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_resep">
+            <i class="bi bi-cart-check-fill"></i>
+            <span>Penjualan Obat Resep</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_resep_riwayat">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Riwayat Penjualan Obat Resep</span>
+          </a>
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_rekanan">
+            <i class="bi bi-cart-dash"></i>
+            <span>Penjualan Obat Rekanan</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_internal">
+            <i class="bi bi-cart-dash-fill"></i>
+            <span>Penjualan Obat Internal</span>
+          </a> -->
+          <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_all_riwayat">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Riwayat Penjualan Obat All</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=setoran_shift_apoteker">
+            <i class="bi bi-bar-chart"></i>
+            <span>Setoran Shift</span>
           </a>
         </li><!-- End Profile Page Nav -->
       <?php } ?>
@@ -524,7 +564,7 @@ if (!isset($_SESSION['login'])) {
         <li class="nav-heading">Kasir</li>
 
         <li class="nav-item">
-          <a class="nav-link collapsed" href="index.php?halaman=daftarbayar">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarbayar&day">
             <i class="bi bi-cash-stack"></i>
             <span>Pembayaran</span>
           </a>
