@@ -1,8 +1,9 @@
 <?php
-$username = $_SESSION['admin']['username'];
+$username = $_SESSION['admin']['namalengkap'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $nota = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis='$_GET[id]';")->fetch_assoc();
 $pasien = $koneksi->query("SELECT * FROM pasien INNER JOIN rekam_medis ON rekam_medis.norm=pasien.no_rm WHERE TRIM(norm)='$_GET[rm]';");
+$getRegis = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$_GET[id]'")->fetch_assoc();
 $pecah = $pasien->fetch_assoc();
 ?>
 
@@ -75,14 +76,84 @@ $pecah = $pasien->fetch_assoc();
 
               <?php
 
-              $plan = $koneksi->query("SELECT * FROM layanan WHERE idrm = '$_GET[rm]' AND DATE_FORMAT(tgl_layanan, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+              $plan = $koneksi->query("SELECT * FROM layanan WHERE idrm = '$pecah[no_rm]' AND DATE_FORMAT(tgl_layanan, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($getRegis['jadwal'])) . "'");
 
               ?>
 
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title">Layanan</h5>
+                  <h5 class="card-title">Layanan <sup><span class="badge bg-success text-light" data-bs-toggle="modal" data-bs-target="#exampleModal">+ Tambah Layanan</span></sup></h5>
+                  <!-- Add Data Modal Layanan -->
+                  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">Tambah Layanan/Tindakan</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="userEntry" method="post" enctype="multipart/form-data">
+                          <div class="modal-body">
+                            <div class="col-md-12">
+                              <label for="inputName5" class="form-label">Layanan/Tindakan</label>
+                              <select name="layanan" class="form-control form-control-sm" id="selLay" onchange="SelLay(this)">
+                                <option hidden>Pilih Layanan</option>
+                                <?php
+                                $getLayananMaster = $koneksimaster->query("SELECT * FROM  master_layanan ORDER BY nama_layanan DESC");
+                                ?>
+                                <?php foreach ($getLayananMaster as $masterLayanan) { ?>
+                                  <option value="<?= $masterLayanan['id'] ?>">
+                                    <?= $masterLayanan['nama_layanan'] ?> || Rp <?= number_format($masterLayanan['harga'], 0, 0, '.') ?>
+                                  </option>
+                                <?php } ?>
+                              </select>
+                            </div>
+                            <div class="col-md-12" style="margin-top:0px; height: 0.1px; visibility : hidden;">
+                              <label for="inputName5" class="form-label">Jumlah</label>
+                              <input type="text" name="jumlah_layanan" value="1" class="form-control form-control-sm" id="inputName5" placeholder="Masukkan Jumlah">
+                            </div>
+                            <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>">
+                            <!-- <input type="hidden" name="idrm" value="<?php echo $pecah['norm'] ?>"> -->
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <input type="submit" class="btn btn-sm btn-primary" name="savelay" value="Save changes" />
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
 
+                  <?php
+                  if (isset($_POST['savelay'])) {
+                    $layanan = $_POST['layanan'];
+                    $getLayananMasterById = $koneksimaster->query("SELECT * FROM master_layanan WHERE id='$layanan'")->fetch_assoc();
+
+                    $DaftarLayanan = $nota['biaya_lain'] . "+" . $getLayananMasterById['nama_layanan'];
+                    $HargaLayanan = intval($nota['total_lain']) + $getLayananMasterById['harga'];
+
+                    // $ttlBiyLain = intval($getBiyLain['total_lain']) + intval($_POST['harga_layanan']);
+
+
+                    $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$DaftarLayanan', total_lain = '$HargaLayanan' WHERE idregis='$_GET[id]'");
+
+                    $koneksi->query("INSERT INTO layanan (layanan, kode_layanan, jumlah_layanan, id_pasien, idrm, tgl_layanan) VALUES ('$getLayananMasterById[nama_layanan]', '$getLayananMasterById[id]', '1', '$pecah[idpasien]', '$_GET[rm]', '$getRegis[jadwal]')");
+
+                    if (isset($_GET['inap'])) {
+                      echo "
+                            <script>
+                                document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
+                            </script>
+                          ";
+                    } else {
+                      echo "
+                            <script>
+                            alert('Successfully added');
+                                document.location.href='index.php?halaman=bayarrawat&rm=$_GET[rm]&id=$_GET[id]&tgl=$_GET[tgl]';
+                            </script>
+                          ";
+                    }
+                  }
+                  ?>
                   <!-- Multi Columns Form -->
                   <div class="row">
                     <div class="table-responsive">
@@ -190,16 +261,34 @@ $pecah = $pasien->fetch_assoc();
                         </td>
                       </tr> -->
                   <tr>
+                    <td><b>Poli</td></b>
+                    <td style="margin-left: 20px;">
+                      <div class="row">
+                        <div class="col-9">
+                          <input value="<?= $nota['poli'] ?>" readonly type="number" class="form-control" name="poli" id="poliHarga" placeholder="Masukkan Potongan">
+                        </div>
+                        <div class="col-3">
+                          <button class="btn btn-secondary" onclick="nolkan()" type="button">Nolkan</button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <script>
+                    function nolkan() {
+                      document.getElementById('poliHarga').value = 0;
+                    }
+                  </script>
+                  <tr>
                     <td><b>Potongan/Jaminan</td></b>
                     <td style="margin-left: 20px;"><input value="0" type="number" class="form-control" name="potongan" id="inputCity" placeholder="Masukkan Potongan"></td>
                   </tr>
                   <tr>
                     <td><b>Biaya Lain</td></b>
-                    <td style="margin-left: 20px;"><input value="" type="text" class="form-control" name="biaya_lain" id="inputCity" placeholder="Masukkan Biaya Lain"></td>
+                    <td style="margin-left: 20px;"><input type="text" class="form-control" name="biaya_lain" id="inputCity" value="<?= $nota['biaya_lain'] ?>" placeholder="Masukkan Biaya Lain"></td>
                   </tr>
                   <tr>
                     <td><b>Total Biaya Lain</td></b>
-                    <td style="margin-left: 20px;"><input value="" type="number" class="form-control" name="total_lain" id="inputCity" placeholder="Masukkan Total Biaya lain"></td>
+                    <td style="margin-left: 20px;"><input value="<?= $nota['total_lain'] ?>" type="number" class="form-control" name="total_lain" id="inputCity" placeholder="Masukkan Total Biaya lain"></td>
                   </tr>
                   <!-- <tr>
                       <td><b>Total</td></b><td style="margin-left: 20px;"><input value="" type="number" class="form-control" id="inputCity" placeholder="Masukkan Total" disabled></td>
@@ -252,27 +341,18 @@ $pecah = $pasien->fetch_assoc();
 
 <?php
 if (isset($_POST['simpan'])) {
-
   $biaya_lain = $_POST['biaya_lain'];
   $total_lain = $_POST['total_lain'];
   $potongan = $_POST['potongan'];
   // $id_pasien=$_POST['id_pasien'];
   $notaNew = $_POST['nota'];
   // $status=$_POST['status'];
-
-
-
-  $koneksi->query("UPDATE biaya_rawat SET biaya_lain='$biaya_lain', nota='$notaNew', total_lain='$total_lain', potongan='$potongan' WHERE idregis='$_GET[id]'");
-
+  $koneksi->query("UPDATE biaya_rawat SET biaya_lain='$biaya_lain', nota='$notaNew', total_lain='$total_lain', potongan='$potongan', poli = '$_POST[poli]' WHERE idregis='$_GET[id]'");
   $koneksi->query("UPDATE registrasi_rawat SET kasir='$username' WHERE idrawat='$_GET[id]'");
-
   echo "
-  <script>
-
-  document.location.href='index.php?halaman=daftarbayar';
-
-  </script>
-
+    <script>
+      document.location.href='index.php?halaman=daftarbayar&day';
+    </script>
   ";
 }
 ?>
