@@ -122,7 +122,7 @@ $obat=$koneksimaster->query("SELECT * FROM puyer;");
 
           $stokAkhir = $ObatKode['jml_obat']-$jml_dokter;
 
-          $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
+          // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
 
           $koneksi->query("INSERT INTO obat_rm SET
               catatan_obat    = '$catatan_obat',
