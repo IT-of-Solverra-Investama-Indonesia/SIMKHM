@@ -1,19 +1,28 @@
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<h4>Tambah Obat Masuk</h4>
-<a href="index.php?halaman=daftarapotek" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;">Kembali</a>
-
-<form method="POST">
-    <div class="card shadow-sm p-2" style="border-radius: 15px;">
+<h5 class="card-title">Tambah Obat Masuk</h5>
+<!-- <a href="index.php?halaman=daftarapotek" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;">Kembali</a> -->
+<div class="card shadow-sm p-2 mb-2">
+    <div class="">
+        <!-- <a href="index.php?halaman=tambah_obatmasuk" class="btn btn-sm mb-1 btn-primary"><i class="bi bi-plus"></i> Pesan Obat</a> -->
+        <a href="index.php?halaman=apotek_obat_expired" class="btn btn-sm mb-1 btn-primary"><i class="bi bi-plus"></i> Obat Expired</a>
+        <a href="index.php?halaman=apotek_terima" class="btn btn-sm mb-1 btn-primary"><i class="bi bi-plus"></i> Terima Obat</a>
+        <!-- <a href="index.php?halaman=daftar_obat_selaras" class="btn btn-sm mb-1 btn-warning">Penyelarasan</a> -->
+        <a href="index.php?halaman=harga_beli_tarakhir" class="btn btn-sm mb-1 btn-success">Harga Beli Terakhir</a>
+        <!-- <a href="index.php?halaman=daftar_obat_master" class="btn btn-sm mb-1 btn-danger">Obat Master</a> -->
+    </div>
+</div>
+<div class="card shadow-sm p-2">
+    <form method="POST">
         <div class="row">
             <div class="col-md-12">
                 <label for="">Pilih Obat :</label>
                 <select required name="nama_obat" class="js-example-basic-single w-100" id="nama_obat_id">
                     <option value="" hidden>Pilih Obat</option>
-                    <!-- <option value="Obat Baru">Tamba    h Obat Baru</option> -->
+                    <!-- <option value="Obat Baru">Tambah Obat Baru</option> -->
                     <?php
-                    $getObat = $koneksimaster->query("SELECT * FROM master_obat GROUP BY kode_obat ORDER BY obat_master ASC");
+                    $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE aktif_poli = 'aktif' OR aktif_ranap = 'aktif' OR aktif_umum = 'aktif' GROUP BY kode_obat ORDER BY obat_master ASC");
                     foreach ($getObat as $obat) {
                     ?>
                         <option value="<?= $obat['kode_obat'] ?>"><?= $obat['kode_obat'] ?> | <?= $obat['obat_master'] ?></option>
@@ -57,7 +66,7 @@
                 <select name="nama_obat_new" id="nama_obat_new_id" class="form-control  mt-2 w-100">
                     <option value="" hidden>Pilih Obat Baru (Data Dari Master)</option>
                     <?php
-                    $getMasterObat = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
+                    $getMasterObat = $koneksimaster->query("SELECT * FROM master_obat WHERE aktif_poli = 'aktif' OR aktif_ranap = 'aktif' ORDER BY obat_master ASC");
                     foreach ($getMasterObat as $masterObat) {
                     ?>
                         <option value="<?= $masterObat['obat_master'] ?>"><?= $masterObat['obat_master'] ?></option>
@@ -157,8 +166,8 @@
                 <button type="submit" name="save" class="btn btn-primary float-end">Simpan</button>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 <script>
     function changeForm() {
         var pil = document.getElementById('fak');
@@ -188,12 +197,12 @@
 <?php
 if (isset($_POST['save'])) {
     if ($_POST['nama_obat'] != 'Obat Baru') {
-        $getObatSingle = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '" . htmlspecialchars($_POST['nama_obat']) . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-        $nama_obat = $getObatSingle['nama_obat'];
-        $id_obat = $getObatSingle['id_obat'];
-        $margininap = $getObatSingle['margininap'];
+        $getObatSingle = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '" . htmlspecialchars($_POST['nama_obat']) . "' LIMIT 1")->fetch_assoc();
+        $nama_obat = $getObatSingle['obat_master'];
+        $id_obat = $getObatSingle['kode_obat'];
+        $margininap = $getObatSingle['margin_inap'];
         $margin_jual = $getObatSingle['margin_jual'];
-        $jml_obat_minim = $getObatSingle['jml_obat_minim'];
+        $jml_obat_minim = '0';
     } else {
         $nama_obat = htmlspecialchars($_POST['nama_obat_new']);
         $id_obat = htmlspecialchars($_POST['id_obat_new']);
