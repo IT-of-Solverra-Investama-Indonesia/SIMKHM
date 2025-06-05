@@ -102,20 +102,19 @@
       
       if ($usia >= 1 && $usia <= 12) {
           return "An " . $nama_lengkap;
-      } elseif ($usia >= 13 && $usia <= 25) {
+      } elseif ($usia >= 13) {
           if ($jenis_kelamin == '1') { // '1' untuk laki-laki
               return "Sdr " . $nama_lengkap;
           } elseif ($jenis_kelamin == '2') { // '2' untuk perempuan
               return "Nn " . $nama_lengkap;
           }
-      } elseif ($usia > 25) { 
+          
           if ($jenis_kelamin == '1' && $status_nikah == '1') { // '1' untuk laki-laki menikah
-              return "Tn " . $nama_lengkap;
+            return "Tn " . $nama_lengkap;
           } elseif ($jenis_kelamin == '2' && $status_nikah == '1') { // '2' untuk perempuan menikah
               return "Ny " . $nama_lengkap;
           }
-      }
-      
+      } 
       return $nama_lengkap;
     }
     
