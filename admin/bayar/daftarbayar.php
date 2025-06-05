@@ -3,23 +3,64 @@ date_default_timezone_set('Asia/Jakarta');
 ?>
 <?php if (!isset($_GET['pasienInap'])) { ?>
   <?php
+  $whereCondition = "";
+  $whereConditionUrl = "";
+  if (isset($_GET['src'])) {
+    $key = htmlspecialchars($_GET['key']);
+    $whereCondition = " AND (nama_pasien LIKE '%$key%' OR no_rm LIKE '%$key%')";
+    $whereConditionUrl = "&key=$key";
+  }
+
   if (isset($_GET['detail']) and isset($_GET['tgl'])) {
+    $urlPage = "index.php?halaman=daftarbayar&detail&tgl=" . htmlspecialchars($_GET['tgl']) . $whereConditionUrl;
     $date = date('Y-m-d', strtotime($_GET['tgl']));
-    $shift = $_GET["shift"];
-    // var_dump($shift); 
-    // $pasien=$koneksi->query("SELECT * FROM registrasi_rawat INNER JOIN biaya_rawat WHERE idregis=idrawat and (status_antri = 'Datang' or status_antri = 'Pembayaran') and registrasi_rawat.shift = '$shift' and perawatan = 'Rawat Jalan' and (date_format(jadwal, '%Y-%m-%d') = '$date' or date_format(jadwal, '%Y-%m-%d') = DATE(NOW() - INTERVAL 1 DAY));"); 
-    $pasien = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND registrasi_rawat.shift = '$shift' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$date' GROUP BY registrasi_rawat.idrawat;");
+    $query = "SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$date' $whereCondition GROUP BY registrasi_rawat.idrawat";
+  } elseif (isset($_GET['all'])) {
+    $urlPage = "index.php?halaman=daftarbayar&all" . $whereConditionUrl;
+    $query = "SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' AND (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') $whereCondition GROUP BY registrasi_rawat.idrawat";
   } else {
-    $shift = $_SESSION["shift"];
+    $urlPage = "index.php?halaman=daftarbayar" . $whereConditionUrl;
     if (date('Hi') > '0730') {
       $jamCondition = "AND jadwal >= '" . date('Y-m-d 07:30:00') . "' AND jadwal <= '" . date('Y-m-d 07:30:00', strtotime('+1 day')) . "'";
     } else {
       $jamCondition = "AND jadwal <= '" . date('Y-m-d 07:30:00') . "' AND jadwal >= '" . date('Y-m-d 07:30:00', strtotime('-1 day')) . "'";
     }
+    $dayCondition = "";
+    $shiftCondition = "";
+    if (isset($_GET['day'])) {
+      $urlPage = "index.php?halaman=daftarbayar&day" . $whereConditionUrl;
+      $dayCondition = "AND nota = ''";
+    }
+    if (isset($_GET['shift'])) {
+      $urlPage = "index.php?halaman=daftarbayar&shift" . $whereConditionUrl;
+      $shiftCondition = "AND registrasi_rawat.shift = '" . $_SESSION['shift'] . "'";
+    }
     // var_dump($shift);
     // $pasien=$koneksi->query("SELECT * FROM registrasi_rawat LEFT JOIN biaya_rawat WHERE idregis=idrawat and (status_antri = 'Datang' or status_antri = 'Pembayaran') and registrasi_rawat.shift = '$shift' and perawatan = 'Rawat Jalan' and (date_format(jadwal, '%Y-%m-%d') = '$date' or date_format(jadwal, '%Y-%m-%d') = DATE(NOW() - INTERVAL 1 DAY));"); 
-    $pasien = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') " . $jamCondition . " GROUP BY registrasi_rawat.idrawat;");
+    $query = "SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') " . $whereCondition . " " . $shiftCondition . " " . $jamCondition . " " . $dayCondition . " GROUP BY registrasi_rawat.idrawat";
   }
+
+
+  //   Pagination
+  // Parameters for pagination
+  $limit = 80; // Number of entries to show in a page
+  $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+  $start = ($page - 1) * $limit;
+  // Get the total number of records
+  $result = $koneksi->query($query);
+  $total_records = $result->num_rows;
+  // Calculate total pages
+  $total_pages = ceil($total_records / $limit);
+
+  $cekPage = '';
+  if (isset($_GET['page'])) {
+    $cekPage = $_GET['page'];
+  } else {
+    $cekPage = '1';
+  }
+  // End Pagination
+
+  $pasien = $koneksi->query($query . " LIMIT $start, $limit");
   ?>
   <!DOCTYPE html>
   <html lang="en">
@@ -71,47 +112,56 @@ date_default_timezone_set('Asia/Jakarta');
           <div class="">
             <div class="row">
               <div class="col-lg-12 col-md-12">
-
-                <div class="card">
+                <div class="card px--0">
                   <div class="card-body">
-
                     <h5 class="card-title mb-0">Data Pembayaran Pasien</h5>
                     <span style="font-size: 12px; margin-top: 0px;" class="mt-0">Data berwarna merah adalah data yang belum di isi dokter</span>
                     <br>
+                    <a href="index.php?halaman=daftarbayar&shift" class="btn btn-sm btn-primary mb-2">Pasien Shift Ini</a>
+                    <a href="index.php?halaman=daftarbayar&all" class="btn btn-sm btn-primary mb-2">Pasien All</a>
                     <a href="index.php?halaman=daftarbayar&pasienInap" class="btn btn-sm btn-primary mb-2">Pasien Inap</a>
+                    <?php if (isset($_GET['day'])) { ?>
+                      <!-- <a href="index.php?halaman=daftarbayar" class="btn btn-sm btn-primary mb-2">Daftar Bayar All Hari ini</a> -->
+                    <?php } else { ?>
+                      <a href="index.php?halaman=daftarbayar&day" class="btn btn-sm btn-primary mb-2">Pasien Belum Bayar Hari ini</a>
+                    <?php } ?>
+                    <a href="index.php?halaman=keuangan" class="btn btn-sm btn-primary mb-2">Keuangan</a>
+                    <a href="index.php?halaman=gajidokter" class="btn btn-sm btn-primary mb-2">Gaji Dokter</a>
                     <form method="post">
                       <div class="row">
-                        <div class="col-6">
-                          Cari Berdasar Tanggal
-                          <input type="date" class="form-control mb-2" name="tgl">
+                        <div class="col-4">
+                          Tanggal
+                          <input type="date" value="<?= isset($_GET['tgl']) ? $_GET['tgl'] : date('Y-m-d') ?>" class="form-control form-control-sm mb-2" name="tgl">
                         </div>
-                        <div class="col-3">
-                          Shift
+                        <div class="col-5">
+                          Cari
+                          <input type="text" name="key" id="" class="form-control form-control-sm">
+                          <!-- Shift
                           <select name="shift" id="" required class="form-control">
                             <option value="" hidden>Pilih Shift</option>
                             <option value="Pagi">Pagi</option>
                             <option value="Sore">Sore</option>
                             <option value="Malam">Malam</option>
-                          </select>
+                          </select> -->
                         </div>
                         <div class="col-3">
                           <br>
-                          <button class="btn btn-primary" name="search"><i class="bi bi-search"></i></button>
+                          <button class="btn btn-sm btn-primary" name="search"><i class="bi bi-search"></i></button>
                         </div>
                       </div>
                     </form>
                     <?php
                     if (isset($_POST['search'])) {
                       echo "
-                    <script>
-                      document.location.href='index.php?halaman=daftarbayar&detail&tgl=" . ($_POST['tgl'] == '' ? date('Y-m-d') : $_POST['tgl']) . "&shift=$_POST[shift]';
-                    </script>
-                  ";
+                        <script>
+                          document.location.href='index.php?halaman=daftarbayar&src&detail&tgl=" . ($_POST['tgl'] == '' ? date('Y-m-d') : $_POST['tgl']) . "&key=" . $_POST['key'] . "';
+                        </script>
+                      ";
                     }
                     ?>
                     <!-- Multi Columns Form -->
                     <div class="table-responsive">
-                      <table id="myTable" class="table table-striped table-hover" style="width:100%; font-size: 12px;">
+                      <table id="myTable" class="table table-striped table-hover table-sm" style="width:100%; font-size: 12px;">
                         <thead>
                           <tr>
                             <th>No</th>
@@ -125,14 +175,14 @@ date_default_timezone_set('Asia/Jakarta');
                             <th>Shift</th>
                             <th>Nota</th>
                             <!-- <th>Status Bayar</th> -->
-                            <th>Biaya Poli</th>
+                            <th>Biaya </th>
                             <th>Periksa lab</th>
                             <th>Total lab</th>
                             <th>Biaya Lain</th>
                             <th>Total Biaya Lain</th>
                             <th>Potongan</th>
                             <th>Total</th>
-                            <th>Aksi</th>
+                            <th></th>
                             <!-- <th>Aksi</th> -->
 
                           </tr>
@@ -184,7 +234,7 @@ date_default_timezone_set('Asia/Jakarta');
                               <td><?php echo $no; ?></td>
                               <!-- <td><?php echo $pecah['idrawat']; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
-                              <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?><br><span style="font-size: 10px; font-weight: bold;"><?= $pecah['status_antri'] == 'Datang' ?  "Belum Entri Dokter" :  "" ?></span></td>
+                              <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?><br><span style="font-size: 10px; font-weight: bold;"><?= $pecah['status_antri'] ?></span></td>
                               <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
                               <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                               <?php
@@ -205,9 +255,11 @@ date_default_timezone_set('Asia/Jakarta');
                 <?php }  ?>
                 </td> -->
                               <!-- <td><?php echo $pecah["status"]; ?></td> -->
-                              <td><?php echo $shift; ?></td>
+                              <td><?php echo $pecah["shift"]; ?></td>
                               <td><?= $biayaRawat['nota'] ?></td>
-                              <td><?php echo intval($poli); ?></td>
+                              <td>
+                                <?php echo intval($poli); ?>
+                              </td>
                               <td>
                                 <?php echo intval($periksa_lab); ?>
                               </td>
@@ -225,7 +277,15 @@ date_default_timezone_set('Asia/Jakarta');
                                   <?php } ?>
                                 </span>
                               </td>
-                              <td><?php echo $biaya_lain; ?></td>
+                              <td>
+                                <?php
+                                $listTindakan = array_filter(explode('+', $biaya_lain));
+                                foreach ($listTindakan as $item) {
+                                  echo "- " . $item . "<br>";
+                                }
+                                // echo $listTindakan[0];
+                                ?>
+                              </td>
                               <td><?php echo intval($total_lain); ?></td>
                               <td><?php echo intval($potongan); ?></td>
                               </td>
@@ -236,7 +296,7 @@ date_default_timezone_set('Asia/Jakarta');
                                 <?php echo $t; ?>
                               </td>
                               <td>
-                                <div class="dropdown">
+                                <div class="dropdown m-0">
                                   <?php
                                   $ubah = $koneksi->query("SELECT * FROM kajian_awal WHERE nama_pasien = '$pecah[nama_pasien]';")->fetch_assoc();
                                   ?>
@@ -245,8 +305,10 @@ date_default_timezone_set('Asia/Jakarta');
                                     <li>
                                       <a href="index.php?halaman=bayarrawat&rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-currency-dollar" style="color:blue;"></i> Bayar</a>
                                     </li>
+                                    <?php if ($biayaRawat['nota'] == '') { ?>
+                                    <?php } ?>
                                     <li>
-                                      <a href="../bayar/printNota.php?id=<?= $pecah['idrawat']?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer"></i> Print</a>
+                                      <a href="../bayar/printNota.php?id=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer"></i> Print</a>
                                     </li>
                                     <li>
                                       <a href="index.php?halaman=rujuklab2&rm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:hotpink;"></i> Rujuk Lab</a>
@@ -294,8 +356,53 @@ date_default_timezone_set('Asia/Jakarta');
 
                         </tbody>
                       </table>
-
                     </div>
+                    <br>
+                    <?php
+                    // Display pagination
+                    echo '<nav>';
+                    echo '<ul class="pagination justify-content-center">';
+
+                    // Back button
+                    if ($page > 1) {
+                      echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page - 1) . '">Back</a></li>';
+                    }
+
+                    // Determine the start and end page
+                    $start_page = max(1, $page - 2);
+                    $end_page = min($total_pages, $page + 2);
+
+                    if ($start_page > 1) {
+                      echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=1">1</a></li>';
+                      if ($start_page > 2) {
+                        echo '<li class="page-item"><span class="page-link">...</span></li>';
+                      }
+                    }
+
+                    for ($i = $start_page; $i <= $end_page; $i++) {
+                      if ($i == $page) {
+                        echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+                      } else {
+                        echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $i . '">' . $i . '</a></li>';
+                      }
+                    }
+
+                    if ($end_page < $total_pages) {
+                      if ($end_page < $total_pages - 1) {
+                        echo '<li class="page-item"><span class="page-link">...</span></li>';
+                      }
+                      echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
+                    }
+
+                    // Next button
+                    if ($page < $total_pages) {
+                      echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page + 1) . '">Next</a></li>';
+                    }
+
+                    echo '</ul>';
+                    echo '</nav>';
+                    ?>
+                    <br>
                   </div>
                 </div>
               </div>
