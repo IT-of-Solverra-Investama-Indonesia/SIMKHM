@@ -1,24 +1,24 @@
 <?php
-$getMarginInap0 = $koneksi->query("SELECT * FROM apotek WHERE margininap = '0' ORDER BY nama_obat ASC");
-foreach ($getMarginInap0 as $marginInap0) {
-  $koneksi->query("UPDATE apotek SET margininap = '100' WHERE idapotek = '$marginInap0[idapotek]'");
-}
+// $getMarginInap0 = $koneksi->query("SELECT * FROM apotek WHERE margininap = '0' ORDER BY nama_obat ASC");
+// foreach ($getMarginInap0 as $marginInap0) {
+//   $koneksi->query("UPDATE apotek SET margininap = '100' WHERE idapotek = '$marginInap0[idapotek]'");
+// }
 
-$getMarginJual0 = $koneksi->query("SELECT * FROM apotek WHERE margin_jual = '' ORDER BY nama_obat ASC");
-foreach ($getMarginJual0 as $marginJual0) {
-  $koneksi->query("UPDATE apotek SET margin_jual = '100' WHERE idapotek = '$marginJual0[idapotek]'");
-}
+// $getMarginJual0 = $koneksi->query("SELECT * FROM apotek WHERE margin_jual = '' ORDER BY nama_obat ASC");
+// foreach ($getMarginJual0 as $marginJual0) {
+//   $koneksi->query("UPDATE apotek SET margin_jual = '100' WHERE idapotek = '$marginJual0[idapotek]'");
+// }
 
-$totalRows = $getMarginInap0->num_rows + $getMarginJual0->num_rows;
-if ($totalRows > 0) {
-  echo "
-        <script>
-            document.location.href='index.php?halaman=margin_obat';
-        </script>
-    ";
-}
-
-$pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GROUP BY nama_obat, id_obat order by idapotek desc;");
+// $totalRows = $getMarginInap0->num_rows + $getMarginJual0->num_rows;
+// if ($totalRows > 0) {
+//   echo "
+//         <script>
+//             document.location.href='index.php?halaman=margin_obat';
+//         </script>
+//     ";
+// }
+error_reporting(0);
+$pasien = $koneksimaster->query("SELECT * FROM master_obat ORDER BY obat_master ASC");
 ?>
 <div>
   <div class="pagetitle">
@@ -34,7 +34,7 @@ $pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GR
       <h5 class="card-title mb-0">Data Obat</h5>
       <!-- Multi Columns Form -->
       <div class="table-responsive">
-        <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+        <table id="myTable" class="table table-striped table-hover table-sm" style="width:100%; font-size: 12px;">
           <thead>
             <tr>
               <th>No</th>
@@ -44,7 +44,9 @@ $pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GR
               <th>Margin Jual</th>
               <th>Margin Resep</th>
               <th>Harga Beli Terakhir</th>
-              <th>Harga Inap | Jual</th>
+              <th>Inap</th>
+              <th>Jual</th>
+              <th>Resep</th>
             </tr>
           </thead>
           <tbody>
@@ -52,53 +54,41 @@ $pasien = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_beli FROM apotek GR
             <?php foreach ($pasien as $pecah) : ?>
               <tr>
                 <td><?php echo $no; ?></td>
-                <td style="margin-top:10px;"><?php echo $pecah["nama_obat"]; ?></td>
-                <td style="margin-top:10px;"><?php echo $pecah["id_obat"]; ?></td>
-                <td style="margin-top:10px;">
-                  <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                    <button onclick="upMargin('<?= $pecah['id_obat'] ?>','<?= $pecah['margininap'] ?>','inap')" class="btn btn-sm btn-warning" type="button" data-bs-toggle="modal" data-bs-target="#margininap_modal">
-                      <?= $pecah['margininap'] ?> %
-                    </button>
-                  <?php } else { ?>
-                    <button class="btn btn-sm btn-warning" type="button">
-                      <?= $pecah['margininap'] ?> %
-                    </button>
-                  <?php } ?>
+                <td><?php echo $pecah["obat_master"]; ?></td>
+                <td><?php echo $pecah["kode_obat"]; ?></td>
+                <td>
+                  <span class="badge bg-warning" style="font-size: 12px;">
+                    <?= $pecah['margin_inap'] ?>%
+                  </span>
                 </td>
-                <td style="margin-top:10px;">
-                  <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                    <button onclick="upMargin('<?= $pecah['id_obat'] ?>','<?= $pecah['margin_jual'] == '' ? 0 : $pecah['margin_jual'] ?>','jual')" class="btn btn-sm" style="background-color: orange;" type="button" data-bs-toggle="modal" data-bs-target="#margininap_modal">
-                      <?= $pecah['margin_jual'] == '' ? 0 : $pecah['margin_jual'] ?> %
-                    </button>
-                  <?php } else { ?>
-                    <button class="btn btn-sm" style="background-color: orange;" type="button">
-                      <?= $pecah['margin_jual'] == '' ? 0 : $pecah['margin_jual'] ?> %
-                    </button>
-                  <?php } ?>
+                <td>
+                  <span class="badge bg-warning" style="font-size: 12px;">
+                    <?= $pecah['margin_jual'] ?>%
+                  </span>
                 </td>
-                <td style="margin-top:10px;">
-                  <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                    <button onclick="upMargin('<?= $pecah['id_obat'] ?>','<?= $pecah['margin_resep'] == '' ? 0 : $pecah['margin_resep'] ?>','resep')" class="btn btn-sm" style="background-color: orange;" type="button" data-bs-toggle="modal" data-bs-target="#margininap_modal">
-                      <?= $pecah['margin_resep'] == '' ? 0 : $pecah['margin_resep'] ?> %
-                    </button>
-                  <?php } else { ?>
-                    <button class="btn btn-sm" style="background-color: orange;" type="button">
-                      <?= $pecah['margin_resep'] == '' ? 0 : $pecah['margin_resep'] ?> %
-                    </button>
-                  <?php } ?>
+                <td>
+                  <span class="badge bg-warning" style="font-size: 12px;">
+                    <?= $pecah['margin_resep'] ?>%
+                  </span>
                 </td>
                 <td>
                   <?php
-                  $getBeliAkhir = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$pecah[id_obat]' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
+                  $getBeliAkhir = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$pecah[kode_obat]' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
 
-                  $marginInap = (intval($pecah['margininap']) / 100) * intval($getBeliAkhir['harga_beli']);
+                  $marginInap = (intval($pecah['margin_inap']) / 100) * intval($getBeliAkhir['harga_beli']);
                   $marginJual = (intval($pecah['margin_jual']) / 100) * intval($getBeliAkhir['harga_beli']);
+                  $marginResep = (intval($pecah['margin_resep']) / 100) * intval($getBeliAkhir['harga_beli']);
                   ?>
-                  Rp<?= number_format($getBeliAkhir['harga_beli'], 0, 0, '.') ?>/Item
+                  Rp<?= number_format($getBeliAkhir['harga_beli'] ?? 0, 0, 0, '.') ?>/Item
                 </td>
                 <td>
-                  Rp<?= number_format($marginInap, 0, 0, '.') ?> |
+                  Rp<?= number_format($marginInap, 0, 0, '.') ?>
+                </td>
+                <td>
                   Rp<?= number_format($marginJual, 0, 0, '.') ?>
+                </td>
+                <td>
+                  Rp<?= number_format($marginResep, 0, 0, '.') ?>
                 </td>
               </tr>
               <?php $no += 1 ?>
