@@ -398,7 +398,8 @@ if (isset($_POST['save'])) {
   $ob = $_POST["diberikan"];
   $obat = implode(", ", $ob);
 
-  $koneksi->query("INSERT INTO pulang(tgl, norm, tgl_mrs, diag_mrs, kamar, pasien, tgl_krs, diag_krs, diag_prwt, lanjut_rmh, diet, istirahat, kontrol, diberikan, keadaan, lain, keluarga, kep_ruang, perawat, tgl_masuk, rujuk) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[tgl_mrs]', '$_POST[diag_mrs]', '$_POST[kamar]', '$_POST[pasien]', '$_POST[tgl_krs]', '$_POST[diag_krs]', '$_POST[diag_prwt]', '$_POST[lanjut_rmh]', '$_POST[diet]', '$_POST[istirahat]', '$_POST[kontrol]', '$obat', '$_POST[keadaan]', '$_POST[lain]', '$_POST[keluarga]', '$_POST[kep_ruang]', '$_POST[perawat]', '$_GET[tgl]', '$_POST[rujuk]')");
+  $koneksi->query("INSERT INTO pulang(tgl, norm, tgl_mrs, diag_mrs, kamar, pasien, tgl_krs, diag_krs, diag_prwt, lanjut_rmh, diet, istirahat, kontrol, diberikan, keadaan, lain, keluarga, kep_ruang, perawat, tgl_masuk, rujuk, shift) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[tgl_mrs]', '$_POST[diag_mrs]', '$_POST[kamar]', '$_POST[pasien]', '$_POST[tgl_krs]', '$_POST[diag_krs]', '$_POST[diag_prwt]', '$_POST[lanjut_rmh]', '$_POST[diet]', '$_POST[istirahat]', '$_POST[kontrol]', '$obat', '$_POST[keadaan]', '$_POST[lain]', '$_POST[keluarga]', '$_POST[kep_ruang]', '$_POST[perawat]', '$_GET[tgl]', '$_POST[rujuk]', '" . $_SESSION['shift'] . "')");
+
   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pulang' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
 
   $selectRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm = '$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
