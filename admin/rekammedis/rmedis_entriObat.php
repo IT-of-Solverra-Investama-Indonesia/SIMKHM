@@ -7,18 +7,8 @@
         <div class="row">
             <div class="col-md-3">
                 <label>Nama Obat</label>
-                <select name="nama_obat" class=" form-control form-control-sm mb-2 w-100" style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
-                    <option value="">Pilih</option>
-                    <?php
-                    if (!isset($_GET['inap'])) {
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_poli = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                    } else {
-                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                    }
-                    foreach ($getObat as $data) {
-                    ?>
-                        <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                    <?php } ?>
+                <select name="nama_obat" class="obat-select form-control form-control-sm mb-2 w-100" style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
+                    <option value="">Pilih Obat</option>
                 </select>
             </div>
             <div class="col-md-2">
