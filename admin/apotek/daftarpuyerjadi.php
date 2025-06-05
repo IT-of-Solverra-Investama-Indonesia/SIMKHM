@@ -1,4 +1,49 @@
 <div class="">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                <?php
+                $apiUrlgetObat = '../apotek/api_getObatMasterLokal.php';
+                if (isset($_GET['inap'])) {
+                    $apiUrlgetObat .= '?inap';
+                } elseif (isset($_GET['penjualan'])) {
+                    $apiUrlgetObat .= '?penjualan';
+                } else {
+                    $apiUrlgetObat .= '';
+                }
+                ?>
+                const obatData = await (await fetch('<?= $apiUrlgetObat ?>')).json();
+
+                document.querySelectorAll('.obat-select').forEach(select => {
+                    // Simpan nilai yang sedang dipilih (jika ada)
+                    const selectedValue = select.value;
+
+                    // Buat array dari nilai option yang sudah ada
+                    const existingOptions = Array.from(select.options).map(opt => opt.value);
+
+                    // Filter data obat untuk hanya menambahkan yang belum ada
+                    const newOptions = obatData.filter(obat =>
+                        !existingOptions.includes(obat.kode_obat)
+                    );
+
+                    // Tambahkan option baru
+                    newOptions.forEach(obat => {
+                        select.add(new Option(obat.nama_obat, obat.kode_obat));
+                    });
+
+                    // Kembalikan nilai yang dipilih sebelumnya (jika masih ada)
+                    if (selectedValue && select.querySelector(`option[value="${selectedValue}"]`)) {
+                        select.value = selectedValue;
+                    }
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
     <h3>Paket Jadi</h3>
     <?php if (isset($_GET['add'])) { ?>
         <a href="index.php?halaman=daftarpuyerjadi" class="btn btn-dark btn-sm mb-2">Kembali</a>
@@ -75,17 +120,16 @@
                 <div class="row">
                     <div class="col-12">
                         <label for="">Obat</label>
-                        <select name="kode_obat" id="" required class="form-control mb-2">
+                        <select name="kode_obat" id="tambahObatSelect2" required class="obat-select form-control mb-2" style="width: 100%; margin-bottom: 10px;">
                             <option value="" hidden>Pilih Obat</option>
-                            <?php
-                            $getObat = $koneksi->query("SELECT * FROM apotek GROUP BY id_obat ORDER BY nama_obat ASC");
-                            foreach ($getObat as $obat) {
-                            ?>
-                                <option value="<?= $obat['id_obat'] ?>"><?= $obat['nama_obat'] ?></option>
-                            <?php } ?>
                         </select>
+                        <script>
+                            $(document).ready(function() {
+                                $('#tambahObatSelect2').select2();
+                            });
+                        </script>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-2">
                         <label for="">Dosis</label>
                         <div class="input-group">
                             <input type="text" class="form-control mb-2" id="dosis1" name="dosis1">
@@ -102,7 +146,7 @@
                     </div>
                     <div class="col-md-4">
                         Jumlah
-                        <input type="number" name="jumlah" id="" class="form-control mb-2">
+                        <input type="text" name="jumlah" id="" class="form-control mb-2">
                     </div>
                     <div class="col-md-6">
                         Petunjuk Pemakaian
@@ -179,7 +223,7 @@
                 ";
         }
         if (isset($_GET['delOb'])) {
-            $koneksi->query("DELETE FROM puyerjadi_detail WHERE id = '" . htmlspecialchars($_GET['delOb']) . "'");
+            $koneksimaster->query("DELETE FROM puyerjadi_detail WHERE id = '" . htmlspecialchars($_GET['delOb']) . "'");
             echo "<script>alert('Data berhasil dihapus');</script>";
             echo "<script>location='index.php?halaman=daftarpuyerjadi&obat&id=" . htmlspecialchars($_GET['id']) . "';</script>";
         }
@@ -208,7 +252,18 @@
                                 <td><?= $no++ ?></td>
                                 <td><?= $pj['nama_paket'] ?></td>
                                 <td><?= $pj['deskripsi'] ?></td>
-                                <td></td>
+                                <td>
+                                    <?php
+                                    $obatList = [];
+                                    $getObatPuyer = $koneksimaster->query("SELECT * FROM puyerjadi_detail WHERE puyer_id = '" . $pj['id'] . "'");
+                                    foreach ($getObatPuyer as $obatPuyer) {
+                                        $obatList[] = $obatPuyer['nama_obat'] . ' ' . $obatPuyer['dosis1'] . 'x' . $obatPuyer['dosis2'] . ' (' . $obatPuyer['jumlah'] . 'pcs)';
+                                    }
+                                    ?>
+                                    <button onclick="upShowObat('<?php echo implode(',', $obatList) ?>')" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#showObat">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </td>
                                 <td>
                                     <a href="index.php?halaman=daftarpuyerjadi&obat&id=<?= $pj['id'] ?>" class="btn btn-sm btn-success"><i class="bi bi-capsule"></i></a>
                                     <a href="index.php?halaman=daftarpuyerjadi&edit&id=<?= $pj['id'] ?>" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
@@ -218,6 +273,40 @@
                         <?php } ?>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <script>
+            function upShowObat(obat) {
+                const list = document.querySelector('#showObatIdShow');
+                list.innerHTML = '';
+                obat.split(',').forEach(item => {
+                    if (item.trim()) {
+                        const li = document.createElement('li');
+                        li.textContent = item;
+                        list.appendChild(li);
+                    }
+                });
+            }
+        </script>
+        <!-- Modal Show Obat -->
+        <div class="modal fade" id="showObat" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Show Modal</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="showObatIdShow">
+
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!-- <button type="button" class="btn btn-primary">Understood</button> -->
+                    </div>
+                </div>
             </div>
         </div>
     <?php } ?>
