@@ -35,21 +35,20 @@ function getFullUrl()
     return $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 }
 ?>
+<?php if (!isset($_GET['print'])) { ?>
+    <!doctype html>
+    <html lang="en">
 
-<!doctype html>
-<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Nota TRNSKS-<?= $biaya['nota'] == '' ? $id : $biaya['nota'] ?></title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="shortcut icon" href="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" type="image/x-icon">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    </head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Nota TRNSKS-<?= $biaya['nota'] == '' ? $id : $biaya['nota'] ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="shortcut icon" href="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-</head>
-
-<body>
-    <?php if (!isset($_GET['print'])) { ?>
+    <body>
         <style>
             body {
                 display: flex;
@@ -101,20 +100,61 @@ function getFullUrl()
                     <table class="table table-striped table-bordered table-sm" style="font-size: 14px;">
                         <thead>
                             <tr>
-                                <th>Biaya Poli</th>
-                                <th>Lain-lain</th>
-                                <th>Biaya Lab</th>
-                                <th>Potongan</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <!-- <th>Potongan</th> -->
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Rp <?= number_format($biaya['poli'], 0, 0, '.') ?></td>
-                                <td>Rp <?= number_format(($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']), 0, 0, '.') ?></td>
-                                <td>Rp <?= number_format(($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']), 0, 0, '.') ?></td>
-                                <td>Rp <?= number_format(($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></td>
+                                <td>Biaya Poli</td>
+                                <td>1x</td>
+                                <td>:<?= number_format($biaya['poli'], 0, 0, '.') ?></td>
                             </tr>
+                            <?php
+                            $listTindakan = array_filter(explode('+', $biaya['biaya_lain']));
+                            foreach ($listTindakan as $item) {
+                            ?>
+                                <tr>
+                                    <td>Tindakan <?= $item ?></td>
+                                    <td>1x</td>
+                                    <td>
+                                        <?php
+                                        $BiayaTindakan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = '" . $item . "'")->fetch_assoc();
+                                        ?>
+                                        :<?= number_format($BiayaTindakan['harga'] ?? 0, 0, 0, '.') ?>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            <?php
+                            $getBiayaLab = $koneksi->query("SELECT * FROM lab WHERE id_lab = '$id'");
+                            foreach ($getBiayaLab as $labBiaya) {
+                            ?>
+                                <tr>
+                                    <td><?= $labBiaya['tipe_lab'] ?></td>
+                                    <td>1x</td>
+                                    <td>:<?= number_format($labBiaya['biaya'], 0, 0, '.') ?></td>
+                                </tr>
+                            <?php } ?>
+                            <tr>
+                                <td>Potongan Harga</td>
+                                <td>1x</td>
+                                <td>:<?= number_format(($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></td>
+                            </tr>
+                            <!-- <tr>
+                        <td>Rp </td>
+                        <td>Rp <?= number_format(($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']), 0, 0, '.') ?></td>
+                        <td>Rp <?= number_format(($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']), 0, 0, '.') ?></td>
+                        <td>Rp <?= number_format(($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></td>
+                    </tr> -->
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2"><b>Total</b></td>
+                                <td><b>:<?= number_format($biaya['poli'] + ($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']) + ($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']) - ($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></b></td>
+                            </tr>
+                        </tfoot>
                     </table>
                     <p align="right">
                         <b>Total : Rp <?= number_format($biaya['poli'] + ($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']) + ($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']) - ($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></b>
@@ -172,78 +212,120 @@ function getFullUrl()
                 </div>
             </center>
         </div>
-    <?php } else { ?>
-        <style>
-            body {
-                font-family: monospace;
-                /* letter-spacing: px; */
-            }
-        </style>
-        <div style="max-width: 58mm; padding: 2mm;">
-            <center>
-                <img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px;" alt="">
-                <h6>Nota TRNSKS-<?= $biaya['nota'] == '' ? $id : $biaya['nota'] ?></h6>
-            </center>
-            <table style="font-size: 8px;">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Nama </td>
-                        <td>: <?= $dataRawat['nama_pasien'] ?></td>
-                    </tr>
-                    <tr>
-                        <td>Nomor RM </td>
-                        <td>: <?= $dataRawat['no_rm'] ?></td>
-                    </tr>
-                    <tr>
-                        <td>Jadwal Kunjungan</td>
-                        <td>: <?= date('d F Y H:i', strtotime($dataRawat['jadwal'])) ?> (<?= $dataRawat['perawatan'] ?>)</td>
-                    </tr>
-                    <tr>
-                        <td>Dokter </td>
-                        <td>: <?= $dataRawat['dokter_rawat'] ?></td>
-                    </tr>
-                </tbody>
-            </table>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.min.js" integrity="sha384-VQqxDN0EQCkWoxt/0vsQvZswzTHUVOImccYmSyhJTp7kGtPed0Qcx8rK9h9YEgx+" crossorigin="anonymous"></script>
+    </body>
 
-            <table class="table table-striped table-bordered table-sm mt-2 mb-0" style="font-size: 8px;">
-                <thead>
+    </html>
+<?php } else { ?>
+    <style>
+        body {
+            font-family: monospace;
+            /* letter-spacing: px; */
+        }
+    </style>
+    <div style="max-width: 58mm; padding: 2mm;">
+        <center>
+            <img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px;" alt="">
+            <h5>Nota TRNSKS-<?= $biaya['nota'] == '' ? $id : $biaya['nota'] ?></h5>
+        </center>
+        <table style="font-size: 10px; ">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Nama </td>
+                    <td>: <?= $dataRawat['nama_pasien'] ?></td>
+                </tr>
+                <tr>
+                    <td>Nomor RM </td>
+                    <td>: <?= $dataRawat['no_rm'] ?></td>
+                </tr>
+                <tr>
+                    <td>Kunjungan</td>
+                    <td>: <?= date('d F Y H:i', strtotime($dataRawat['jadwal'])) ?></td>
+                </tr>
+                <tr>
+                    <td>Dokter </td>
+                    <td>: <?= $dataRawat['dokter_rawat'] ?></td>
+                </tr>
+            </tbody>
+        </table>
+        <hr class="my-1">
+        <table class="w-100" style="font-size: 11px;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <!-- <th>Biaya Lab</th>
+                        <th>Potongan</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Biaya Poli</td>
+                    <td>1x</td>
+                    <td>:<?= number_format($biaya['poli'], 0, 0, '.') ?></td>
+                </tr>
+                <?php
+                $listTindakan = array_filter(explode('+', $biaya['biaya_lain']));
+                foreach ($listTindakan as $item) {
+                ?>
                     <tr>
-                        <th>Biaya Poli</th>
-                        <th>Lain-lain</th>
-                        <th>Biaya Lab</th>
-                        <th>Potongan</th>
+                        <td>Tindakan <?= $item ?></td>
+                        <td>1x</td>
+                        <td>
+                            <?php
+                            $BiayaTindakan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = '" . $item . "'")->fetch_assoc();
+                            ?>
+                            :<?= number_format($BiayaTindakan['harga'] ?? 0, 0, 0, '.') ?>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
+                <?php } ?>
+                <?php
+                $getBiayaLab = $koneksi->query("SELECT * FROM lab WHERE id_lab = '$id'");
+                foreach ($getBiayaLab as $labBiaya) {
+                ?>
                     <tr>
-                        <td>Rp <?= number_format($biaya['poli'], 0, 0, '.') ?></td>
+                        <td><?= $labBiaya['tipe_lab'] ?></td>
+                        <td>1x</td>
+                        <td>:<?= number_format($labBiaya['biaya'], 0, 0, '.') ?></td>
+                    </tr>
+                <?php } ?>
+                <tr>
+                    <td>Potongan Harga</td>
+                    <td>1x</td>
+                    <td>:<?= number_format(($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></td>
+                </tr>
+                <!-- <tr>
+                        <td>Rp </td>
                         <td>Rp <?= number_format(($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']), 0, 0, '.') ?></td>
                         <td>Rp <?= number_format(($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']), 0, 0, '.') ?></td>
                         <td>Rp <?= number_format(($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></td>
-                    </tr>
-                </tbody>
-            </table>
-            <p align="right" style="font-size: 10px; margin-top: 0px;">
-                <b>Total : Rp <?= number_format($biaya['poli'] + ($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']) + ($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']) - ($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></b>
-            </p>
-        </div>
-        <script>
-            window.print();
-            setTimeout(function() {
-                window.close();
-            }, 1000);
-        </script>
-    <?php } ?>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.min.js" integrity="sha384-VQqxDN0EQCkWoxt/0vsQvZswzTHUVOImccYmSyhJTp7kGtPed0Qcx8rK9h9YEgx+" crossorigin="anonymous"></script>
-</body>
-
-</html>
+                    </tr> -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><b>Total</b></td>
+                    <td><b>:<?= number_format($biaya['poli'] + ($biaya['total_lain'] == '' ? '0' : $biaya['total_lain']) + ($biaya['biaya_lab'] == '' ? '0' : $biaya['biaya_lab']) - ($biaya['potongan'] == '' ? '0' : $biaya['potongan']), 0, 0, '.') ?></b></td>
+                </tr>
+            </tfoot>
+        </table>
+        <p align="left" style="font-size: 12px; margin-top: 0px;">
+            <!-- <b>Total : Rp </b> -->
+            Kasir : <?= $dataRawat['kasir'] == '' ? $_SESSION['admin']['namalengkap'] : $dataRawat['kasir'] ?>
+        </p>
+    </div>
+    <script>
+        // window.print();
+        // setTimeout(function() {
+        //     window.close();
+        // }, 1000);
+    </script>
+<?php } ?>
