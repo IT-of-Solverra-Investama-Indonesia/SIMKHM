@@ -13,7 +13,7 @@ if (isset($_POST['src'])) {
   $queryKey = " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR diagnosis LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR antrian LIKE '%$_POST[key]%' OR registrasi_rawat.jadwal LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%')";
 }
 if (isset($_GET['day'])) {
-  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' " . $queryKey . " ORDER BY idrawat DESC";
+  $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' AND shift = '" . $_SESSION['shift'] . "' " . $queryKey . " ORDER BY idrawat DESC";
   $linkPage = "index.php?halaman=daftarregistrasi&day";
 } elseif (isset($_GET['all'])) {
   $limit = 1;
@@ -119,53 +119,104 @@ if (isset($_GET['detail'])) {
         </nav>
       </div><!-- End Page Title -->
 
-      <section class="section  py-4">
+      <section class="section  py-0">
         <div class="">
           <?php if (isset($_GET['detail'])) { ?>
-            <a href="index.php?halaman=daftarregistrasi" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;">Kembali</a>
+            <a href="index.php?halaman=daftarrmedis" class="btn btn-sm btn-dark mb-2" style="max-width: 100px;">Kembali</a>
+            <?php if ($_SESSION['admin']['level'] == 'dokter' or $_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'perawat' or $_SESSION['admin']['level'] == 'labx') { ?>
+              <?php
+              $getRegisInap = $koneksi->query("SELECT *, COUNT(*) as jum FROM registrasi_rawat WHERE  (status_antri!='Pulang') and perawatan ='Rawat Inap' AND TRIM(no_rm) = TRIM('$_GET[detail]')")->fetch_assoc();
+              ?>
+              <?php if ($getRegisInap['jum'] == 1) { ?>
+                <a href="index.php?halaman=cttpenyakit&id=<?= htmlspecialchars($_GET['detail']) ?>&inap&tgl=<?= date('Y-m-d', strtotime($getRegisInap['jadwal'])) ?>" target="_blank" class="btn btn-sm btn-warning mb-2">Visite (Catatan Penyakit)</a>
+                <a href="index.php?halaman=rekapinap&id=<?= $getRegisInap['idrawat'] ?>" target="_blank" class="btn btn-sm btn-info mb-2">Biaya</a>
+                <a href="index.php?halaman=rujuklab2&id=<?= $getRegisInap['idrawat'] ?>&rm=<?= htmlspecialchars($_GET['detail']) ?>&inap&tgl=<?= date('Y-m-d', strtotime($getRegisInap['jadwal'])) ?>" target="_blank" class="btn btn-sm btn-success mb-2">Lab</a>
+                <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['detail']) ?>&inap&tgl=<?= date('Y-m-d', strtotime($getRegisInap['jadwal'])) ?>" target="_blank" class="btn btn-sm btn-danger mb-2">TTV (Observasi Perawat)</a>
 
+              <?php } ?>
+            <?php } ?>
             <?php
             $detailPasien = $pasien->fetch_assoc();
             ?>
-            <div class="card p-1 w-100">
+            <div class="card p-2 w-100">
               <h5><b>Riwayat RM <?= $detailPasien['nama_pasien'] ?></b></h5>
               <div class="table-responsive mt-0">
-                <table class="table mt-0" id="myTable2" style="font-size: 12px;">
+                <table class="table mt-0" style="font-size: 12px; ">
                   <thead>
                     <tr>
                       <th>Jadwal</th>
-                      <th>Keluhan Utama</th>
-                      <th>Keluhan Tambahan</th>
+                      <th>Keluhan</th>
+                      <!-- <th>Keluhan Tambahan</th> -->
                       <th>Pemeriksaan</th>
+                      <th>Lab</th>
                       <th>Diagnosis</th>
                       <th>Pemeriksaan Fisik</th>
                       <th>Obat</th>
-                      <th>Lab</th>
                     </tr>
                   </thead>
                   <tbody>
                     <?php
-
                     $getRm = $koneksi->query("SELECT * FROM rekam_medis WHERE norm='$_GET[detail]' ORDER BY jadwal DESC LIMIT 5");
                     foreach ($getRm as $data) {
                     ?>
+                      <?php $getRegisSingle = $koneksi->query("SELECT * FROM kajian_awal WHERE norm = '$data[norm]' AND tgl_rm <= '" . date('Y-m-d', strtotime($data['jadwal'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc(); ?>
                       <tr>
                         <td><?= $data['jadwal'] ?></td>
-                        <td><?= $data['keluhan_utama'] ?></td>
-                        <td><?= $data['anamnesa'] ?></td>
+                        <td>
+                          <span>
+                            <b>Utama : </b><?= $getRegisSingle['keluhan_utama'] ?><br>
+                            <b>Tambahan : </b><?= $data['anamnesa'] ?>
+                          </span>
+                        </td>
+                        <!-- <td><?= $data['anamnesa'] ?></td> -->
                         <td>
                           <ul class="list-group">
                             <?php
                             $getKajian = $koneksi->query("SELECT * FROM kajian_awal WHERE REPLACE(REPLACE(REPLACE(norm, '\t', ' '), '  ', ' '), '  ', ' ') = '$_GET[detail]' AND tgl_rm = '$data[tgl_rm]' Limit 1")->fetch_assoc();
                             // print_r($getKajian);
+                            $getLabPoli = $koneksi->query("SELECT * FROM lab_poli WHERE nama_pasien = '$data[nama_pasien]' AND jadwal = '$data[jadwal]' LIMIT 1")->fetch_assoc();
                             ?>
-                            <li class="list-group-item"><b>Suhu : <?= $getKajian['suhu_tubuh'] ?></b></li>
-                            <li class="list-group-item"><b>S.Oksigen : <?= $getKajian['oksigen'] ?></b></li>
-                            <li class="list-group-item"><b>Sistole : <?= $getKajian['sistole'] ?></b></li>
-                            <li class="list-group-item"><b>Distole : <?= $getKajian['distole'] ?></b></li>
-                            <li class="list-group-item"><b>F. Nafas : <?= $getKajian['frek_nafas'] ?></b></li>
-                            <li class="list-group-item"><b>Nadi : <?= $getKajian['nadi'] ?></b></li>
+                            <li class="list-group-item"><b>Nadi : <?= $getKajian['nadi'] ?? '' ?></b></li>
+                            <li class="list-group-item"><b>Suhu : <?= $getKajian['suhu_tubuh'] ?? '' ?></b></li>
+                            <li class="list-group-item"><b>S.Oksigen : <?= $getKajian['oksigen'] ?? '' ?></b></li>
+                            <li class="list-group-item"><b>Sistole : <?= $getKajian['sistole'] ?? '' ?></b></li>
+                            <li class="list-group-item"><b>Distole : <?= $getKajian['distole'] ?? '' ?></b></li>
+                            <li class="list-group-item"><b>F. Nafas : <?= $getKajian['frek_nafas'] ?? '' ?></b></li>
+                            <li class="list-group-item"><b>BB : <?= $getKajian['bb'] ?? '' ?> KG</b></li>
                           </ul>
+                        </td>
+                        <td>
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th>Pemeriksaan</th>
+                                <th>Hasil</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td>Gula Darah</td>
+                                <td><?= $getLabPoli['gula_darah'] ?? "-" ?></td>
+                              </tr>
+                              <tr>
+                                <td>Kolestrol</td>
+                                <td><?= $getLabPoli['kolestrol'] ?? "-" ?></td>
+                              </tr>
+                              <tr>
+                                <td>Asam Urat</td>
+                                <td><?= $getLabPoli['asam_urat'] ?? "-" ?></td>
+                              </tr>
+                              <?php
+                              $getLab = $koneksi->query("SELECT * FROM lab_hasil WHERE REPLACE(REPLACE(REPLACE(norm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'  AND tgl_inap = '" . date('Y-m-d', strtotime($data['jadwal'])) . "'");
+                              foreach ($getLab as $lab) {
+                              ?>
+                                <tr>
+                                  <td><?= $lab['nama_periksa'] ?></td>
+                                  <td><?= $lab['hasil_periksa'] ?></td>
+                                </tr>
+                              <?php } ?>
+                            </tbody>
+                          </table>
                         </td>
                         <td><?= $data['diagnosis'] ?></td>
                         <td>
@@ -246,6 +297,7 @@ if (isset($_GET['detail'])) {
                             <?= ($pemeriksaanFisik['motorik_bawah_kiri'] != 5) ? "motorik_bawah_kiri: " . $pemeriksaanFisik['motorik_bawah_kiri'] . "<br>" : '' ?>
                             <?= ($pemeriksaanFisik['motorik_bawah_kanan'] != 5) ? "motorik_bawah_kanan: " . $pemeriksaanFisik['motorik_bawah_kanan'] . "<br>" : '' ?>
                             kognitif: <?= $pemeriksaanFisik['kognitif'] ?><br>
+
                             <button type="button" onclick="upDataPemeriksaanFisik('<?= $pemeriksaanFisik['gcs_e'] ?>', '<?= $pemeriksaanFisik['gcs_v'] ?>', '<?= $pemeriksaanFisik['gcs_m'] ?>', '<?= $pemeriksaanFisik['rangsangan_meninggal'] ?>', '<?= $pemeriksaanFisik['refleks_fisiologis1'] ?>', '<?= $pemeriksaanFisik['refleks_fisiologis2'] ?>', '<?= $pemeriksaanFisik['refleks_patologis'] ?>', '<?= $pemeriksaanFisik['flat'] ?>', '<?= $pemeriksaanFisik['hl'] ?>', '<?= $pemeriksaanFisik['assistos'] ?>', '<?= $pemeriksaanFisik['thympani'] ?>', '<?= $pemeriksaanFisik['soepel'] ?>', '<?= $pemeriksaanFisik['ntf_atas_kiri'] ?>', '<?= $pemeriksaanFisik['ntf_atas'] ?>', '<?= $pemeriksaanFisik['ntf_atas_kanan'] ?>', '<?= $pemeriksaanFisik['ntf_tengah_kiri'] ?>', '<?= $pemeriksaanFisik['ntf_tengah'] ?>', '<?= $pemeriksaanFisik['ntf_tengah_kanan'] ?>', '<?= $pemeriksaanFisik['ntf_bawah_kiri'] ?>', '<?= $pemeriksaanFisik['ntf_bawah'] ?>', '<?= $pemeriksaanFisik['ntf_bawah_kanan'] ?>', '<?= $pemeriksaanFisik['bu'] ?>', '<?= $pemeriksaanFisik['bu_komen'] ?>', '<?= $pemeriksaanFisik['anemis_kiri'] ?>', '<?= $pemeriksaanFisik['anemis_kanan'] ?>', '<?= $pemeriksaanFisik['ikterik_kiri'] ?>', '<?= $pemeriksaanFisik['ikterik_kanan'] ?>', '<?= $pemeriksaanFisik['rcl_kiri'] ?>', '<?= $pemeriksaanFisik['rcl_kanan'] ?>', '<?= $pemeriksaanFisik['pupil_kiri'] ?>', '<?= $pemeriksaanFisik['pupil_kanan'] ?>', '<?= $pemeriksaanFisik['visus_kiri'] ?>', '<?= $pemeriksaanFisik['visus_kanan'] ?>', '<?= $pemeriksaanFisik['torax'] ?>', '<?= $pemeriksaanFisik['retraksi'] ?>', '<?= $pemeriksaanFisik['vesikuler_kiri'] ?>', '<?= $pemeriksaanFisik['vesikuler_kanan'] ?>', '<?= $pemeriksaanFisik['wheezing_kiri'] ?>', '<?= $pemeriksaanFisik['wheezing_kanan'] ?>', '<?= $pemeriksaanFisik['rongki_kiri'] ?>', '<?= $pemeriksaanFisik['rongki_kanan'] ?>', '<?= $pemeriksaanFisik['s1s2'] ?>', '<?= $pemeriksaanFisik['murmur'] ?>', '<?= $pemeriksaanFisik['golop'] ?>', '<?= $pemeriksaanFisik['nch_kiri'] ?>', '<?= $pemeriksaanFisik['nch_kanan'] ?>', '<?= $pemeriksaanFisik['polip_kiri'] ?>', '<?= $pemeriksaanFisik['polip_kanan'] ?>', '<?= $pemeriksaanFisik['conca_kiri'] ?>', '<?= $pemeriksaanFisik['conca_kanan'] ?>', '<?= $pemeriksaanFisik['faring_hipertermis'] ?>', '<?= $pemeriksaanFisik['halitosis'] ?>', '<?= $pemeriksaanFisik['pembesaran_tonsil'] ?>', '<?= $pemeriksaanFisik['serumin_kiri'] ?>', '<?= $pemeriksaanFisik['serumin_kanan'] ?>', '<?= $pemeriksaanFisik['typani_intak_kiri'] ?>', '<?= $pemeriksaanFisik['typani_intak_kanan'] ?>', '<?= $pemeriksaanFisik['pembesaran_getah_bening'] ?>', '<?= $pemeriksaanFisik['akral_hangat_atas_kiri'] ?>', '<?= $pemeriksaanFisik['akral_hangat_atas_kanan'] ?>', '<?= $pemeriksaanFisik['akral_hangat_bawah_kiri'] ?>', '<?= $pemeriksaanFisik['akral_hangat_bawah_kanan'] ?>', '<?= $pemeriksaanFisik['oe_atas_kiri'] ?>', '<?= $pemeriksaanFisik['oe_atas_kanan'] ?>', '<?= $pemeriksaanFisik['oe_bawah_kiri'] ?>', '<?= $pemeriksaanFisik['oe_bawah_kanan'] ?>', '<?= $pemeriksaanFisik['crt'] ?>', '<?= $pemeriksaanFisik['motorik_atas_kiri'] ?>', '<?= $pemeriksaanFisik['motorik_atas_kanan'] ?>', '<?= $pemeriksaanFisik['motorik_bawah_kiri'] ?>', '<?= $pemeriksaanFisik['motorik_bawah_kanan'] ?>', '<?= $pemeriksaanFisik['kognitif'] ?>')" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#showPemeriksaanFisik">
                               <i class="bi bi-eye"></i> Lihat
                             </button>
@@ -253,7 +305,7 @@ if (isset($_GET['detail'])) {
                         </td>
                         <td>
                           <?php
-                          $getObat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[detail]'  AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$data[jadwal]', '%Y-%m-%d')");
+                          $getObat = $koneksi->query("SELECT * FROM obat_rm WHERE idrm = '$_GET[detail]'  AND rekam_medis_id = '$data[id_rm]'");
                           ?>
                           <table class="table">
                             <thead>
@@ -269,27 +321,11 @@ if (isset($_GET['detail'])) {
                                   <td><?= $obat['nama_obat'] ?></td>
                                   <td><?= $obat['jml_dokter'] ?></td>
                                   <td><?= $obat['dosis1_obat'] ?> x <?= $obat['dosis2_obat'] ?></td>
-                                </tr>
-                              <?php } ?>
-                            </tbody>
-                          </table>
-                        </td>
-                        <td>
-                          <table class="table">
-                            <thead>
-                              <tr>
-                                <th>Pemeriksaan</th>
-                                <th>Hasil</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php
-                              $getLab = $koneksi->query("SELECT * FROM lab_hasil WHERE REPLACE(REPLACE(REPLACE(norm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'");
-                              foreach ($getLab as $lab) {
-                              ?>
-                                <tr>
-                                  <td><?= $lab['nama_periksa'] ?></td>
-                                  <td><?= $lab['hasil_periksa'] ?></td>
+                                  <?php if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
+                                    <td>
+                                      <a href="index.php?halaman=daftarrmedis&detail=<?= $_GET['detail'] ?>&hapus_obat=<?= $obat['idobat'] ?>" class="btn btn-sm btn-danger text-right" onclick="return confirm('Anda yakin mau menghapus obat ini?')"><i class="bi bi-trash"></i></a>
+                                    </td>
+                                  <?php } ?>
                                 </tr>
                               <?php } ?>
                             </tbody>
@@ -301,6 +337,8 @@ if (isset($_GET['detail'])) {
                 </table>
               </div>
             </div>
+
+
             <?php if (isset($_GET['inap'])) { ?>
               <div class="card p-2 mb-2">
                 <h5><b>Riwayat Terapi <?= $detailPasien['nama_pasien'] ?></b></h5>
@@ -366,6 +404,9 @@ if (isset($_GET['detail'])) {
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title mb-1">Data Registrasi Diagnosis</h5>
+                  <?php if (isset($_GET['day'])) { ?>
+                    <span class="mb-2 mt-0" stxyle="font-size: 9px;">Data ditampilkan pada Tgl <?= date('d-m-Y') ?> pada shift <?= $_SESSION['shift'] ?></span> <br>
+                  <?php } ?>
                   <button class="btn btn-sm btn-primary mb-2 mt-1" data-bs-toggle="modal" data-bs-target="#showKamar">Lihat Kamar Terpakai</button>
                   <!-- Modal -->
                   <div class="modal fade" id="showKamar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -480,12 +521,20 @@ if (isset($_GET['detail'])) {
                               <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="background-color: green; color:white;"><?php echo $no; ?></td>
                               <!-- <td style="background-color: green; color:white;"><?php echo $no; ?></td> -->
                             <?php } ?>
+                            <?php
+                            $getKajianAwal = $koneksi->query("SELECT COUNT(*) as jum FROM kajian_awal WHERE norm = '$pecah[no_rm]' AND tgl_rm = '" . date('Y-m-d', strtotime($pecah['jadwal'])) . "'")->fetch_assoc();
+                            if ($getKajianAwal['jum'] > 0) {
+                              $badge = "<sup class='badge bg-success text-light'>Sudah Isi</sup>";
+                            } else {
+                              $badge = "<sup class='badge bg-danger text-light'>Belum Isi</sup>";
+                            }
+                            ?>
                             <?php if ($pecah['kategori'] == 'offline') { ?>
-                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;" onMouseOver="this.style.background-color='red'"><?php echo $pecah["nama_pasien"]; ?><br>
+                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;" onMouseOver="this.style.background-color='red'"><?php echo $pecah["nama_pasien"]; ?> <?= $badge ?><br>
                                 <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
                               </td>
                             <?php } else { ?>
-                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px; background-color: green; color:white;"><?php echo $pecah["nama_pasien"]; ?><br>
+                              <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px; background-color: green; color:white;"><?php echo $pecah["nama_pasien"]; ?> <?= $badge ?><br>
                                 <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
                               </td>
                             <?php } ?>
@@ -525,29 +574,70 @@ if (isset($_GET['detail'])) {
                                   <?php } else { ?>
                                     <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&ubah" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Lihat Kajian Awal</a></li>
                                   <?php } ?>
-                                  <li><a href="index.php?halaman=daftarregistrasi&day&id=<?php echo $pecah["idrawat"]; ?>&jadwal=<?= date("Y-m-d\TH:i:s+00:00", $jadwal); ?>&antrian=<?php echo $pecah["antrian"]; ?>&dokter=<?php echo $pecah["dokter_rawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&status=datang" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-check-circle" style="color:green;"></i> Datang</a></li>
-
+                                  <?php if ($_SESSION['admin']['level'] == 'daftar' or $_SESSION['admin']['level'] == 'sup') { ?>
+                                    <li><button onclick="upData('<?= $pecah['idrawat'] ?>', '<?= date('Y-m-d\TH:i:s+00:00', $jadwal); ?>', '<?php echo $pecah['antrian']; ?>', '<?php echo $pecah['dokter_rawat']; ?>', '<?php echo $pecah['no_rm']; ?>', 'Datang')" data-bs-toggle="modal" data-bs-target="#tambahKeluhanUtama" href="index.php?halaman=daftarregistrasi&day&id=<?php echo $pecah["idrawat"]; ?>&jadwal=<?= date("Y-m-d\TH:i:s+00:00", $jadwal); ?>&antrian=<?php echo $pecah["antrian"]; ?>&dokter=<?php echo $pecah["dokter_rawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&status=datang" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-check-circle" style="color:green;"></i> Datang</button></li>
+                                  <?php } ?>
                                   <?php $dataPasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap = '$pecah[nama_pasien]'")->fetch_assoc(); ?>
                                   <li><a href="../pasien/fal-risk.php?id=<?php echo $dataPasien["idpasien"]; ?>&kunjungan=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk</a></li>
-
-                                  <li>
-                                    <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
-                                      <i class="bi bi-pencil" style="color:green;"></i> Edit
-                                    </a>
-                                  </li>
-
-                                  <li><a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
-                                      <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
+                                  <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                    <li>
+                                      <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
+                                        <i class="bi bi-pencil" style="color:green;"></i> Edit
+                                      </a>
+                                    </li>
+                                    <li>
+                                      <a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
+                                        <i class="bi bi-trash" style="color:red;"></i> Hapus</a>
+                                    </li>
+                                  <?php } ?>
                                 </ul>
                               </div>
                             </td>
                           </tr>
-
                           <?php $no += 1 ?>
                         <?php endforeach; ?>
-
                       </tbody>
                     </table>
+                    <script>
+                      function upData(id, jadwal, antrian, dokter, norm, status) {
+                        document.getElementById('id_id').value = id;
+                        document.getElementById('jadwal_id').value = jadwal;
+                        document.getElementById('antrian_id').value = antrian;
+                        document.getElementById('dokter_id').value = dokter;
+                        document.getElementById('norm_id').value = norm;
+                        document.getElementById('status_id').value = status;
+                      }
+                    </script>
+                    <!-- Modal -->
+                    <div class="modal fade" id="tambahKeluhanUtama" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Tambah Keluhan Utama</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <form method="get">
+                            <div class="modal-body">
+                              <label for="">Input Keluhan Utama</label>
+                              <input type="text" name="halaman" value="daftarregistrasi" hidden>
+                              <input type="text" name="day" hidden>
+                              <textarea name="keluhanUtama" class="form-control " id=""></textarea>
+                              <input hidden type="text" name="id" id="id_id">
+                              <input hidden type="text" name="jadwal" id="jadwal_id">
+                              <input hidden type="text" name="antrian" id="antrian_id">
+                              <input hidden type="text" name="dokter" id="dokter_id">
+                              <input hidden type="text" name="norm" id="norm_id">
+                              <input hidden type="text" name="status" id="status_id">
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="submit" class="btn btn-sm btn-primary">Datangkan</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+
                     <?php
                     // Display pagination
                     echo '<nav>';
@@ -592,11 +682,11 @@ if (isset($_GET['detail'])) {
                     echo '</ul>';
                     echo '</nav>';
                     ?>
+
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
     </div>
@@ -613,10 +703,11 @@ if (isset($_GET['detail'])) {
 
 </html>
 
-<?php if (isset($_GET['status'])) {
+<?php
+if (isset($_GET['status'])) {
   $getBPJS = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$_GET[id]'")->fetch_assoc();
   $jam = date('H:i:s', strtotime($_GET['jadwal']));
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', perawat='" . $_SESSION['admin']['username'] . "' WHERE idrawat='$_GET[id]'");
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', perawat='" . $_SESSION['admin']['username'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
 
   if ($getBPJS['carabayar'] == 'bpjs') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
@@ -625,7 +716,7 @@ if (isset($_GET['detail'])) {
   } elseif ($getBPJS['carabayar'] == 'spesialis anak' or $getBPJS['carabayar'] == 'spesialis penyakit dalam') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('100000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } else {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('20000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   }
 
   // Logika Untuk Mengirim Link Rating Otomatis
@@ -746,7 +837,8 @@ Tim kami selalu siap membantu dan memberikan dukungan untuk kebutuhan Anda. Teri
 
   if (mysqli_affected_rows($koneksi) > 0) {
   }
-} ?>
+}
+?>
 <script>
   $(document).ready(function() {
     $('#myTable').DataTable({
