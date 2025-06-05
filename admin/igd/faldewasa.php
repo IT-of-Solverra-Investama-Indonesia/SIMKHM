@@ -1,7 +1,7 @@
 <?php 
     $username=$_SESSION['admin']['username'];
     $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
-    $pasien=$koneksi->query("SELECT * FROM igd WHERE idigd='$_GET[id]'");
+    $pasien = $koneksi->query("SELECT * FROM igd WHERE idigd='$_GET[id]'");
     $pecah=$pasien->fetch_assoc();    
 ?>
 <!DOCTYPE html>
