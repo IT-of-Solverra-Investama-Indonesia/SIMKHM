@@ -64,6 +64,48 @@ function getLastWord($inputString)
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      <?php
+      $apiUrlgetObat = '../apotek/api_getObatMasterLokal.php';
+      // if (isset($_GET['inap'])) {
+      //   $apiUrlgetObat .= '?inap';
+      // } elseif (isset($_GET['penjualan'])) {
+      //   $apiUrlgetObat .= '?penjualan';
+      // } else {
+      //   $apiUrlgetObat .= '';
+      // }
+      ?>
+      const obatData = await (await fetch('<?= $apiUrlgetObat . '?inap' ?>')).json();
+
+      document.querySelectorAll('.obat-select').forEach(select => {
+        // Simpan nilai yang sedang dipilih (jika ada)
+        const selectedValue = select.value;
+
+        // Buat array dari nilai option yang sudah ada
+        const existingOptions = Array.from(select.options).map(opt => opt.value);
+
+        // Filter data obat untuk hanya menambahkan yang belum ada
+        const newOptions = obatData.filter(obat =>
+          !existingOptions.includes(obat.kode_obat)
+        );
+
+        // Tambahkan option baru
+        newOptions.forEach(obat => {
+          select.add(new Option(obat.nama_obat, obat.kode_obat));
+        });
+
+        // Kembalikan nilai yang dipilih sebelumnya (jika masih ada)
+        if (selectedValue && select.querySelector(`option[value="${selectedValue}"]`)) {
+          select.value = selectedValue;
+        }
+      });
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  });
+</script>
 <?php if (!isset($_GET['view'])) { ?>
   <main>
     <div class="">
@@ -207,18 +249,8 @@ function getLastWord($inputString)
                                   <label for="inputName5" class="form-label">Nama Obat</label><br>
                                   <input type="text" name="jenis" id="jenis3" hidden>
                                   <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                  <select name="nama_obat[]" class="form-select mb-2 w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                  <select name="nama_obat[]" class="obat-select form-select mb-2 w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
                                     <option value="">Pilih</option>
-                                    <?php
-                                    if (!isset($_GET['inap'])) {
-                                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                    } else {
-                                      $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                    }
-                                    foreach ($getObat as $data) {
-                                    ?>
-                                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                    <?php } ?>
                                   </select>
                                 </div>
                                 <div class="col-md-6">
@@ -275,19 +307,8 @@ function getLastWord($inputString)
                               <div class="control-group2">
                                 <label for="inputName5" class="form-label">Nama Obat</label>
                                 <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                <select name="nama_obat[]" class="form-select mb-2" id="selObat1" aria-label="Default select example">
+                                <select name="nama_obat[]" class="obat-select form-select mb-2" id="selObat1" aria-label="Default select example">
                                   <option value="">Pilih</option>
-
-                                  <?php
-                                  if (!isset($_GET['inap'])) {
-                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                  } else {
-                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                  }
-                                  foreach ($getObat as $data) {
-                                  ?>
-                                    <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                  <?php } ?>
                                 </select>
 
                                 <div class="row">
@@ -387,14 +408,8 @@ function getLastWord($inputString)
                                 <div class="col-md-12">
                                   <input hidden type="text" id="jenis2" name="jenis" class="form-control">
                                   <label for="inputName5" class="form-label">Nama Obat</label><br>
-                                  <select name="nama_obat[]" class="form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                  <select name="nama_obat[]" class="obat-select form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
                                     <option value="">Pilih</option>
-                                    <?php
-                                    $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                    foreach ($getObat as $data) {
-                                    ?>
-                                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                    <?php } ?>
                                   </select>
                                 </div>
 
@@ -413,15 +428,8 @@ function getLastWord($inputString)
                               <br>
                               <div class="control-group">
                                 <label for="inputName5" class="form-label">Nama Obat</label>
-                                <select name="nama_obat[]" class="form-control " id="selObat1" aria-label="Default select example">
+                                <select name="nama_obat[]" class="obat-select form-control " id="selObat1" aria-label="Default select example">
                                   <option value="">Pilih</option>
-
-                                  <?php
-                                  $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                                  foreach ($getObat as $data) {
-                                  ?>
-                                    <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                  <?php } ?>
                                 </select>
                                 <div class="col-md-12" style="margin-top:20px">
                                   <label for="">Jumlah Obat</label>
@@ -554,7 +562,11 @@ function getLastWord($inputString)
                               <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
                               <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
                               <td><?php echo $in["durasi_obat"]; ?> hari</td>
-                              <td><?php echo date('Y-m-d', strtotime($in["created_at"])) ?></td>
+                              <td>
+                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
+                                  <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
+                                </a>
+                              </td>
                               <td><?= $in['petugas'] ?></td>
                               <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
                               <td>
@@ -623,8 +635,14 @@ function getLastWord($inputString)
                               <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
                               <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
                               <td><?php echo $or["durasi_obat"]; ?> hari</td>
-                              <td><?php echo date('Y-m-d', strtotime($or["created_at"])) ?></td>
-                              <td><?= $or['petugas'] ?></td>
+                              <td>
+                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
+                                  <?php echo date('Y-m-d', strtotime($or["created_at"])) ?>
+                                </a>
+                              </td>
+                              <td>
+                                <?= $or['petugas'] ?>
+                              </td>
                               <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
                               <td>
                                 <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
@@ -696,18 +714,8 @@ function getLastWord($inputString)
                   <div class="row">
                     <div class="col-md-2">
                       <label>Nama Obat</label>
-                      <select name="nama_obat" class=" form-control form-control-sm mb-2 w-100" style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
+                      <select name="nama_obat" class="obat-select form-control form-control-sm mb-2 w-100" style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
                         <option value="">Pilih</option>
-                        <?php
-                        if (!isset($_GET['inap'])) {
-                          $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                        } else {
-                          $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe != '' AND aktif_ranap = 'aktif' GROUP BY nama_obat ORDER BY nama_obat ASC");
-                        }
-                        foreach ($getObat as $data) {
-                        ?>
-                          <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                        <?php } ?>
                       </select>
                     </div>
                     <div class="col-md-1">
