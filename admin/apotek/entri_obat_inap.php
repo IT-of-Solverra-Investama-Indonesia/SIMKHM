@@ -93,8 +93,9 @@ $linkPage = 'index.php?halaman=entri_obat_inap';
                                     <?php } ?>
                                     <td>
                                         <div class="dropdown">
-                                            <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
-                                                <a href="index.php?halaman=lpo&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="btn btn-link btn-sm" style="color: blue; font-weight: bold; font-size: 15px;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i></a>
+                                            <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'sup') { ?>
+                                                <a href="index.php?halaman=lpo&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="btn btn-warning btn-sm"><i class="bi bi-file-earmark-spreadsheet"></i></a>
+                                                <a href="index.php?halaman=retur_obat_inap&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>&idrawat=<?= $pecah['idrawat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-capsule-pill"></i></a>    
                                             <?php } ?>
                                         </div>
                                     </td>
