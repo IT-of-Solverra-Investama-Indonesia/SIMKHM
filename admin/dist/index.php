@@ -138,6 +138,13 @@ if (!isset($_SESSION['login'])) {
           <span>Dashboard</span>
         </a>
       </li>
+
+      <?php if ($level == 'apoteker' or $level == 'ceo'  or $level == 'sup' or $level == 'racik') { ?>
+        <a class="nav-link collapsed" href="index.php?halaman=dashboardapotek">
+          <i class="bi bi-capsule"></i>
+          <span>Dashboard Apotik</span>
+        </a>
+      <?php } ?>
       <!-- End Dashboard Nav -->
 
       <?php if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') { ?>
@@ -407,13 +414,13 @@ if (!isset($_SESSION['login'])) {
             <i class="bi bi-capsule"></i>
             <span>Apoteker</span>
           </a> -->
-          <a class="nav-link collapsed" href="index.php?halaman=dashboardapotek">
-            <i class="bi bi-capsule"></i>
-            <span>Dashboard Apotik</span>
-          </a>
           <a class="nav-link collapsed" href="index.php?halaman=tambah_obatmasuk">
             <i class="bi bi-capsule"></i>
             <span>Pemesanan Obat</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=apotek_riwayat_faktur">
+            <i class="bi bi-dropbox"></i>
+            <span>Riwayat Faktur</span>
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=stok_obat_apoteker">
             <i class="bi bi-capsule"></i>

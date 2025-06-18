@@ -47,7 +47,7 @@
               }elseif($row2['level'] == 'racik'){
                 echo "<script> location='index.php?halaman=daftarrmedis&racik'; </script> ";
               } elseif ($row2['level'] == 'apoteker') {
-                echo "<script> location='index.php?halaman=daftarapotek'; </script> ";
+                echo "<script> location='index.php?halaman=tambah_obatmasuk'; </script> ";
               } elseif ($row2['level'] == 'kasir') {
                 echo "<script> location='index.php?halaman=daftarbayar'; </script> ";
               }else{

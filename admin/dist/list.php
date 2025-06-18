@@ -17,7 +17,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="dasboar"){include '../rawatjalan/dasboar.php';}
                    
                    
-                   elseif ($hal=="dashboard_detail"){include 'dashboard_detail.php';}
+                   elseif ($hal=="dashboard_detail"){include '../dashboard/dashboard_detail.php';}
 
                    //    Gaji Dokter 
                    elseif ($hal=="gajidokter"){include '../gajidokter/gajidokter.php';}
@@ -163,7 +163,9 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="penjualan_obat_all_riwayat"){include '../apotek/penjualan_obat_all_riwayat.php';}
                    elseif ($hal=="setoran_shift_apoteker"){include '../apotek/setoran_shift_apoteker.php';}
                    elseif ($hal=="apoteker_hpp"){include '../apotek/apoteker_hpp.php';}
-                   elseif ($hal=="retur_obat_inap"){include '../apotek/retur_obat_inap.php';}
+                   elseif ($hal=="retur_obat_inap"){include '../apotek/retur_obat_inap.php';} elseif ($hal == "apotek_riwayat_faktur") {
+    include '../apotek/apotek_riwayat_faktur.php';
+}
                     
                     //laporan
                    elseif ($hal=="laporanmedis"){include '../laporan/laporanmedis.php';}
