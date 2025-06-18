@@ -112,7 +112,6 @@ $pecah = $pasien->fetch_assoc();
                               <input type="text" name="jumlah_layanan" value="1" class="form-control form-control-sm" id="inputName5" placeholder="Masukkan Jumlah">
                             </div>
                             <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>">
-                            <!-- <input type="hidden" name="idrm" value="<?php echo $pecah['norm'] ?>"> -->
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -127,17 +126,11 @@ $pecah = $pasien->fetch_assoc();
                   if (isset($_POST['savelay'])) {
                     $layanan = $_POST['layanan'];
                     $getLayananMasterById = $koneksimaster->query("SELECT * FROM master_layanan WHERE id='$layanan'")->fetch_assoc();
-
                     $DaftarLayanan = $nota['biaya_lain'] . "+" . $getLayananMasterById['nama_layanan'];
                     $HargaLayanan = intval($nota['total_lain']) + $getLayananMasterById['harga'];
-
                     // $ttlBiyLain = intval($getBiyLain['total_lain']) + intval($_POST['harga_layanan']);
-
-
                     $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$DaftarLayanan', total_lain = '$HargaLayanan' WHERE idregis='$_GET[id]'");
-
                     $koneksi->query("INSERT INTO layanan (layanan, kode_layanan, jumlah_layanan, id_pasien, idrm, tgl_layanan) VALUES ('$getLayananMasterById[nama_layanan]', '$getLayananMasterById[id]', '1', '$pecah[idpasien]', '$_GET[rm]', '$getRegis[jadwal]')");
-
                     if (isset($_GET['inap'])) {
                       echo "
                             <script>
@@ -158,47 +151,64 @@ $pecah = $pasien->fetch_assoc();
                   <div class="row">
                     <div class="table-responsive">
                       <!-- Button trigger modal -->
-                      <br>
-
                       <div id="employee_table">
-                        <table class="table table-bordered">
+                        <table class="table table-sm" style="font-size: 12px;">
                           <thead>
-                            <tr>
+                            <t>
                               <th width="5%">No.</th>
                               <th width="40%">Layanan/Tindakan</th>
-                              <!-- <th width="30%">Harga Layanan</th> -->
                               <th width="30%">Jumlah</th>
-                            </tr>
+                              <th>Aksi</th>
+                            </t>
                           </thead>
                           <tbody>
-
                             <?php $no = 1 ?>
-
                             <?php foreach ($plan as $plan) : ?>
-
                               <tr>
                                 <td><?php echo $no; ?></td>
                                 <td style="margin-top:10px;"><?php echo $plan["layanan"]; ?></td>
-                                <!-- <td style="margin-top:10px;"><?php echo $plan["kode_layanan"]; ?></td> -->
                                 <td style="margin-top:10px;"><?php echo $plan["jumlah_layanan"]; ?></td>
+                                <td>
+                                  <a href="index.php?halaman=bayarrawat&rm=<?= htmlspecialchars($_GET['rm']) ?>&id=<?= htmlspecialchars($_GET['id']) ?>&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&deleteLayanan=<?= $plan['idlayanan'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                </td>
                               </tr>
-
                               <?php $no += 1 ?>
                             <?php endforeach ?>
-
                           </tbody>
-
                         </table>
                       </div>
                     </div>
                   </div>
-
-                  <br>
-                  <br>
-
-
                 </div>
               </div>
+              <?php
+              if (isset($_GET['deleteLayanan'])) {
+                $idLayanan = htmlspecialchars($_GET['deleteLayanan']);
+                $getSingleLayanaFormDelete = $koneksi->query("SELECT * FROM layanan WHERE idlayanan = '" . $idLayanan . "'")->fetch_assoc();
+
+                $getMasterLayananSingle = $koneksimaster->query("SELECT * FROM master_layanan WHERE id = '$getSingleLayanaFormDelete[kode_layanan]'")->fetch_assoc();
+
+                $layanan = $nota['biaya_lain'];
+                $penghapusLayanan = $getMasterLayananSingle['nama_layanan'];
+
+                $arrayLayanan = explode('+', $layanan);
+                $arrayLayanan = array_filter($arrayLayanan, function ($item) use ($penghapusLayanan) {
+                  return $item !== $penghapusLayanan;
+                });
+
+                $layananBaru = implode('+', $arrayLayanan);
+                $nominalBaru = $nota['total_lain'] - $getMasterLayananSingle['harga'];
+                $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$layananBaru', total_lain = '$nominalBaru' WHERE idregis='$_GET[id]'");
+                $koneksi->query("DELETE FROM layanan WHERE idlayanan = '" . $idLayanan . "'");
+
+                echo "
+                <script>
+                    alert('Successfully deleted');
+                    document.location.href='index.php?halaman=bayarrawat&rm=$_GET[rm]&id=$_GET[id]&tgl=$_GET[tgl]';
+                  </script>
+                ";
+              }
+              ?>
 
               <div style="margin-bottom:2px; margin-top:30px">
                 <hr>

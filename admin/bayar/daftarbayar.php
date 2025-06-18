@@ -20,10 +20,10 @@ date_default_timezone_set('Asia/Jakarta');
     $query = "SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' AND (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') $whereCondition GROUP BY registrasi_rawat.idrawat";
   } else {
     $urlPage = "index.php?halaman=daftarbayar" . $whereConditionUrl;
-    if (date('Hi') > '0730') {
-      $jamCondition = "AND jadwal >= '" . date('Y-m-d 07:30:00') . "' AND jadwal <= '" . date('Y-m-d 07:30:00', strtotime('+1 day')) . "'";
+    if (date('Hi') > '0700') {
+      $jamCondition = "AND jadwal >= '" . date('Y-m-d 07:00:00') . "' AND jadwal <= '" . date('Y-m-d 07:00:00', strtotime('+1 day')) . "'";
     } else {
-      $jamCondition = "AND jadwal <= '" . date('Y-m-d 07:30:00') . "' AND jadwal >= '" . date('Y-m-d 07:30:00', strtotime('-1 day')) . "'";
+      $jamCondition = "AND jadwal <= '" . date('Y-m-d 07:00:00') . "' AND jadwal >= '" . date('Y-m-d 07:00:00', strtotime('-1 day')) . "'";
     }
     $dayCondition = "";
     $shiftCondition = "";
@@ -99,9 +99,9 @@ date_default_timezone_set('Asia/Jakarta');
               <li class="breadcrumb-item">
                 <a href="index.php?halaman=daftarbayar" style="color:blue;">
                   <?php if (date('Hi') > '0730') { ?>
-                    Daftar Pembayaran Dari <?= date('d-m-Y 07:30:00') ?> Hingga <?= date('d-m-Y 07:30:00', strtotime('+1 day')) ?>
+                    Daftar Pembayaran Dari <?= date('d-m-Y 07:00:00') ?> Hingga <?= date('d-m-Y 07:00:00', strtotime('+1 day')) ?>
                   <?php } else { ?>
-                    Daftar Pembayaran Dari <?= date('d-m-Y 07:30:00', strtotime('-1 day')) ?> Hingga <?= date('d-m-Y 07:30:00') ?>
+                    Daftar Pembayaran Dari <?= date('d-m-Y 07:00:00', strtotime('-1 day')) ?> Hingga <?= date('d-m-Y 07:00:00') ?>
                   <?php } ?>
                 </a>
               </li>
@@ -279,7 +279,7 @@ date_default_timezone_set('Asia/Jakarta');
                               </td>
                               <td>
                                 <?php
-                                $listTindakan = array_filter(explode('+', $biaya_lain));
+                                $listTindakan = array_filter(explode('+', string: $biaya_lain));
                                 foreach ($listTindakan as $item) {
                                   echo "- " . $item . "<br>";
                                 }
@@ -445,9 +445,10 @@ date_default_timezone_set('Asia/Jakarta');
   <div>
     <div class="card shadow p-2">
       <h5>Pembayaran Pasien Inap</h5>
-      <a href="index.php?halaman=daftarbayar" style="max-width: 100px;" class="btn btn-sm btn-dark">Kembali</a>
       <div class="table-responsive">
-        <table class="table table-hover table-striped" style="font-size: 13px;" id="myTable">
+        <a href="index.php?halaman=daftarbayar" style="max-width: 100px;" class="btn btn-sm btn-dark">Kembali</a>
+        <a href="index.php?halaman=daftarbayar&pasienInap&pulang" style="max-width:200px;" class="btn btn-sm btn-warning">Pasien Inap Pulang</a>
+        <table class="table table-hover table-striped" style="font-size: 12px;" id="myTable">
           <thead>
             <tr>
               <th>Nama Pasien</th>
@@ -458,12 +459,17 @@ date_default_timezone_set('Asia/Jakarta');
               <!--<th>Antrian</th>-->
               <th>Kamar</th>
               <th>Status Datang</th>
+              <th>Carabayar</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <?php
-            $getData = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND status_antri != 'Pulang' ORDER BY idrawat DESC ");
+            if (!isset($_GET['pulang'])) {
+              $getData = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND status_antri != 'Pulang' ORDER BY idrawat DESC ");
+            } else {
+              $getData = $koneksi->query("SELECT registrasi_rawat.* FROM pulang INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = pulang.norm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = pulang.tgl_masuk WHERE registrasi_rawat.perawatan = 'Rawat Inap' AND pulang.tgl = '" . date('Y-m-d') . "' ORDER BY idrawat DESC ");
+            }
             foreach ($getData as $data) {
             ?>
               <tr>
@@ -475,6 +481,7 @@ date_default_timezone_set('Asia/Jakarta');
                 <!--<td><?= $data['antrian'] ?></td>-->
                 <td><?= $data['kamar'] ?></td>
                 <td><?= $data['status_antri'] ?></td>
+                <td><?= $data['carabayar'] ?></td>
                 <td>
                   <a href="index.php?halaman=rekapinap&id=<?= $data['idrawat'] ?>" style="font-size: 12px;" class="btn btn-danger"><i class="bi bi-cash-coin"></i></a>
                 </td>
