@@ -48,7 +48,7 @@
                     $searchWhere = "";
                     $urlPage = 'index.php?halaman=apotek_terima';
                     if (isset($_GET['src'])) {
-                        $searchWhere = "WHERE pembelian_obat.nama_obat LIKE '%" . htmlspecialchars($_GET['key']) . "'%";
+                        $searchWhere = " AND pembelian_obat.nama_obat LIKE '%" . htmlspecialchars($_GET['key']) . "%'";
                         $urlPage = 'index.php?halaman=apotek_terima&src&key=' . htmlspecialchars($_GET['key']);
                     }
                     // ALTER TABLE `apotek` ADD `pembelian_id` INT(11) NULL AFTER `produsen`, ADD `tgl_datang` DATE NULL AFTER `pembelian_id`;

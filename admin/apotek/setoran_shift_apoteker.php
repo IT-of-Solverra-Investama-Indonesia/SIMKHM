@@ -15,6 +15,7 @@
                 <div class="col-5">
                     <select name="shift" id="" class="form-control form-control-sm" required>
                         <option value="<?= $shift ?>"><?= $shift ?></option>
+                        <option value="All">All</option>
                         <option value="Pagi">Pagi</option>
                         <option value="Sore">Sore</option>
                         <option value="Malam">Malam</option>
@@ -50,7 +51,7 @@
                             $srcCondition .= ' AND date_format(tgl_jual, "%Y-%m-%d") = "' . $tanggal . '"';
                         }
 
-                        if ($shift != '') {
+                        if ($shift != '' and $shift != 'All') {
                             $srcCondition .= ' AND shift = "' . $shift . '"';
                         }
                     }

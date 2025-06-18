@@ -2,7 +2,13 @@
 require '../dist/function.php';
 $tanggal = htmlspecialchars($_GET['tanggal']);
 $shift = htmlspecialchars($_GET['shift']);
-$getData = $koneksi->query("SELECT sumber, SUM((harga_umum - diskon_obat) * jumlah) AS total_penjualan FROM (
+
+$shiftCondition = "";
+if ($shift != 'All') {
+    $shiftCondition = "AND shift = '$shift'";
+}
+
+$getData = $koneksi->query("SELECT sumber, SUM((harga_umum - diskon_obat) * jumlah) AS total_penjualan, petugas, shift FROM (
                             SELECT 'UMUM' AS sumber, id_penjualan, nota, tgl_jual, kode_obat, nama_obat, harga_umum, diskon_obat, jumlah, harga_beli, akun, petugas, shift, created_at FROM penjualan_umum
                             UNION ALL
                             SELECT 'RESEP' AS sumber, id_penjualan, nota, tgl_jual, kode_obat, nama_obat, harga_umum, diskon_obat, jumlah, harga_beli, akun, petugas, shift, created_at FROM penjualan_resep
@@ -10,7 +16,9 @@ $getData = $koneksi->query("SELECT sumber, SUM((harga_umum - diskon_obat) * juml
                             SELECT 'REKANAN' AS sumber, id_penjualan, nota, tgl_jual, kode_obat, nama_obat, harga_umum, diskon_obat, jumlah, harga_beli, akun, petugas, shift, created_at FROM penjualan_rekanan
                             UNION ALL
                             SELECT 'INTERNAL' AS sumber, id_penjualan, nota, tgl_jual, kode_obat, nama_obat, harga_umum, diskon_obat, jumlah, harga_beli, akun, petugas, shift, created_at FROM penjualan_internal
-                        ) AS penjualan_obat  WHERE 1 = 1 AND date_format(tgl_jual, '%Y-%m-%d') = '$tanggal' AND shift = '$shift' GROUP BY sumber ORDER BY tgl_jual DESC");
+                        ) AS penjualan_obat  WHERE 1 = 1 AND date_format(tgl_jual, '%Y-%m-%d') = '$tanggal' " . $shiftCondition . " GROUP BY sumber ORDER BY tgl_jual DESC");
+
+$dataSingle = $getData->fetch_assoc();
 ?>
 
 <style>
@@ -24,6 +32,28 @@ $getData = $koneksi->query("SELECT sumber, SUM((harga_umum - diskon_obat) * juml
         <img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px; margin-bottom: 0px;" alt="">
         <h5>Kasir Klinik Husada Mulia</h5>
     </center>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Nama</td>
+                <td>: <?= $dataSingle['petugas'] ?></td>
+            </tr>
+            <tr>
+                <td>SHIFT</td>
+                <td>: <?= $dataSingle['shift'] ?></td>
+            </tr>
+            <tr>
+                <td>SHIFT</td>
+                <td>: <?= $tanggal ?></td>
+            </tr>
+        </tbody>
+    </table>
     <table class="table table-sm table-hover " style="font-size: 12px;">
         <thead>
             <tr>

@@ -47,7 +47,11 @@
             <div class="col-3">
                 <label for="" class="mb-0">Jenis</label>
                 <select name="jenis" id="" class="form-control form-control-sm">
-                    <option value="Poli">Poli</option>
+                    <option value="Poli">Poli All</option>
+                    <option value="PoliUmum">PoliUmum</option>
+                    <option value="PoliBPJS">PoliBPJS</option>
+                    <option value="PoliAnak">PoliAnak</option>
+                    <option value="PoliPenyakitDalam">PoliPenyakitDalam</option>
                     <option value="Inap">Inap</option>
                     <option value="Umum">Umum</option>
                     <option value="Resep">Resep</option>
@@ -101,6 +105,22 @@
                 if (isset($_GET['jenis']) && $_GET['jenis'] == 'Poli') {
                     $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN rekam_medis ON rekam_medis.id_rm = obat_rm.rekam_medis_id WHERE obat_rm.tgl_pasien >= '$_GET[mulai]' AND obat_rm.tgl_pasien <= '$_GET[hingga]' AND idigd = '0' GROUP BY kode_obat ORDER BY nama_obat DESC");
                 }
+                
+                if (isset($_GET['jenis']) && in_array($_GET['jenis'], ['PoliUmum', 'PoliBPJS', 'PoliAnak', 'PoliPenyakitDalam'])) {
+                    $queryKey = '';
+                    if($_GET['jenis'] == 'PoliUmum'){
+                        $queryKey .= " AND registrasi_rawat.carabayar = 'umum'";
+                    }elseif($_GET['jenis'] == 'PoliBPJS'){
+                        $queryKey .= " AND registrasi_rawat.carabayar = 'bpjs'";
+                    }elseif($_GET['jenis'] == 'PoliAnak'){
+                        $queryKey .= " AND registrasi_rawat.carabayar = 'spesialis anak'";
+                    }elseif($_GET['jenis'] == 'PoliPenyakitDalam'){
+                        $queryKey .= " AND registrasi_rawat.carabayar = 'spesialis penyakit dalam'";
+                    }
+
+                    $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN rekam_medis ON rekam_medis.id_rm = obat_rm.rekam_medis_id INNER JOIN registrasi_rawat  ON registrasi_rawat.jadwal = rekam_medis.jadwal WHERE obat_rm.tgl_pasien >= '$_GET[mulai]' $queryKey AND obat_rm.tgl_pasien <= '$_GET[hingga]' AND idigd = '0' GROUP BY kode_obat ORDER BY nama_obat DESC");
+                }
+
                 if (isset($_GET['jenis']) && ($_GET['jenis'] == 'Umum' || $_GET['jenis'] == 'Resep' || $_GET['jenis'] == 'Rekanan' || $_GET['jenis'] == 'Internal')) {
                     if ($_GET['jenis'] == 'Umum') {
                         $sumber = 'UMUM';
@@ -125,7 +145,7 @@
                 ?>
                 <?php foreach ($getObat as $obat) { ?>
                     <?php
-                    if ($_GET['jenis'] == 'Inap' or $_GET['jenis'] == 'Poli') {
+                    if ($_GET['jenis'] == 'Inap' or $_GET['jenis'] == 'Poli' or in_array($_GET['jenis'], ['PoliUmum', 'PoliBPJS', 'PoliAnak', 'PoliPenyakitDalam'])) {
                         $getObatMasuk = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_masuk, (SELECT harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars($obat['kode_obat']) . "' AND  tgl_beli <= '$_GET[hingga]' ORDER BY idapotek DESC LIMIT 1) as harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars('$obat[kode_obat]') . "' AND tgl_beli <= '$_GET[hingga]'")->fetch_assoc();
                         $namaObat = $obat['nama_obat'];
                         $kodeObat = $obat['kode_obat'];

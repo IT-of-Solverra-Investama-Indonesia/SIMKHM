@@ -28,6 +28,10 @@ $getDataSingle = $koneksi->query("SELECT * FROM penjualan_rekanan WHERE nota = '
                 <td>: <?= $getDataSingle['tgl_jual'] ?></td>
             </tr>
             <tr>
+                <td>Pembeli</td>
+                <td>: <?= $getDataSingle['akun'] ?></td>
+            </tr>
+            <tr>
                 <td>Petugas</td>
                 <td>: <?= $getDataSingle['petugas'] ?></td>
             </tr>
