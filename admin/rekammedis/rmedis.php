@@ -909,7 +909,9 @@ if ($pas['jenis_kelamin'] == '1') {
                   <div class="row">
                     <div class="col-md-12">
                       <label for="inputName5" class="form-label">Racik Ke-</label><br>
-                      <input type="number" name="racik" class="form-control form-control-sm w-100" style="width:100%;" aria-label="Default select example">
+                      <span class="badge bg-success mb-1 " onclick="document.getElementById('racikFormId').value='Capsule'">Capsule</span>
+                      <span class="badge bg-warning mb-1 " onclick="document.getElementById('racikFormId').value='Puyer'">Puyer</span>
+                      <input type="text" name="racik" id="racikFormId" class="form-control form-control-sm w-100" style="width:100%;" aria-label="Default select example">
                     </div>
                     <?php foreach (range(1, 8) as $i) { ?>
                       <div class="col-md-12">

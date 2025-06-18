@@ -63,8 +63,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   }
 } elseif (isset($_GET['all'])) {
   if (isset($_GET['perawatan'])) {
-    $queryKey .= " AND perawatan = '" . htmlspecialchars($_GET['perawatan']) . "'";
-    $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&fil=';
+    if ($_GET['perawatan'] != 'All') {
+      $queryKey .= " AND perawatan = '" . htmlspecialchars($_GET['perawatan']) . "'";
+    }
+    if ($_GET['carabayar'] != 'All') {
+      $queryKey .= " AND carabayar = '" . htmlspecialchars($_GET['carabayar']) . "'";
+    }
+    $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&carabayar=' . $_GET['carabayar'] . '&fil=';
     if (isset($_GET['bulan'])) {
       $queryKey .= " AND DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['bulan']) . "'";
       $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&fil=&bulan=' . htmlspecialchars($_GET['bulan']) . '';
@@ -330,7 +335,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                         </td>
                         <td>
                           <?php
-                            $getObat = $koneksi->query("SELECT * FROM obat_rm WHERE idrm = '$_GET[detail]'  AND rekam_medis_id = '$data[id_rm]'");
+                          $getObat = $koneksi->query("SELECT * FROM obat_rm WHERE idrm = '$_GET[detail]'  AND rekam_medis_id = '$data[id_rm]'");
                           ?>
                           <table class="table">
                             <thead>
@@ -557,12 +562,21 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                     <form action="" method="get" class="mb-2">
                       <input type="text" name="halaman" id="" value="daftarrmedis" hidden>
                       <input type="text" name="all" id="" value="" hidden>
-                      <div class="row">
-                        <div class="col-9">
+                      <div class="row g-1">
+                        <div class="col-5">
                           <select name="perawatan" class="form-select" id="">
-                            <option value="All">All</option>
+                            <option value="All">All Perawatan</option>
                             <option value="Rawat Jalan">Rawat Jalan</option>
                             <option value="Rawat Inap">Rawat Inap</option>
+                          </select>
+                        </div>
+                        <div class="col-4">
+                          <select name="carabayar" class="form-select" id="">
+                            <option value="All">All Cara Bayar</option>
+                            <option value="umum">umum</option>
+                            <option value="bpjs">bpjs</option>
+                            <option value="spesialis anak">spesialis anak</option>
+                            <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
                           </select>
                         </div>
                         <div class="col-3">
@@ -573,7 +587,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                   <?php } ?>
                   <?php if (isset($_GET['all']) or isset($_GET['racik'])) { ?>
                     <form method="POST">
-                      <div class="row">
+                      <div class="row g-1">
                         <div class="col-9">
                           <input type="text" class="form-control mb-2" name="key" placeholder="Search ..." id="">
                         </div>
@@ -623,7 +637,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           $getPasien = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm) = '" . htmlspecialchars($pecah['no_rm']) . "'")->fetch_assoc();
                           ?>
 
-                          <?php if(!isset($_GET['racik'])){?>
+                          <?php if (!isset($_GET['racik'])) { ?>
                             <tr>
                               <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')"
                                 <?php if (($_SESSION['admin']['level'] == 'apoteker' || $_SESSION['admin']['level'] == 'racik') && isset($obatData["status_obat"]) && $obatData["status_obat"] == "selesai") {
@@ -684,13 +698,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                           // $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                                           ?>
                                           <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>&rawat=<?php echo $pecah["idrawat"]; ?>&cekrm&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
-  
+
                                           <?php
                                           // $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
                                           ?>
                                           <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
                                           <?php if ($getLastRM['jumm'] == 0 or $level == "dokter" or  $level == "sup") { ?>
-  
+
                                           <?php } else { ?>
                                             <!-- <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>&ubahrm" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Ubah Rekam Medis</a></li> -->
                                           <?php } ?>
@@ -706,7 +720,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                           ?>
                                             <li><a href="index.php?halaman=pengkajian&inap&norm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail Pengkajian</a></li>
                                           <?php } ?>
-  
+
                                           <?php
                                           $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
                                           ?>
@@ -740,7 +754,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 </div>
                               </td>
                             </tr>
-                          <?php }else{?>
+                          <?php } else { ?>
                             <?php if (empty($tel["jadwal"])) { ?>
                               <tr>
                                 <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')"
@@ -802,13 +816,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                             // $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                                             ?>
                                             <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>&rawat=<?php echo $pecah["idrawat"]; ?>&cekrm&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
-    
+
                                             <?php
                                             // $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
                                             ?>
                                             <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
                                             <?php if ($getLastRM['jumm'] == 0 or $level == "dokter" or  $level == "sup") { ?>
-    
+
                                             <?php } else { ?>
                                               <!-- <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>&ubahrm" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Ubah Rekam Medis</a></li> -->
                                             <?php } ?>
@@ -824,7 +838,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                             ?>
                                               <li><a href="index.php?halaman=pengkajian&inap&norm=<?php echo $pecah["no_rm"]; ?>&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail Pengkajian</a></li>
                                             <?php } ?>
-    
+
                                             <?php
                                             $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
                                             ?>
@@ -858,8 +872,8 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   </div>
                                 </td>
                               </tr>
-                            <?php }?>
-                          <?php }?>
+                            <?php } ?>
+                          <?php } ?>
 
 
                           <?php $no += 1 ?>
