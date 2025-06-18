@@ -32,7 +32,9 @@
                         <th>Jadwal</th>
                         <th>Tgl Pulang</th>
                         <th>Diagnosa Perawat</th>
+                        <th>Carabayar</th>
                         <th>Perawat</th>
+                        <th>Total Biaya</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,7 +42,8 @@
                     if (isset($_POST['rekap'])) {
                         $date_start = $_POST['date_start'];
                         $date_end = $_POST['date_end'];
-                        $query = "SELECT * FROM pulang WHERE tgl BETWEEN '$date_start' AND '$date_end' ORDER BY tgl DESC";
+                        $total = 0;
+                        $query = "SELECT pulang.*, registrasi_rawat.carabayar, registrasi_rawat.idrawat FROM pulang INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = pulang.norm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = pulang.tgl_masuk WHERE tgl BETWEEN '$date_start' AND '$date_end' ORDER BY tgl DESC";
                         $getData = $koneksi->query($query);
                         foreach ($getData as $data) {
                     ?>
@@ -51,11 +54,25 @@
                                 <td><?= $data['tgl_masuk'] ?></td>
                                 <td><?= $data['tgl'] ?></td>
                                 <td><?= $data['diag_prwt'] ?></td>
+                                <td><?= $data['carabayar'] ?></td>
                                 <td><?= $data['perawat'] ?></td>
+                                <td>
+                                    <?php
+                                    $getTotalBiayaSingle = $koneksi->query("SELECT SUM(besaran) as besaran FROM rawatinapdetail WHERE id = '$data[idrawat]'")->fetch_assoc();
+                                    $total += $getTotalBiayaSingle['besaran'];
+                                    ?>
+                                    Rp<?= number_format($getTotalBiayaSingle['besaran'], 0, 0, '.') ?>
+                                </td>
                             </tr>
                         <?php } ?>
                     <?php } ?>
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="8"><b>Total</b></td>
+                        <td><b>Rp<?= number_format($total, 0, 0, '.') ?></b></td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -77,7 +94,7 @@
             buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
             paging: false,
             order: false,
-            searching: true ,
+            searching: true,
         });
     });
 </script>

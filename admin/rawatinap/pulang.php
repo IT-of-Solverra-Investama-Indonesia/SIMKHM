@@ -110,7 +110,8 @@ function konversiNomorHP($nomor)
               </div>
               <?php
               $cekOp = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM pulang WHERE norm = '$_GET[id]' AND tgl_masuk = '$_GET[tgl]'  AND pasien !=''")->fetch_assoc();
-              if ($cekOp['jumlah'] == 0) {
+              $cekJumRegist = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM registrasi_rawat WHERE no_rm='$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ")->fetch_assoc();
+              if ($cekOp['jumlah'] < $cekJumRegist['jumlah']) {
               ?>
                 <div class="card">
                   <div class="card-body">

@@ -507,9 +507,7 @@ if (isset($_GET['detail'])) {
                         </tr>
                       </thead>
                       <tbody>
-
                         <?php $no = 1 ?>
-
                         <?php foreach ($pasien as $pecah) : ?>
                           <?php
                           $getSinglePasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$pecah[no_rm]' LIMIT 1")->fetch_assoc();
@@ -569,6 +567,11 @@ if (isset($_GET['detail'])) {
                                 ?>
                                 <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                 <ul class="dropdown-menu">
+                                  <li>
+                                    <a href="../rawatjalan/printAntrian.php?idrawat=<?php echo $pecah["idrawat"]; ?>" target="_blank" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
+                                      <i class="bi bi-printer text-warning"></i> Print Antrian
+                                    </a>
+                                  </li>
                                   <?php if (empty($ubah['nama_pasien'])) { ?>
                                     <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Isi Kajian Awal</a></li>
                                   <?php } else { ?>
@@ -580,6 +583,7 @@ if (isset($_GET['detail'])) {
                                   <?php $dataPasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap = '$pecah[nama_pasien]'")->fetch_assoc(); ?>
                                   <li><a href="../pasien/fal-risk.php?id=<?php echo $dataPasien["idpasien"]; ?>&kunjungan=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk</a></li>
                                   <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+
                                     <li>
                                       <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
                                         <i class="bi bi-pencil" style="color:green;"></i> Edit
