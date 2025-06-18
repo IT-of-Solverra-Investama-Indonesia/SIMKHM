@@ -77,6 +77,7 @@ if (isset($_POST['src'])) {
                     <th>Ket</th>
                     <th>Petugas</th>
                     <th>Unit</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -146,13 +147,117 @@ if (isset($_POST['src'])) {
                         <td><?= $data['ket'] ?></td>
                         <td><?= $data['petugas'] ?></td>
                         <td><?= $data['unit'] ?></td>
+                        <td>
+                            <button onclick="upData('<?= $data['idgaji'] ?>', '<?= $data['dokter'] ?>', '<?= $data['akun'] ?>', '<?= $data['besaran'] ?>', '<?= $data['ket'] ?>', '<?= $data['petugas'] ?>', '<?= $data['unit'] ?>')" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="btn btn-sm btn-success" style="font-size: 12px;"><i class="bi bi-pencil"></i></button>
+                            <a href="index.php?halaman=gajidokter_history&delete=<?= $data['idgaji'] ?>" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')" class="btn btn-sm btn-danger" style="font-size: 12px;"><i class="bi bi-trash"></i></a>
+                        </td>
                     </tr>
                 <?php } ?>
             </tbody>
         </table>
     </div>
 </div>
+<script>
+    function upData(id, dokter, akun, besaran, ket, petugas, unit) {
+        document.getElementById('id').value = id;
+        document.getElementById('dokter').value = dokter;
+        document.getElementById('akun').value = akun;
+        document.getElementById('besaran').value = besaran;
+        document.getElementById('ket').value = ket;
+        document.getElementById('petugas').value = petugas;
+        document.getElementById('unit').value = unit;
+    }
+</script>
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Update</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    <input type="text" hidden name="id" id="id">
+                    <p class="mb-0 float-start" for=""><b>Dokter :</b></p>
+                    <select name="dokter" id="dokter" class="form-control mb-2">
+                        <option value="" hidden>Pilih Dokter</option>
+                        <?php
+                        $getDokter = $koneksi->query("SELECT * FROM admin WHERE level= 'dokter'");
+                        foreach ($getDokter as $dokter) {
+                        ?>
+                            <option value="<?= $dokter['namalengkap'] ?>"><?= $dokter['namalengkap'] ?></option>
+                        <?php } ?>
+                    </select>
+                    <p class="mb-0 float-start" for=""><b>Akun Gaji Dokter :</b></p>
+                    <select name="akun" id="akun" class="form-control mb-2">
+                        <option value="" hidden>Pilih Akun</option>
+                        <?php
+                        $getAkun = $koneksimaster->query("SELECT * FROM akungajidokter");
+                        foreach ($getAkun as $akun) {
+                        ?>
+                            <option value="<?= $akun['namaakungajidokter'] ?>"><?= $akun['namaakungajidokter'] ?></option>
+                        <?php } ?>
+                    </select>
+                    <p class="mb-0 float-start" for=""><b>Besaran Gaji Dokter :</b></p>
+                    <input type="number" name="besaran" class="form-control mb-2" id="besaran">
+                    <p class="mb-0 float-start" for=""><b>Keterangan Gaji Dokter :</b></p>
+                    <input type="text" name="ket" class="form-control mb-2" id="ket">
+                    <p class="mb-0 float-start" for=""><b>Unit Gaji Dokter :</b></p>
+                    <select name="unit" class="form-control mb-2" id="unit">
+                        <option value="">Pilih Unit</option>
+                        <option value="KHM 1">KHM 1</option>
+                        <option value="KHM 2">KHM 2</option>
+                        <option value="KHM 3">KHM 3</option>
+                        <option value="KHM 4">KHM 4</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" name="saveUpdate" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+<?php
+if (isset($_POST['saveUpdate'])) {
+    $id = $_POST['id'];
+    $dokter = $_POST['dokter'];
+    $akun = $_POST['akun'];
+    $besaran = $_POST['besaran'];
+    $ket = $_POST['ket'];
+    $unit = $_POST['unit'];
+
+    $update = "UPDATE gajidokter SET dokter = ?, akun = ?, besaran = ?, ket = ?, unit = ? WHERE idgaji = ?";
+    $stmt = $koneksimaster->prepare($update);
+    $stmt->bind_param('sssssi', $dokter, $akun, $besaran, $ket, $unit, $id);
+    $stmt->execute();
+    $stmt->close();
+
+    echo "
+            <script>
+                alert('Data berhasil diupdate');
+                window.location.href = 'index.php?halaman=gajidokter_history';
+            </script>
+        ";
+}
+
+
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $delete = "DELETE FROM gajidokter WHERE idgaji = '$id'";
+    $koneksimaster->query($delete);
+    echo "
+            <script>
+                alert('Data berhasil dihapus');
+                window.location.href = 'index.php?halaman=gajidokter_history';
+            </script>
+        ";
+}
+
+?>
 <div class="card shadow-sm p-2">
     <center>
         <?php
