@@ -54,7 +54,7 @@
 
     if (isset($_POST['search']) && $_POST['keyword'] != '') {
 
-      $result = $koneksi->query("SELECT COUNT(*) as count FROM pasien WHERE nama_lengkap LIKE '%$_POST[keyword]%' OR nama_ibu LIKE '%$_POST[keyword]%' OR DATE_FORMAT(tgl_lahir, '%d-%m-%Y') LIKE '%$_POST[keyword]%' OR pembiayaan LIKE '%$_POST[keyword]%' OR no_bpjs LIKE '%$_POST[keyword]%' OR no_rm LIKE '%$_POST[keyword]%' OR provinsi LIKE '%$_POST[keyword]%' OR kota LIKE '%$_POST[keyword]%' OR kecamatan LIKE '%$_POST[keyword]%' OR kelurahan LIKE '%$_POST[keyword]%' OR alamat LIKE '%$_POST[keyword]%'");
+      $result = $koneksi->query("SELECT COUNT(*) as count FROM pasien WHERE nama_lengkap LIKE '%$_POST[keyword]%' OR nama_ibu LIKE '%$_POST[keyword]%' OR DATE_FORMAT(tgl_lahir, '%d-%m-%Y') LIKE '%$_POST[keyword]%' OR pembiayaan LIKE '%$_POST[keyword]%' OR no_bpjs LIKE '%$_POST[keyword]%' OR no_rm LIKE '%$_POST[keyword]%' OR provinsi LIKE '%$_POST[keyword]%' OR kota LIKE '%$_POST[keyword]%' OR kecamatan LIKE '%$_POST[keyword]%' OR kelurahan LIKE '%$_POST[keyword]%' OR alamat LIKE '%$_POST[keyword]%' OR nohp LIKE '%$_POST[keyword]%'");
       $total_records = $result->fetch_assoc()['count'];
 
       // Calculate total pages
@@ -68,7 +68,7 @@
       }
     // End Pagination
 
-    $pasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap LIKE '%$_POST[keyword]%' OR nama_ibu LIKE '%$_POST[keyword]%' OR DATE_FORMAT(tgl_lahir, '%d-%m-%Y') LIKE '%$_POST[keyword]%' OR pembiayaan LIKE '%$_POST[keyword]%' OR no_bpjs LIKE '%$_POST[keyword]%' OR no_rm LIKE '%$_POST[keyword]%'  OR provinsi LIKE '%$_POST[keyword]%' OR kota LIKE '%$_POST[keyword]%' OR kecamatan LIKE '%$_POST[keyword]%' OR kelurahan LIKE '%$_POST[keyword]%' OR alamat LIKE '%$_POST[keyword]%' ORDER BY idpasien DESC LIMIT $start, $limit;");
+    $pasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap LIKE '%$_POST[keyword]%' OR nama_ibu LIKE '%$_POST[keyword]%' OR DATE_FORMAT(tgl_lahir, '%d-%m-%Y') LIKE '%$_POST[keyword]%' OR pembiayaan LIKE '%$_POST[keyword]%' OR no_bpjs LIKE '%$_POST[keyword]%' OR no_rm LIKE '%$_POST[keyword]%'  OR provinsi LIKE '%$_POST[keyword]%' OR kota LIKE '%$_POST[keyword]%' OR kecamatan LIKE '%$_POST[keyword]%' OR kelurahan LIKE '%$_POST[keyword]%' OR alamat LIKE '%$_POST[keyword]%' OR nohp LIKE '%$_POST[keyword]%' ORDER BY idpasien DESC LIMIT $start, $limit;");
   } else {
     // Get the total number of records
     // $tgl_mulaii = date('Y-m-d', strtotime('2024-03-28'));
@@ -103,9 +103,9 @@
       if ($usia >= 1 && $usia <= 12) {
           return "An " . $nama_lengkap;
       } elseif ($usia >= 13) {
-          if ($jenis_kelamin == '1') { // '1' untuk laki-laki
+          if ($jenis_kelamin == '1' && $status_nikah != '1') { // '1' untuk laki-laki
               return "Sdr " . $nama_lengkap;
-          } elseif ($jenis_kelamin == '2') { // '2' untuk perempuan
+          } elseif ($jenis_kelamin == '2' && $status_nikah != '1') { // '2' untuk perempuan
               return "Nn " . $nama_lengkap;
           }
           
