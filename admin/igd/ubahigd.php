@@ -1,5 +1,4 @@
 <?php
-
 error_reporting(0);
 $username = $_SESSION['admin']['username'];
 $level = $_SESSION['admin']['level'];
@@ -10,18 +9,13 @@ $igd = $koneksi->query("SELECT * FROM igd WHERE idigd='$_GET[id]';");
 $igd = $igd->fetch_assoc();
 $pasien = $koneksi->query("SELECT * FROM pasien INNER JOIN kajian_awal WHERE idpasien='$_GET[id]' AND no_rm = norm;");
 $pecah = $pasien->fetch_assoc();
-
-
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
   <title>KHM WONOREJO</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
@@ -37,9 +31,6 @@ $pecah = $pasien->fetch_assoc();
 </head>
 
 <body>
-
-
-
   <main>
     <div class="container">
       <div class="pagetitle">
@@ -51,7 +42,6 @@ $pecah = $pasien->fetch_assoc();
           </ol>
         </nav>
       </div><!-- End Page Title -->
-
       <form class="row g-3" method="post" enctype="multipart/form-data">
         <div class="container">
           <div class="row">
@@ -547,6 +537,7 @@ $pecah = $pasien->fetch_assoc();
                               formLain.classList.remove('hidden');
                             } else if (this.value === 'Rawat') {
                               formLain2.classList.remove('hidden');
+                              // formLain2.setAttribute('required', 'true');
                             } else if (this.value != 'Rujuk') {
                               formLain.classList.add('hidden');
                             } else if (this.value != 'Rawat') {
@@ -623,6 +614,18 @@ if (isset($_POST['save'])) {
 
   // move_uploaded_file($lokasi, '../igd/foto/'.$gambar_anatomi);
 
+  if ($_POST['tindak'] == 'Rawat') {
+    if ($_POST['kamar'] == "") {
+      echo "
+        <script>
+          alert('Kamar Tidak Boleh Kosong !!!');
+          document.location.href='index.php?halaman=ubahigd&id=$_GET[id]';
+        </script>
+      ";
+      exit();
+    }
+  }
+
   if ($level == "igd" or $level == "perawat" or $level == "sup") {
 
     $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]' WHERE idigd='$_GET[id]' ");
@@ -635,6 +638,9 @@ if (isset($_POST['save'])) {
 
   // if($countigd["jumlah"] == 0){
   if ($_POST['tindak'] == "Rawat") {
+
+
+
     $getLast = $koneksi->query("SELECT * FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
     $idrawat = $getLast['idrawat'] + 1;
 
