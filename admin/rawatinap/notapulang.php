@@ -157,7 +157,7 @@ function getFullUrl()
 							$getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '" . $ambilSingle['no_rm'] . "'")->fetch_assoc();
 							include '../rawatjalan/api_token_wa.php';
 							?>
-							<a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=<?= $newMes = str_replace('rating.php', 'ratinginap.php', $mes); ?><?= $_GET['id']?>. Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
+							<a href="https://wa.me/<?= konversiNomorHP($getPasien['nohp']) ?>?text=<?= $newMes = str_replace('rating.php', 'ratinginap.php', $mes); ?><?= $_GET['id'] ?>. Berikut Nota Online Anda <?= getFullUrl() ?>" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i></a>
 						<?php } ?>
 					</p>
 				</div>
@@ -168,7 +168,25 @@ function getFullUrl()
 			<style>
 				body {
 					font-family: monospace;
+					color: #000;
 					/* letter-spacing: px; */
+				}
+
+				@media print {
+					@page {
+						size: 58mm auto;
+						margin: 0;
+					}
+
+					body {
+						font-size: 11px;
+					}
+
+					h6 {
+						font-size: 12px;
+						font-weight: bold;
+					}
+
 				}
 			</style>
 			<div style="max-width: 58mm; padding: 2mm;">
@@ -176,7 +194,7 @@ function getFullUrl()
 					<img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px;" alt="">
 					<h6>Nota TRNSKS-<?= $id ?></h6>
 				</center>
-				<table style="font-size: 8px;">
+				<table style="font-size: 10px;">
 					<thead>
 						<tr>
 							<th></th>
@@ -189,12 +207,12 @@ function getFullUrl()
 							<td>: <?= $ambilSingle['nama_pasien'] ?></td>
 						</tr>
 						<tr>
-							<td>Nomor RM </td>
+							<td>No.RM </td>
 							<td>: <?= $ambilSingle['no_rm'] ?></td>
 						</tr>
 						<tr>
-							<td>Jadwal Kunjungan</td>
-							<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> (<?= $ambilSingle['perawatan'] ?>)</td>
+							<td>Jadwal	</td>
+							<td>: <?= date('d F Y H:i', strtotime($ambilSingle['jadwal'])) ?> </td>
 						</tr>
 						<tr>
 							<td>Dokter </td>
@@ -202,45 +220,35 @@ function getFullUrl()
 						</tr>
 					</tbody>
 				</table>
-				<table class="table table-bordered" id="myTable" style="font-size: 8px;">
-					<thead>
-						<tr>
-							<th>Tgl</th>
-							<th>Biaya</th>
-							<th>Besaran</th>
-							<th>Ket</th>
-							<!-- <th>Petugas</th> -->
-						</tr>
-					</thead>
-					<tbody>
-						<?php $subtotal = 0; ?>
-						<?php while ($pecah = $ambil->fetch_assoc()) { ?>
-							<tr>
-								<td><?php echo $pecah["tgl"]; ?></td>
-								<td><?php echo $pecah["biaya"]; ?></td>
-								<td> Rp. <?php echo number_format($pecah["besaran"]) ?></td>
-								<td><?php echo $pecah["ket"]; ?></td>
-								<!-- <td><?php echo $pecah["petugas"]; ?></td> -->
-							</tr>
-							<?php $subtotal += $pecah['besaran']; ?>
-						<?php } ?>
-					</tbody>
-					<tfoot>
-						<tr>
-							<td colspan="2">TOTAL</td>
-							<td>
-								<b>Rp.<?php echo number_format($subtotal) ?></b>
-							</td>
-							<td colspan="2"></td>
-						</tr>
-					</tfoot>
-				</table>
+				<div style="font-size: 12px;">
+					<?php
+					$subtotal = 0;
+					while ($pecah = $ambil->fetch_assoc()) {
+					?>
+						<div style="">
+							<li>
+								<b><?php echo $pecah["tgl"]; ?></b> <?php echo $pecah["biaya"]; ?>
+								<div>
+									Rp <?php echo number_format($pecah["besaran"]); ?>
+									<?php if (!empty($pecah["ket"])) { ?>
+										(<?php echo $pecah["ket"]; ?>)
+									<?php } ?>
+								</div>	
+							</li>
+						</div>
+					<?php
+						$subtotal += $pecah['besaran'];
+					}
+					?>
+					<div style="border-top:2px solid #000; margin-top:10px; padding-top:6px;">
+						<b>TOTAL: Rp.<?php echo number_format($subtotal); ?></b>
+					</div>
+				</div>
 			</div>
 			<script>
-				window.print();
-				setTimeout(function() {
-					window.close();
-				}, 1000);
+				// window.print();
+				// setTimeout(function() {
+				// });
 			</script>
 		<?php } elseif ($_GET['print'] == 'hvs') { ?>
 			<div class="container mt-2">
