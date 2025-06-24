@@ -83,7 +83,7 @@
                         <td><?= $data['jumlahpasien'] ?> Pasien</td>
                         <td><?= number_format($total, 0, 0, '.') ?></td>
                         <td>
-                            <?= number_format($total/$hari, 0, 0, '.') ?>
+                            <?= number_format($total/ $data['jumlahpasien'], 0, 0, '.') ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
