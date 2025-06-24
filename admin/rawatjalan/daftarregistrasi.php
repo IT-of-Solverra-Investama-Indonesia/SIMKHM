@@ -711,7 +711,7 @@ if (isset($_GET['detail'])) {
 if (isset($_GET['status'])) {
   $getBPJS = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$_GET[id]'")->fetch_assoc();
   $jam = date('H:i:s', strtotime($_GET['jadwal']));
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', perawat='" . $_SESSION['admin']['username'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', datang_at= '".date('Y-m-d H:i:s')."', perawat='" . $_SESSION['admin']['namalengkap'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
 
   if ($getBPJS['carabayar'] == 'bpjs') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
