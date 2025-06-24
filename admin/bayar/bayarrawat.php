@@ -358,7 +358,7 @@ if (isset($_POST['simpan'])) {
   $notaNew = $_POST['nota'];
   // $status=$_POST['status'];
   $koneksi->query("UPDATE biaya_rawat SET biaya_lain='$biaya_lain', nota='$notaNew', total_lain='$total_lain', potongan='$potongan', poli = '$_POST[poli]' WHERE idregis='$_GET[id]'");
-  $koneksi->query("UPDATE registrasi_rawat SET kasir='$username' WHERE idrawat='$_GET[id]'");
+  $koneksi->query("UPDATE registrasi_rawat SET kasir='$username', pembayaran_at = '".date('Y-m-d H:i:s')."' WHERE idrawat='$_GET[id]'");
   echo "
     <script>
       document.location.href='index.php?halaman=daftarbayar&day';
