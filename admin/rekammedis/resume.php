@@ -1164,7 +1164,7 @@ if (isset($_POST['save'])) {
   $kognitif = htmlspecialchars($_POST['kognitif'] ?? '');
   // End Post Default
 
-  $koneksi->query("UPDATE registrasi_rawat SET perawat='" . $_SESSION['admin']['username'] . "' WHERE idrawat='$_GET[id]'");
+  $koneksi->query("UPDATE registrasi_rawat SET perawat='" . $_SESSION['admin']['username'] . "', perawat_at = '".date('Y-m-d H:i:s')."' WHERE idrawat='$_GET[id]'");
 
   // $foto=$_FILES['foto']['name'];
   // $lokasi=$_FILES['foto']['tmp_name'];
