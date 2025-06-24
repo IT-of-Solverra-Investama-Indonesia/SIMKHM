@@ -1,4 +1,12 @@
 <div>
+    <?php
+    if (isset($_GET['updateStokReal'])) {
+        $koneksi->query("INSERT INTO revisi_sementara (kode_obat, stok_seharusnya) VALUES ('$_GET[kode_obat]', '$_GET[stok_seharusnya]') ");
+        $revisiStokSeharusnya = $_GET['stok_sekarang'] - $_GET['stok_seharusnya'];
+        $getDataSingle = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$_GET[kode_obat]'")->fetch_assoc();
+        $koneksi->query("INSERT INTO revisi_obat (kode_obat, nama_obat, jumlah, keterangan, tanggal, petugas, shift) VALUES ('$_GET[kode_obat]', '$getDataSingle[obat_master]', '$revisiStokSeharusnya', 'Revisi IT', NOW(), 'IT Solverra', 'Pagi')");
+    }
+    ?>
     <?php if (!isset($_GET['detail']) and !isset($_GET['AllRevisi'])) { ?>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -146,7 +154,28 @@
                     ?>
                 <?php } ?>
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped table-sm" style="font-size: 12px;">
+                    <!-- Include jQuery -->
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+                    <!-- Include DataTables and Buttons -->
+                    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+                    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.dataTables.min.css" />
+                    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.html5.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.print.min.js"></script>
+
+                    <table class="table table-hover table-striped table-sm" style="font-size: 12px;" id="myTable">
+                        <script>
+                            $(document).ready(function() {
+                                $('#myTable').DataTable({
+                                    dom: 'Bfrtip',
+                                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                                    "pageLength": 100
+                                });
+                            });
+                        </script>
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -161,6 +190,7 @@
                                 <th>Penjualan Internal</th>
                                 <th>Revisi</th>
                                 <th>Stok</th>
+                                <th>Query</th>
                                 <th>Aktif Poli</th>
                                 <th>Aktif Ranap</th>
                             </tr>
@@ -180,7 +210,7 @@
                                     $whereConditionMaster = " AND (obat_master LIKE '%$_GET[key]%' OR kode_obat LIKE '%$_GET[key]%')";
                                 }
                                 if ($_GET['tgl'] != "") {
-                                    $whereConditionMasuk = " AND tgl_datang <= '$_GET[tgl]'";
+                                    $whereConditionMasuk = " AND tgl_beli <= '$_GET[tgl]'";
                                     $whereConditionKeluar = " AND tgl_pasien <= '$_GET[tgl]'";
                                     $whereConditionPenjualan = " AND tgl_jual <= '$_GET[tgl]'";
                                     $whereConditionRetur = " AND tgl_retur <= '$_GET[tgl]'";
@@ -283,7 +313,11 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <b><?= (($getSingleObatMasuk['jumlahMasuk'] ?? 0) + ($getSingleObatRetur['jumlahRetur'] ?? 0)) - (($getSingleObatKeluar['jumlahKeluar'] ?? 0) + ($getPenjualanUmum['jumlah'] == '' ? 0 : $getPenjualanUmum['jumlah']) + ($getPenjualanResep['jumlah'] == '' ? 0 : $getPenjualanResep['jumlah']) + ($getPenjualanRekanan['jumlah'] == '' ? 0 : $getPenjualanRekanan['jumlah']) + ($getPenjualanInternal['jumlah'] == '' ? 0 : $getPenjualanInternal['jumlah']) + ($getRevisi['jumlah'] == '' ? 0 : $getRevisi['jumlah'])) ?></b>
+                                        <b><?= $stokSekarang = (($getSingleObatMasuk['jumlahMasuk'] ?? 0) + ($getSingleObatRetur['jumlahRetur'] ?? 0)) - (($getSingleObatKeluar['jumlahKeluar'] ?? 0) + ($getPenjualanUmum['jumlah'] == '' ? 0 : $getPenjualanUmum['jumlah']) + ($getPenjualanResep['jumlah'] == '' ? 0 : $getPenjualanResep['jumlah']) + ($getPenjualanRekanan['jumlah'] == '' ? 0 : $getPenjualanRekanan['jumlah']) + ($getPenjualanInternal['jumlah'] == '' ? 0 : $getPenjualanInternal['jumlah']) + ($getRevisi['jumlah'] == '' ? 0 : $getRevisi['jumlah'])) ?></b>
+
+                                    </td>
+                                    <td>
+                                        <!-- <button type="button" onclick="upDataStok('<?= $data['kode_obat'] ?>', '<?= $stokSekarang ?>')" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalUpdateStok">Update Stok</button> -->
 
                                         <?php
                                         $getDataRevisiSementara = $koneksi->query("SELECT *, COUNT(*) as jum FROM revisi_sementara WHERE kode_obat = '$data[kode_obat]' LIMiT 1")->fetch_assoc();
@@ -292,8 +326,10 @@
                                             <?php
                                             $getSingleNamaObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$getDataRevisiSementara[kode_obat]' LIMIT 1")->fetch_assoc();
                                             ?>
+                                            <?php if (((($getSingleObatMasuk['jumlahMasuk'] ?? 0) + ($getSingleObatRetur['jumlahRetur'] ?? 0)) - (($getSingleObatKeluar['jumlahKeluar'] ?? 0) + ($getPenjualanUmum['jumlah'] == '' ? 0 : $getPenjualanUmum['jumlah']) + ($getPenjualanResep['jumlah'] == '' ? 0 : $getPenjualanResep['jumlah']) + ($getPenjualanRekanan['jumlah'] == '' ? 0 : $getPenjualanRekanan['jumlah']) + ($getPenjualanInternal['jumlah'] == '' ? 0 : $getPenjualanInternal['jumlah']) + ($getRevisi['jumlah'] == '' ? 0 : $getRevisi['jumlah']))) - $getDataRevisiSementara['stok_seharusnya'] != 0) { ?>
+                                                <!-- INSERT INTO `revisi_obat`(`kode_obat`, `nama_obat`, `jumlah`, `keterangan`, `tanggal`, `petugas`, `shift`) VALUES ('<?= $getDataRevisiSementara['kode_obat'] ?>','<?= $getSingleNamaObat['obat_master'] ?>','<?= ((($getSingleObatMasuk['jumlahMasuk'] ?? 0) + ($getSingleObatRetur['jumlahRetur'] ?? 0)) - (($getSingleObatKeluar['jumlahKeluar'] ?? 0) + ($getPenjualanUmum['jumlah'] == '' ? 0 : $getPenjualanUmum['jumlah']) + ($getPenjualanResep['jumlah'] == '' ? 0 : $getPenjualanResep['jumlah']) + ($getPenjualanRekanan['jumlah'] == '' ? 0 : $getPenjualanRekanan['jumlah']) + ($getPenjualanInternal['jumlah'] == '' ? 0 : $getPenjualanInternal['jumlah']) + ($getRevisi['jumlah'] == '' ? 0 : $getRevisi['jumlah']))) - $getDataRevisiSementara['stok_seharusnya'] ?>','Revisi IT','2025-06-17','IT Solverra','Pagi'); -->
+                                            <?php } ?>
 
-                                            <!-- INSERT INTO `revisi_obat`(, `kode_obat`, `nama_obat`, `jumlah`, `keterangan`, `tanggal`, `petugas`, `shift`) VALUES ('<?= $getDataRevisiSementara['kode_obat'] ?>','<?= $getSingleNamaObat['obat_master'] ?>','<?= ((($getSingleObatMasuk['jumlahMasuk'] ?? 0) + ($getSingleObatRetur['jumlahRetur'] ?? 0)) - (($getSingleObatKeluar['jumlahKeluar'] ?? 0) + ($getPenjualanUmum['jumlah'] == '' ? 0 : $getPenjualanUmum['jumlah']) + ($getPenjualanResep['jumlah'] == '' ? 0 : $getPenjualanResep['jumlah']) + ($getPenjualanRekanan['jumlah'] == '' ? 0 : $getPenjualanRekanan['jumlah']) + ($getPenjualanInternal['jumlah'] == '' ? 0 : $getPenjualanInternal['jumlah']) + ($getRevisi['jumlah'] == '' ? 0 : $getRevisi['jumlah']))) - $getDataRevisiSementara['stok_seharusnya'] ?>','Revisi IT','2025-06-17','IT Solverra','Pagi') -->
                                         <?php } ?>
                                     </td>
                                     <td><?= $data['aktif_poli'] ?></td>
@@ -302,6 +338,36 @@
                             <?php } ?>
                         </tbody>
                     </table>
+                </div>
+                <script>
+                    function upDataStok(kode_obat, stok_sekarang) {
+                        document.getElementById('kode_obat_id_id').value = kode_obat;
+                        document.getElementById('stok_sekarang_id_id').value = stok_sekarang;
+                    }
+                </script>
+                <!-- Modal -->
+                <div class="modal fade" id="modalUpdateStok" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Update Stok</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="get" action="../apotek/actionToUpdateStok.php" target="_blank">
+                                <div class="modal-body">
+                                    <input type="text" name="halaman" id="" value="stok_obat_apoteker" hidden>
+                                    <input type="text" name="updateStokReal" id="" value="" hidden>
+                                    <input type="text" readonly name="kode_obat" id="kode_obat_id_id" class="form-control mb-2 form-control-sm">
+                                    <input type="text" readonly name="stok_sekarang" id="stok_sekarang_id_id" class="form-control mb-2 form-control-sm">
+                                    <input type="text" name="stok_seharusnya" id="" class="form-control form-control-sm">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" name="">Update To Revisi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <script>
                     function upData(apoteker_id, jumlahDatang) {
