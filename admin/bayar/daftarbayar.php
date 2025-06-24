@@ -127,6 +127,8 @@ date_default_timezone_set('Asia/Jakarta');
                     <?php } ?>
                     <a href="index.php?halaman=keuangan" class="btn btn-sm btn-primary mb-2">Keuangan</a>
                     <a href="index.php?halaman=gajidokter" class="btn btn-sm btn-primary mb-2">Gaji Dokter</a>
+                    <a href="index.php?halaman=gajidokter_history" class="btn btn-sm btn-primary mb-2">Riwayat Gaji Dokter</a>
+
                     <form method="post">
                       <div class="row">
                         <div class="col-4">
