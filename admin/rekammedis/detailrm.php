@@ -1831,6 +1831,7 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
               VALUES ('$_POST[serah_obat]', '$_POST[tepat1]', '$_POST[tepat2]', '$_POST[tepat3]', '$_POST[tepat4]', '$_POST[tepat5]', '$_GET[id]', '$_GET[tgl]', '$_POST[noresep]', '" . $_SESSION['admin']['idadmin'] . "', '" . $_SESSION['admin']['namalengkap'] . "')
           
               ");
+                          $koneksi->query("UPDATE registrasi_rawat SET apoteker_check_at = '" . date('Y-m-d H:i:s') . "' WHERE jadwal = '" . $_GET['tgl'] . "'");
                           echo "
               <script>
               alert('Berhasil' );
