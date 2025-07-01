@@ -24,7 +24,7 @@ $koneksi->query("
         SUM(IF(kategori='online',1,0)) AS online,
         SUM(IF(kategori='offline',1,0)) AS offline,
         COUNT(no_rm) AS jumlah
-        FROM registrasi_rawat where status_antri = 'Datang' or status_antri = 'Pembayaran'  AND DATE_FORMAT(jadwal, '%y/%m') >= '$bulan6Lalu' AND DATE_FORMAT(jadwal, '%y/%m') <= '$bulanSaatIni'group by bulan order by bulan desc
+        FROM registrasi_rawat where status_antri = 'Datang' or status_antri = 'Pembayaran' AND perawatan = 'Rawat Jalan' AND DATE_FORMAT(jadwal, '%y/%m') >= '$bulan6Lalu' AND DATE_FORMAT(jadwal, '%y/%m') <= '$bulanSaatIni' group by bulan order by bulan desc
     ");
 
 $ambilpoli = $koneksi->query("SELECT * from poli_jumlah JOIN hari_jumlah On poli_jumlah.bulan=hari_jumlah.bulan order by poli_jumlah.bulan desc");
@@ -77,11 +77,11 @@ $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length("AES-256-CBC"));
 $randomToken = encrypt("Solverra Investama", $key, $iv);
 ?>
 <div class="card p-2">
-    <b>POLI (Hanya Ditampilkan 6 Bulan Terakhir) | <a href="index.php?halaman=dashboard_detail&Poli">Dashboard Lengkap</a> | Poli Daerah klik <a href="?halaman=polidaerah">disini</a></b>
+    <b> Poli Daerah klik <a href="?halaman=polidaerah">disini</a></b>
     <div href="index.php?halaman=poli">
         <div style="font-size: 12px;" class="table-responsive">
             <!-- <div class="table-responsive"> -->
-            <table class="table table-bordered">
+            <table class="table table-bordered" style="font-size: 12px; width: 100%;" id="myTable">
                 <!-- Pasien Poli, Pendapatan dan Biaya. || Poli Perdaerah, klik <a href="index.php?halaman=polidaerah" target="_blank">disini</a> ||  
                       <a href="index.php?halaman=polilama" target="_blank">barulama</a> -->
                 <tr>
@@ -93,25 +93,13 @@ $randomToken = encrypt("Solverra Investama", $key, $iv);
                     <th class="text-capitalize">PenyakitDalam</th>
                     <th class="text-capitalize">malam</th>
                     <th class="text-capitalize">Ranap</th>
-                    <!--<th class="text-capitalize">kosmetik</th>
-                        <th class="text-capitalize">Gigi Umum</th>
-                        <th class="text-capitalize">Gigi BPJS</th>-->
-                    <th class="text-capitalize">Lab poli</th>
+                    <th class="text-capitalize">LabPoli</th>
                     <th class="text-capitalize">ODC</th>
-
-                    <!--<th class="text-capitalize">Vit C</th>
-                        <th class="text-capitalize">ODC</th>
-                        <th class="text-capitalize">Homecare</th> -->
-                    <th class="text-capitalize">jumlah (datang)</th>
-                    <th class="text-capitalize">pendapatan <br>(kasir)</th>
-                    <!-- <th class="text-capitalize">obatPoli/pasien <br>(kasir)</th> -->
-                    <th class="text-capitalize">pendapatan <br>(akuntan)</th>
-                    <th class="text-capitalize">Rp/hr <br>(akuntan)</th>
-                    <th class="text-capitalize">Rp/umum <br>(akuntan)</th>
-                    <!-- <th class="text-capitalize">obat/pasien <br>(akuntan)</th>
-                        <th class="text-capitalize">igd</th> -->
-
-
+                    <th class="text-capitalize">JumlahDatang</th>
+                    <th class="text-capitalize">pendapatanKasir</th>
+                    <th class="text-capitalize">pendapataAkuntan</th>
+                    <th class="text-capitalize">Rp/hrAkuntan</th>
+                    <th class="text-capitalize">Rp/umumAkuntan</th>
                 </tr>
                 <?php while ($poli = $ambilpoli->fetch_assoc()) { ?>
                     <tr>
@@ -138,9 +126,6 @@ $randomToken = encrypt("Solverra Investama", $key, $iv);
                                 <?= $getRanap['jum'] ?> || <?= number_format($getRanap['jum'] / $poli['harii'], 2) ?>
                             </a>
                         </td>
-                        <!-- <td><?php echo $poli['kosmetik'] ?>  ||  <?php echo number_format($poli['kosmetik'] / $poli['harii'], 2) ?></td>
-                          <td><a href="index.php?halaman=kasir1shift&gigiumum=<?php echo $bulan = $poli['bulan'] ?> "><?php echo $poli['gigiumum'] ?> ||  <?php echo number_format($poli['gigiumum'] / $poli['harii'], 2) ?></a></td>
-                          <td><a href="index.php?halaman=kasir1shift&gigibpjs=<?php echo $bulan = $poli['bulan'] ?> "><?php echo $poli['gigibpjs'] ?>  ||  <?php echo number_format($poli['gigibpjs'] / $poli['harii'], 2) ?></a></td> -->
                         <td>
                             <?php
                             $getJumlahLab = $koneksi->query("SELECT COUNT(*) as jumlahLab FROM registrasi_rawat INNER JOIN lab ON lab.id_lab_inap = registrasi_rawat.idrawat WHERE DATE_FORMAT(jadwal, '%y/%m') = '$poli[bulan]'")->fetch_assoc();
@@ -158,18 +143,13 @@ $randomToken = encrypt("Solverra Investama", $key, $iv);
                             $response = callAPI($apiUrl, "GET", $params);
                             $responseData = json_decode($response, true);
                             if ($responseData['status'] === "Successfully" && !empty($responseData['data'])) {
-                                echo number_format($totalAkuntan = $responseData['data'][0]['total'], 2);
+                                // echo number_format($totalAkuntan = $responseData['data'][0]['total'], 2);
                             } else {
-                                echo $totalAkuntan = 0;
+                                // echo $totalAkuntan = 0;
                             }
-                            // echo htmlspecialchars($response)." ".$randomToken." ";
-                            // echo $decryptedData = decrypt($randomToken, $key , $iv);;
-
                             ?>
+                            <?= $koneksi->query("SELECT * FROM layanan WHERE layanan LIKE '%ODC%' AND DATE_FORMAT(tgl_layanan, '%y/%m') = '$poli[bulan]'")->num_rows ?>
                         </td>
-                        <!-- <td><?php echo $poli['vitc'] ?>  ||  <?php echo number_format($poli['vitc'] / $poli['harii'], 2) ?></td>
-                          <td><?php echo $poli['ODC'] ?>  ||  <?php echo number_format($poli['ODC'] / $poli['harii'], 2) ?></td>
-                          <td><?php echo $poli['homecare'] ?>  ||  <?php echo number_format($poli['homecare'] / $poli['harii'], 2) ?></td> -->
                         <td><?php echo $poli['jumlah'] ?> || <?php echo number_format($poli['jumlah'] / $poli['harii'], 2) ?></td>
                         <?php
                         //kasir 
@@ -204,10 +184,6 @@ $randomToken = encrypt("Solverra Investama", $key, $iv);
                         <td>
                             <?= number_format($poli['umum'] != 0 ? $totalAkuntan / $poli['umum'] : 0, 0, 0, '.') ?>
                         </td>
-
-                        <!-- <td>
-
-                            </td> -->
                     </tr>
                 <?php } ?>
             </table>

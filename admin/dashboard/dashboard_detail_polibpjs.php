@@ -15,7 +15,7 @@
             <tbody>
                 <?php
                 //   $getData = $koneksi->query("SELECT registrasi_rawat.*, pasien.nama_lengkap, pasien.nohp FROM registrasi_rawat INNER JOIN pasien ON pasien.no_rm = registrasi_rawat.no_rm WHERE DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['polibpjs']) . "' AND carabayar = 'bpjs' ORDER BY idrawat DESC");
-                $getData = $koneksi->query("SELECT registrasi_rawat.* FROM registrasi_rawat WHERE DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['polibpjs']) . "' AND carabayar = 'bpjs' ORDER BY idrawat DESC");
+                $getData = $koneksi->query("SELECT registrasi_rawat.* FROM registrasi_rawat WHERE DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['polibpjs']) . "' AND carabayar = 'bpjs' AND perawatan = 'Rawat Jalan' AND (status_antri = 'Datang' or status_antri = 'Pembayaran') ORDER BY idrawat DESC");
                 foreach ($getData as $data) {
                 ?>
                     <tr>

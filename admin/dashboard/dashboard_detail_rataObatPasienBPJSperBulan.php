@@ -1,3 +1,18 @@
+<div class="card shadow p-2 mb-2">
+    <form method="get">
+        <div class="row g-1">
+            <div class="col-5">
+                <input type="text" hidden name="halaman" id="" value="dashboard_detail">
+                <input type="text" hidden name="rataObatPasienBPJSperBulan" id="" value="">
+                <input type="month" class="form-control form-control-sm" id="bulan" name="bulan"
+                    value="<?= $bulanSaatIni = (isset($_GET['bulan']) ? htmlspecialchars($_GET['bulan']) : date('Y-m')) ?>">
+            </div>
+            <div class="col-2 align-self-end">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
 <div class="card shadow p-2">
     <h5 class="card-title mb-0 mt-0">Rata Rata Obat Pasien BPJS Per-Bulan</h5>
     <div class="table-responsive">
@@ -13,50 +28,55 @@
                 </tr>
             </thead>
             <?php
+            $totalPasien = 0;
+            $totalFinal = 0;
+            $totalRata = 0;
             // Query data pasien per bulan & dokter
             $query = "
-    SELECT DATE_FORMAT(jadwal, '%m-%Y') as bulan,
-           dokter_rawat,
-           COUNT(*) as jumlahpasien
-    FROM registrasi_rawat
-    WHERE perawatan = 'Rawat Jalan' 
-        AND carabayar = 'bpjs' 
-        AND status_antri != 'Belum Datang'
-    GROUP BY DATE_FORMAT(jadwal, '%m-%Y'), dokter_rawat
-    ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, dokter_rawat;
-";
+                SELECT DATE_FORMAT(jadwal, '%Y-%m') as bulan,
+                    dokter_rawat,
+                    COUNT(*) as jumlahpasien
+                FROM registrasi_rawat
+                WHERE perawatan = 'Rawat Jalan' 
+                    AND carabayar = 'bpjs' 
+                    AND status_antri != 'Belum Datang'
+                    AND DATE_FORMAT(jadwal, '%Y-%m') = '$bulanSaatIni'
+                GROUP BY DATE_FORMAT(jadwal, '%Y-%m'), dokter_rawat
+                ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, dokter_rawat;
+            ";
             $getData = $koneksi->query($query);
 
             // Query semua data obat + harga sekaligus
             $allObat = [];
             $obatQuery = "
-    SELECT DATE_FORMAT(o.tgl_pasien, '%m-%Y') AS bulan,
-           r.dokter_rawat,
-           o.kode_obat,
-           o.jml_dokter,
-           a.harga_beli
-    FROM obat_rm o
-    INNER JOIN registrasi_rawat r 
-        ON r.no_rm = o.idrm 
-        AND o.tgl_pasien = DATE_FORMAT(r.jadwal, '%Y-%m-%d')
-    LEFT JOIN (
-        SELECT id_obat, harga_beli
-        FROM apotek a1
-        WHERE idapotek = (
-            SELECT MAX(idapotek) 
-            FROM apotek a2 
-            WHERE a2.id_obat = a1.id_obat
-        )
-    ) a ON a.id_obat = o.kode_obat
-    WHERE r.perawatan = 'Rawat Jalan'
-        AND r.carabayar = 'bpjs'
-        AND r.status_antri != 'Belum Datang'
-        AND o.rekam_medis_id IS NOT NULL;
-";
+                SELECT DATE_FORMAT(o.tgl_pasien, '%Y-%m') AS bulan,
+                    r.dokter_rawat,
+                    o.kode_obat,
+                    o.jml_dokter,
+                    a.harga_beli
+                FROM obat_rm o
+                INNER JOIN registrasi_rawat r 
+                    ON r.no_rm = o.idrm 
+                    AND o.tgl_pasien = DATE_FORMAT(r.jadwal, '%Y-%m-%d')
+                LEFT JOIN (
+                    SELECT id_obat, harga_beli
+                    FROM apotek a1
+                    WHERE idapotek = (
+                        SELECT MAX(idapotek) 
+                        FROM apotek a2 
+                        WHERE a2.id_obat = a1.id_obat
+                    )
+                ) a ON a.id_obat = o.kode_obat
+                WHERE r.perawatan = 'Rawat Jalan'
+                    AND r.carabayar = 'bpjs'
+                    AND r.status_antri != 'Belum Datang'
+                    AND o.rekam_medis_id IS NOT NULL
+                    AND DATE_FORMAT(r.jadwal, '%Y-%m') = '$bulanSaatIni'
+            ";
             $resultObat = $koneksi->query($obatQuery);
 
             // Kelompokkan obat per bulan + dokter
-            while ($row = $resultObat->fetch_assoc()) {
+            foreach ($resultObat as $row) {
                 $key = $row['bulan'] . '|' . $row['dokter_rawat'];
                 if (!isset($allObat[$key])) $allObat[$key] = [];
                 $allObat[$key][] = $row;
@@ -66,9 +86,10 @@
             <tbody>
                 <?php foreach ($getData as $data): ?>
                     <?php
-                    $bulan = $data['bulan'];
+                    $bulan = $data['bulan'] == date('Y-m') ? date('Y-m') : $data['bulan'];
                     $dokter = $data['dokter_rawat'];
-                    $hari = date('t', mktime(0, 0, 0, substr($bulan, 0, 2), 1, substr($bulan, 3)));
+                    // $hari = date('t', mktime(0, 0, 0, substr($bulan, 0, 2), 1, substr($bulan, 3)));
+                    $hari = date('t', mktime(0, 0, 0, (int)substr($bulan, 0, 2), 1, (int)substr($bulan, 3)));
 
                     $key = $bulan . '|' . $dokter;
                     $total = 0;
@@ -82,18 +103,32 @@
                     }
                     ?>
                     <tr>
-                        <td><?= $bulan ?></td>
+                        <td>
+                            <?= $bulan ?>
+                        </td>
                         <td><?= $hari ?> Hari</td>
                         <td><?= $dokter ?></td>
                         <td><?= $data['jumlahpasien'] ?> Pasien</td>
                         <td><?= number_format($total, 0, 0, '.') ?></td>
                         <td>
-                            <?= number_format($total / $hari, 0, 0, '.') ?>
+                            <?= number_format($total / $data['jumlahpasien'], 0, 0, '.') ?>
                         </td>
                     </tr>
+                    <?php
+                    $totalPasien += $data['jumlahpasien'];
+                    $totalFinal += $total;
+                    $totalRata += ($total / $data['jumlahpasien']);
+                    ?>
                 <?php endforeach; ?>
             </tbody>
-
+            <tfoot>
+                <tr>
+                    <td colspan="3"><b>Total</b></td>
+                    <td><b><?= number_format($totalPasien, 0, 0, '.') ?></b></td>
+                    <td><b><?= number_format($totalFinal, 0, 0, '.') ?></b></td>
+                    <td><b><?= number_format($totalRata, 0, 0, '.') ?></b></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
