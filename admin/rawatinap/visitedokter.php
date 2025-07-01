@@ -131,7 +131,7 @@
                             <label class="">Dokter Jaga</label>
                             <div class="form_control">
                                 <select name="dokter" class="form-control" required>
-                                    <option value="" hidden>Pilih Dokter</option>
+                                    <option value="<?= $_SESSION['dokter_rawat'] ?>"><?php echo $_SESSION['dokter_rawat'] ?></option>
                                     <?php
                                     $ambildokter = $koneksi->query("SELECT * FROM admin WHERE level = 'dokter'");
                                     while ($pecahdokter = $ambildokter->fetch_assoc()) {
@@ -150,7 +150,7 @@
                             <label class="">Shift</label>
                             <div class="form_control">
                                 <select name="shift" class="form-control " required="">
-                                    <option value="" hidden>Pilih Shift</option>
+                                    <option value="<?= $_SESSION['shift'] ?>" ><?php echo $_SESSION['shift'] ?></option>
                                     <option value="pagi">pagi</option>
                                     <option value="sore">sore</option>
                                     <option value="malam">malam</option>
@@ -162,7 +162,16 @@
                 <button class="btn btn-primary " name="simpan">Simpan</button>
             </form>
         </div>
-
+        <?php
+        $uri = $_SERVER['REQUEST_URI'];
+        $segments = explode('/', trim($uri, '/'));
+        $folder = $segments[0];
+        $getUnit = $folder === 'wonorejo' ? 'KHM 1' : ($folder === 'klakah' ? 'KHM 2' : (
+            $folder === 'tunjung' ? 'KHM 3' : (
+                $folder === 'kunir' ? 'KHM 4' : 'KHM 1'
+            )
+        ));
+        ?>
         <?php
         if (isset($_POST['simpan'])) {
             date_default_timezone_set('Asia/Jakarta');
@@ -191,7 +200,7 @@
 
             $row = $ambilgaji->num_rows;
 
-            $koneksimaster->query("INSERT INTO gajidokter (tgl, dokter, akun, besaran, ket, petugas, shiftgaji, unit) VALUES ('$tgl', '$dokter', '$biaya', '$totalg', '$dokter', '$petugas', '$shift', 'KHM 1') ");
+            $koneksimaster->query("INSERT INTO gajidokter (tgl, dokter, akun, besaran, ket, petugas, shiftgaji, unit) VALUES ('$tgl', '$dokter', '$biaya', '$totalg', '$dokter', '$petugas', '$shift', '$getUnit') ");
 
             // $koneksi->query("UPDATE rawatinap SET oke=0");
 

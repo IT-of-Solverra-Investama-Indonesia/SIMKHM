@@ -180,6 +180,9 @@ function konversiNomorHP($nomor)
                           <div class="col-md-12">
                             <input type="text" placeholder="Tujuan Rujukan" class="form-control" name="rujuk">
                           </div>
+                          <div class="col-md-12">
+                            <input type="text" placeholder="Alsan Rujuk" class="form-control mt-2" name="rujuk_keterangan">
+                          </div>
                         </div>
                       </div>
                       <style>
@@ -398,8 +401,9 @@ function konversiNomorHP($nomor)
 if (isset($_POST['save'])) {
   $ob = $_POST["diberikan"];
   $obat = implode(", ", $ob);
+  
 
-  $koneksi->query("INSERT INTO pulang(tgl, norm, tgl_mrs, diag_mrs, kamar, pasien, tgl_krs, diag_krs, diag_prwt, lanjut_rmh, diet, istirahat, kontrol, diberikan, keadaan, lain, keluarga, kep_ruang, perawat, tgl_masuk, rujuk, shift) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[tgl_mrs]', '$_POST[diag_mrs]', '$_POST[kamar]', '$_POST[pasien]', '$_POST[tgl_krs]', '$_POST[diag_krs]', '$_POST[diag_prwt]', '$_POST[lanjut_rmh]', '$_POST[diet]', '$_POST[istirahat]', '$_POST[kontrol]', '$obat', '$_POST[keadaan]', '$_POST[lain]', '$_POST[keluarga]', '$_POST[kep_ruang]', '$_POST[perawat]', '$_GET[tgl]', '$_POST[rujuk]', '" . $_SESSION['shift'] . "')");
+  $koneksi->query("INSERT INTO pulang(tgl, norm, tgl_mrs, diag_mrs, kamar, pasien, tgl_krs, diag_krs, diag_prwt, lanjut_rmh, diet, istirahat, kontrol, diberikan, keadaan, lain, keluarga, kep_ruang, perawat, tgl_masuk, rujuk, shift, rujuk_keterangan) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[tgl_mrs]', '$_POST[diag_mrs]', '$_POST[kamar]', '$_POST[pasien]', '$_POST[tgl_krs]', '$_POST[diag_krs]', '$_POST[diag_prwt]', '$_POST[lanjut_rmh]', '$_POST[diet]', '$_POST[istirahat]', '$_POST[kontrol]', '$obat', '$_POST[keadaan]', '$_POST[lain]', '$_POST[keluarga]', '$_POST[kep_ruang]', '$_POST[perawat]', '$_GET[tgl]', '$_POST[rujuk]', '" . $_SESSION['shift'] . "', '".$_POST['rujuk_keterangan']."')");
 
   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pulang' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
 

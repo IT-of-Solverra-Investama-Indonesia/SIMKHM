@@ -1,5 +1,6 @@
 <?php
 error_reporting(0);
+
 $username = $_SESSION['admin']['username'];
 $level = $_SESSION['admin']['level'];
 $shift = $_SESSION['shift'];
@@ -394,7 +395,10 @@ $pecah = $pasien->fetch_assoc();
                         <div class="hidden mt-2" id="rjk">
                           <div class="row">
                             <div class="col-md-12">
-                              <input type="text" placeholder="Tujuan Rujukan" class="form-control" name="tindak_rujuk">
+                              <input type="text" placeholder="Tujuan Rujukan" class="form-control mb-2" name="tindak_rujuk">
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" placeholder="Keterangan/Alasan Rujuk" class="form-control" name="tindak_rujuk_keterangan">
                             </div>
                           </div>
                         </div>
@@ -424,8 +428,41 @@ $pecah = $pasien->fetch_assoc();
                           <label for="inputName5" class="form-label">Perawat Yang Mengkaji </label>
                           <input type="text" name="perawat" id="" class="form-control" value="<?= $username ?>">
                         </div>
+                        <div class="col-12 mt-2">
+                          <label for="inputName5" class="form-label">Perujuk</label>
+                          <select name="perujuk" class="form-control" id="selectPerujuk">
+                            <option hidden value="">Pilih Perujuk</option>
+                            <option value="Baru">Baru</option>
+                            <?php
+                            $getDataPerujuk = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk != '' GROUP BY perujuk ORDER BY perujuk ASC");
+                            foreach ($getDataPerujuk as $dataPerujuk) {
+                            ?>
+                              <option value="<?= $dataPerujuk['perujuk'] ?>"><?= $dataPerujuk['perujuk'] ?> || <?= $dataPerujuk['perujuk_hp'] ?></option>
+                            <?php } ?>
+                          </select>
+                          <div id="perujukBaru" class="hidden mt-2">
+                            <div style="margin-top:5px;">
+                              <label for="inputName5" class="form-label">Perujuk Baru</label>
+                              <input type="text" name="perujuk_baru" id="" class="form-control" value="<?php echo $igd['perujuk'] ?>">
+                            </div>
+                            <div style="margin-top:5px;">
+                              <label for="inputName5" class="form-label">Hp Perujuk</label>
+                              <input type="number" name="perujuk_hp" id="" class="form-control" value="<?php echo $igd['perujuk_hp'] ?>">
+                            </div>
+                          </div>
+                        </div>
 
-
+                        <script>
+                          document.getElementById('selectPerujuk').addEventListener('change', function() {
+                            var perujukBaruDiv = document.getElementById('perujukBaru');
+                            if (this.value === 'Baru') {
+                              perujukBaruDiv.classList.remove('hidden');
+                            } else {
+                              perujukBaruDiv.classList.add('hidden');
+                            }
+                          });
+                        </script>
+                        
                         <div style="margin-bottom:2px; margin-top:30px">
                           <hr>
                           <h5 class="card-title">Asesmen Medis</h5>
@@ -596,6 +633,13 @@ if (isset($_POST['save'])) {
   $gejala_gastro = $_POST['gejala_gastro'];
   $faktor_pemberat = $_POST['faktor_pemberat'];
   $penurunan_fungsional = $_POST['penurunan_fungsional'];
+
+  $perujuk = htmlspecialchars($_POST['perujuk'] == 'Baru' ? $_POST['perujuk_baru'] : $_POST['perujuk']);
+  if ($_POST['perujuk'] != 'Baru') {
+    $perujuk_hp = $koneksi->query("SELECT perujuk_hp FROM registrasi_rawat WHERE perujuk = '$perujuk' ORDER BY jadwal DESC LIMIT 1")->fetch_assoc()['perujuk_hp'];
+  } else {
+    $perujuk_hp = htmlspecialchars($_POST['perujuk_hp']);
+  }
   // $rencana_pemulangan=$_POST['rencana_pemulangan'];
   // $rencana_rawat=$_POST['rencana_rawat'];
   // $intruksi_medik=$_POST['intruksi_medik'];
@@ -627,10 +671,8 @@ if (isset($_POST['save'])) {
   }
 
   if ($level == "igd" or $level == "perawat" or $level == "sup") {
-
-    $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]' WHERE idigd='$_GET[id]' ");
+    $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]', tindak_rujuk_keterangan = '$_POST[tindak_rujuk_keterangan]' WHERE idigd='$_GET[id]' ");
   } elseif ($level == "dokter") {
-
     $koneksi->query("UPDATE igd SET penunjang='$_POST[penunjang]',dkerja='$_POST[dkerja]', dbanding='$_POST[dbanding]', tgl='$_POST[tgl]', sub='$_POST[sub]', ob='$_POST[ob]', dokter='$_POST[dokter]', rencana_rawat='$_POST[rencana_rawat]' WHERE idigd='$_GET[id]' ");
   }
 
@@ -638,13 +680,10 @@ if (isset($_POST['save'])) {
 
   // if($countigd["jumlah"] == 0){
   if ($_POST['tindak'] == "Rawat") {
-
-
-
     $getLast = $koneksi->query("SELECT * FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
     $idrawat = $getLast['idrawat'] + 1;
 
-    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "')");
+    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$perujuk', '$perujuk_hp')");
 
     $tgl = date('Y-m-d');
 
