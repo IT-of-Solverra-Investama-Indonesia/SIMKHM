@@ -1,5 +1,4 @@
 <div class="">
-
     <h5 class="card-title">Penjualan Obat Umum</h5>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -64,21 +63,74 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('#obat_kode').select2();
+
+            $('#obat_kode').change(function() {
+                const kodeObat = $(this).val();
+                // Ambil data dari API menggunakan nilai kodeObat
+                $.get('../apotek/getPadananApi.php', {
+                        dataPadanan: 'padanan_obat',
+                        kodeObat: kodeObat
+                    })
+                    .then(data => {
+                        // Buat list pada elemen dengan id PadananObat
+                        const list = $('#PadananObat');
+                        list.empty();
+                        data.forEach(item => {
+                            const listItem = $('<li>').text(`${item.kode_obat_padanan} | ${item.nama_obat}`);
+                            list.append(listItem);
+                        });
+                    })
+                    .fail(error => console.error('Error:', error));
+            });
+
+            window.toPadanan = function() {
+                const selectedValue = $('#obat_kode').val();
+                if (selectedValue) {
+                    const currentUrl = window.location.href;
+                    const newUrl = `index.php?halaman=padanan_obat&kodeObat=${selectedValue}`;
+                    window.open(newUrl, '_blank');
+                } else {
+                    alert('Silakan pilih obat terlebih dahulu.');
+                }
+            };
         });
     </script>
     <div class="card shadow p-2 mb-0">
         <form method="post">
             <div class="row">
-                <div class="col-md-6">
-                    <select name="kode_obat" class="from-control w-100 obat-select form-control-sm" id="obat_kode">
+                <div class="col-md-5">
+                    <select name="kode_obat" class="form-control w-100 obat-select form-control-sm mb-2" id="obat_kode">
 
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <input type="number" name="jumlah_obat" value="1" class="form-control form-control-sm" id="" placeholder="Jumlah">
+                <div class="col-md-1">
+                    <button class="btn btn-sm btn-warning mb-2" type="button" data-bs-toggle="modal" data-bs-target="#modalPadanan">Padanan</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="modalPadanan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Padanan Obat</h3>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <span id="PadananObat">
+
+                                    </span>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="toPadanan()">Lihat Padanan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-2">
-                    <input type="number" name="diskon_obat" value="0" class="form-control form-control-sm" id="" placeholder="Diskon (%)">
+                    <input type="number" name="jumlah_obat" value="1" class="form-control form-control-sm mb-2" id="" placeholder="Jumlah">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="diskon_obat" value="0" class="form-control form-control-sm mb-2" id="" placeholder="Diskon (%)">
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-sm btn-primary" name="addToCart">[+]</button>
@@ -227,7 +279,7 @@
                 $obatLokalSingleSave = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$data[kode]' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
                 $diskon = ($obatLokalSingleSave['harga_beli'] * $data['diskon'] / 100);
 
-                $koneksi->query("INSERT INTO `penjualan_umum`(`nota`, `tgl_jual`, `kode_obat`, `nama_obat`, `harga_umum`, `diskon_obat`, `jumlah`, `harga_beli`, `akun`, `petugas`, `shift`) VALUES ('" . htmlspecialchars($_POST['nota']) . "','" . htmlspecialchars($_POST['tgl_jual']) . "','" . htmlspecialchars($data['kode']) . "','" . htmlspecialchars($data['nama']) . "','" . htmlspecialchars($data['harga']) . "','" . htmlspecialchars($diskon) . "','" . htmlspecialchars($data['jumlah']) . "','" . htmlspecialchars($obatLokalSingleSave['harga_beli']) . "','" . htmlspecialchars($_POST['akun']) . "','" . htmlspecialchars($_SESSION['admin']['namalengkap']) . "', '".htmlspecialchars($_SESSION['shift'])."')");
+                $koneksi->query("INSERT INTO `penjualan_umum`(`nota`, `tgl_jual`, `kode_obat`, `nama_obat`, `harga_umum`, `diskon_obat`, `jumlah`, `harga_beli`, `akun`, `petugas`, `shift`) VALUES ('" . htmlspecialchars($_POST['nota']) . "','" . htmlspecialchars($_POST['tgl_jual']) . "','" . htmlspecialchars($data['kode']) . "','" . htmlspecialchars($data['nama']) . "','" . htmlspecialchars($data['harga']) . "','" . htmlspecialchars($diskon) . "','" . htmlspecialchars($data['jumlah']) . "','" . htmlspecialchars($obatLokalSingleSave['harga_beli']) . "','" . htmlspecialchars($_POST['akun']) . "','" . htmlspecialchars($_SESSION['admin']['namalengkap']) . "', '" . htmlspecialchars($_SESSION['shift']) . "')");
             }
         }
         unset($_SESSION['keranjang_obat']);
@@ -261,7 +313,7 @@
                             <td><?= $data5['nota'] ?></td>
                             <td>Rp <?= number_format($data5['hargaTotal'], 0, 0, '.') ?></td>
                             <td>
-                                <a target="_blank" href="../apotek/penjualan_obat_umum_nota.php?nota=<?= $data5['nota']?>" class="btn btn-sm btn-warning"><i class="bi bi-printer"></i></a>
+                                <a target="_blank" href="../apotek/penjualan_obat_umum_nota.php?nota=<?= $data5['nota'] ?>" class="btn btn-sm btn-warning"><i class="bi bi-printer"></i></a>
                             </td>
                         </tr>
                     <?php } ?>

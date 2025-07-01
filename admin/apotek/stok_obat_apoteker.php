@@ -476,11 +476,14 @@
                                 <th>Tanggal</th>
                                 <th>Batch</th>
                                 <th>Expired</th>
+                                <th>HargaBeli</th>
                                 <th>Jumlah Obat</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
+                            $totalNominal = 0;
                             $getData = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$_GET[kode_obat]' AND tgl_beli <= '$_GET[hinggaTanggal]' ORDER BY tgl_beli DESC");
                             foreach ($getData as $data) {
                             ?>
@@ -490,18 +493,69 @@
                                     <td><?= $data['tgl_datang'] ?? "0000-00-00" ?></td>
                                     <td><?= $data['batch'] ==  "" ? "-" : $data['batch'] ?></td>
                                     <td><?= $data['tgl_expired'] ?></td>
+                                    <td>
+                                        <button type="button" data-bs-toggle="modal" data-bs-target="#updateHargaBeli" onclick="upData('<?= $data['idapotek'] ?>', '<?= $data['harga_beli'] ?>')" class="btn badge bg-warning" style="font-size: 12px;">
+                                            Rp <?= number_format($data['harga_beli'], 0, 0, '.') ?>
+                                        </button>
+                                    </td>
                                     <td><?= $data['jml_obat'] ?></td>
+                                    <td>Rp <?= number_format($data['jml_obat'] * $data['harga_beli'], 0, 0, '.') ?></td>
                                 </tr>
-                                <?php $total += $data['jml_obat'] ?>
+                                <?php
+                                $total += $data['jml_obat'];
+                                $totalNominal += $data['jml_obat'] * $data['harga_beli'];
+                                ?>
                             <?php } ?>
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="5"><b>Total</b></td>
+                                <td colspan="6"><b>Total</b></td>
                                 <td><b><?= $total ?></b></td>
+                                <td><b>Rp <?= number_format($totalNominal, 0, 0, '.') ?></b></td>
                             </tr>
                         </tfoot>
                     </table>
+                    <script>
+                        function upData(idapotek, harga_beli) {
+                            document.getElementById('idapotek_id').value = idapotek;
+                            document.getElementById('harga_beli').value = harga_beli;
+                        }
+                    </script>
+                    <div class="modal fade" id="updateHargaBeli" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Update Harga Belli</h3>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form method="post">
+                                    <div class="modal-body">
+                                        <input type="text" hidden name="idapotek" id="idapotek_id" class="form-control form-control-sm">
+                                        <input type="number" name="harga_beli" id="harga_beli" class="form-control form-control-sm" placeholder="Harga Beli">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" name="updateHargaBeli" class="btn btn-sm btn-dark">Update</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <?php 
+                    if (isset($_POST['updateHargaBeli'])) {
+                        $idapotek = htmlspecialchars($_POST['idapotek']);
+                        $harga_beli = htmlspecialchars($_POST['harga_beli']);
+
+                        $koneksi->query("UPDATE apotek SET harga_beli = '$harga_beli' WHERE idapotek = '$idapotek'");
+
+                        echo "
+                        <script>
+                            alert('Berhasil memperbarui harga beli');
+                            window.location.href = 'index.php?halaman=stok_obat_apoteker&detail=masuk&kode_obat=$_GET[kode_obat]&hinggaTanggal=$_GET[hinggaTanggal]';
+                        </script>
+                        ";
+                    }
+                    ?>
                 </div>
             </div>
         <?php } elseif ($_GET['detail'] == 'keluar') { ?>
