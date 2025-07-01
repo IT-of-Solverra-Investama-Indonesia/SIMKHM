@@ -145,6 +145,13 @@ if (!isset($_SESSION['login'])) {
           <span>Dashboard Apotik</span>
         </a>
       <?php } ?>
+
+      <?php if ($level == 'perawat' or $level == 'inap'  or $level == 'sup' or $level == 'igd') { ?>
+        <a class="nav-link collapsed" href="index.php?halaman=dashboardinap">
+          <i class="bi bi-heart-pulse"></i>
+          <span>Dashboard Inap</span>
+        </a>
+      <?php } ?>
       <!-- End Dashboard Nav -->
 
       <?php if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') { ?>
@@ -192,6 +199,16 @@ if (!isset($_SESSION['login'])) {
             <li>
               <a href="index.php?halaman=rekappasienpulang">
                 <i class="bi bi-circle"></i><span>Rekap Pasien Pulang</span>
+              </a>
+            </li>
+            <li>
+              <a href="index.php?halaman=rekappasienrujuk">
+                <i class="bi bi-circle"></i><span>Rekap Pasien Rujuk</span>
+              </a>
+            </li>
+            <li>
+              <a href="index.php?halaman=rekappasienperujuk">
+                <i class="bi bi-circle"></i><span>Rekap Perujuk Pasien</span>
               </a>
             </li>
             <!-- <li>
@@ -592,6 +609,12 @@ if (!isset($_SESSION['login'])) {
           <a class="nav-link collapsed" href="index.php?halaman=kamar_inap">
             <i class="bi bi-cash-coin"></i>
             <span>Setting Tarif Kamar</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=akun_gajidokter">
+            <i class="bi bi-coin"></i>
+            <span>Akun Gaji Dokter</span>
           </a>
         </li>
         <li class="nav-item">

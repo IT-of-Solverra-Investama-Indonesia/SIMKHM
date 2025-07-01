@@ -582,13 +582,13 @@ if (isset($_GET['detail'])) {
                                   <?php } ?>
                                   <?php $dataPasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap = '$pecah[nama_pasien]'")->fetch_assoc(); ?>
                                   <li><a href="../pasien/fal-risk.php?id=<?php echo $dataPasien["idpasien"]; ?>&kunjungan=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk</a></li>
+                                  <li>
+                                    <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
+                                      <i class="bi bi-pencil" style="color:green;"></i> Edit
+                                    </a>
+                                  </li>
                                   <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
 
-                                    <li>
-                                      <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
-                                        <i class="bi bi-pencil" style="color:green;"></i> Edit
-                                      </a>
-                                    </li>
                                     <li>
                                       <a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
                                         <i class="bi bi-trash" style="color:red;"></i> Hapus</a>
@@ -598,6 +598,7 @@ if (isset($_GET['detail'])) {
                               </div>
                             </td>
                           </tr>
+
                           <?php $no += 1 ?>
                         <?php endforeach; ?>
                       </tbody>
@@ -718,7 +719,7 @@ if (isset($_GET['status'])) {
   } elseif ($getBPJS['carabayar'] == 'malam') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('50000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } elseif ($getBPJS['carabayar'] == 'spesialis anak' or $getBPJS['carabayar'] == 'spesialis penyakit dalam') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('100000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('200000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } else {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   }

@@ -611,6 +611,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           <th>No RM</th>
                           <!-- <th>Jadwal</th> -->
                           <th>Antrian</th>
+                          <th>Waktu</th>
                           <!-- <th>Diagnosis</th> -->
                           <th>CaraBayar</th>
                           <?php if (!isset($_GET['racik'])) { ?>
@@ -658,12 +659,15 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                               <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                               <!-- <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
+                              <td style="margin-top: 10px;">
+                                <button class="btn-sm btn btn-warning" style="font-size: 8px;" onclick="alert('Datang: <?= $pecah['datang_at'] ?> | Perawat: <?= $pecah['perawat_at'] ?> | Dokter: <?= $pecah['dokter_at'] ?> | Bayar: <?= $pecah['pembayaran_at'] ?> | Apotek: <?= $pecah['apoteker_check_at'] ?>')"><i class="bi bi-eye"></i></button>
+                              </td>
                               <!-- <td style="margin-top:10px;"><?php echo $getLastRM["diagnosis"]; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["carabayar"]; ?></td>
                               <?php if (!isset($_GET['racik'])) { ?>
                                 <td style="margin-top:10px;">
                                   <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                    <button class="btn btn-sm btn-warning" onclick="upDataStatus('<?= $pecah['idrawat'] ?>')" data-bs-toggle="modal" data-bs-target="#editStatusAntri">
+                                    <button class="btn badge bg-warning py-1 px-2 text-light" style="font-size: 12px;" onclick="upDataStatus('<?= $pecah['idrawat'] ?>')" data-bs-toggle="modal" data-bs-target="#editStatusAntri">
                                       <?= $pecah['status_antri'] ?>
                                     </button>
                                   <?php } else { ?>

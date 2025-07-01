@@ -1,13 +1,13 @@
 <?php
-  include 'urutan.php';
-  $shift = $_SESSION['shift'];
-  $poli = $_SESSION['admin']['username'];
-  $ambilrawat = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$_GET[idrawat]' ");
-  $pecahrawat = $ambilrawat->fetch_assoc();
-  $ambilpasien = $koneksi->query("SELECT * FROM pasien WHERE idpasien='$pecahrawat[id_pasien]' ");
-  $pecahpasien = $ambilpasien->fetch_assoc();
-  $dokter = $pecahrawat['dokter_rawat'] !== "" ? $pecahrawat['dokter_rawat'] : $_SESSION['dokter_rawat'];
-  date_default_timezone_set('Asia/Jakarta');
+include 'urutan.php';
+$shift = $_SESSION['shift'];
+$poli = $_SESSION['admin']['username'];
+$ambilrawat = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$_GET[idrawat]' ");
+$pecahrawat = $ambilrawat->fetch_assoc();
+$ambilpasien = $koneksi->query("SELECT * FROM pasien WHERE idpasien='$pecahrawat[id_pasien]' ");
+$pecahpasien = $ambilpasien->fetch_assoc();
+$dokter = $pecahrawat['dokter_rawat'] !== "" ? $pecahrawat['dokter_rawat'] : $_SESSION['dokter_rawat'];
+date_default_timezone_set('Asia/Jakarta');
 ?>
 
 <!DOCTYPE html>
@@ -126,17 +126,16 @@
                     </div>
                     <div class="col-md-6" id="ant">
                       <label for="inputState" class="form-label" style="color: orangered; font-weight:bold">Antrian</label>
-                      <select id="antrian" name="antrian" class="form-control" disabled>
+                      <select id="antrian" name="antrian" class="form-control">
+                        <option value="<?= $pecahrawat['antrian'] ?>" selected><?= $pecahrawat['antrian'] ?></option>
                         <?php
                         $t = $_POST["from"];
                         date_default_timezone_set("asia/jakarta");
                         $tg = date('Ymd') + 0;
                         $time = date('Hi') - 300;
                         //var_dump($time);
-
                         $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat WHERE registrasi_rawat.kode=tgltab.kode) AND tgl>=$tg AND jam>$time ORDER BY tgltab.no ASC"); ?>
-
-                        <option value="" width="40" <?= ($pecahrawat['antrian'] === "") ? "selected" : ""; ?>>Silahkan Pilih Antrian</option>
+                        <!-- <option value="" width="40" <?= ($pecahrawat['antrian'] === "") ? "selected" : ""; ?>>Silahkan Pilih Antrian</option> -->
                         <?php while ($row3 = mysqli_fetch_assoc($k)): ?>
                           <option value="<?php echo $row3['urut']; ?>" width="40" <?= ($pecahrawat['antrian'] === $row3['urut']) ? "selected" : ""; ?>><?php echo $row3['ket']; ?> </option>
                         <?php endwhile; ?>
@@ -246,20 +245,43 @@
 </html>
 
 <?php
-  if (isset($_POST['edit'])) {
-    $dokter_rawat = htmlspecialchars($_POST["dokter_rawat"]);
-    $perawatan = htmlspecialchars($_POST["perawatan"]);
-    $carabayar = htmlspecialchars($_POST["carabayar"]);
-    if ($perawatan == "Rawat Inap") {
-      $koneksi->query("UPDATE igd SET dokter_rawat='$dokter_rawat' WHERE idrawat='$_GET[idrawat]'");
-    } else {
-      $koneksi->query("UPDATE registrasi_rawat SET dokter_rawat='$dokter_rawat', carabayar = '$carabayar', petugaspoli='$poli', shift='$shift' WHERE idrawat='$_GET[idrawat]'");
+if (isset($_POST['edit'])) {
+  $dokter_rawat = htmlspecialchars($_POST["dokter_rawat"]);
+  $perawatan = htmlspecialchars($_POST["perawatan"]);
+  $carabayar = htmlspecialchars($_POST["carabayar"]);
+
+  $antrian = htmlspecialchars($_POST["antrian"]);
+  $tgl = date('Ymd') + 0;
+  $kode = $tgl . "+" . $antrian;
+
+  if ($perawatan == "Rawat Inap") {
+    $koneksi->query("UPDATE igd SET dokter_rawat='$dokter_rawat' WHERE idrawat='$_GET[idrawat]'");
+  } else {
+    $koneksi->query("UPDATE registrasi_rawat SET dokter_rawat='$dokter_rawat', carabayar = '$carabayar', petugaspoli='$poli', shift='$shift', antrian='$antrian', kode='$kode' WHERE idrawat='$_GET[idrawat]'");
+    switch ($carabayar) {
+      case 'bpjs':
+        $biaya = 0;
+        break;
+      case 'malam':
+        $biaya = 50000;
+        break;
+      case 'spesialis anak':
+        $biaya = 200000;
+        break;
+      case 'spesialis penyakit dalam':
+        $biaya = 200000;
+        break;
+      default:
+        $biaya = 35000;
+        break;
     }
-    echo "
+    $koneksi->query("UPDATE biaya_rawat SET poli = '$biaya' WHERE idregis='$_GET[idrawat]'");
+  }
+  echo "
       <script>
         alert('Data berhasil didaftarkan!');
         document.location.href='index.php?halaman=daftarregistrasi';
       </script>
     ";
-  }
+}
 ?>

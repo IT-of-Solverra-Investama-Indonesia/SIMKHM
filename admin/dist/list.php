@@ -18,9 +18,11 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    
                    
                    elseif ($hal=="dashboard_detail"){include '../dashboard/dashboard_detail.php';}
+                   elseif ($hal=="dashboardinap"){include '../dashboard/dashboardinap.php';}
 
                    //    Gaji Dokter 
                    elseif ($hal=="gajidokter"){include '../gajidokter/gajidokter.php';}
+                   elseif ($hal=="akun_gajidokter"){include '../gajidokter/akun_gajidokter.php';}
                    elseif ($hal=="gajidokter_history"){include '../gajidokter/gajidokter_history.php';}
                    //    ENd Gaji Dokter 
 
@@ -36,6 +38,8 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="kajianawalinap"){include '../rawatinap/kajianawalinap.php';}
                    elseif ($hal=="rekappasienpulang"){include '../rawatinap/rekappasienpulang.php';}
                    elseif ($hal=="lpogizi"){include '../rawatinap/lpogizi.php';}
+                   elseif ($hal=="rekappasienrujuk"){include '../rawatinap/rekappasienrujuk.php';}
+                   elseif ($hal=="rekappasienperujuk"){include '../rawatinap/rekappasienperujuk.php';}
 
                    elseif ($hal=="cttpenyakit"){include '../rawatinap/cttpenyakit.php';}
                    elseif ($hal=="rekonobat"){include '../rawatinap/rekonobat.php';}
@@ -163,6 +167,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="penjualan_obat_all_riwayat"){include '../apotek/penjualan_obat_all_riwayat.php';}
                    elseif ($hal=="setoran_shift_apoteker"){include '../apotek/setoran_shift_apoteker.php';}
                    elseif ($hal=="apoteker_hpp"){include '../apotek/apoteker_hpp.php';}
+                   elseif ($hal=="padanan_obat"){include '../apotek/padanan_obat.php';}
                    elseif ($hal=="retur_obat_inap"){include '../apotek/retur_obat_inap.php';} elseif ($hal == "apotek_riwayat_faktur") {
     include '../apotek/apotek_riwayat_faktur.php';
 }

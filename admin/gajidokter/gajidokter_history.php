@@ -8,7 +8,8 @@
 </div>
 
 <div class="card shadow-sm p-2 mb-1">
-    <form method="post">
+    <form method="get">
+        <input type="text" name="halaman" id="" value="gajidokter_history" hidden>
         <div class="row">
             <div class="col-6">
                 <input placeholder="Dari Tanggal" name="tgl_start" class="form-control mb-2 form-control-sm" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" id="date" />
@@ -16,7 +17,7 @@
             <div class="col-6">
                 <input placeholder="Hingga Tanggal" name="tgl_end" class="form-control mb-2 form-control-sm" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" id="date" />
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 <select name="dokter" id="" class="form-control mb-2 form-control-sm">
                     <option value="All Dokter">All Dokter</option>
                     <?php
@@ -27,7 +28,7 @@
                     <?php } ?>
                 </select>
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 <select name="akun" id="" class="form-control mb-2 form-control-sm">
                     <option value="All Akun">All Akun</option>
                     <?php
@@ -38,7 +39,7 @@
                     <?php } ?>
                 </select>
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 <select name="unit" id="" class="form-control mb-2 form-control-sm">
                     <option value="All Unit">All Unit</option>
                     <?php
@@ -49,25 +50,27 @@
                     <?php } ?>
                 </select>
             </div>
+            <div class="col-3">
+                <select name="shiftgaji" id="" class="form-control mb-2 form-control-sm">
+                    <option value="All Shift">All Shift</option>
+                    <?php
+                    $getShift = $koneksimaster->query("SELECT * FROM gajidokter GROUP BY shiftgaji");
+                    foreach ($getShift as $shift) {
+                    ?>
+                        <option value="<?= $shift['shiftgaji'] ?>"><?= $shift['shiftgaji'] ?></option>
+                    <?php } ?>
+                </select>
+            </div>
             <div class="col-12">
                 <button name="src" class="btn btn-sm btn-primary float-end"><i class="bi bi-search"></i> Search</button>
             </div>
         </div>
     </form>
 </div>
-<?php
-if (isset($_POST['src'])) {
-    echo "
-            <script>
-                document.location.href='index.php?halaman=gajidokter_history&src&tgl_start=" . htmlspecialchars($_POST['tgl_start']) . "&tgl_end=" . htmlspecialchars($_POST['tgl_end']) . "&dokter=" . htmlspecialchars($_POST['dokter']) . "&akun=" . htmlspecialchars($_POST['akun']) . "&unit=" . htmlspecialchars($_POST['unit']) . "';
-            </script>
-        ";
-}
-?>
 
 <div class="card shadow-sm p-2 mt-1">
     <div class="table-responsive">
-        <table class="table-hover table table-striped" style="font-size: 13px;">
+        <table class="table-hover table table-striped" style="font-size: 12px;">
             <thead>
                 <tr>
                     <th>Tgl</th>
@@ -77,6 +80,7 @@ if (isset($_POST['src'])) {
                     <th>Ket</th>
                     <th>Petugas</th>
                     <th>Unit</th>
+                    <th>Shift</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -86,34 +90,31 @@ if (isset($_POST['src'])) {
                 $tgl_end = "";
                 $dokter = "";
                 $akun = "";
+                $unit = "";
+                $shiftGaji = "";
+                $urlPage = "index.php?halaman=gajidokter_history";
                 if (isset($_GET['src'])) {
-                    if ($_GET['tgl_start'] == '') {
-                        $tgl_start = "";
-                    } else {
+                    $urlPage = "index.php?halaman=gajidokter_history&tgl_start=$_GET[tgl_start]&tgl_end=$_GET[tgl_end]&dokter=$_GET[dokter]&akun=$_GET[akun]&unit=$_GET[unit]&shiftgaji=$_GET[shiftgaji]&src=$_GET[src]";
+                    if ($_GET['tgl_start'] != '') {
                         $tgl_start = "AND tgl >= '" . htmlspecialchars(date('Y-m-d', strtotime($_GET['tgl_start']))) . "'";
                     }
-                    if ($_GET['tgl_end'] == '') {
-                        $tgl_end = "";
-                    } else {
+                    if ($_GET['tgl_end'] != '') {
                         $tgl_end = "AND tgl <= '" . htmlspecialchars(date('Y-m-d', strtotime($_GET['tgl_end']))) . "'";
                     }
-                    if ($_GET['dokter'] == 'All Dokter') {
-                        $dokter = "";
-                    } else {
+                    if ($_GET['dokter'] != 'All Dokter') {
                         $dokter = "AND dokter LIKE '%" . htmlspecialchars($_GET['dokter']) . "%'";
                     }
-                    if ($_GET['akun'] == 'All akun') {
-                        $akun = "";
-                    } else {
-                        $akun = "AND akun = '" . htmlspecialchars($_GET['akun']) . "'";
+                    if ($_GET['akun'] != 'All Akun') {
+                        $akun = "AND akun = '$_GET[akun]'";
                     }
-                    if ($_GET['akun'] == 'All Unit') {
-                        $akun = "";
-                    } else {
-                        $akun = "AND unit = '" . htmlspecialchars($_GET['unit']) . "'";
+                    if ($_GET['unit'] != 'All Unit') {
+                        $unit = "AND unit = '" . htmlspecialchars($_GET['unit']) . "'";
+                    }
+                    if ($_GET['shiftgaji'] != 'All Shift') {
+                        $shiftGaji = "AND shiftgaji = '" . htmlspecialchars($_GET['shiftgaji']) . "'";
                     }
                 }
-                $query = "SELECT * FROM gajidokter WHERE dokter != '' " . $tgl_start . " " . $tgl_end . " " . $akun . "  " . $dokter . " ORDER BY tgl DESC";
+                $query = "SELECT * FROM gajidokter WHERE dokter != '' $tgl_start $tgl_end $dokter $akun $unit $shiftGaji ORDER BY tgl DESC";
 
                 //   Pagination
                 // Parameters for pagination
@@ -136,7 +137,7 @@ if (isset($_POST['src'])) {
                 }
                 // End Pagination
 
-                $getData = $koneksimaster->query($query);
+                $getData = $koneksimaster->query($query . " LIMIT $start, $limit");
                 foreach ($getData as $data) {
                 ?>
                     <tr>
@@ -147,9 +148,15 @@ if (isset($_POST['src'])) {
                         <td><?= $data['ket'] ?></td>
                         <td><?= $data['petugas'] ?></td>
                         <td><?= $data['unit'] ?></td>
+                        <td><?= $data['shiftgaji'] ?></td>
                         <td>
-                            <button onclick="upData('<?= $data['idgaji'] ?>', '<?= $data['dokter'] ?>', '<?= $data['akun'] ?>', '<?= $data['besaran'] ?>', '<?= $data['ket'] ?>', '<?= $data['petugas'] ?>', '<?= $data['unit'] ?>')" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="btn btn-sm btn-success" style="font-size: 12px;"><i class="bi bi-pencil"></i></button>
-                            <a href="index.php?halaman=gajidokter_history&delete=<?= $data['idgaji'] ?>" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')" class="btn btn-sm btn-danger" style="font-size: 12px;"><i class="bi bi-trash"></i></a>
+                            <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                <button onclick="upData('<?= $data['idgaji'] ?>', '<?= $data['dokter'] ?>', '<?= $data['akun'] ?>', '<?= $data['besaran'] ?>', '<?= $data['ket'] ?>', '<?= $data['petugas'] ?>', '<?= $data['unit'] ?>')" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="btn btn-sm btn-success" style="font-size: 12px;"><i class="bi bi-pencil"></i></button>
+                                <a href="index.php?halaman=gajidokter_history&delete=<?= $data['idgaji'] ?>" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')" class="btn btn-sm btn-danger" style="font-size: 12px;"><i class="bi bi-trash"></i></a>
+                            <?php } ?>
+                            <?php if (isset($_GET['src'])) { ?>
+                                <!-- <a href="../gajidokter/gajiDokterShiftPrint.php?tgl_start=<?= $_GET['tgl_start'] ?>&tgl_end=<?= $_GET['tgl_end'] ?>&dokter=<?= $_GET['dokter'] ?>&akun=<?= $_GET['akun'] ?>&unit=<?= $_GET['unit'] ?>&shiftgaji=<?= $_GET['shiftgaji'] ?>&src=<?= $_GET['src'] ?>" class="btn btn-sm btn-warning"><i class="bi bi-printer"></i></a> -->
+                            <?php } ?>
                         </td>
                     </tr>
                 <?php } ?>
@@ -267,7 +274,7 @@ if (isset($_GET['delete'])) {
 
         // Back button
         if ($page > 1) {
-            echo '<li class="page-item"><a class="page-link" href="index.php?halaman=pendaftaranall&page=' . ($page - 1) . '">Back</a></li>';
+            echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page - 1) . '">Back</a></li>';
         }
 
         // Determine the start and end page
@@ -275,7 +282,7 @@ if (isset($_GET['delete'])) {
         $end_page = min($total_pages, $page + 2);
 
         if ($start_page > 1) {
-            echo '<li class="page-item"><a class="page-link" href="index.php?halaman=pendaftaranall&page=1">1</a></li>';
+            echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=1">1</a></li>';
             if ($start_page > 2) {
                 echo '<li class="page-item"><span class="page-link">...</span></li>';
             }
@@ -285,7 +292,7 @@ if (isset($_GET['delete'])) {
             if ($i == $page) {
                 echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
             } else {
-                echo '<li class="page-item"><a class="page-link" href="index.php?halaman=pendaftaranall&page=' . $i . '">' . $i . '</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $i . '">' . $i . '</a></li>';
             }
         }
 
@@ -293,12 +300,12 @@ if (isset($_GET['delete'])) {
             if ($end_page < $total_pages - 1) {
                 echo '<li class="page-item"><span class="page-link">...</span></li>';
             }
-            echo '<li class="page-item"><a class="page-link" href="index.php?halaman=pendaftaranall&page=' . $total_pages . '">' . $total_pages . '</a></li>';
+            echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
         }
 
         // Next button
         if ($page < $total_pages) {
-            echo '<li class="page-item"><a class="page-link" href="index.php?halaman=pendaftaranall&page=' . ($page + 1) . '">Next</a></li>';
+            echo '<li class="page-item"><a class="page-link" href="' . $urlPage . '&page=' . ($page + 1) . '">Next</a></li>';
         }
 
         echo '</ul>';
