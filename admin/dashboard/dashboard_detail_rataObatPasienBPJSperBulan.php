@@ -117,7 +117,7 @@
                     <?php
                     $totalPasien += $data['jumlahpasien'];
                     $totalFinal += $total;
-                    $totalRata += ($total / $data['jumlahpasien']);
+                    // $totalRata += ($total / $data['jumlahpasien']);
                     ?>
                 <?php endforeach; ?>
             </tbody>
@@ -126,7 +126,7 @@
                     <td colspan="3"><b>Total</b></td>
                     <td><b><?= number_format($totalPasien, 0, 0, '.') ?></b></td>
                     <td><b><?= number_format($totalFinal, 0, 0, '.') ?></b></td>
-                    <td><b><?= number_format($totalRata, 0, 0, '.') ?></b></td>
+                    <td><b><?= number_format(($totalFinal / $totalPasien), 0, 0, '.') ?></b></td>
                 </tr>
             </tfoot>
         </table>
