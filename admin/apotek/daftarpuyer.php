@@ -76,7 +76,7 @@ $obat = $koneksimaster->query("SELECT * FROM puyer;");
 
                   <!-- Multi Columns Form -->
                   <div class="table-responsive">
-                    <table id="myTable" class="table table-striped" style="width:100%">
+                    <table id="myTable" class="table table-striped table-sm" style="width:100%; font-size: 12px;">
                       <thead>
                         <tr>
                           <th>No</th>
@@ -87,7 +87,6 @@ $obat = $koneksimaster->query("SELECT * FROM puyer;");
                           <th>Catatan Obat</th>
                           <th></th>
                           <!-- <th>Aksi</th> -->
-
                         </tr>
                       </thead>
                       <tbody>
@@ -98,11 +97,21 @@ $obat = $koneksimaster->query("SELECT * FROM puyer;");
 
                           <tr>
                             <td><?php echo $no; ?></td>
-                            <td style="margin-top:10px;"><?php echo $pecah["nama_paket"]; ?></td>
-                            <td style="margin-top:10px;"><?php echo $pecah["dosis_paket1"]; ?> X <?php echo $pecah["dosis_paket2"]; ?> Per Hari</td>
-                            <td style="margin-top:10px;"><?php echo $pecah['petunjuk_paket'] ?></td>
-                            <td style="margin-top:10px;"><?php echo $pecah["durasi_paket"]; ?></td>
-                            <td style="margin-top:10px;"><?php echo $pecah["ctt_paket"]; ?></td>
+                            <td >
+                              <?php echo $pecah["nama_paket"]; ?> <br>
+                              <span style="font-size: 10px;">
+                                <?php
+                                $getObatDetail = $koneksimaster->query("SELECT * FROM puyer_detail JOIN master_obat ON master_obat.obat_master = puyer_detail.nama_obat WHERE id_puyer = '$pecah[id]'");
+                                foreach($getObatDetail as $obDet){
+                                ?>
+                                  <?= $obDet['obat_master']?> (<?= $obDet['kode_obat']?>)
+                                <?php }?>
+                              </span>
+                            </td>
+                            <td style=""><?php echo $pecah["dosis_paket1"]; ?> X <?php echo $pecah["dosis_paket2"]; ?> Per Hari</td>
+                            <td style=""><?php echo $pecah['petunjuk_paket'] ?></td>
+                            <td style=""><?php echo $pecah["durasi_paket"]; ?></td>
+                            <td style=""><?php echo $pecah["ctt_paket"]; ?></td>
                             <td>
                               <div class="dropdown">
                                 <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
