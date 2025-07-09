@@ -16,28 +16,28 @@ if ($jenis == 'filter_penjualan_umum') {
     $kode_obat = $_GET['kode_obat'] ?? '';
 
     if ($tgl_awal && $tgl_akhir && $kode_obat) {
-        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_umum WHERE tgl_jual BETWEEN '$tgl_awal' AND '$tgl_akhir' AND kode_obat = '$kode_obat' GROUP BY nama_obat, petugas ORDER BY tgl_jual ASC;");
+        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM((harga_umum-diskon_obat)*jumlah) AS omset FROM penjualan_umum WHERE tgl_jual BETWEEN '$tgl_awal' AND '$tgl_akhir' AND kode_obat = '$kode_obat' GROUP BY nama_obat, petugas ORDER BY tgl_jual ASC;");
     } elseif ($tgl_awal && $tgl_akhir) {
-        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_umum WHERE tgl_jual BETWEEN '$tgl_awal' AND '$tgl_akhir' GROUP BY nama_obat, petugas ORDER BY tgl_jual ASC;");
+        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM((harga_umum-diskon_obat)*jumlah) AS omset FROM penjualan_umum WHERE tgl_jual BETWEEN '$tgl_awal' AND '$tgl_akhir' GROUP BY nama_obat, petugas ORDER BY tgl_jual ASC;");
     } elseif ($kode_obat) {
-        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_umum WHERE kode_obat = '$kode_obat' GROUP BY nama_obat, petugas ORDER BY tgl_jual ASC;");
+        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM((harga_umum-diskon_obat)*jumlah) AS omset FROM penjualan_umum WHERE kode_obat = '$kode_obat' GROUP BY nama_obat, petugas ORDER BY tgl_jual ASC;");
     } else {
-        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_umum GROUP BY nama_obat, petugas ORDER BY nama_obat ASC;");
+        $getdata = $koneksi->query("SELECT petugas, nama_obat, SUM(jumlah) AS jumlah, SUM((harga_umum-diskon_obat)*jumlah) AS omset FROM penjualan_umum GROUP BY nama_obat, petugas ORDER BY nama_obat ASC;");
     }
 }
 
 if ($jenis == 'omset_umum') {
-    $getdataumum = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, SUM((harga_umum - ((diskon_obat / 100)*harga_umum)) * jumlah) AS omset FROM penjualan_umum WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m') ORDER BY bulan ASC;");
+    $getdataumum = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, SUM((harga_umum - diskon_obat)*jumlah) AS omset FROM penjualan_umum WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m') ORDER BY bulan ASC;");
 }
 if ($jenis == 'rekanan') {
-    $getdatarekanan = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_rekanan WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m') ORDER BY bulan ASC;");
+    $getdatarekanan = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, SUM((harga_umum - diskon_obat) * jumlah) AS omset FROM penjualan_rekanan WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m') ORDER BY bulan ASC;");
 }
 if ($jenis == 'penjualan_umum') {
-    $getdatapenjualanumum = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, petugas, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_umum WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m'), petugas ORDER BY bulan ASC, petugas ASC;");
+    $getdatapenjualanumum = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, petugas, SUM((harga_umum-diskon_obat)*jumlah) AS omset FROM penjualan_umum WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m'), petugas ORDER BY bulan ASC, petugas ASC;");
 }
 
 if ($jenis == 'penjualan_resep') {
-    $getdatapenjualanresep = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, petugas, SUM(harga_umum * (1 - diskon_obat / 100) * jumlah) AS omset FROM penjualan_resep WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m'), petugas ORDER BY bulan ASC,petugas ASC;");
+    $getdatapenjualanresep = $koneksi->query("SELECT DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan, petugas, SUM((harga_umum-diskon_obat)*jumlah) AS omset FROM penjualan_resep WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY DATE_FORMAT(tgl_jual, '%Y-%m'), petugas ORDER BY bulan ASC,petugas ASC;");
 }
 
 if ($jenis == '') {
@@ -47,7 +47,7 @@ if ($jenis == '') {
     FROM (
     SELECT
     DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan,
-    ((harga_umum - ((diskon_obat / 100)*harga_umum)) * jumlah) AS omset
+    ((harga_umum - diskon_obat)*jumlah) AS omset
     FROM penjualan_umum
     WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH)
 
@@ -55,7 +55,7 @@ if ($jenis == '') {
 
     SELECT
     DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan,
-    ((harga_umum - ((diskon_obat / 100)*harga_umum)) * jumlah) AS omset
+    ((harga_umum - diskon_obat)*jumlah) AS omset
     FROM penjualan_resep
     WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH)
 
@@ -63,7 +63,7 @@ if ($jenis == '') {
 
     SELECT
     DATE_FORMAT(tgl_jual, '%Y-%m') AS bulan,
-    ((harga_umum - ((diskon_obat / 100)*harga_umum)) * jumlah) AS omset
+    ((harga_umum - diskon_obat)*jumlah) AS omset
     FROM penjualan_rekanan
     WHERE tgl_jual >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH)
 
@@ -87,17 +87,17 @@ if ($jenis == '') {
         <label for="filter-tanggal" class="form-label">Filter Tanggal</label>
         <div class="row g-3">
             <div class="col-3">
-                <input type="date" name="tgl_awal" class="form-control mb-2" placeholder="Tanggal Awal">
+                <input type="date" name="tgl_awal" class="form-control form-control-sm mb-2" placeholder="Tanggal Awal">
             </div>
             <div class="col-3">
-                <input type="date" name="tgl_akhir" class="form-control mb-2" placeholder="Tanggal Akhir">
+                <input type="date" name="tgl_akhir" class="form-control form-control-sm mb-2" placeholder="Tanggal Akhir">
             </div>
             <div class="col-4">
                 <select name="kode_obat" class="from-control w-100 obat-select form-control-sm" id="obat_kode"></select>
             </div>
             <div class="col-2">
-                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
-                <a href="index.php?halaman=dashboardapotek" class="btn btn-danger">Reset</a>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i></button>
+                <a href="index.php?halaman=dashboardapotek" class="btn btn-danger btn-sm">Reset</a>
             </div>
         </div>
     </form>
@@ -106,15 +106,16 @@ if ($jenis == '') {
         <input type="hidden" name="halaman" value="dashboardapotek">
         <label for="jenis-omset" class="form-label">Filter</label>
         <div class="d-flex">
-            <select name="jenis_omset" class="form-control" id="jenis-omset">
+            <select name="jenis_omset" class="form-control form-control-sm" id="jenis-omset">
                 <option value="">Pilih Jenis</option>
                 <option value="omset_umum" <?= $jenis == 'omset_umum' ? 'selected' : '' ?>>Omset Apotek Umum (24 Bulan)</option>
                 <option value="rekanan" <?= $jenis == 'rekanan' ? 'selected' : '' ?>>Penjualan Rekanan (24 Bulan)</option>
                 <option value="penjualan_umum" <?= $jenis == 'penjualan_umum' ? 'selected' : '' ?>>Penjualan Umum</option>
                 <option value="penjualan_resep" <?= $jenis == 'penjualan_resep' ? 'selected' : '' ?>>Penjualan Resep</option>
+                <option value="omset_apotek_all" <?= $jenis == 'omset_apotek_all' ? 'selected' : '' ?>>Omset Apotek All</option>
             </select>
-            <button type="submit" class="btn btn-primary mx-2"><i class="bi bi-search"></i></button>
-            <a href="index.php?halaman=dashboardapotek" class="btn btn-danger">Reset</a>
+            <button type="submit" class="btn btn-primary mx-2 btn-sm"><i class="bi bi-search"></i></button>
+            <a href="index.php?halaman=dashboardapotek" class="btn btn-danger btn-sm">Reset</a>
         </div>
     </form>
 </div>
@@ -355,6 +356,104 @@ if ($jenis == '') {
         </div>
     </div>
 <?php endif ?>
+
+<?php if ($jenis === 'omset_apotek_all') { ?>
+    <?php
+    // Ambil bulan awal dan akhir dari GET, jika ada
+    $month_start = $_GET['month_start'] ?? '';
+    $month_end = $_GET['month_end'] ?? '';
+    ?>
+    <div class="card shadow p-2 mb-2">
+        <form method="get">
+            <div class="row g-1">
+                <div class="col-5">
+                    <input type="hidden" name="halaman" value="dashboardapotek">
+                    <input type="hidden" name="jenis_omset" value="omset_apotek_all">
+                    <input type="month" value="<?= htmlspecialchars($month_start) ?>" placeholder="Dari Bulan" class="form-control form-control-sm" name="month_start">
+                </div>
+                <div class="col-5">
+                    <input type="month" value="<?= htmlspecialchars($month_end) ?>" placeholder="Hingga Bulan" class="form-control form-control-sm" name="month_end">
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-sm btn-primary" type="submit" name="src"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card shadow p-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover table-striped" style="font-size: 12px;">
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        <th>PenjualanUmum</th>
+                        <th>PenjualanResep</th>
+                        <th>PenjualanRekanan</th>
+                        <th>PenjualanInternal</th>
+                        <th>ObatInap</th>
+                        <th>OmsetTotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Jika tidak ada, gunakan 12 bulan terakhir
+                    if (!$month_end) {
+                        $month_end = date('Y-m');
+                    }
+                    if (!$month_start) {
+                        $month_start = date('Y-m', strtotime('-11 months', strtotime($month_end . '-01')));
+                    }
+
+                    // Buat array bulan dari month_start ke month_end (DESC)
+                    $period = [];
+                    $start = DateTime::createFromFormat('Y-m', $month_start);
+                    $end = DateTime::createFromFormat('Y-m', $month_end);
+                    $end->modify('+1 month');
+                    for ($dt = clone $end; $dt > $start; $dt->modify('-1 month')) {
+                        $period[] = (clone $dt)->modify('-1 month');
+                    }
+
+                    // Query omset per bulan per jenis
+                    foreach ($period as $dt) {
+                        $bulan = $dt->format('Y-m');
+                        // Penjualan Umum
+                        $q1 = $koneksi->query("SELECT SUM((harga_umum-diskon_obat) * jumlah) AS omset FROM penjualan_umum WHERE DATE_FORMAT(tgl_jual, '%Y-%m') = '$bulan'");
+                        $umum = $q1 ? ($q1->fetch_assoc()['omset'] ?? 0) : 0;
+
+                        // Penjualan Resep
+                        $q2 = $koneksi->query("SELECT SUM((harga_umum-diskon_obat) * jumlah) AS omset FROM penjualan_resep WHERE DATE_FORMAT(tgl_jual, '%Y-%m') = '$bulan'");
+                        $resep = $q2 ? ($q2->fetch_assoc()['omset'] ?? 0) : 0;
+
+                        // Penjualan Rekanan
+                        $q3 = $koneksi->query("SELECT SUM((harga_umum-diskon_obat) * jumlah) AS omset FROM penjualan_rekanan WHERE DATE_FORMAT(tgl_jual, '%Y-%m') = '$bulan'");
+                        $rekanan = $q3 ? ($q3->fetch_assoc()['omset'] ?? 0) : 0;
+
+                        // Penjualan Internal (jika ada tabelnya, jika tidak, set 0)
+                        $q4 = $koneksi->query("SELECT SUM((harga_umum-diskon_obat) * jumlah) AS omset FROM penjualan_internal WHERE DATE_FORMAT(tgl_jual, '%Y-%m') = '$bulan'");
+                        $internal = $q4 ? ($q4->fetch_assoc()['omset'] ?? 0) : 0;
+
+                        // Obat Inap
+                        $q5 = $koneksi->query("SELECT SUM(besaran) AS omset FROM rawatinapdetail WHERE biaya LIKE '%obat%' AND DATE_FORMAT(tgl, '%Y-%m') = '$bulan'");
+                        $inap = $q5 ? ($q5->fetch_assoc()['omset'] ?? 0) : 0;
+
+                        $total = $umum + $resep + $rekanan + $internal + $inap;
+
+                        echo "<tr>
+                            <td>{$bulan}</td>
+                            <td>" . number_format($umum, 0, ',', '.') . "</td>
+                            <td>" . number_format($resep, 0, ',', '.') . "</td>
+                            <td>" . number_format($rekanan, 0, ',', '.') . "</td>
+                            <td>" . number_format($internal, 0, ',', '.') . "</td>
+                            <td>" . number_format($inap, 0, ',', '.') . "</td>
+                            <td>" . number_format($total, 0, ',', '.') . "</td>
+                        </tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php } ?>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
