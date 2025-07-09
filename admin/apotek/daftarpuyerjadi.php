@@ -232,7 +232,17 @@
         <a href="index.php?halaman=daftarpuyerjadi&add" class="btn btn-sm btn-primary mb-2">[+] Tambah</a>
         <div class="card shadow p-2">
             <div class="table-responsive">
-                <table class="table table-hover table-striped" style="font-size: 12px;">
+                <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css">
+                <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+                <script>
+                    $(document).ready(function() {
+                        $('#myTable').DataTable({
+                            // "ordering": false
+                        });
+                    });
+                </script>
+
+                <table class="table table-hover table-striped" style="width:100%; font-size: 12px;" id="myTable">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -250,7 +260,18 @@
                         ?>
                             <tr>
                                 <td><?= $no++ ?></td>
-                                <td><?= $pj['nama_paket'] ?></td>
+                                <td>
+                                    <?= $pj['nama_paket'] ?>
+                                    <br>
+                                    <span style="font-size: 10px;">
+                                        <?php
+                                        $getObatData = $koneksimaster->query("SELECT * FROM puyerjadi_detail WHERE puyer_id = '" . $pj['id'] . "'");
+                                        foreach ($getObatData as $obatData) {
+                                        ?>
+                                            <?= $obatData['nama_obat'] ?> (<?= $obatData['kode_obat'] ?>) |
+                                        <?php } ?>
+                                    </span>
+                                </td>
                                 <td><?= $pj['deskripsi'] ?></td>
                                 <td>
                                     <?php
