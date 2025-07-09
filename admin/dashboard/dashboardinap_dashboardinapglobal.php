@@ -47,7 +47,7 @@
                     <tr>
                         <td><?= $dataBulan['bulan'] ?></td>
                         <td>
-                            <?= $JumlahHari = $dataBulan['jadwal'] == date('Y-m') ? date('d') : date('t', strtotime($dataBulan['jadwal'])) ?>
+                            <?= $JumlahHari = $dataBulan['bulan'] == date('Y-m') ? date('d') : date('t', strtotime($dataBulan['jadwal'])) ?>
                         </td>
                         <td>
                             <?php
