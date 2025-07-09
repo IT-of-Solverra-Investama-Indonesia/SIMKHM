@@ -163,7 +163,7 @@
         $obatLokalSingle = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$kode_obat' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
         $obatMasterSingle = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$kode_obat'")->fetch_assoc();
 
-        $harga = $obatLokalSingle['harga_beli'] * ($obatMasterSingle['margin_jual'] / 100);
+        $harga = ($obatLokalSingle['harga_beli'] * ($obatMasterSingle['margin_jual'] / 100));
         $sub = $harga * $jumlah;
         $subtotal = $sub - ($sub * $diskon / 100);
 
@@ -277,7 +277,7 @@
         if (!empty($_SESSION['keranjang_obat'])) {
             foreach ($_SESSION['keranjang_obat'] as $index => $data) {
                 $obatLokalSingleSave = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$data[kode]' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-                $diskon = ($obatLokalSingleSave['harga_beli'] * $data['diskon'] / 100);
+                $diskon = ($data['harga'] * $data['diskon'] / 100);
 
                 $koneksi->query("INSERT INTO `penjualan_umum`(`nota`, `tgl_jual`, `kode_obat`, `nama_obat`, `harga_umum`, `diskon_obat`, `jumlah`, `harga_beli`, `akun`, `petugas`, `shift`) VALUES ('" . htmlspecialchars($_POST['nota']) . "','" . htmlspecialchars($_POST['tgl_jual']) . "','" . htmlspecialchars($data['kode']) . "','" . htmlspecialchars($data['nama']) . "','" . htmlspecialchars($data['harga']) . "','" . htmlspecialchars($diskon) . "','" . htmlspecialchars($data['jumlah']) . "','" . htmlspecialchars($obatLokalSingleSave['harga_beli']) . "','" . htmlspecialchars($_POST['akun']) . "','" . htmlspecialchars($_SESSION['admin']['namalengkap']) . "', '" . htmlspecialchars($_SESSION['shift']) . "')");
             }
