@@ -418,7 +418,7 @@ if (isset($_GET['detail'])) {
                         </div>
                         <div class="modal-body">
                           <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-striped table-hover" style="font-size: 12px;">
                               <thead>
                                 <tr>
                                   <th>Nama Pasien</th>
@@ -427,6 +427,7 @@ if (isset($_GET['detail'])) {
                                   <th>NoRm</th>
                                   <th>Jadwal</th>
                                   <th>Kamar</th>
+                                  <th>CaraBayar</th>
                                   <th>Status</th>
                                 </tr>
                               </thead>
@@ -442,6 +443,7 @@ if (isset($_GET['detail'])) {
                                     <td><?= $kamar['no_rm'] ?></td>
                                     <td><?= $kamar['jadwal'] ?></td>
                                     <td><?= $kamar['kamar'] ?></td>
+                                    <td><?= $kamar['carabayar'] ?></td>
                                     <td><?= $kamar['status_antri'] ?></td>
                                   </tr>
                                 <?php } ?>
@@ -712,7 +714,7 @@ if (isset($_GET['detail'])) {
 if (isset($_GET['status'])) {
   $getBPJS = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$_GET[id]'")->fetch_assoc();
   $jam = date('H:i:s', strtotime($_GET['jadwal']));
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', datang_at= '".date('Y-m-d H:i:s')."', perawat='" . $_SESSION['admin']['namalengkap'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', datang_at= '" . date('Y-m-d H:i:s') . "', perawat='" . $_SESSION['admin']['namalengkap'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
 
   if ($getBPJS['carabayar'] == 'bpjs') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
