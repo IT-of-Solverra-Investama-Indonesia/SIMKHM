@@ -461,7 +461,7 @@ date_default_timezone_set('Asia/Jakarta');
               <!--<th>Antrian</th>-->
               <th>Kamar</th>
               <th>Status Datang</th>
-              <th>Carabayar</th>
+              <th>CaraBayar</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -475,7 +475,15 @@ date_default_timezone_set('Asia/Jakarta');
             foreach ($getData as $data) {
             ?>
               <tr>
-                <td><?= $data['nama_pasien'] ?></td>
+                <td>
+                  <?= $data['nama_pasien'] ?><br>
+                  <?php
+                  $getDataPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$data[no_rm]'")->fetch_assoc();
+                  ?>
+                  <span style="font-size: 10px;">
+                    <?= $getDataPasien['provinsi'] ?> | <?= $getDataPasien['kota'] ?> | <?= $getDataPasien['kecamatan'] ?> | <?= $getDataPasien['kelurahan'] ?> | <?= $getDataPasien['alamat'] ?>
+                  </span>
+                </td>
                 <td><?= $data['perawatan'] ?></td>
                 <td><?= $data['dokter_rawat'] ?></td>
                 <td><?= $data['no_rm'] ?></td>
