@@ -401,9 +401,29 @@ function konversiNomorHP($nomor)
 if (isset($_POST['save'])) {
   $ob = $_POST["diberikan"];
   $obat = implode(", ", $ob);
-  
 
-  $koneksi->query("INSERT INTO pulang(tgl, norm, tgl_mrs, diag_mrs, kamar, pasien, tgl_krs, diag_krs, diag_prwt, lanjut_rmh, diet, istirahat, kontrol, diberikan, keadaan, lain, keluarga, kep_ruang, perawat, tgl_masuk, rujuk, shift, rujuk_keterangan) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[tgl_mrs]', '$_POST[diag_mrs]', '$_POST[kamar]', '$_POST[pasien]', '$_POST[tgl_krs]', '$_POST[diag_krs]', '$_POST[diag_prwt]', '$_POST[lanjut_rmh]', '$_POST[diet]', '$_POST[istirahat]', '$_POST[kontrol]', '$obat', '$_POST[keadaan]', '$_POST[lain]', '$_POST[keluarga]', '$_POST[kep_ruang]', '$_POST[perawat]', '$_GET[tgl]', '$_POST[rujuk]', '" . $_SESSION['shift'] . "', '".$_POST['rujuk_keterangan']."')");
+
+  $tgl = htmlspecialchars($_POST['tgl'], ENT_QUOTES);
+  $tgl_mrs = htmlspecialchars($_POST['tgl_mrs'], ENT_QUOTES);
+  $diag_mrs = htmlspecialchars($_POST['diag_mrs'], ENT_QUOTES);
+  $kamar = htmlspecialchars($_POST['kamar'], ENT_QUOTES);
+  $pasien = htmlspecialchars($_POST['pasien'], ENT_QUOTES);
+  $tgl_krs = htmlspecialchars($_POST['tgl_krs'], ENT_QUOTES);
+  $diag_krs = htmlspecialchars($_POST['diag_krs'], ENT_QUOTES);
+  $diag_prwt = htmlspecialchars($_POST['diag_prwt'], ENT_QUOTES);
+  $lanjut_rmh = htmlspecialchars($_POST['lanjut_rmh'], ENT_QUOTES);
+  $diet = htmlspecialchars($_POST['diet'], ENT_QUOTES);
+  $istirahat = htmlspecialchars($_POST['istirahat'], ENT_QUOTES);
+  $kontrol = htmlspecialchars($_POST['kontrol'], ENT_QUOTES);
+  $keadaan = htmlspecialchars($_POST['keadaan'], ENT_QUOTES);
+  $lain = htmlspecialchars($_POST['lain'], ENT_QUOTES);
+  $keluarga = htmlspecialchars($_POST['keluarga'], ENT_QUOTES);
+  $kep_ruang = htmlspecialchars($_POST['kep_ruang'], ENT_QUOTES);
+  $perawat = htmlspecialchars($_POST['perawat'], ENT_QUOTES);
+  $rujuk = htmlspecialchars($_POST['rujuk'], ENT_QUOTES);
+  $rujuk_keterangan = htmlspecialchars($_POST['rujuk_keterangan'], ENT_QUOTES);
+
+  $koneksi->query("INSERT INTO pulang(tgl, norm, tgl_mrs, diag_mrs, kamar, pasien, tgl_krs, diag_krs, diag_prwt, lanjut_rmh, diet, istirahat, kontrol, diberikan, keadaan, lain, keluarga, kep_ruang, perawat, tgl_masuk, rujuk, shift, rujuk_keterangan) VALUES ('$tgl', '$_GET[id]','$tgl_mrs', '$diag_mrs', '$kamar', '$pasien', '$tgl_krs', '$diag_krs', '$diag_prwt', '$lanjut_rmh', '$diet', '$istirahat', '$kontrol', '$obat', '$keadaan', '$lain', '$keluarga', '$kep_ruang', '$perawat', '$_GET[tgl]', '$rujuk', '" . $_SESSION['shift'] . "', '$rujuk_keterangan')");
 
   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pulang' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
 
