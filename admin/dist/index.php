@@ -584,7 +584,7 @@ if (!isset($_SESSION['login'])) {
         </li><!-- End Profile Page Nav -->
       <?php } ?>
 
-      <?php if ($level == 'kasir' or $level == 'ceo'  or $level == 'sup') { ?>
+      <?php if ($level == 'kasir' or $level == 'ceo'  or $level == 'sup' or $level == 'igd') { ?>
         <li class="nav-heading">Kasir</li>
 
         <li class="nav-item">
