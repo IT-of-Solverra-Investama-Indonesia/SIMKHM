@@ -278,7 +278,8 @@ if ($jenis == '') {
     <!-- Filter Penjualan Umum -->
     <div class="card shadow p-3">
         <div class="table-responsive">
-            <table class="table" id="myTable3">
+            <h6>Filter Penjualan Umum dari <?= $_GET['tgl_awal'] ?> sampai <?= $_GET['tgl_akhir'] ?></h6>
+            <table class="table" id="myTable3" style="font-size: 12px;">
                 <thead>
                     <tr>
                         <th>Nama Petugas</th>
@@ -288,6 +289,7 @@ if ($jenis == '') {
                     </tr>
                 </thead>
                 <tbody>
+                    <?php $jumlahTotal = 0; ?>
                     <?php foreach ($getdata as $pecah) : ?>
                         <tr>
                             <td><?= $pecah['petugas'] ?></td>
@@ -295,11 +297,15 @@ if ($jenis == '') {
                             <td><?= $pecah['jumlah'] ?></td>
                             <td><?= number_format($pecah['omset'], 2, ',', '.'); ?></td>
                         </tr>
+                        <?php
+                        $jumlahTotal += $pecah['jumlah'];
+                        ?>
                     <?php endforeach ?>
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="3" class="text-end">Total</th>
+                        <th colspan="2" class="text-start">Total</th>
+                        <th><?= $jumlahTotal ?></th>
                         <th>
                             <?php
                             $totalOmset = 0;
