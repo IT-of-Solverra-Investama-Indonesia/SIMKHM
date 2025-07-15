@@ -100,21 +100,23 @@
                 //                 ) as a GROUP BY kode_obat ORDER BY nama_obat DESC");
                 // }
                 if (isset($_GET['jenis']) && $_GET['jenis'] == 'Inap') {
-                    $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = obat_rm.idrm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien WHERE obat_rm.tgl_pasien >= '$_GET[mulai]' AND obat_rm.tgl_pasien <= '$_GET[hingga]' AND perawatan = 'Rawat Inap' GROUP BY kode_obat ORDER BY nama_obat DESC");
+                    // $getObat = $koneksi->query("SELECT o.kode_obat, o.nama_obat, SUM(o.jml_dokter) as jumlah_keluar, rd.besaran, rd.ket, o.idobat, rd.besaran / o.jml_dokter AS hargaJual FROM obat_rm AS o INNER JOIN registrasi_rawat AS r ON r.no_rm = o.idrm AND r.jadwal = o.tgl_pasien INNER JOIN rawatinapdetail AS rd ON TRIM(SUBSTRING_INDEX(rd.ket, ' ', -1)) = o.idobat WHERE r.perawatan = 'Rawat Inap' AND rd.tgl >= '$_GET[mulai]' AND rd.tgl <= '$_GET[hingga]' GROUP BY kode_obat, hargaJual ORDER BY o.nama_obat DESC;");
+                    $getObat = $koneksi->query("SELECT o.kode_obat, o.nama_obat, SUM(o.jml_dokter) as jumlah_keluar, rd.besaran, rd.ket, o.idobat, rd.besaran / o.jml_dokter AS hargaJual FROM obat_rm AS o INNER JOIN registrasi_rawat AS r ON r.no_rm = o.idrm AND r.jadwal = o.tgl_pasien INNER JOIN rawatinapdetail AS rd ON TRIM(SUBSTRING_INDEX(rd.ket, ' ', -1)) = o.idobat WHERE r.perawatan = 'Rawat Inap' AND rd.tgl >= '$_GET[mulai]' AND rd.tgl <= '$_GET[hingga]' AND rd.biaya LIKE '%biayaobat%'  GROUP BY kode_obat, hargaJual ORDER BY o.nama_obat DESC;");
+                    // $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = obat_rm.idrm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien WHERE obat_rm.tgl_pasien >= '$_GET[mulai]' AND obat_rm.tgl_pasien <= '$_GET[hingga]' AND perawatan = 'Rawat Inap' GROUP BY kode_obat ORDER BY nama_obat DESC");
                 }
                 if (isset($_GET['jenis']) && $_GET['jenis'] == 'Poli') {
                     $getObat = $koneksi->query("SELECT *, SUM(jml_dokter) as jumlah_keluar FROM obat_rm INNER JOIN rekam_medis ON rekam_medis.id_rm = obat_rm.rekam_medis_id WHERE obat_rm.tgl_pasien >= '$_GET[mulai]' AND obat_rm.tgl_pasien <= '$_GET[hingga]' AND idigd = '0' GROUP BY kode_obat ORDER BY nama_obat DESC");
                 }
-                
+
                 if (isset($_GET['jenis']) && in_array($_GET['jenis'], ['PoliUmum', 'PoliBPJS', 'PoliAnak', 'PoliPenyakitDalam'])) {
                     $queryKey = '';
-                    if($_GET['jenis'] == 'PoliUmum'){
+                    if ($_GET['jenis'] == 'PoliUmum') {
                         $queryKey .= " AND registrasi_rawat.carabayar = 'umum'";
-                    }elseif($_GET['jenis'] == 'PoliBPJS'){
+                    } elseif ($_GET['jenis'] == 'PoliBPJS') {
                         $queryKey .= " AND registrasi_rawat.carabayar = 'bpjs'";
-                    }elseif($_GET['jenis'] == 'PoliAnak'){
+                    } elseif ($_GET['jenis'] == 'PoliAnak') {
                         $queryKey .= " AND registrasi_rawat.carabayar = 'spesialis anak'";
-                    }elseif($_GET['jenis'] == 'PoliPenyakitDalam'){
+                    } elseif ($_GET['jenis'] == 'PoliPenyakitDalam') {
                         $queryKey .= " AND registrasi_rawat.carabayar = 'spesialis penyakit dalam'";
                     }
 
@@ -146,14 +148,16 @@
                 <?php foreach ($getObat as $obat) { ?>
                     <?php
                     if ($_GET['jenis'] == 'Inap' or $_GET['jenis'] == 'Poli' or in_array($_GET['jenis'], ['PoliUmum', 'PoliBPJS', 'PoliAnak', 'PoliPenyakitDalam'])) {
-                        $getObatMasuk = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_masuk, (SELECT harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars($obat['kode_obat']) . "' AND  tgl_beli <= '$_GET[hingga]' ORDER BY idapotek DESC LIMIT 1) as harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars('$obat[kode_obat]') . "' AND tgl_beli <= '$_GET[hingga]'")->fetch_assoc();
+                        $getObatMasuk = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_masuk, (SELECT harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars($obat['kode_obat']) . "' AND  tgl_beli <= '$_GET[hingga]' ORDER BY idapotek DESC LIMIT 1) as harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars($obat['kode_obat']) . "' AND tgl_beli <= '$_GET[hingga]'")->fetch_assoc();
                         $namaObat = $obat['nama_obat'];
                         $kodeObat = $obat['kode_obat'];
                         $jumlahObatKeluar = $obat['jumlah_keluar'];
                         $hargaObatMasuk = $getObatMasuk['harga_beli'] ?? 0;
                         if ($_GET['jenis'] == 'Inap') {
-                            $getObatMaster = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$obat[kode_obat]'")->fetch_assoc();
-                            $hargaJual = $hargaObatMasuk * $getObatMaster['margin_inap'] / 100;
+                            // $getObatMaster = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$obat[kode_obat]'")->fetch_assoc();
+                            // $getObatMaster = $koneksi->query("SELECT *, margininap as margin_inap FROM apotek WHERE id_obat = '$obat[kode_obat]' AND tgl_beli <= '$_GET[hingga]' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
+                            // $hargaJual = $hargaObatMasuk * $getObatMaster['margin_inap'] / 100;
+                            $hargaJual = $obat['hargaJual'] ?? 0;
                             // $getBiayaRanap = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket = '%" . $obat['idobat'] . "%' LIMIT 1")->fetch_assoc();
                             // $getJumlahRanap = $koneksi->query("SELECT * FROM obat_rm WHERE idobat = '%" . $obat['idobat'] . "%' LIMIT 1")->fetch_assoc();
 
@@ -191,6 +195,34 @@
                     $totalHPP += $hargaTotalHPP;
                     $totalLaba += $laba;
                     ?>
+                <?php } ?>
+                <?php if (isset($_GET['jenis']) && $_GET['jenis'] == 'Inap') { ?>
+                    <?php
+                    // $getObat = $koneksi->query("SELECT o.kode_obat, o.nama_obat, SUM(o.jml_dokter) as jumlah_keluar, rd.besaran, rd.ket, o.idobat, rd.besaran / o.jml_dokter AS hargaJual FROM obat_rm AS o INNER JOIN registrasi_rawat AS r ON r.no_rm = o.idrm AND r.jadwal = o.tgl_pasien INNER JOIN rawatinapdetail AS rd ON TRIM(SUBSTRING_INDEX(rd.ket, ' ', -1)) = o.idobat WHERE r.perawatan = 'Rawat Inap' AND rd.tgl >= '$_GET[mulai]' AND rd.tgl <= '$_GET[hingga]' AND rd.biaya LIKE '%biayaobat%'  GROUP BY kode_obat, hargaJual ORDER BY o.nama_obat DESC;");
+
+                    $getObatRetur = $koneksi->query("SELECT *, SUM(jumlah_retur) as jumlah, rd.besaran, rd.ket, o.idretur, rd.besaran / o.jumlah_retur AS hargaJual FROM retur_obat_inap AS o INNER JOIN rawatinapdetail AS rd ON TRIM(SUBSTRING_INDEX(rd.ket, ' ', -1)) = o.idretur WHERE tgl_retur >= '$_GET[mulai]' AND tgl_retur <= '$_GET[hingga]' AND rd.biaya LIKE '%Retur%' GROUP BY kode_obat, hargaJual ORDER BY nama_obat DESC");
+                    foreach ($getObatRetur as $retur) {
+                    ?>
+                        <?php
+                        $getObatMasuk = $koneksi->query("SELECT *, SUM(jml_obat) as jumlah_masuk, (SELECT harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars($retur['kode_obat']) . "' AND  tgl_beli <= '$_GET[hingga]' ORDER BY idapotek DESC LIMIT 1) as harga_beli FROM apotek WHERE id_obat = '" . htmlspecialchars($retur['kode_obat']) . "' AND tgl_beli <= '$_GET[hingga]'")->fetch_assoc();
+                        ?>
+                        <tr>
+                            <td><?= $retur['kode_obat'] ?></td>
+                            <td><?= $retur['nama_obat'] ?></td>
+                            <td><?= $retur['jumlah'] ?></td>
+                            <td>Rp <?= number_format($retur['hargaJual'],0,0,'.') ?></td>
+                            <td>Rp <?= number_format($getObatMasuk['harga_beli'],0,0,'.') ?></td>
+                            <td>Rp <?= number_format($hargaTotal = $retur['hargaJual'] * $retur['jumlah'],0,0,'.') ?></td>
+                            <td>Rp <?= number_format($hargaTotalHPP = $getObatMasuk['harga_beli'] ,0,0,'.')* $retur['jumlah'] ?></td>
+                            <td>Rp <?= number_format($laba = $hargaTotal - $hargaTotalHPP,0,0,'.') ?></td>
+                            <td>Rp <?= number_format($retur['hargaJual'] - $getObatMasuk['harga_beli'],0,0,'.') ?></td>
+                        </tr>
+                        <?php
+                        $totalTotal += $hargaTotal;
+                        $totalHPP += $hargaTotalHPP;
+                        $totalLaba += $laba;
+                        ?>
+                    <?php } ?>
                 <?php } ?>
             </tbody>
             <tbody>
