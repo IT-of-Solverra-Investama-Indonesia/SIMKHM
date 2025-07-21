@@ -2,7 +2,7 @@
 
 //koneksi ke db
 
-require 'function.php';
+// require 'function.php';
 
 
 
