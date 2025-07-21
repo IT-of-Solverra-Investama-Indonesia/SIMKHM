@@ -262,6 +262,7 @@ if (isset($_GET['confirm'])) {
                         <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
                         <option value="gigi umum">gigi umum</option>
                         <option value="gigi bpjs">gigi bpjs</option>
+                        <option value="kosmetik">kosmetik</option>
                       </select>
                     </div>
                     <div class="col-md-6">
