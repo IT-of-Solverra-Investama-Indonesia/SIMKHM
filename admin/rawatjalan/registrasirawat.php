@@ -1,5 +1,5 @@
 <?php
-include '../rawatjalan/urutan.php';
+require '../rawatjalan/urutan.php';
 
 $id = $_GET['id'];
 $shift = $_SESSION['shift'];
@@ -260,6 +260,8 @@ if (isset($_GET['confirm'])) {
                         <option value="malam">malam</option>
                         <option value="spesialis anak">spesialis anak</option>
                         <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
+                        <option value="gigi umum">gigi umum</option>
+                        <option value="gigi bpjs">gigi bpjs</option>
                       </select>
                     </div>
                     <div class="col-md-6">
