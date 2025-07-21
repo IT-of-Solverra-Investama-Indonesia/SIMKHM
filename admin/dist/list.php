@@ -101,6 +101,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="isilab"){include '../lab/isilab.php';}
                    elseif ($hal=="detaillab2"){include '../lab/detaillab2.php';}
                    elseif ($hal=="ubahhasil"){include '../lab/ubahhasil.php';}
+                   elseif ($hal=="riwayatLab"){include '../lab/riwayatLab.php';}
 
                    elseif ($hal=="daftarlabinap"){include '../lab/daftarlabinap.php';}
                    elseif ($hal=="isilabinap"){include '../lab/isilabinap.php';}
