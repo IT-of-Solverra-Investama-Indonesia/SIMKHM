@@ -726,6 +726,8 @@ if (isset($_GET['status'])) {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } elseif ($getBPJS['carabayar'] == 'gigi bpjs') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  } elseif ($getBPJS['carabayar'] == 'kosmetik') {
+    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } else {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   }

@@ -170,6 +170,7 @@ date_default_timezone_set('Asia/Jakarta');
                         <option value="malam" <?= ($pecahrawat['carabayar'] === "gigi bpjs") ? "selected" : ""; ?>>gigi bpjs</option>
                         <option value="malam" <?= ($pecahrawat['carabayar'] === "spesialis anak") ? "selected" : ""; ?>>spesialis anak</option>
                         <option value="malam" <?= ($pecahrawat['carabayar'] === "spesialis penyakit dalam") ? "selected" : ""; ?>>spesialis penyakit dalam</option>
+                        <option value="malam" <?= ($pecahrawat['carabayar'] === "kosmetik") ? "selected" : ""; ?>>kosmetik</option>
                       </select>
                     </div>
                     <div class="col-md-6">
@@ -279,6 +280,9 @@ if (isset($_POST['edit'])) {
         $biaya = 35000;
         break;
       case 'gigi bpjs':
+        $biaya = 0;
+        break;
+      case 'kosmetik':
         $biaya = 0;
         break;
       default:
