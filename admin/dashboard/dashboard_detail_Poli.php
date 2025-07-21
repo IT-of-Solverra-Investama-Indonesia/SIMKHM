@@ -95,6 +95,7 @@ $randomToken = encrypt("Solverra Investama", $key, $iv);
                     <th class="text-capitalize">Ranap</th>
                     <th class="text-capitalize">LabPoli</th>
                     <th class="text-capitalize">ODC</th>
+                    <th class="text-capitalize">Homecare</th>
                     <th class="text-capitalize">JumlahDatang</th>
                     <th class="text-capitalize">pendapatanKasir</th>
                     <th class="text-capitalize">pendapataAkuntan</th>
@@ -148,7 +149,10 @@ $randomToken = encrypt("Solverra Investama", $key, $iv);
                                 // echo $totalAkuntan = 0;
                             }
                             ?>
-                            <?= $koneksi->query("SELECT * FROM layanan WHERE layanan LIKE '%ODC%' AND DATE_FORMAT(tgl_layanan, '%y/%m') = '$poli[bulan]'")->num_rows ?>
+                            <?= $koneksi->query("SELECT * FROM biaya_rawat WHERE biaya_lain LIKE '%ODC%' AND DATE_FORMAT(created_at, '%y/%m') = '$poli[bulan]'")->num_rows ?>
+                        </td>
+                        <td>
+                            <?= $koneksi->query("SELECT * FROM biaya_rawat WHERE biaya_lain LIKE '%homecare%' AND DATE_FORMAT(created_at, '%y/%m') = '$poli[bulan]'")->num_rows ?>
                         </td>
                         <td><?php echo $poli['jumlah'] ?> || <?php echo number_format($poli['jumlah'] / $poli['harii'], 2) ?></td>
                         <?php
