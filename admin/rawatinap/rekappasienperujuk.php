@@ -6,10 +6,11 @@
                 <form method="get">
                     <div class="row g-1">
                         <div class="col-5">
-                            <input onblur="this.type='text'" onfocus="(this.type='date')" placeholder="Dari Tanggal" name="date_start" class="form-control form-control-sm" value="<?= $date_start = $_GET['daet_start'] ?? '0000-00-00' ?>" id="">
+                            <input type="text" name="halaman" hidden value="rekappasienperujuk" id="">
+                            <input onblur="this.type='text'" onfocus="(this.type='date')" placeholder="Dari Tanggal" name="date_start" class="form-control form-control-sm" value="<?= $date_start = $_GET['date_start'] ?? '0000-00-00' ?>" id="">
                         </div>
                         <div class="col-5">
-                            <input onblur="this.type='text'" onfocus="(this.type='date')" placeholder="Hingga Tanggal" name="date_end" class="form-control form-control-sm" value="<?= $date_end = $_GET['daet_start'] ?? date('Y-m-d') ?>" id="">
+                            <input onblur="this.type='text'" onfocus="(this.type='date')" placeholder="Hingga Tanggal" name="date_end" class="form-control form-control-sm" value="<?= $date_end = $_GET['date_end'] ?? date('Y-m-d') ?>" id="">
                         </div>
                         <div class="col-2">
                             <button class="btn btn-sm btn-primary"><i class="bi bi-search"></i></button>
@@ -60,13 +61,13 @@
 
     <?php if (isset($_GET['detail'])) { ?>
         <div class="">
-            <?php 
-                $date_start = $_GET['date_start'];
-                $date_end = $_GET['date_end'];
-                $perujuk = $_GET['perujuk'];
-                $perujuk_hp = $_GET['perujuk_hp'];
+            <?php
+            $date_start = $_GET['date_start'];
+            $date_end = $_GET['date_end'];
+            $perujuk = $_GET['perujuk'];
+            $perujuk_hp = $_GET['perujuk_hp'];
             ?>
-            <h5 class="card-title text-capitalize">Data Pasien Rujuk <?= $_GET['perujuk']?></h5>
+            <h5 class="card-title text-capitalize">Data Pasien Rujuk <?= $_GET['perujuk'] ?></h5>
             <div class="card shadow p-2">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped table-sm" style="font-size: 12px;">
@@ -81,18 +82,18 @@
                         </thead>
                         <tbody>
                             <?php
-                                $getData = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk = '$perujuk' AND perujuk_hp = '$perujuk_hp' AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' order by jadwal asc");
-                                $no = 1;
-                                foreach ($getData as $data) {
-                                ?>
-                                    <tr>
-                                        <td><?= $no++ ?></td>
-                                        <td><?= $data['nama_pasien'] ?></td>
-                                        <td><?= $data['no_rm'] ?></td>
-                                        <td><?= $data['jadwal'] ?></td>
-                                        <td><?= $data['status_antri'] ?></td>
-                                    </tr>
-                                <?php }
+                            $getData = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk = '$perujuk' AND perujuk_hp = '$perujuk_hp' AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' order by jadwal asc");
+                            $no = 1;
+                            foreach ($getData as $data) {
+                            ?>
+                                <tr>
+                                    <td><?= $no++ ?></td>
+                                    <td><?= $data['nama_pasien'] ?></td>
+                                    <td><?= $data['no_rm'] ?></td>
+                                    <td><?= $data['jadwal'] ?></td>
+                                    <td><?= $data['status_antri'] ?></td>
+                                </tr>
+                            <?php }
                             ?>
                         </tbody>
                     </table>
