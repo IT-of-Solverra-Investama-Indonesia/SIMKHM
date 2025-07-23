@@ -1,5 +1,5 @@
-<?php 
-    $koneksi = mysqli_connect("localhost", "root", "", "klinik");
+<?php
+$koneksi = mysqli_connect("localhost", "root", "", "klinik_wonorejo");
     $koneksimaster = mysqli_connect("localhost", "root", "", "klinik_master");
 // $koneksidoc = mysqli_connect("localhost", "root", "", "dokumen");
 

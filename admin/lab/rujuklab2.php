@@ -1,17 +1,12 @@
 
 <?php 
-
 $id=$_GET['id'];
-
 // $user=$_SESSION['login']['username'];
-
 // $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $ambil=$koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$id' ");
 $pecah=$ambil->fetch_assoc();
-
 $ambil2=$koneksi->query("SELECT * FROM daftartes GROUP BY tipe ");
 // $pecah=$ambil->fetch_assoc();
-
 $p=$koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_assoc();
 
  ?>

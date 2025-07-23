@@ -1,18 +1,12 @@
-
 <?php 
-
-$tanggal=$_GET['tgl'];
-$id=$_GET['id'];
-
-$user=$_SESSION['admin']['username'];
-$tgl=date('Ymd');
-
-
-// $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
-$ambil=$koneksi->query("SELECT * FROM lab WHERE id_lab_inap='$id' AND tgl='$tanggal'");
-$pecah=$ambil->fetch_assoc();
-
- ?>
+  $tanggal=$_GET['tgl'];
+  $id=$_GET['id'];
+  $user=$_SESSION['admin']['username'];
+  $tgl=date('Ymd');
+  // $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
+  $ambil=$koneksi->query("SELECT * FROM lab WHERE id_lab_inap='$id' AND tgl='$tanggal'");
+  $pecah=$ambil->fetch_assoc();
+?>
 
 
 <!DOCTYPE html>

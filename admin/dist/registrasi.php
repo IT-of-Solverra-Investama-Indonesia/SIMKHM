@@ -180,37 +180,32 @@ if (!isset($_SESSION['login'])) {
 if (isset ($_POST['save'])) 
 
 {
-$username=htmlspecialchars($_POST["username"]);
-$namalengkap=htmlspecialchars($_POST["namalengkap"]);
-$password=($_POST["password"]);
-$level=($_POST["level"]);
+$username = sani($_POST["username"]);
+$namalengkap = sani($_POST["namalengkap"]);
+$password = sani($_POST["password"]);
+$level = sani($_POST["level"]);
+$nik = sani($_POST["nik"]);
 
-$query = mysqli_query($koneksi, "SELECT * FROM admin WHERE username = '$username';"); 
-        
-    if($query->num_rows > 0) {
-       echo "
-    <script>
+// Query untuk cek username
+$stmtCheck = $koneksi->prepare("SELECT * FROM admin WHERE username = ?");
+$stmtCheck->bind_param("s", $username);
+$stmtCheck->execute();
+$resultCheck = $stmtCheck->get_result();
 
-    alert('Username telah didaftarkan, silahkan coba username lain.');
+if ($resultCheck->num_rows > 0) {
+  echo "
+  <script>
+  alert('Username telah didaftarkan, silahkan coba username lain.');
+  document.location.href='registrasi.php';
+  </script>
+  ";
+} else {
+  // Query untuk insert data
+  $stmtInsert = $koneksi->prepare("INSERT INTO admin (username, password, namalengkap, level, nik) VALUES (?, ?, ?, ?, ?)");
+  $stmtInsert->bind_param("sssss", $username, $password, $namalengkap, $level, $nik);
+  $stmtInsert->execute();
 
-    document.location.href='registrasi.php';
-
-    </script>
-
-    ";
-    }
-    
-    else{
-
-  $koneksi->query("INSERT INTO admin
-
-    (username, password, namalengkap, level, nik)
-
-    VALUES ('$username', '$password', '$namalengkap', '$_POST[level]', '$_POST[nik]')
-
-    ");
-
-  if (mysqli_affected_rows($koneksi)>0) {
+  if (mysqli_affected_rows($koneksi) > 0) {
     echo "
     <script>
     alert('Berhasil!');
@@ -225,7 +220,6 @@ $query = mysqli_query($koneksi, "SELECT * FROM admin WHERE username = '$username
     </script>
     ";
   }
-
 }
 }
 

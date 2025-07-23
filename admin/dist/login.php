@@ -22,12 +22,15 @@
   }
   //jika tombol login di tekan
   if (isset ($_POST["login"])) {
-      $username=$_POST["username"];
-      $password=$_POST["password"];
-      $shift=$_POST['shift'];
-      $dokter_rawat=$_POST['dokter_rawat'];
-      $result=mysqli_query($koneksi, "SELECT * FROM admin WHERE username='$username'");
-      $baris=mysqli_num_rows($result);
+      $username = sani($_POST["username"]);
+      $password = sani($_POST["password"]);
+      $shift = sani($_POST['shift']);
+      $dokter_rawat = sani($_POST['dokter_rawat']);
+      $stmt = $koneksi->prepare("SELECT * FROM admin WHERE username = ?");
+      $stmt->bind_param("s", $username);
+      $stmt->execute();
+      $result = $stmt->get_result();
+      $baris = $result->num_rows;
       // var_dump($baris);
       //cek username
       if (mysqli_num_rows($result)===1) {
