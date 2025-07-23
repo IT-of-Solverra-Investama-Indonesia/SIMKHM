@@ -1,9 +1,13 @@
 <?php 
+    // function sani($value) {
+    //     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    // }
+
     if(isset($_SESSION['kosmetik'])){
-        $id_pasien = $_SESSION['kosmetik']['idpasien'];
-        $products = $koneksi->query("SELECT cart_kosmetik.*,produk_kosmetik.* FROM cart_kosmetik join produk_kosmetik on cart_kosmetik.produk_id = produk_kosmetik.id_produk  WHERE cart_kosmetik.user_id = '$id_pasien'");
+        $id_pasien = sani($_SESSION['kosmetik']['idpasien']);
+        $products = $koneksi->query("SELECT cart_kosmetik.*, produk_kosmetik.* FROM cart_kosmetik JOIN produk_kosmetik ON cart_kosmetik.produk_id = produk_kosmetik.id_produk WHERE cart_kosmetik.user_id = '$id_pasien'");
     }else{
-        $products = $koneksi->query("SELECT cart_kosmetik.*,produk_kosmetik.* FROM cart_kosmetik join produk_kosmetik on cart_kosmetik.produk_id = produk_kosmetik.id_produk LIMIT 0");
+        $products = $koneksi->query("SELECT cart_kosmetik.*, produk_kosmetik.* FROM cart_kosmetik JOIN produk_kosmetik ON cart_kosmetik.produk_id = produk_kosmetik.id_produk LIMIT 0");
     }
 ?>
 <div class="container">
@@ -154,26 +158,34 @@
             <?php
             if (isset($_GET['add'])) {
                 if (isset($_SESSION['kosmetik'])) {
-                    $getProd = $koneksi->query("SELECT * FROM produk_kosmetik WHERE id_produk = '" . htmlspecialchars($_GET['add']) . "'")->fetch_assoc();
-                    $user_id = $_SESSION['kosmetik']['idpasien'];
-                    $username = $_SESSION['kosmetik']['nama_lengkap'];
-                    $produk_id = $getProd['id_produk'];
-                    $produk = $getProd['nama_produk'];
-                    $harga = $getProd['harga'];
-                    $diskon = $getProd['diskon'];
+                    $add_id = sani($_GET['add']);
+                    $kategori = isset($_GET['kategori']) ? sani($_GET['kategori']) : '';
+                    $getProdStmt = $koneksi->prepare("SELECT * FROM produk_kosmetik WHERE id_produk = ?");
+                    $getProdStmt->bind_param("s", $add_id);
+                    $getProdStmt->execute();
+                    $getProd = $getProdStmt->get_result()->fetch_assoc();
+
+                    $user_id = sani($_SESSION['kosmetik']['idpasien']);
+                    $username = sani($_SESSION['kosmetik']['nama_lengkap']);
+                    $produk_id = sani($getProd['id_produk']);
+                    $produk = sani($getProd['nama_produk']);
+                    $harga = sani($getProd['harga']);
+                    $diskon = sani($getProd['diskon']);
                     $jumlah = '1';
                     $sub_harga = 1 * $getProd['harga'];
 
-                    $koneksi->query("INSERT INTO cart_kosmetik (user_id, username, produk_id, produk, harga, diskon, jumlah, sub_harga) VALUES ('$user_id', '$username', '$produk_id', '$produk', '$harga', '$diskon', '$jumlah', '$sub_harga')");
-                    
-                    if($_GET['kategori'] =='Konsultasi'){
+                    $insertStmt = $koneksi->prepare("INSERT INTO cart_kosmetik (user_id, username, produk_id, produk, harga, diskon, jumlah, sub_harga) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $insertStmt->bind_param("ssssssii", $user_id, $username, $produk_id, $produk, $harga, $diskon, $jumlah, $sub_harga);
+                    $insertStmt->execute();
+
+                    if ($kategori == 'Konsultasi') {
                         echo "
                             <script>
                                 alert('Berhasil Menambahkan Produk Ke Keranjang, Tetapi Untuk Menggunakan Produk Ini, Silahkan Lakukan Konsultasi Terlebih Dahulu Kepada Dokter Kami !');
                                 document.location.href='chat.php';
                             </script>
                         ";
-                    }else{
+                    } else {
                         echo "
                             <script>
                                 alert('Berhasil Menambahkan Produk Ke Keranjang');

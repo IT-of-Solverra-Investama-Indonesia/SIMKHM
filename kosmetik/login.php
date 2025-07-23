@@ -1,162 +1,176 @@
 <?php session_start(); ?>
 
 <?php
-  
-  include "function.php";
-  if (isset($_SESSION['kosmetik']['nama_lengkap'])) {
-    header("Location: index.php?halaman=shop");
-    exit();
-  } 
+
+include "function.php";
+if (isset($_SESSION['kosmetik']['nama_lengkap'])) {
+  header("Location: index.php?halaman=shop");
+  exit();
+}
 ?>
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Klinik Husada Mulia</title>
-    <link rel="icon" type="image/png" href="../admin/dist/assets/img/khm.png" />
-    <style>
-      .hide-form {
-        visibility : hidden;
-        max-height: 0.1px;
-        overflow : hidden;
-      }
-    </style>
-    <link href="../pasien/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../pasien/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="../pasien/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="../pasien/assets/vendor/quill/quill.snow.css" rel="stylesheet">
-    <link href="../pasien/assets/vendor/quill/quill.bubble.css" rel="stylesheet">
-    <link href="../pasien/assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="../pasien/assets/vendor/simple-datatables/style.css" rel="stylesheet">
-    <link href="../pasien/assets/css/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> -->
-  </head>
-  <body>
-    <div class="container">
-      <center>
-          <div style="max-width: 500px;" class="m-auto mt-4">
-              <img src="../admin/dist/assets/img/khm.png" class="mb-4" style="width: 30%;" alt="">
-              <?php if(!isset($_GET['pasien'])){?> <!-- Halaman Awal memilih sebagai pasien lama atau baru -->
-                <!-- <a href="?pasien=lama" class="btn btn-success mb-3 w-100">Pasien Lama</a>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Klinik Husada Mulia</title>
+  <link rel="icon" type="image/png" href="../admin/dist/assets/img/khm.png" />
+  <style>
+    .hide-form {
+      visibility: hidden;
+      max-height: 0.1px;
+      overflow: hidden;
+    }
+  </style>
+  <link href="../pasien/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../pasien/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../pasien/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="../pasien/assets/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="../pasien/assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <link href="../pasien/assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="../pasien/assets/vendor/simple-datatables/style.css" rel="stylesheet">
+  <link href="../pasien/assets/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> -->
+</head>
+
+<body>
+  <div class="container">
+    <center>
+      <div style="max-width: 500px;" class="m-auto mt-4">
+        <img src="../admin/dist/assets/img/khm.png" class="mb-4" style="width: 30%;" alt="">
+        <?php if (!isset($_GET['pasien'])) { ?> <!-- Halaman Awal memilih sebagai pasien lama atau baru -->
+          <!-- <a href="?pasien=lama" class="btn btn-success mb-3 w-100">Pasien Lama</a>
                 <a href="?pasien=baru" class="btn btn-success w-100">Pasien Baru</a> -->
-                <div class="card shadow p-2 w-100">
-                  <h5><b>Login</b></h5>
-                  <p class="mt-0 mb-1" style="font-size: 12px;">Login Menggunakan Email dan Password yang Sudah Didaftarkan</p>
-                  <br>
-                  <form method="post">
-                    <p class="mb-0" align="left">Email :</p>
-                    <input type="email" class="form-control w-100 mb-2" name="email" placeholder ="Email">
-                    <p class="mb-0" align="left">Password :</p>
-                    <div class="input-group mb-3">
-                      <input type="password" class="form-control mb-2" name="password" id="password" placeholder="Password" aria-label="Recipient's password" aria-describedby="button-addon2">
-                      <button class="btn h-100 btn-outline-success" type="button" id="button-addon2" onclick="togglePassword()"><i class="bi bi-eye" id="toggleIcon"></i></button>
-                    </div>
-                    <p class="m-0" align="left" style="font-size: 11px; text-decorative: bold; ">
-                      <a href="forget_password.php" style="text-decoration: none;">Lupa Passowrd ??</a><br><br>
-                      <a href="../pasien/login.php" class="text-blue" style="text-decoration: underline blue;"><b>Klik Untuk Pendaftaran Berobat Online</b></a>
-                    </p>
-                    <a href="?pasien=baru" class="btn btn-sm btn-success float-end ms-2">Register</a>
-                    <button type="submit" name="check" class="btn btn-sm btn-success float-end ">Login</button>
-                  </form>
-                </div>
-                <script>
-                    function togglePassword() {
-                        const passwordField = document.getElementById('password');
-                        const toggleIcon = document.getElementById('toggleIcon');
-                        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                        passwordField.setAttribute('type', type);
-                        toggleIcon.classList.toggle('bi-eye');
-                        toggleIcon.classList.toggle('bi-eye-slash');
-                    }
-                </script>
-                <?php
-                  if(isset($_POST['check'])){
-                    $email = htmlspecialchars($_POST['email']);
-                    $password = htmlspecialchars($_POST['password']);
-                    $getPasien = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE email = '$email' and password = '$password' Limit 1");
-                    if ($getPasien->num_rows > 0) {
-                      $row = $getPasien->fetch_assoc();
-                      $_SESSION['kosmetik'] = $row;
-                      
-                      echo  "
+          <div class="card shadow p-2 w-100">
+            <h5><b>Login</b></h5>
+            <p class="mt-0 mb-1" style="font-size: 12px;">Login Menggunakan Email dan Password yang Sudah Didaftarkan</p>
+            <br>
+            <form method="post">
+              <p class="mb-0" align="left">Email :</p>
+              <input type="email" class="form-control w-100 mb-2" name="email" placeholder="Email">
+              <p class="mb-0" align="left">Password :</p>
+              <div class="input-group mb-3">
+                <input type="password" class="form-control mb-2" name="password" id="password" placeholder="Password" aria-label="Recipient's password" aria-describedby="button-addon2">
+                <button class="btn h-100 btn-outline-success" type="button" id="button-addon2" onclick="togglePassword()"><i class="bi bi-eye" id="toggleIcon"></i></button>
+              </div>
+              <p class="m-0" align="left" style="font-size: 11px; text-decorative: bold; ">
+                <a href="forget_password.php" style="text-decoration: none;">Lupa Password ??</a><br><br>
+                <a href="../pasien/login.php" class="text-blue" style="text-decoration: underline blue;"><b>Klik Untuk Pendaftaran Berobat Online</b></a>
+              </p>
+              <a href="?pasien=baru" class="btn btn-sm btn-success float-end ms-2">Register</a>
+              <button type="submit" name="check" class="btn btn-sm btn-success float-end ">Login</button>
+            </form>
+          </div>
+          <script>
+            function togglePassword() {
+              const passwordField = document.getElementById('password');
+              const toggleIcon = document.getElementById('toggleIcon');
+              const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+              passwordField.setAttribute('type', type);
+              toggleIcon.classList.toggle('bi-eye');
+              toggleIcon.classList.toggle('bi-eye-slash');
+            }
+          </script>
+          <?php
+          if (isset($_POST['check'])) {
+            $email = sani($_POST['email']);
+            $password = sani($_POST['password']);
+            $getPasien = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE email = ? LIMIT 1");
+            $getPasien->bind_param("s", $email);
+            $getPasien->execute();
+            $result = $getPasien->get_result();
+            if ($result->num_rows > 0) {
+              $row = $result->fetch_assoc();
+              if ($password === $row['password']) {
+                $_SESSION['kosmetik'] = $row;
+                echo  "
                         <script>
                           alert('Berhasil Login!');
                           document.location.href='index.php?halaman=shop';
                         </script>
-                      ";
-                    }else{
-                      echo  "
+                        ";
+              } else {
+                echo  "
                         <script>
                           alert('Username Dan Sandi Salah');
                           document.location.href='login.php';
                         </script>
+                        ";
+              }
+            } else {
+              echo  "
+                      <script>
+                        alert('Username Dan Sandi Salah');
+                        document.location.href='login.php';
+                      </script>
                       ";
-                    }
-                  }
-                ?>
-                
-              <?php }else{?> <!-- Jika Sudah memilih -->
-                <?php if($_GET['pasien'] == 'lama'){?><!-- jika memilih sebagai pasien lama -->
-                  <script>
-                    document.location.href='login.php';
-                  </script>
-                <?php }elseif($_GET['pasien'] == 'baru'){?><!-- jika memilih sebagai pasien baru -->
-                  <div class="card shadow p-2">
-                    <h4>Daftar Pasien</h4>
-                    <form method="POST">
-                      <div class="row" id="f1">
-                        <div class="col-md-12 mb-2">
-                          <p class="mb-0" align="left">Email</p>
-                          <input type="email" required class="form-control"  name="email" id="inputName5" placeholder="Masukan Email Anda">
-                        </div> 
-                        <div class="col-md-12 mb-2">
-                          <p class="mb-0" align="left">Password</p>
-                          <input type="password" required class="form-control"  name="password" id="inputName5" placeholder="Password">
-                        </div> 
-                        <div class="col-md-12 mb-2">
-                          <p class="mb-0" align="left">Nama Lengkap</p>
-                          <input type="text" required class="form-control"  name="nama_lengkap" id="inputName5" placeholder="Masukkan Nama Pasien">
-                        </div> 
-                        <!-- <div class="col-md-12 mb-2">
+            }
+            $getPasien->close();
+          }
+          ?>
+
+        <?php } else { ?> <!-- Jika Sudah memilih -->
+          <?php if ($_GET['pasien'] == 'lama') { ?><!-- jika memilih sebagai pasien lama -->
+            <script>
+              document.location.href = 'login.php';
+            </script>
+          <?php } elseif ($_GET['pasien'] == 'baru') { ?><!-- jika memilih sebagai pasien baru -->
+            <div class="card shadow p-2">
+              <h4>Daftar Pasien</h4>
+              <form method="POST">
+                <div class="row" id="f1">
+                  <div class="col-md-12 mb-2">
+                    <p class="mb-0" align="left">Email</p>
+                    <input type="email" required class="form-control" name="email" id="inputName5" placeholder="Masukan Email Anda">
+                  </div>
+                  <div class="col-md-12 mb-2">
+                    <p class="mb-0" align="left">Password</p>
+                    <input type="password" required class="form-control" name="password" id="inputName5" placeholder="Password">
+                  </div>
+                  <div class="col-md-12 mb-2">
+                    <p class="mb-0" align="left">Nama Lengkap</p>
+                    <input type="text" required class="form-control" name="nama_lengkap" id="inputName5" placeholder="Masukkan Nama Pasien">
+                  </div>
+                  <!-- <div class="col-md-12 mb-2">
                           <p class="mb-0" align="left">Nama Ayah</p>
                           <input type="text" required class="form-control"  name="nama_ibu" id="inputName5" placeholder="Masukkan Nama Ayah Pasien">
                         </div>  -->
-                        <div class="col-md-12 mb-2">
-                          <p class="mb-0" align="left">Tanggal Lahir</p>
-                          <div class="row">
-                            <div class="col-4">
-                              <select name="tanggal" class="form-control mb-2">
-                                <option hidden>Tanggal</option>
-                                <?php for ($i=1; $i <= 31; $i++) { ?>
-                                  <?php if($i < 10){?>
-                                    <option value="0<?= $i?>">0<?= $i?></option>
-                                  <?php }else{?>
-                                    <option value="<?= $i?>"><?= $i?></option>
-                                  <?php }?>
-                                <?php }?>
-                              </select>
-                            </div>
-                            <div class="col-3">
-                              <select name="bulan" class="form-control mb-2">
-                                <option hidden>Bulan</option>
-                                <?php for ($i=1; $i <= 12; $i++) { ?>
-                                  <?php if($i < 10){?>
-                                    <option value="0<?= $i?>">0<?= $i?></option>
-                                  <?php }else{?>
-                                    <option value="<?= $i?>"><?= $i?></option>
-                                  <?php }?>
-                                <?php }?>
-                              </select>
-                            </div>
-                            <div class="col-5">
-                              <input type="number" name="tahun" class="form-control mb-2" placeholder="Tahun">
-                            </div>
-                          </div>
-                          <!-- <input type="date" required class="form-control" name="tgl_lahir" id="inputName5" placeholder="Masukkan Nama Pasien"> -->
-                        </div>
-                        <!-- <div class="col-md-12 mb-2">
+                  <div class="col-md-12 mb-2">
+                    <p class="mb-0" align="left">Tanggal Lahir</p>
+                    <div class="row">
+                      <div class="col-4">
+                        <select name="tanggal" class="form-control mb-2">
+                          <option hidden>Tanggal</option>
+                          <?php for ($i = 1; $i <= 31; $i++) { ?>
+                            <?php if ($i < 10) { ?>
+                              <option value="0<?= $i ?>">0<?= $i ?></option>
+                            <?php } else { ?>
+                              <option value="<?= $i ?>"><?= $i ?></option>
+                            <?php } ?>
+                          <?php } ?>
+                        </select>
+                      </div>
+                      <div class="col-3">
+                        <select name="bulan" class="form-control mb-2">
+                          <option hidden>Bulan</option>
+                          <?php for ($i = 1; $i <= 12; $i++) { ?>
+                            <?php if ($i < 10) { ?>
+                              <option value="0<?= $i ?>">0<?= $i ?></option>
+                            <?php } else { ?>
+                              <option value="<?= $i ?>"><?= $i ?></option>
+                            <?php } ?>
+                          <?php } ?>
+                        </select>
+                      </div>
+                      <div class="col-5">
+                        <input type="number" name="tahun" class="form-control mb-2" placeholder="Tahun">
+                      </div>
+                    </div>
+                    <!-- <input type="date" required class="form-control" name="tgl_lahir" id="inputName5" placeholder="Masukkan Nama Pasien"> -->
+                  </div>
+                  <!-- <div class="col-md-12 mb-2">
                           <p class="mb-0" align="left">Jenis Kelamin</p>
                           <select id="inputState" name="jenis_kelamin" required class="form-select">
                             <option selected>Pilih</option>
@@ -166,11 +180,11 @@
                           </select>
                         </div>
                       </div> -->
-                       <div class="col-md-12 mb-2">
-                          <p class="mb-0" align="left" for="inputCity" required class="form-label">No. HP </p>
-                          <input type="text" name="nohp" required class="form-control" id="inputCity" placeholder="Masukkan No. HP Pasien">
-                        </div> 
-                      <!-- <div class="row hide-form" id="f2">
+                  <div class="col-md-12 mb-2">
+                    <p class="mb-0" align="left" for="inputCity" required class="form-label">No. HP </p>
+                    <input type="text" name="nohp" required class="form-control" id="inputCity" placeholder="Masukkan No. HP Pasien">
+                  </div>
+                  <!-- <div class="row hide-form" id="f2">
                         <div class="col-md-12 mb-2">
                           <p class="mb-0" align="left" for="inputCity" required class="form-label">No. HP </p>
                           <input type="text" name="nohp" required class="form-control" id="inputCity" placeholder="Masukkan No. HP Pasien">
@@ -227,18 +241,18 @@
                           <input type="text" required class="form-control" name="no_bpjs" value="-">
                         </div>
                       </div> -->
-                      <!-- <div class="btn-group mb-3 mt-2" role="group" aria-label="Basic mixed styles example">
+                  <!-- <div class="btn-group mb-3 mt-2" role="group" aria-label="Basic mixed styles example">
                         <button type="button" onclick="changeForm()" class="btn btn-success" id="btn-nav"></button>
                       </div> -->
-                      <div id="btn-sub" class="">
-                        <p align="left" style="font-size: 12px;">
-                          <a href="login.php">Sudah Punya Akun ?</a><br>
-                        </p>
-                        <button type="submit" name="login" class="btn btn-success w-50 ">Ajukan Pendaftaran</button>
-                      </div>
-                    </form>
+                  <div id="btn-sub" class="">
+                    <p align="left" style="font-size: 12px;">
+                      <a href="login.php">Sudah Punya Akun ?</a><br>
+                    </p>
+                    <button type="submit" name="login" class="btn btn-success w-50 ">Ajukan Pendaftaran</button>
                   </div>
-                  <!-- <script>
+              </form>
+            </div>
+            <!-- <script>
                     function samakanAlamat() {
                       document.getElementById("alamatDomisili").innerHTML='Provinsi '+document.getElementById("provins").value +', '+'Kabupaten/Kota '+document.getElementById("kot").value +', '+'Kecamatan '+document.getElementById("kecamata").value +', '+ 'Desa/Kelurahan '+document.getElementById("keluraha").value +', '+ document.getElementById("alamatAsal").value +', '+ document.getElementById("kode_pos").value  ;
                     }
@@ -445,64 +459,63 @@
                         });
                     });
                   </script> -->
-                  <?php
-                    if(isset($_POST['login'])){
-                      $nama_lengkap=htmlspecialchars($_POST["nama_lengkap"]);
-                      // $nama_ibu=htmlspecialchars($_POST["nama_ibu"]);
-                      $nohp=htmlspecialchars($_POST["nohp"]);
-                      $tgl_lahir=date('Y-m-d', strtotime($_POST['tanggal'].'-'.$_POST['bulan'].'-'.$_POST['tahun']));
-                      // $tgl_lahir=htmlspecialchars($_POST["tgl_lahir"]);
-                      $jenis_identitas='KTP';
-                      // $no_identitas=htmlspecialchars($_POST["no_identitas"]);
-                      // $jenis_kelamin=htmlspecialchars($_POST["jenis_kelamin"]);
-                      // $provinsi=htmlspecialchars($_POST["provinsi"]);
-                      // $kota=htmlspecialchars($_POST["kota"]);
-                      // $kelurahan=htmlspecialchars($_POST["kelurahan"]);
-                      // $kecamatan=htmlspecialchars($_POST["kecamatan"]);
-                      // $kode_pos=htmlspecialchars($_POST["kode_pos"]);
-                      // $alamat=htmlspecialchars($_POST["alamat"]);
-                      $email=htmlspecialchars($_POST["email"]);
-                      $password=htmlspecialchars($_POST["password"]);
-                      $kategori='';
-                      $pembiayaan='';
-                      $status_nikah='';
-                      $foto ='';
+            <?php
+            if (isset($_POST['login'])) {
+              $nama_lengkap = sani($_POST["nama_lengkap"]);
+              // $nama_ibu = sani($_POST["nama_ibu"]);
+              $nohp = sani($_POST["nohp"]);
+              $tanggal = sani($_POST['tanggal']);
+              $bulan = sani($_POST['bulan']);
+              $tahun = sani($_POST['tahun']);
+              $tgl_lahir = date('Y-m-d', strtotime($tanggal . '-' . $bulan . '-' . $tahun));
+              // $tgl_lahir = sani($_POST["tgl_lahir"]);
+              $jenis_identitas = 'KTP';
+              // $no_identitas = sani($_POST["no_identitas"]);
+              // $jenis_kelamin = sani($_POST["jenis_kelamin"]);
+              // $provinsi = sani($_POST["provinsi"]);
+              // $kota = sani($_POST["kota"]);
+              // $kelurahan = sani($_POST["kelurahan"]);
+              // $kecamatan = sani($_POST["kecamatan"]);
+              // $kode_pos = sani($_POST["kode_pos"]);
+              // $alamat = sani($_POST["alamat"]);
+              $email = sani($_POST["email"]);
+              $password = sani($_POST["password"]);
+              $kategori = '';
+              $pembiayaan = '';
+              $status_nikah = '';
+              $foto = '';
 
-                      // Ambil Nomor RM Terakhir + 1
-                      $no_rm='';
+              // Ambil Nomor RM Terakhir + 1
+              $no_rm = '';
 
-                      //hitung usia
-                      $lahir    =new DateTime($tgl_lahir);
-                      $today        =new DateTime();
-                      $umur = $today->diff($lahir);
-                      $umur2=$umur->y." Tahun,".$umur->m." Bulan,".$umur->d." Hari";
+              // hitung usia
+              $lahir = new DateTime($tgl_lahir);
+              $today = new DateTime();
+              $umur = $today->diff($lahir);
+              $umur2 = $umur->y . " Tahun," . $umur->m . " Bulan," . $umur->d . " Hari";
 
-                      // $koneksi->query("INSERT INTO pasien_kosmetik (nama_lengkap, nama_ibu, nohp, email, no_identitas,  tgl_lahir, jenis_kelamin, jenis_identitas, provinsi, kota, kelurahan, kecamatan, kode_pos, alamat, kategori, status_nikah, pembiayaan, foto, no_rm, umur, no_bpjs, password) VALUES ('$nama_lengkap', '$nama_ibu', '$nohp', '$email', '$no_identitas', '$tgl_lahir', '$jenis_kelamin', '$jenis_identitas', '$provinsi', '$kota', '$kelurahan', '$kecamatan',  '$kode_pos', '$alamat', '$kategori', '$status_nikah','$pembiayaan', '$foto', '$no_rm', '$umur2','$_POST[no_bpjs]', '$password')");
-                      $koneksi->query("INSERT INTO pasien_kosmetik (nama_lengkap, nohp, email,
-                      tgl_lahir, jenis_identitas,
-                       umur, password) 
-                      VALUES ('$nama_lengkap','$nohp', '$email', '$tgl_lahir', '$jenis_identitas', 
-                        '$umur2', '$password')");
+              $stmt = $koneksi->prepare("INSERT INTO pasien_kosmetik (nama_lengkap, nohp, email, tgl_lahir, jenis_identitas, umur, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
+              $stmt->bind_param("sssssss", $nama_lengkap, $nohp, $email, $tgl_lahir, $jenis_identitas, $umur2, $password);
+              $stmt->execute();
+              $stmt->close();
 
-                      echo  "
+              echo  "
                           <script>
                             alert('Yeayyy, Akun sudah terdaftar, silahkan login menggunakan email dan password yang sudah di daftarkan');
                             document.location.href='login.php';
-
-                            // window.open('https://api.whatsapp.com/send?phone=6282233880001&text=Pendaftaran%20Pasien%20Kosmetik%20Baru%20%28Online%29%0A1.%20Nama%20%3A%20$nama_lengkap%0A2.%20Nama%20Ayah%20%3A%20$nama_ibu%0A3.%20Nomor%20Hp%20%3A%20$nohp%0A4.%20Tanggal%20Lahir%20%3A%20$tgl_lahir%0A5.%20Nomor%20KTP%20%3A%20$no_identitas%0A6.%20Alamat%20Sekarang%20%3A%20$alamat', '_blank')
-                            // document.location.href='https://api.whatsapp.com/send?phone=6282233880001&text=Pendaftaran%20Pasien%20Baru%20%28Online%29%0A1.%20Nama%20%3A%20$nama_lengkap%0A2.%20Nama%20Ayah%20%3A%20$nama_ibu%0A3.%20Nomor%20Hp%20%3A%20$nohp%0A4.%20Tanggal%20Lahir%20%3A%20$tgl_lahir%0A5.%20Nomor%20KTP%20%3A%20$no_identitas%0A6.%20Alamat%20Sekarang%20%3A%20$alamat';
                           </script>
                         ";
-                    }
-                  ?>
-                <?php }?>
-              <?php }?>
-          </div>
-      </center>
-      <br>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-  </body>
+            }
+            ?>
+          <?php } ?>
+        <?php } ?>
+      </div>
+    </center>
+    <br>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</body>
+
 </html>

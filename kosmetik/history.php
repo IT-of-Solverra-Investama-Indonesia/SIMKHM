@@ -17,7 +17,11 @@
         </thead>
         <tbody>
             <?php
-                $getHis = $koneksi->query("SELECT * FROM pemesanan WHERE user_id = '" . $_SESSION['kosmetik']['idpasien'] . "' GROUP BY code_nota ORDER BY created_at DESC");
+                $user_id = sani($_SESSION['kosmetik']['idpasien']);
+                $stmtHis = $koneksi->prepare("SELECT * FROM pemesanan WHERE user_id = ? GROUP BY code_nota ORDER BY created_at DESC");
+                $stmtHis->bind_param("s", $user_id);
+                $stmtHis->execute();
+                $getHis = $stmtHis->get_result();
                 foreach ($getHis as $data) {
             ?>
                 <tr>
@@ -37,7 +41,12 @@
                                 <tbody>
                                     <?php
                                         $totalProduk = 0;
-                                        $getProd = $koneksi->query("SELECT * FROM pemesanan WHERE user_id = '" . $_SESSION['kosmetik']['idpasien'] . "' AND code_nota = '$data[code_nota]'");
+                                        $stmtProd = $koneksi->prepare("SELECT * FROM pemesanan WHERE user_id = ? AND code_nota = ?");
+                                        $user_id_prod = sani($_SESSION['kosmetik']['idpasien']);
+                                        $code_nota_prod = sani($data['code_nota']);
+                                        $stmtProd->bind_param("ss", $user_id_prod, $code_nota_prod);
+                                        $stmtProd->execute();
+                                        $getProd = $stmtProd->get_result();
                                         foreach ($getProd as $prod){
                                     ?>
                                     <tr>
@@ -105,18 +114,30 @@ if (isset($_POST['update'])) {
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
-    $fileName = uniqid() . $_FILES['foto_bukti']['name'];
+
+    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    $file_type = $_FILES['foto_bukti']['type'];
+    $file_ext = strtolower(pathinfo($_FILES['foto_bukti']['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($file_type, $allowed_types) && !in_array($file_ext, ['jpg', 'jpeg', 'png', 'pdf'])) {
+        echo "<script>alert('Hanya file gambar (JPG, JPEG, PNG) dan PDF yang diperbolehkan!'); window.history.back();</script>";
+        exit;
+    }
+
+    $fileName = uniqid() . sani($_FILES['foto_bukti']['name']);
     move_uploaded_file($_FILES["foto_bukti"]["tmp_name"], $target_dir . $fileName);
 
+    $stmt = $koneksi->prepare("UPDATE pemesanan SET bukti_pembayaran = ?, status = 'Diproses' WHERE code_nota = ?");
+    $stmt->bind_param("ss", $fileName, sani($_POST['code_nota']));
+    $stmt->execute();
+    $stmt->close();
 
-    $koneksi->query("UPDATE pemesanan SET bukti_pembayaran ='$fileName',status='Diproses' 
-        where code_nota = $_POST[code_nota]");
     echo "
-            <script>
-                alert('Berhasil mengirimkan bukti pembayaran');
-                document.location.href='index.php?halaman=history';
-            </script>
-        ";
+        <script>
+            alert('Berhasil mengirimkan bukti pembayaran');
+            document.location.href='index.php?halaman=history';
+        </script>
+    ";
 }
 
 ?>

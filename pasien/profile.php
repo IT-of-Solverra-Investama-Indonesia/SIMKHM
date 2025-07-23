@@ -6,7 +6,13 @@
       exit();
   }
   include "function.php";
-  $getPasien = $koneksi->query("SELECT * FROM pasien WHERE nohp = '".$_SESSION['pasien']['nohp']."' AND password = '".$_SESSION['pasien']['password']."' LIMIT 1")->fetch_assoc();
+  // Sanitize session variables
+  $nohp = sani($_SESSION['pasien']['nohp']);
+  $password = sani($_SESSION['pasien']['password']);
+  $stmt = $koneksi->prepare("SELECT * FROM pasien WHERE nohp = ? AND password = ? LIMIT 1");
+  $stmt->bind_param("ss", $nohp, $password);
+  $stmt->execute();
+  $getPasien = $stmt->get_result()->fetch_assoc();
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,15 +59,21 @@
     </div>
     <?php 
         if(isset($_POST['update'])){
-            $password  = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $koneksi->query("UPDATE pasien SET nohp = '$_POST[nohp]', password='$password' WHERE idpasien = '$getPasien[idpasien]'");
+            $nohp = sani($_POST['nohp']);
+            $password_plain = sani($_POST['password']);
+            $password_hashed = password_hash($password_plain, PASSWORD_DEFAULT);
+
+            $stmt = $koneksi->prepare("UPDATE pasien SET nohp = ?, password = ? WHERE idpasien = ?");
+            $stmt->bind_param("ssi", $nohp, $password_hashed, $getPasien['idpasien']);
+            $stmt->execute();
+
             echo  "
-                <script>
-                    alert('Update Berhasil');
-                    document.location.href='menupasien.php';
-                </script>
+          <script>
+              alert('Update Berhasil');
+              document.location.href='menupasien.php';
+          </script>
             ";
-            $_SESSION['pasien']['password'] = $password;
+            $_SESSION['pasien']['password'] = $password_hashed;
         }
     ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

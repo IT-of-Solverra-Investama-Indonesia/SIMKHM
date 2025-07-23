@@ -19,12 +19,14 @@ include "function.php";
 
 // $perawat=$_SESSION['admin']['username'];
 // $id=$_GET['id'];
-$norm = $_SESSION['pasien']['no_rm'];
+$norm = sani($_SESSION['pasien']['no_rm']);
 
+$date = date("Y-m-d");
 
-$date= date("Y-m-d");
-
-  $pasien=$koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm = '$norm' ORDER BY idrawat DESC;"); 
+$stmt = $koneksi->prepare("SELECT * FROM registrasi_rawat WHERE no_rm = ? ORDER BY idrawat DESC");
+$stmt->bind_param("s", $norm);
+$stmt->execute();
+$pasien = $stmt->get_result();
 
 
 ?>
@@ -188,40 +190,28 @@ $date= date("Y-m-d");
 <?php 
 
 
-if(isset($_GET['hapus'])){
+if (isset($_GET['hapus'])) {
+  $id = sani($_GET['id']);
+  $stmt = $koneksi->prepare("DELETE FROM registrasi_rawat WHERE idrawat = ?");
+  $stmt->bind_param("s", $id);
+  $stmt->execute();
 
-$koneksi->query("DELETE FROM registrasi_rawat WHERE idrawat='$_GET[id]' "); 
-
-	if (mysqli_affected_rows($koneksi)>0) {
-
-	echo "
-
-	<script>
-
-	alert('Data berhasil terhapus!');
-
-	document.location.href='riwayatdaftar.php';
-
-	</script>
-
-	";
-
-	} else {
-
-	echo "
-
-	<script>
-
-	alert('GAGAL MENGHAPUS DATA');
-
-	document.location.href='riwayatdaftar.php';
-
-	</script>
-
-	";
-
-	}
-
+  if ($stmt->affected_rows > 0) {
+    echo "
+    <script>
+    alert('Data berhasil terhapus!');
+    document.location.href='riwayatdaftar.php';
+    </script>
+    ";
+  } else {
+    echo "
+    <script>
+    alert('GAGAL MENGHAPUS DATA');
+    document.location.href='riwayatdaftar.php';
+    </script>
+    ";
+  }
+  $stmt->close();
 }
 
 

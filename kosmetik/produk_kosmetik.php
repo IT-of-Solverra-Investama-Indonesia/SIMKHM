@@ -39,54 +39,96 @@
   </div>
 </div>
 <?php
+    function sani($data) {
+      global $koneksi;
+      return mysqli_real_escape_string($koneksi, htmlspecialchars(trim($data)));
+    }
+
     if(isset($_POST['add'])){
-         // Upload photo
-         $target_dir = "../../kosmetik/produk_kosmetik/";
-    
-         // Pengecekan dan pembuatan folder jika belum ada
-         if (!is_dir($target_dir)) {
-             mkdir($target_dir, 0777, true);
-         }
-         $fileName = uniqid().$_FILES['foto']['name'];
-         move_uploaded_file($_FILES["foto"]["tmp_name"], $target_dir.$fileName);
-    
-         $koneksi->query("INSERT INTO produk_kosmetik (nama_produk, harga, deskripsi, kategori, berat, stok, diskon, foto) VALUES ('$_POST[nama_produk]', '$_POST[harga]', '$_POST[deskripsi]', '$_POST[kategori]', '$_POST[berat]', '$_POST[stok]', '$_POST[diskon]', '$fileName')");
-    
-         echo "
-             <script>
-                 alert('Berhasil');
-                 document.location.href='index.php?halaman=produk_kosmetik';
-             </script>
-         ";
+      $nama_produk = sani($_POST['nama_produk']);
+      $harga = sani($_POST['harga']);
+      $deskripsi = sani($_POST['deskripsi']);
+      $kategori = sani($_POST['kategori']);
+      $berat = sani($_POST['berat']);
+      $stok = sani($_POST['stok']);
+      $diskon = sani($_POST['diskon']);
+
+      $target_dir = "../../kosmetik/produk_kosmetik/";
+      if (!is_dir($target_dir)) {
+        mkdir($target_dir, 0777, true);
+      }
+      $fileName = uniqid().sani($_FILES['foto']['name']);
+      move_uploaded_file($_FILES["foto"]["tmp_name"], $target_dir.$fileName);
+
+      $stmt = $koneksi->prepare("INSERT INTO produk_kosmetik (nama_produk, harga, deskripsi, kategori, berat, stok, diskon, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+      $stmt->bind_param("sdsssdds", $nama_produk, $harga, $deskripsi, $kategori, $berat, $stok, $diskon, $fileName);
+      $stmt->execute();
+      $stmt->close();
+
+      echo "
+        <script>
+          alert('Berhasil');
+          document.location.href='index.php?halaman=produk_kosmetik';
+        </script>
+      ";
     }
+
     if(isset($_POST['edit'])){
-         $target_dir = "../../kosmetik/produk_kosmetik/";
-         if($_FILES['foto']['name'] != ''){
-             unlink('../../kosmetik/produk_kosmetik/'.$_POST['fotolama']);
-             $fileName = uniqid().$_FILES['foto']['name'];
-             move_uploaded_file($_FILES["foto"]["tmp_name"], $target_dir.$fileName);
-             $koneksi->query("UPDATE produk_kosmetik SET foto='$fileName' WHERE id_produk = '$_POST[id]'");
-         }
-         $koneksi->query("UPDATE produk_kosmetik SET nama_produk='$_POST[nama_produk]', harga='$_POST[harga]', deskripsi='$_POST[deskripsi]', kategori='$_POST[kategori]', berat='$_POST[berat]', stok='$_POST[stok]', diskon='$_POST[diskon]' WHERE id_produk = '$_POST[id]'");
-    
-         echo "
-             <script>
-                 alert('Berhasil');
-                 document.location.href='index.php?halaman=produk_kosmetik';
-             </script>
-         ";
+      $id = sani($_POST['id']);
+      $nama_produk = sani($_POST['nama_produk']);
+      $harga = sani($_POST['harga']);
+      $deskripsi = sani($_POST['deskripsi']);
+      $kategori = sani($_POST['kategori']);
+      $berat = sani($_POST['berat']);
+      $stok = sani($_POST['stok']);
+      $diskon = sani($_POST['diskon']);
+      $fotolama = sani($_POST['fotolama']);
+
+      $target_dir = "../../kosmetik/produk_kosmetik/";
+      if($_FILES['foto']['name'] != ''){
+        if($fotolama != ''){
+          @unlink($target_dir.$fotolama);
+        }
+        $fileName = uniqid().sani($_FILES['foto']['name']);
+        move_uploaded_file($_FILES["foto"]["tmp_name"], $target_dir.$fileName);
+
+        $stmt = $koneksi->prepare("UPDATE produk_kosmetik SET foto=? WHERE id_produk=?");
+        $stmt->bind_param("si", $fileName, $id);
+        $stmt->execute();
+        $stmt->close();
+      }
+
+      $stmt = $koneksi->prepare("UPDATE produk_kosmetik SET nama_produk=?, harga=?, deskripsi=?, kategori=?, berat=?, stok=?, diskon=? WHERE id_produk=?");
+      $stmt->bind_param("sdsssddi", $nama_produk, $harga, $deskripsi, $kategori, $berat, $stok, $diskon, $id);
+      $stmt->execute();
+      $stmt->close();
+
+      echo "
+        <script>
+          alert('Berhasil');
+          document.location.href='index.php?halaman=produk_kosmetik';
+        </script>
+      ";
     }
+
     if(isset($_GET['delProd'])){
-         if($_GET['fotolama'] != ''){
-             unlink('../../kosmetik/produk_kosmetik/'.$_GET['fotolama']);
-         }
-         $koneksi->query("DELETE FROM produk_kosmetik WHERE id_produk = '$_GET[delProd]'");
-         echo "
-             <script>
-                 alert('Berhasil');
-                 document.location.href='index.php?halaman=produk_kosmetik';
-             </script>
-         ";
+      $delProd = sani($_GET['delProd']);
+      $fotolama = sani($_GET['fotolama']);
+      $target_dir = "../../kosmetik/produk_kosmetik/";
+      if($fotolama != ''){
+        @unlink($target_dir.$fotolama);
+      }
+      $stmt = $koneksi->prepare("DELETE FROM produk_kosmetik WHERE id_produk=?");
+      $stmt->bind_param("i", $delProd);
+      $stmt->execute();
+      $stmt->close();
+
+      echo "
+        <script>
+          alert('Berhasil');
+          document.location.href='index.php?halaman=produk_kosmetik';
+        </script>
+      ";
     }
 ?>
 <div class="card shadow p-2 mt-2">

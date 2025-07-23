@@ -18,11 +18,13 @@ if (isset($_GET['logout'])) {
 
 include "function.php";
 
-$nik = $_SESSION['kosmetik']['no_identitas'];
-$norm = $_SESSION['kosmetik']['no_rm'];
+$nik = sani($_SESSION['kosmetik']['no_identitas']);
+$norm = sani($_SESSION['kosmetik']['no_rm']);
 
-$ambil = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE no_identitas='$nik' or no_rm='$norm';");
-$admin = $ambil->fetch_assoc();
+$stmt = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE no_identitas=? OR no_rm=?");
+$stmt->bind_param("ss", $nik, $norm);
+$stmt->execute();
+$admin = $stmt->get_result()->fetch_assoc();
 
 
 ?>
@@ -170,16 +172,22 @@ $admin = $ambil->fetch_assoc();
                               </div>
                             </div>
                             <?php
-                                if(isset($_POST['savedatadiri'])){
-                                    $jenis_kelamin = htmlspecialchars($_POST['jenis_kelamin']);
-                                    $tgl_lahir = htmlspecialchars($_POST['tgl_lahir']);
-                                    $no_identitas = htmlspecialchars($_POST['no_identitas']);
+                                if (isset($_POST['savedatadiri'])) {
+                                    $jenis_kelamin = sani($_POST['jenis_kelamin']);
+                                    $tgl_lahir = sani($_POST['tgl_lahir']);
+                                    $no_identitas = sani($_POST['no_identitas']);
+                                    $idpasien = sani($_SESSION['kosmetik']['idpasien']);
 
-                                    $koneksi->query("UPDATE pasien_kosmetik SET jenis_kelamin='$jenis_kelamin', tgl_lahir='$tgl_lahir', no_identitas='$no_identitas' WHERE idpasien='".$_SESSION['kosmetik']['idpasien']."'");
+                                    $stmt = $koneksi->prepare("UPDATE pasien_kosmetik SET jenis_kelamin=?, tgl_lahir=?, no_identitas=? WHERE idpasien=?");
+                                    $stmt->bind_param("ssss", $jenis_kelamin, $tgl_lahir, $no_identitas, $idpasien);
+                                    $stmt->execute();
 
-                                    $getNewPasien = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE idpasien = '".$_SESSION['kosmetik']['idpasien']."'")->fetch_assoc();
+                                    $stmt2 = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE idpasien=?");
+                                    $stmt2->bind_param("s", $idpasien);
+                                    $stmt2->execute();
+                                    $getNewPasien = $stmt2->get_result()->fetch_assoc();
+
                                     $_SESSION['kosmetik'] = '';
-                                    
                                     $_SESSION['kosmetik'] = $getNewPasien;
 
                                     echo "
@@ -192,7 +200,11 @@ $admin = $ambil->fetch_assoc();
                             ?>
                         <?php }?>
                         <?php
-                            $getRoom = $koneksi->query("SELECT * FROM room_konsultasi WHERE pasien_id = '".$_SESSION['kosmetik']['idpasien']."' ORDER BY created_at DESC");
+                            $stmt = $koneksi->prepare("SELECT * FROM room_konsultasi WHERE pasien_id = ? ORDER BY created_at DESC");
+                            $pasien_id = sani($_SESSION['kosmetik']['idpasien']);
+                            $stmt->bind_param("s", $pasien_id);
+                            $stmt->execute();
+                            $getRoom = $stmt->get_result();
                             foreach($getRoom as $data){
                         ?>
                             <div class="col-md-12">
@@ -209,7 +221,11 @@ $admin = $ambil->fetch_assoc();
                 </div>
             <?php }else{?>
                 <?php
-                    $getRoom = $koneksi->query("SELECT * FROM room_konsultasi WHERE id = '".htmlspecialchars($_GET['room'])."' ORDER BY created_at DESC")->fetch_assoc();
+                    $room_id = sani($_GET['room']);
+                    $stmt = $koneksi->prepare("SELECT * FROM room_konsultasi WHERE id = ? ORDER BY created_at DESC");
+                    $stmt->bind_param("s", $room_id);
+                    $stmt->execute();
+                    $getRoom = $stmt->get_result()->fetch_assoc();
                 ?>
                 <div class="row mb-1">
                     <div class="col-md-12">
@@ -433,13 +449,15 @@ $admin = $ambil->fetch_assoc();
 
     <?php
         if(isset($_GET['makeNewRoom'])){
-            $id =  'id'.date('ymdhis').$_SESSION['kosmetik']['idpasien'];
-            $pasien_id = $_SESSION['kosmetik']['idpasien'];
-            $koneksi->query("INSERT INTO room_konsultasi (id, pasien_id, dokter, admin_id) VALUES ('$id', '$pasien_id', '','')");
+            $id = 'id' . date('ymdhis') . sani($_SESSION['kosmetik']['idpasien']);
+            $pasien_id = sani($_SESSION['kosmetik']['idpasien']);
+            $stmt = $koneksi->prepare("INSERT INTO room_konsultasi (id, pasien_id, dokter, admin_id) VALUES (?, ?, '', '')");
+            $stmt->bind_param("ss", $id, $pasien_id);
+            $stmt->execute();
             echo "
-                <script>
-                    document.location.href='chat.php?room=$id';
-                </script>
+            <script>
+                document.location.href='chat.php?room=$id';
+            </script>
             ";
         }
     ?>

@@ -30,14 +30,13 @@
                 <?php
                 $grandTotal = 0;
                 if (isset($_SESSION['kosmetik'])) {
-                    $id_pasien = $_SESSION['kosmetik']['idpasien'];
+                    $id_pasien = sani($_SESSION['kosmetik']['idpasien']);
 
-                    $products = $koneksi->query("SELECT cart_kosmetik.*,produk_kosmetik.* FROM cart_kosmetik join produk_kosmetik
-                        on cart_kosmetik.produk_id = produk_kosmetik.id_produk  WHERE cart_kosmetik.user_id = '$id_pasien' 
-                        ");
+                    $stmt = $koneksi->prepare("SELECT cart_kosmetik.*, produk_kosmetik.* FROM cart_kosmetik JOIN produk_kosmetik ON cart_kosmetik.produk_id = produk_kosmetik.id_produk WHERE cart_kosmetik.user_id = ?");
+                    $stmt->bind_param("s", $id_pasien);
+                    $stmt->execute();
+                    $products = $stmt->get_result();
 
-                    // print_r($products);
-                
                 } else {
                     echo "
                         <script>
@@ -102,14 +101,14 @@
                                     </a>
                                     <?php
                                     if (isset($_GET['id'])) {
-                                        $koneksi->query("DELETE FROM cart_kosmetik where id=$_GET[id]");
+                                        $id = sani($_GET['id']);
+                                        $koneksi->query("DELETE FROM cart_kosmetik WHERE id = $id");
                                         echo "
                                         <script>
                                         alert('Berhasil menghapus cart');
                                         document.location.href='index.php?halaman=cart';
                                         </script>
                                         ";
-
                                     }
 
 
@@ -148,11 +147,13 @@
                                 </form>
                                 <?php
                                 if (isset($_POST['update_jumlah'])) {
-                                    $id_pasien = $_SESSION['kosmetik']['idpasien'];
-                                    $jumlah = htmlspecialchars($_POST['jumlah']);
-                                    $id = htmlspecialchars($_POST['id']);
-                                    $koneksi->query("UPDATE cart_kosmetik SET jumlah = $jumlah WHERE id=$id
-                                    AND user_id =$id_pasien");
+                                    $id_pasien = sani($_SESSION['kosmetik']['idpasien']);
+                                    $jumlah = sani($_POST['jumlah']);
+                                    $id = sani($_POST['id']);
+
+                                    $stmt = $koneksi->prepare("UPDATE cart_kosmetik SET jumlah = ? WHERE id = ? AND user_id = ?");
+                                    $stmt->bind_param("iis", $jumlah, $id, $id_pasien);
+                                    $stmt->execute();
 
                                     echo "
                                         <script>
@@ -440,26 +441,50 @@
                             });
                         </script>
                         <?php
-                            if(isset($_POST['co'])){
-                                $getCart = $koneksi->query("SELECT cart_kosmetik.*, cart_kosmetik.harga as hargaa, produk_kosmetik.* FROM cart_kosmetik join produk_kosmetik on cart_kosmetik.produk_id = produk_kosmetik.id_produk  WHERE cart_kosmetik.user_id = '$id_pasien' ");
-                                $code_nota = date('dmYHis').$_SESSION['kosmetik']['idpasien'];
-                                $user_id = $_SESSION['kosmetik']['idpasien'];
-                                $username = $_SESSION['kosmetik']['nama_lengkap'];
-                                $nama_lengkap = htmlspecialchars($_POST['nama_lengkap']);
-                                $alamat_lengkap = htmlspecialchars($_POST['alamat_lengkap']);
-                                $no_telp = htmlspecialchars($_POST['no_telp']);
+                            if (isset($_POST['co'])) {
+                                $id_pasien = sani($_SESSION['kosmetik']['idpasien']);
+                                $getCart = $koneksi->prepare("SELECT cart_kosmetik.*, cart_kosmetik.harga as hargaa, produk_kosmetik.* FROM cart_kosmetik JOIN produk_kosmetik ON cart_kosmetik.produk_id = produk_kosmetik.id_produk WHERE cart_kosmetik.user_id = ?");
+                                $getCart->bind_param("s", $id_pasien);
+                                $getCart->execute();
+                                $resultCart = $getCart->get_result();
 
-                                foreach($getCart as $data){
-                                    $produk_id=$data['id_produk'];
-                                    $produk=$data['nama_produk'];
-                                    $harga=$data['hargaa'];
-                                    $jumlah=$data['jumlah'];
-                                    $sub_harga= $data['harga'] * $data['jumlah'] - (($data['harga'] * $data['jumlah']) * $data['diskon'] / 100);
+                                $code_nota = sani(date('dmYHis') . $_SESSION['kosmetik']['idpasien']);
+                                $user_id = sani($_SESSION['kosmetik']['idpasien']);
+                                $username = sani($_SESSION['kosmetik']['nama_lengkap']);
+                                $nama_lengkap = sani($_POST['nama_lengkap']);
+                                $alamat_lengkap = sani($_POST['alamat_lengkap']);
+                                $no_telp = sani($_POST['no_telp']);
 
-                                    $koneksi->query("INSERT INTO pemesanan (code_nota, user_id, username, nama_lengkap, alamat_lengkap, no_telp, produk_id, produk, harga, jumlah, sub_harga, status) VALUES ('$code_nota', '$user_id', '$username', '$nama_lengkap', '$alamat_lengkap', '$no_telp', '$produk_id', '$produk', '$harga', '$jumlah', '$sub_harga', 'Menunggu_pembayaran')");
+                                $stmtInsert = $koneksi->prepare("INSERT INTO pemesanan (code_nota, user_id, username, nama_lengkap, alamat_lengkap, no_telp, produk_id, produk, harga, jumlah, sub_harga, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu_pembayaran')");
+
+                                foreach ($resultCart as $data) {
+                                    $produk_id = sani($data['id_produk']);
+                                    $produk = sani($data['nama_produk']);
+                                    $harga = sani($data['hargaa']);
+                                    $jumlah = sani($data['jumlah']);
+                                    $sub_harga = sani($data['harga'] * $data['jumlah'] - (($data['harga'] * $data['jumlah']) * $data['diskon'] / 100));
+
+                                    $stmtInsert->bind_param(
+                                        "ssssssssiii",
+                                        $code_nota,
+                                        $user_id,
+                                        $username,
+                                        $nama_lengkap,
+                                        $alamat_lengkap,
+                                        $no_telp,
+                                        $produk_id,
+                                        $produk,
+                                        $harga,
+                                        $jumlah,
+                                        $sub_harga
+                                    );
+                                    $stmtInsert->execute();
                                 }
 
-                                $koneksi->query("DELETE FROM cart_kosmetik WHERE user_id = '$user_id'");
+                                $stmtDelete = $koneksi->prepare("DELETE FROM cart_kosmetik WHERE user_id = ?");
+                                $stmtDelete->bind_param("s", $user_id);
+                                $stmtDelete->execute();
+
                                 echo "
                                     <script>
                                         alert('Berhasil Check Out, Lakukan Pembayaran Dengan Transfer Ke Nomor Rekening 330101007238502 BRI, dan Upload Bukti Pembayaran Anda');
@@ -468,18 +493,26 @@
                                 ";
                             }
 
-                            if(isset($_POST['savedatadiri'])){
-                                $provinsi=htmlspecialchars($_POST["provinsi"]);
-                                $kota=htmlspecialchars($_POST["kota"]);
-                                $kelurahan=htmlspecialchars($_POST["kelurahan"]);
-                                $kecamatan=htmlspecialchars($_POST["kecamatan"]);
-                                $kode_pos=htmlspecialchars($_POST["kode_pos"]);
-                                $alamat=htmlspecialchars($_POST["alamat"]);
+                            if (isset($_POST['savedatadiri'])) {
+                                $provinsi = sani($_POST["provinsi"]);
+                                $kota = sani($_POST["kota"]);
+                                $kelurahan = sani($_POST["kelurahan"]);
+                                $kecamatan = sani($_POST["kecamatan"]);
+                                $kode_pos = sani($_POST["kode_pos"]);
+                                $alamat = sani($_POST["alamat"]);
+                                $idpasien = sani($_SESSION['kosmetik']['idpasien']);
 
-                                $koneksi->query("UPDATE pasien_kosmetik SET provinsi='$provinsi', kota='$kota', kecamatan='$kecamatan', kelurahan='$kelurahan', kode_pos='$kode_pos', alamat='$alamat' WHERE idpasien = '".$_SESSION['kosmetik']['idpasien']."'");
-                                $getNewPasien = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE idpasien = '".$_SESSION['kosmetik']['idpasien']."'")->fetch_assoc();
+                                $stmt = $koneksi->prepare("UPDATE pasien_kosmetik SET provinsi=?, kota=?, kecamatan=?, kelurahan=?, kode_pos=?, alamat=? WHERE idpasien=?");
+                                $stmt->bind_param("sssssss", $provinsi, $kota, $kecamatan, $kelurahan, $kode_pos, $alamat, $idpasien);
+                                $stmt->execute();
+
+                                $stmtGet = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE idpasien=?");
+                                $stmtGet->bind_param("s", $idpasien);
+                                $stmtGet->execute();
+                                $result = $stmtGet->get_result();
+                                $getNewPasien = $result->fetch_assoc();
+
                                 $_SESSION['kosmetik'] = '';
-                                
                                 $_SESSION['kosmetik'] = $getNewPasien;
 
                                 echo "

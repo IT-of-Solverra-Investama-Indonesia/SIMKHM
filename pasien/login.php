@@ -49,34 +49,39 @@ if (isset($_SESSION['pasien']['nama_lengkap'])) {
             <br>
             <form method="post">
               <p class="mb-0" align="left">NIK</p>
-              <input type="number" class="form-control w-100 mb-2" name="NIK" id="NIK" placeholder="Masukan NIK">
+              <input type="number" class="form-control w-100 mb-2" required name="NIK" id="NIK" placeholder="Masukan NIK">
               <button type="submit" name="check" class="btn btn-sm btn-success float-end">Login</button>
               <a href="login.php?pasien=baru"><button type="button" name="reg" class="btn btn-sm btn-success float-end  mx-2">Register</button></a>
             </form>
           </div>
           <?php
-          if (isset($_POST['check'])) {
-            $NIK = htmlspecialchars($_POST['NIK']);
-            $getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_identitas = '$NIK' Limit 1");
+            if (isset($_POST['check'])) {
+            $NIK = sani($_POST['NIK']);
+            $stmt = $koneksi->prepare("SELECT * FROM pasien WHERE no_identitas = ? LIMIT 1");
+            $stmt->bind_param("s", $NIK);
+            $stmt->execute();
+            $getPasien = $stmt->get_result();
             if ($getPasien->num_rows > 0) {
               $row = $getPasien->fetch_assoc();
               $_SESSION['pasien'] = $row;
 
               echo  "
-                        <script>
-                          alert('Berhasil Login!');
-                          document.location.href='menupasien.php';
-                        </script>
-                      ";
+                  <script>
+                    alert('Berhasil Login!');
+                    document.location.href='menupasien.php';
+                  </script>
+                  ";
             } else {
+              $NIK = sani($NIK);
               echo  "
-                        <script>
-                          alert('NIK Belum Terdaftar di KHM, Silahkan Isi data pasien terlebih dahulu jika ingin melanjutkan kependaftaran online');
-                          document.location.href='login.php?pasien=baru&nik='+ '$NIK';
-                        </script>
-                      ";
+                  <script>
+                    alert('NIK Belum Terdaftar di KHM, Silahkan Isi data pasien terlebih dahulu jika ingin melanjutkan kependaftaran online');
+                    document.location.href='login.php?pasien=baru&nik='+ '$NIK';
+                  </script>
+                  ";
             }
-          }
+            $stmt->close();
+            }
           ?>
 
         <?php } else { ?> <!-- Jika Sudah memilih -->
@@ -98,36 +103,40 @@ if (isset($_SESSION['pasien']['nama_lengkap'])) {
             </div>
             <?php
             if (isset($_POST['login'])) {
-              $nohp = $_POST['nohp'];
-              $password = $_POST['password'];
-              $cekRow = $koneksi->query("SELECT * FROM pasien WHERE nohp = '$nohp' LIMIT 1");
+              $nohp = sani($_POST['nohp']);
+              $password = sani($_POST['password']);
+              $stmt = $koneksi->prepare("SELECT * FROM pasien WHERE nohp = ? LIMIT 1");
+              $stmt->bind_param("s", $nohp);
+              $stmt->execute();
+              $cekRow = $stmt->get_result();
               if ($cekRow->num_rows > 0) {
-                $row = $cekRow->fetch_assoc();
-                if (password_verify($password, $row['password'])) {
-                  $_SESSION['pasien'] = $row;
+              $row = $cekRow->fetch_assoc();
+              if (password_verify($password, $row['password'])) {
+                $_SESSION['pasien'] = $row;
 
-                  echo  "
-                            <script>
-                              alert('Login Berhasil');
-                              document.location.href='menupasien.php';
-                            </script>
-                          ";
-                } else {
-                  echo  "
-                            <script>
-                              alert('Password Salah');
-                              document.location.href='login.php?pasien=lama';
-                            </script>
-                          ";
-                }
+                echo  "
+                    <script>
+                      alert('Login Berhasil');
+                      document.location.href='menupasien.php';
+                    </script>
+                    ";
               } else {
-                echo "
-                          <script>
-                            alert('Nomor Hp Tidak Ditemukan');
-                            document.location.href='login.php?pasien=lama';
-                          </script>
-                        ";
+                echo  "
+                    <script>
+                      alert('Password Salah');
+                      document.location.href='login.php?pasien=lama';
+                    </script>
+                    ";
               }
+              } else {
+              echo "
+                    <script>
+                    alert('Nomor Hp Tidak Ditemukan');
+                    document.location.href='login.php?pasien=lama';
+                    </script>
+                  ";
+              }
+              $stmt->close();
             }
             ?>
           <?php } elseif ($_GET['pasien'] == 'baru') { ?><!-- jika memilih sebagai pasien baru -->
@@ -477,43 +486,70 @@ if (isset($_SESSION['pasien']['nama_lengkap'])) {
             </script>
             <?php
             if (isset($_POST['login'])) {
-              $nama_lengkap = htmlspecialchars($_POST["nama_lengkap"]);
-              $nama_ibu = htmlspecialchars($_POST["nama_ibu"]);
-              $nohp = htmlspecialchars($_POST["nohp"]);
+              $nama_lengkap = sani($_POST["nama_lengkap"]);
+              $nama_ibu = sani($_POST["nama_ibu"]);
+              $nohp = sani($_POST["nohp"]);
               $email = '';
-              $tgl_lahir = date('Y-m-d', strtotime($_POST['tanggal'] . '-' . $_POST['bulan'] . '-' . $_POST['tahun']));
+              $tgl_lahir = date('Y-m-d', strtotime(sani($_POST['tanggal']) . '-' . sani($_POST['bulan']) . '-' . sani($_POST['tahun'])));
               $jenis_identitas = 'KTP';
-              $no_identitas = htmlspecialchars($_POST["no_identitas"]);
-              $jenis_kelamin = htmlspecialchars($_POST["jenis_kelamin"]);
-              $provinsi = htmlspecialchars($_POST["provinsi"]);
-              $kota = htmlspecialchars($_POST["kota"]);
-              $kelurahan = htmlspecialchars($_POST["kelurahan"]);
-              $kecamatan = htmlspecialchars($_POST["kecamatan"]);
-              $kode_pos = htmlspecialchars($_POST["kode_pos"]);
-              $alamat = htmlspecialchars($_POST["alamat"]);
+              $no_identitas = sani($_POST["no_identitas"]);
+              $jenis_kelamin = sani($_POST["jenis_kelamin"]);
+              $provinsi = sani($_POST["provinsi"]);
+              $kota = sani($_POST["kota"]);
+              $kelurahan = sani($_POST["kelurahan"]);
+              $kecamatan = sani($_POST["kecamatan"]);
+              $kode_pos = sani($_POST["kode_pos"]);
+              $alamat = sani($_POST["alamat"]);
               $kategori = '';
               $pembiayaan = '';
               $status_nikah = '';
               $foto = '';
+              $no_bpjs = isset($_POST["no_bpjs"]) ? sani($_POST["no_bpjs"]) : '';
 
               // Ambil Nomor RM Terakhir + 1
               $no_rm = '';
 
               //hitung usia
-              $lahir    = new DateTime($tgl_lahir);
-              $today        = new DateTime();
+              $lahir = new DateTime($tgl_lahir);
+              $today = new DateTime();
               $umur = $today->diff($lahir);
               $umur2 = $umur->y . " Tahun," . $umur->m . " Bulan," . $umur->d . " Hari";
 
-              $koneksi->query("INSERT INTO pasien (nama_lengkap, nama_ibu, nohp, email, no_identitas,  tgl_lahir, jenis_kelamin, jenis_identitas, provinsi, kota, kelurahan, kecamatan, kode_pos, alamat, kategori, status_nikah, pembiayaan, foto, no_rm, umur, no_bpjs) VALUES ('$nama_lengkap', '$nama_ibu', '$nohp', '$email', '$no_identitas', '$tgl_lahir', '$jenis_kelamin', '$jenis_identitas', '$provinsi', '$kota', '$kelurahan', '$kecamatan',  '$kode_pos', '$alamat', '$kategori', '$status_nikah','$pembiayaan', '$foto', '$no_rm', '$umur2','$_POST[no_bpjs]')");
+              $stmt = $koneksi->prepare("INSERT INTO pasien (nama_lengkap, nama_ibu, nohp, email, no_identitas, tgl_lahir, jenis_kelamin, jenis_identitas, provinsi, kota, kelurahan, kecamatan, kode_pos, alamat, kategori, status_nikah, pembiayaan, foto, no_rm, umur, no_bpjs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+              $stmt->bind_param(
+              "sssssssssssssssssssss",
+              $nama_lengkap,
+              $nama_ibu,
+              $nohp,
+              $email,
+              $no_identitas,
+              $tgl_lahir,
+              $jenis_kelamin,
+              $jenis_identitas,
+              $provinsi,
+              $kota,
+              $kelurahan,
+              $kecamatan,
+              $kode_pos,
+              $alamat,
+              $kategori,
+              $status_nikah,
+              $pembiayaan,
+              $foto,
+              $no_rm,
+              $umur2,
+              $no_bpjs
+              );
+              $stmt->execute();
+              $stmt->close();
 
               echo  "
-                          <script>
-                            alert('Berhasil Mengirim Pendaftaran, Silahkan Kirim WA yang ada, Kemudian Tunggu Hingga Admin Memberikan Nomor Rekam Medik dan NIK, Lalu Silahkan Login Sebagai Pasien Lama');
-                            window.open('https://api.whatsapp.com/send?phone=6282233880001&text=Pendaftaran%20Pasien%20Baru%20%28Online%29%0A1.%20Nama%20%3A%20$nama_lengkap%0A2.%20Nama%20Ayah%20%3A%20$nama_ibu%0A3.%20Nomor%20Hp%20%3A%20$nohp%0A4.%20Tanggal%20Lahir%20%3A%20$tgl_lahir%0A5.%20Nomor%20KTP%20%3A%20$no_identitas%0A6.%20Alamat%20Sekarang%20%3A%20$alamat', '_blank')
-                            document.location.href='https://api.whatsapp.com/send?phone=6282233880001&text=Pendaftaran%20Pasien%20Baru%20%28Online%29%0A1.%20Nama%20%3A%20$nama_lengkap%0A2.%20Nama%20Ayah%20%3A%20$nama_ibu%0A3.%20Nomor%20Hp%20%3A%20$nohp%0A4.%20Tanggal%20Lahir%20%3A%20$tgl_lahir%0A5.%20Nomor%20KTP%20%3A%20$no_identitas%0A6.%20Alamat%20Sekarang%20%3A%20$alamat';
-                          </script>
-                        ";
+                    <script>
+                    alert('Berhasil Mengirim Pendaftaran, Silahkan Kirim WA yang ada, Kemudian Tunggu Hingga Admin Memberikan Nomor Rekam Medik dan NIK, Lalu Silahkan Login Sebagai Pasien Lama');
+                    window.open('https://api.whatsapp.com/send?phone=6282233880001&text=Pendaftaran%20Pasien%20Baru%20%28Online%29%0A1.%20Nama%20%3A%20$nama_lengkap%0A2.%20Nama%20Ayah%20%3A%20$nama_ibu%0A3.%20Nomor%20Hp%20%3A%20$nohp%0A4.%20Tanggal%20Lahir%20%3A%20$tgl_lahir%0A5.%20Nomor%20KTP%20%3A%20$no_identitas%0A6.%20Alamat%20Sekarang%20%3A%20$alamat', '_blank')
+                    document.location.href='https://api.whatsapp.com/send?phone=6282233880001&text=Pendaftaran%20Pasien%20Baru%20%28Online%29%0A1.%20Nama%20%3A%20$nama_lengkap%0A2.%20Nama%20Ayah%20%3A%20$nama_ibu%0A3.%20Nomor%20Hp%20%3A%20$nohp%0A4.%20Tanggal%20Lahir%20%3A%20$tgl_lahir%0A5.%20Nomor%20KTP%20%3A%20$no_identitas%0A6.%20Alamat%20Sekarang%20%3A%20$alamat';
+                    </script>
+                  ";
             }
             ?>
           <?php } ?>

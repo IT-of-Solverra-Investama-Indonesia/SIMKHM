@@ -1,17 +1,20 @@
 <?php
 
-$id =htmlspecialchars($_GET['id_produk']);
+$id = sani($_GET['id_produk']);
 if (isset($_SESSION['kosmetik'])) {
-  $products = $koneksi->query("SELECT * FROM produk_kosmetik WHERE id_produk='".htmlspecialchars($_GET['id_produk'])."'");
+  $stmt = $koneksi->prepare("SELECT * FROM produk_kosmetik WHERE id_produk = ?");
+  $id_produk = sani($_GET['id_produk']);
+  $stmt->bind_param("s", $id_produk);
+  $stmt->execute();
+  $products = $stmt->get_result();
   $product = $products->fetch_assoc();
-  
-}else{
+} else {
   echo "
-          <script>
-              alert('Lakukan Login Terlebih Dahulu Sebelum Melakukan Pembelian');
-              document.location.href='login.php';
-          </script>
-      ";
+    <script>
+      alert('Lakukan Login Terlebih Dahulu Sebelum Melakukan Pembelian');
+      document.location.href='login.php';
+    </script>
+  ";
 }
 
 ?>

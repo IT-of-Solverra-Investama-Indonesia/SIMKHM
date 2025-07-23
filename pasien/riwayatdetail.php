@@ -20,13 +20,17 @@ include "function.php";
 
 // $perawat=$_SESSION['admin']['username'];
 // $id=$_GET['id'];
-$norm = $_SESSION['pasien']['no_rm'];
+$norm = sani($_SESSION['pasien']['no_rm']);
 
-// $perawat=$_SESSION['admin']['username'];
-// $id=$_GET['id'];
+// $perawat=sani($_SESSION['admin']['username']);
+// $id=sani($_GET['id']);
 
-
-$p=$koneksi->query("SELECT * FROM registrasi_rawat INNER JOIN pasien WHERE pasien.no_rm = '$_GET[norm]' and idrawat='$_GET[idrawat]' ORDER BY idrawat DESC;")->fetch_assoc(); 
+$stmt = $koneksi->prepare("SELECT * FROM registrasi_rawat INNER JOIN pasien WHERE pasien.no_rm = ? and idrawat = ? ORDER BY idrawat DESC;");
+$norm_param = sani($_GET['norm']);
+$idrawat_param = sani($_GET['idrawat']);
+$stmt->bind_param("ss", $norm_param, $idrawat_param);
+$stmt->execute();
+$p = $stmt->get_result()->fetch_assoc();
 
 ?>
 

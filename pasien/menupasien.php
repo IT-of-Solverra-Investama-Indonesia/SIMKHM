@@ -1,28 +1,27 @@
 <?php session_start(); ?>
 <?php
   error_reporting(0);
-  if (!isset($_SESSION['pasien']['nama_lengkap'])) {
+  if (!isset(($_SESSION['pasien']['nama_lengkap']))) {
     header("Location: login.php");
     exit();
   }
   if (isset($_GET['logout'])) {
-    // Hapus semua data sesi
     session_unset();
-    // Hancurkan sesi
     session_destroy();
-    // Redirect ke halaman login
     header("Location: login.php");
     exit();
-
   }
 
   include "function.php";
 
-  $nik = $_SESSION['pasien']['no_identitas'];
-  $norm = $_SESSION['pasien']['no_rm'];
+  $nik = sani($_SESSION['pasien']['no_identitas']);
+  $norm = sani($_SESSION['pasien']['no_rm']);
 
-  $ambil = $koneksi->query("SELECT * FROM pasien WHERE no_identitas='$nik' or no_rm='$norm';");
-  $admin = $ambil->fetch_assoc();
+  $stmt = $koneksi->prepare("SELECT * FROM pasien WHERE no_identitas=? or no_rm=?;");
+  $stmt->bind_param("ss", $nik, $norm);
+  $stmt->execute();
+  $admin = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
 ?>
 
 
@@ -129,9 +128,22 @@
                       <div class="ps-3">
                         <?php
                         $hari_ini = date('Y-m-d');
-                        $antrian = $koneksi->query("SELECT * FROM tgltab INNER JOIN registrasi_rawat WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = '$hari_ini' and no_rm = '$norm' and registrasi_rawat.kode = tgltab.kode")->fetch_assoc();
+                        $hari_ini_sani = sani($hari_ini);
+                        $norm_sani = sani($norm);
 
-                        $jumlah_pasien_hari = $koneksi->query("SELECT jadwal, antrian FROM registrasi_rawat WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = '$hari_ini' and no_rm = '$norm'")->fetch_assoc();
+                        // Query untuk $antrian
+                        $stmt_antrian = $koneksi->prepare("SELECT * FROM tgltab INNER JOIN registrasi_rawat WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = ? AND no_rm = ? AND registrasi_rawat.kode = tgltab.kode");
+                        $stmt_antrian->bind_param("ss", $hari_ini_sani, $norm_sani);
+                        $stmt_antrian->execute();
+                        $antrian = $stmt_antrian->get_result()->fetch_assoc();
+                        $stmt_antrian->close();
+
+                        // Query untuk $jumlah_pasien_hari
+                        $stmt_jumlah = $koneksi->prepare("SELECT jadwal, antrian FROM registrasi_rawat WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = ? AND no_rm = ?");
+                        $stmt_jumlah->bind_param("ss", $hari_ini_sani, $norm_sani);
+                        $stmt_jumlah->execute();
+                        $jumlah_pasien_hari = $stmt_jumlah->get_result()->fetch_assoc();
+                        $stmt_jumlah->close();
                         ?>
                         <?php if (!empty($jumlah_pasien_hari['jadwal']) or !empty($jumlah_pasien_hari['antrian'])) { ?>
                           <div style="font-size: 2em; font-weight: bold; color: orangered">
@@ -163,7 +175,15 @@
                           <div class="ps-3">
                             <?php
                             $hari_ini = date('Y-m-d');
-                            $jumlah_pasien_hari = $koneksi->query("SELECT COUNT(*) idrawat FROM registrasi_rawat WHERE no_rm='$no_rm' AND perawatan = 'Rawat Jalan' and status_antri = 'Datang' and perawat = '' ")->num_rows;
+                            $hari_ini_sani = sani($hari_ini);
+                            $no_rm_sani = sani($norm);
+
+                            $stmt_jumlah_pasien = $koneksi->prepare("SELECT COUNT(*) AS idrawat FROM registrasi_rawat WHERE no_rm=? AND perawatan='Rawat Jalan' AND status_antri='Datang' AND perawat=''");
+                            $stmt_jumlah_pasien->bind_param("s", $no_rm_sani);
+                            $stmt_jumlah_pasien->execute();
+                            $result_jumlah_pasien = $stmt_jumlah_pasien->get_result()->fetch_assoc();
+                            $stmt_jumlah_pasien->close();
+                            $jumlah_pasien_hari = $result_jumlah_pasien['idrawat'];
                             ?>
 
                             <?php if (!empty($jumlah_pasien_hari)) { ?>

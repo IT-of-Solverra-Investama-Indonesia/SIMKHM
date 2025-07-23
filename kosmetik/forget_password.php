@@ -25,8 +25,14 @@
                         </form>
                     <?php }else{?>
                         <?php
-                            $hp_mod = substr(htmlspecialchars($_GET['noHp']), 2);        
-                            $cek = $koneksi->query("SELECT *, COUNT(*) as jum FROM pasien_kosmetik WHERE SUBSTRING(nohp, 2) = '$hp_mod' LIMIT 1")->fetch_assoc();
+                            $hp_mod = sani(substr(sani($_GET['noHp']), 2));
+                            $stmt = $koneksi->prepare("SELECT *, COUNT(*) as jum FROM pasien_kosmetik WHERE SUBSTRING(nohp, 2) = ? LIMIT 1");
+                            $stmt->bind_param("s", $hp_mod);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+                            $cek = $result->fetch_assoc();
+                            $stmt->close();
+                        ?>
                         ?>
                         <?php if($cek['jum'] == 1){?>
                             <h5 class="card-title">
@@ -53,8 +59,14 @@
                         <?php }?>
                     <?php }?>
                 <?php }else{?>
-                    <?php 
-                        $cek = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE idpasien = '".htmlspecialchars($_GET['resetpassword'])."' LIMIT 1")->fetch_assoc();    
+                    <?php
+                        $idpasien = sani(htmlspecialchars($_GET['resetpassword']));
+                        $stmt = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE idpasien = ? LIMIT 1");
+                        $stmt->bind_param("s", $idpasien);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        $cek = $result->fetch_assoc();
+                        $stmt->close();
                     ?>
                     <h5 class="card-title">Password Baru</h5>
                     <p class="card-text text-capitalize" style="font-size: 13px;">Demi Melindungi hak dan privasi pengguna, silahkan ubah password anda <b><?= $cek['nama_lengkap']?></p></b>
@@ -81,7 +93,7 @@
     </script>
     <?php 
         if(isset($_POST['kirimLink'])){
-            $hp = htmlspecialchars($_POST['nohp']);
+            $hp = sani($_POST['nohp']);
             echo"
                 <script>
                     document.location.href='forget_password.php?noHp=$hp';
@@ -90,10 +102,10 @@
         }
 
         if(isset($_POST['send'])){
-            $hp = htmlspecialchars(htmlspecialchars($_GET['noHp']));
+            $hp = sani(sani($_GET['noHp']));
             $curl = curl_init();
             $phone = $hp;
-            $message = urlencode("Klik Link Berikut Untuk Melakukan Perubahan Pada Password Anda : https://simkhm.id/wonorejo/kosmetik/forget_password?yt6069958218b765b0c16629b4b7f6ddfcytgh&resetpassword=".htmlspecialchars($_POST['id'])."&yt6069958218b765b0c16629b4b7f6ddfcyt");
+            $message = urlencode("Klik Link Berikut Untuk Melakukan Perubahan Pada Password Anda : https://simkhm.id/wonorejo/kosmetik/forget_password?yt6069958218b765b0c16629b4b7f6ddfcytgh&resetpassword=".sani($_POST['id'])."&yt6069958218b765b0c16629b4b7f6ddfcyt");
 
             curl_setopt($curl, CURLOPT_URL, "https://jogja.wablas.com/api/send-message?phone=$phone&message=$message&token=$token");
             $result = curl_exec($curl);
@@ -108,12 +120,17 @@
         } 
         
         if(isset($_POST['ubahPassword'])){
-            $koneksi->query("UPDATE pasien_kosmetik SET password = '".htmlspecialchars($_POST['password'])."' WHERE idpasien = '".htmlspecialchars($_GET['resetpassword'])."'");
+            $password = sani(htmlspecialchars($_POST['password']));
+            $idpasien = sani(htmlspecialchars($_GET['resetpassword']));
+            $stmt = $koneksi->prepare("UPDATE pasien_kosmetik SET password = ? WHERE idpasien = ?");
+            $stmt->bind_param("ss", $password, $idpasien);
+            $stmt->execute();
+            $stmt->close();
             echo"
-                <script>
-                    alert('Password Berhasil Di Ubah, Silahkan Login Kembali');
-                    document.location.href='login.php';
-                </script>
+            <script>
+                alert('Password Berhasil Di Ubah, Silahkan Login Kembali');
+                document.location.href='login.php';
+            </script>
             ";
         }
     ?>

@@ -96,8 +96,8 @@
     <div class="row">
         <div class="owl-carousel owl-theme">
             <?php
-                $getProd1 = $koneksi->query("SELECT * FROM produk_kosmetik ORDER BY id_produk DESC LIMIT 8");
-                foreach($getProd1 as $prod1){
+              $getProd1 = $koneksi->query("SELECT * FROM produk_kosmetik ORDER BY id_produk DESC LIMIT 8");
+              foreach($getProd1 as $prod1){
             ?>
                     <div class="card h-100 shadow-sm">
                         <img src="produk_kosmetik/<?= $prod1['foto']?>" class="card-img-top" style="" alt="...">

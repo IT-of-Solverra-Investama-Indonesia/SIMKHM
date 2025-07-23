@@ -5,10 +5,19 @@
     // include 'function.php';
 
     if(isset($_POST['login'])){
-        $cekUsers = $koneksi->query("SELECT `nama_lengkap`, `nama_ibu`, `no_rm`, `tgl_lahir`, `umur`, `no_bpjs`, `tempat_lahir`, `jenis_kelamin`, `nohp`, `email`, `password`, `jenis_identitas`, `no_identitas`, `agama`, `suku`, `bahasa`, `rt`, `rw`, `provinsi`, `kota`, `kecamatan`, `kelurahan`, `kode_pos`, `alamat`, `alamat_dom`, `rt_dom`, `rw_dom`, `kelurahan_dom`, `kecamatan_dom`, `kota_dom`, `provinsi_dom`, `kode_pos_dom`, `no_telp`, `pendidikan`, `pekerjaan`, `status_nikah`, `kategori`, `pembiayaan`, `foto`, `ihs_id` FROM pasien_kosmetik WHERE email = '$_POST[email]' and password = '$_POST[password]' Limit 1");
+        $email = sani($_POST['email']);
+        $password = sani($_POST['password']);
 
-        if($cekUsers -> num_rows > 0){
-            $idUser = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE email = '$_POST[email]' and password = '$_POST[password]' Limit 1")->fetch_assoc();
+        $stmt = $koneksi->prepare("SELECT `nama_lengkap`, `nama_ibu`, `no_rm`, `tgl_lahir`, `umur`, `no_bpjs`, `tempat_lahir`, `jenis_kelamin`, `nohp`, `email`, `password`, `jenis_identitas`, `no_identitas`, `agama`, `suku`, `bahasa`, `rt`, `rw`, `provinsi`, `kota`, `kecamatan`, `kelurahan`, `kode_pos`, `alamat`, `alamat_dom`, `rt_dom`, `rw_dom`, `kelurahan_dom`, `kecamatan_dom`, `kota_dom`, `provinsi_dom`, `kode_pos_dom`, `no_telp`, `pendidikan`, `pekerjaan`, `status_nikah`, `kategori`, `pembiayaan`, `foto`, `ihs_id` FROM pasien_kosmetik WHERE email = ? and password = ? Limit 1");
+        $stmt->bind_param("ss", $email, $password);
+        $stmt->execute();
+        $cekUsers = $stmt->get_result();
+
+        if($cekUsers->num_rows > 0){
+            $stmt2 = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE email = ? and password = ? Limit 1");
+            $stmt2->bind_param("ss", $email, $password);
+            $stmt2->execute();
+            $idUser = $stmt2->get_result()->fetch_assoc();
             $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
             $data = array();
@@ -30,23 +39,36 @@
     }
 
     if(isset($_POST['registerAwal'])){
-        $nama_lengkap=htmlspecialchars($_POST["nama_lengkap"]);
-        $nohp=htmlspecialchars($_POST["nohp"]);
-        $jenis_identitas='KTP';
-        $email=htmlspecialchars($_POST["email"]);
-        $password=htmlspecialchars($_POST["password"]);
-        $tgl_lahir = $tgl_lahir=date('Y-m-d', strtotime($_POST['tanggal'].'-'.$_POST['bulan'].'-'.$_POST['tahun']));
+        $nama_lengkap = sani(htmlspecialchars($_POST["nama_lengkap"]));
+        $nohp = sani(htmlspecialchars($_POST["nohp"]));
+        $jenis_identitas = 'KTP';
+        $email = sani(htmlspecialchars($_POST["email"]));
+        $password = sani(htmlspecialchars($_POST["password"]));
+        $tanggal = sani($_POST['tanggal']);
+        $bulan = sani($_POST['bulan']);
+        $tahun = sani($_POST['tahun']);
+        $tgl_lahir = date('Y-m-d', strtotime($tanggal.'-'.$bulan.'-'.$tahun));
 
-        $lahir =new DateTime($tgl_lahir);
-        $today =new DateTime();
+        $lahir = new DateTime($tgl_lahir);
+        $today = new DateTime();
         $umur = $today->diff($lahir);
-        $umur2=$umur->y." Tahun,".$umur->m." Bulan,".$umur->d." Hari";
+        $umur2 = $umur->y." Tahun,".$umur->m." Bulan,".$umur->d." Hari";
 
-        $cekEmailTerdaftar = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE email = '$email' ");
+        $stmt = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $cekEmailTerdaftar = $stmt->get_result();
+
         if($cekEmailTerdaftar->num_rows == 0){
-            $koneksi->query("INSERT INTO pasien_kosmetik (nama_lengkap, nohp, email, tgl_lahir, jenis_identitas, umur, password) VALUES ('$nama_lengkap','$nohp', '$email', '$tgl_lahir', '$jenis_identitas', '$umur2', '$password')");
-            $result = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE nama_lengkap='$nama_lengkap', nohp='$nohp', email='$email', tgl_lahir='$tgl_lahir', jenis_identitas='$jenis_identitas', umur='$umur2', password='$password'");
-    
+            $stmt2 = $koneksi->prepare("INSERT INTO pasien_kosmetik (nama_lengkap, nohp, email, tgl_lahir, jenis_identitas, umur, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt2->bind_param("sssssss", $nama_lengkap, $nohp, $email, $tgl_lahir, $jenis_identitas, $umur2, $password);
+            $stmt2->execute();
+
+            $stmt3 = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE nama_lengkap=? AND nohp=? AND email=? AND tgl_lahir=? AND jenis_identitas=? AND umur=? AND password=?");
+            $stmt3->bind_param("sssssss", $nama_lengkap, $nohp, $email, $tgl_lahir, $jenis_identitas, $umur2, $password);
+            $stmt3->execute();
+            $result = $stmt3->get_result();
+
             $data = array();
             while ($hasil = $result->fetch_assoc()){
                 $data[] = $hasil; 
@@ -55,7 +77,6 @@
             $data = "email sudah terpakai";
         }
 
-
         $response = array(
             "status" => "Successfully",
             "message" => $data
@@ -63,15 +84,20 @@
     }
 
     if(isset($_POST['registerKe2'])){
-        $jenis_kelamin = $_POST['jenis_kelamin'];
-        $no_identitas = $_POST['no_identitas'];
+        $jenis_kelamin = sani($_POST['jenis_kelamin']);
+        $no_identitas = sani($_POST['no_identitas']);
+        $token_raw = sani($_POST['token']);
+        $lengthToKeep = strlen($token_raw) - 26;
+        $token = substr($token_raw, 0, $lengthToKeep);
 
-        $lengthToKeep = strlen($_POST['token']) - 26;
-        $token = substr($_POST['token'], 0, $lengthToKeep);
+        $stmt = $koneksi->prepare("UPDATE pasien_kosmetik SET jenis_kelamin=?, no_identitas=? WHERE idpasien=?");
+        $stmt->bind_param("sss", $jenis_kelamin, $no_identitas, $token);
+        $stmt->execute();
 
-        $koneksi->query("UPDATE pasien_kosmetik SET jenis_kelamin='$jenis_kelamin', no_identitas='$no_identitas' WHERE idpasien='$token'");
-        
-        $result = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE idpasien='$token'");
+        $stmt2 = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE idpasien=?");
+        $stmt2->bind_param("s", $token);
+        $stmt2->execute();
+        $result = $stmt2->get_result();
 
         $data = array();
         while ($hasil = $result->fetch_assoc()){
@@ -85,19 +111,24 @@
     }
 
     if(isset($_POST['registerKe3'])){
-        $provinsi=htmlspecialchars($_POST["provinsi"]);
-        $kota=htmlspecialchars($_POST["kota"]);
-        $kelurahan=htmlspecialchars($_POST["kelurahan"]);
-        $kecamatan=htmlspecialchars($_POST["kecamatan"]);
-        $kode_pos=htmlspecialchars($_POST["kode_pos"]);
-        $alamat=htmlspecialchars($_POST["alamat"]);
+        $provinsi = sani(htmlspecialchars($_POST["provinsi"]));
+        $kota = sani(htmlspecialchars($_POST["kota"]));
+        $kelurahan = sani(htmlspecialchars($_POST["kelurahan"]));
+        $kecamatan = sani(htmlspecialchars($_POST["kecamatan"]));
+        $kode_pos = sani(htmlspecialchars($_POST["kode_pos"]));
+        $alamat = sani(htmlspecialchars($_POST["alamat"]));
+        $token_raw = sani($_POST['token']);
+        $lengthToKeep = strlen($token_raw) - 26;
+        $token = substr($token_raw, 0, $lengthToKeep);
 
-        $lengthToKeep = strlen($_POST['token']) - 26;
-        $token = substr($_POST['token'], 0, $lengthToKeep);
+        $stmt = $koneksi->prepare("UPDATE pasien_kosmetik SET provinsi=?, kota=?, kecamatan=?, kelurahan=?, kode_pos=?, alamat=? WHERE idpasien=?");
+        $stmt->bind_param("sssssss", $provinsi, $kota, $kecamatan, $kelurahan, $kode_pos, $alamat, $token);
+        $stmt->execute();
 
-        $koneksi->query("UPDATE pasien_kosmetik SET provinsi='$provinsi', kota='$kota', kecamatan='$kecamatan', kelurahan='$kelurahan', kode_pos='$kode_pos', alamat='$alamat' WHERE idpasien = '$token'");
-        
-        $result = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE idpasien='$token'");
+        $stmt2 = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE idpasien=?");
+        $stmt2->bind_param("s", $token);
+        $stmt2->execute();
+        $result = $stmt2->get_result();
 
         $data = array();
         while ($hasil = $result->fetch_assoc()){

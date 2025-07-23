@@ -18,11 +18,15 @@ if (isset($_GET['logout'])) {
 
 include "function.php";
 
-$nik = $_SESSION['pasien']['no_identitas'];
-$norm = $_SESSION['pasien']['no_rm'];
+$nik = sani($_SESSION['pasien']['no_identitas']);
+$norm = sani($_SESSION['pasien']['no_rm']);
 
-$ambil = $koneksi->query("SELECT * FROM pasien WHERE no_identitas='$nik' or no_rm='$norm';");
+$stmt = $koneksi->prepare("SELECT * FROM pasien WHERE no_identitas=? OR no_rm=?");
+$stmt->bind_param("ss", $nik, $norm);
+$stmt->execute();
+$ambil = $stmt->get_result();
 $admin = $ambil->fetch_assoc();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -137,7 +141,12 @@ $admin = $ambil->fetch_assoc();
                 </div>
             <?php }else{?>
                 <?php
-                    $getRoom = $koneksi->query("SELECT * FROM room_konsultasi WHERE id = '$_GET[room]' ORDER BY created_at DESC")->fetch_assoc();
+                    $roomId = sani($_GET['room']);
+                    $stmtRoom = $koneksi->prepare("SELECT * FROM room_konsultasi WHERE id = ? ORDER BY created_at DESC");
+                    $stmtRoom->bind_param("s", $roomId);
+                    $stmtRoom->execute();
+                    $getRoom = $stmtRoom->get_result()->fetch_assoc();
+                    $stmtRoom->close();
                 ?>
                 <div class="row mb-1">
                     <div class="col-md-12">

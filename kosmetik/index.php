@@ -146,8 +146,8 @@
                 </li>
               <?php }else{?>
                 <?php 
-                  $id_pasien = $_SESSION['kosmetik']['idpasien'];
-                  $products = $koneksi->query("SELECT cart_kosmetik.*,produk_kosmetik.* FROM cart_kosmetik join produk_kosmetik on cart_kosmetik.produk_id = produk_kosmetik.id_produk  WHERE cart_kosmetik.user_id = '$id_pasien'");
+                  $id_pasien = sani($_SESSION['kosmetik']['idpasien']);
+                  $products = $koneksi->query("SELECT cart_kosmetik.*, produk_kosmetik.* FROM cart_kosmetik JOIN produk_kosmetik ON cart_kosmetik.produk_id = produk_kosmetik.id_produk WHERE cart_kosmetik.user_id = '{$id_pasien}'");
                 ?>
                 <li class="nav-item">
                   <a class="nav-link" href="chat.php"><b><i class="bi bi-chat-left-text"></i></b> </a>

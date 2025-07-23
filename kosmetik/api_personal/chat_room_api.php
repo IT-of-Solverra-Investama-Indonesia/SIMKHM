@@ -4,28 +4,43 @@
     include '../../admin/dist/function.php';
     // include 'function.php';
 
-    $getToken = $_GET['token'] ?? $_POST['token'];
+    $getToken = sani($_GET['token'] ?? $_POST['token']);
     $lengthToKeep = strlen($getToken) - 26;
-    $token = substr($getToken, 0, $lengthToKeep);
+    $token = sani(substr($getToken, 0, $lengthToKeep));
 
-    if($_GET['addRoom']){
-        $id =  'id'.date('ymdhis').$token;
-        $pasien_id = $token;
-        $getRegist = $koneksi->query("SELECT * FROM pasien_kosmetik WHERE idpasien = '$token'")->fetch_assoc();
+    if (isset($_GET['addRoom']) && sani($_GET['addRoom'])) {
+        $id = sani('id' . date('ymdhis') . $token);
+        $pasien_id = sani($token);
 
-        if($getRegist['jenis_kelamin'] == '' OR $getRegist['no_identitas'] == ''){
-            $data = 'Silahlan Melengkapi Data Diri (Registrasi 2)';
-            $status = 'Unsuccessfully';
-        }else{
-            $koneksi->query("INSERT INTO room_konsultasi (id, pasien_id, dokter, admin_id) VALUES ('$id', '$pasien_id', '','')");
-            $result = $koneksi->query("SELECT * FROM rom_konsultasi WHERE id='$id'");
-            $status = 'Successfully';
+        $stmt = $koneksi->prepare("SELECT * FROM pasien_kosmetik WHERE idpasien = ?");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $getRegist = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (sani($getRegist['jenis_kelamin']) == '' || sani($getRegist['no_identitas']) == '') {
+            $data = sani('Silahlan Melengkapi Data Diri (Registrasi 2)');
+            $status = sani('Unsuccessfully');
+        } else {
+            $stmt = $koneksi->prepare("INSERT INTO room_konsultasi (id, pasien_id, dokter, admin_id) VALUES (?, ?, '', '')");
+            $stmt->bind_param("ss", $id, $pasien_id);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt = $koneksi->prepare("SELECT * FROM room_konsultasi WHERE id = ?");
+            $stmt->bind_param("s", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $status = sani('Successfully');
             $data = array();
+
+            while ($hasil = $result->fetch_assoc()) {
+                $data[] = array_map('sani', $hasil);
+            }
+            $stmt->close();
         }
 
-        while ($hasil = $result->fetch_assoc()){
-            $data[] = $hasil; 
-        }
         $response = array(
             "status" => $status,
             "message" => $data

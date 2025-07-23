@@ -13,12 +13,12 @@ include '../admin/rawatjalan/urutan.php';
 // $poli=$_SESSION['admin']['username'];
 
 //var_dump($id)
-$idPasien = $_SESSION['pasien']['idpasien'];
-$ambil=$koneksi->query("SELECT * FROM pasien WHERE idpasien='$idPasien' ");
-
-$pecah=$ambil->fetch_assoc();
+$idPasien = sani($_SESSION['pasien']['idpasien']);
+$ambil = $koneksi->prepare("SELECT * FROM pasien WHERE idpasien = ?");
+$ambil->bind_param("s", $idPasien);
+$ambil->execute();
+$pecah = $ambil->get_result()->fetch_assoc();
 date_default_timezone_set('Asia/Jakarta');
-
 
  ?>
 
@@ -103,15 +103,24 @@ date_default_timezone_set('Asia/Jakarta');
                       <!-- <select name="kamar" class="form-select" id="">
                         <option hidden>Pilih Kamar</option>
                         <?php
-                          $getKamar = $koneksi->query("SELECT * FROM kamar LIMIT 10");
-                          foreach($getKamar as $kamar){
+                          $getKamarStmt = $koneksi->prepare("SELECT * FROM kamar LIMIT 10");
+                          $getKamarStmt->execute();
+                          $getKamarResult = $getKamarStmt->get_result();
+                          while($kamar = $getKamarResult->fetch_assoc()){
+                          $namakamar = sani($kamar['namakamar']);
+                          $cekKamarStmt = $koneksi->prepare("SELECT COUNT(*) as jumlah FROM registrasi_rawat WHERE kamar = ? and status_antri != 'Pulang'");
+                          $cekKamarStmt->bind_param("s", $namakamar);
+                          $cekKamarStmt->execute();
+                          $cekKamar = $cekKamarStmt->get_result()->fetch_assoc();
+                          if($cekKamar['jumlah'] == 0){
                         ?>
-                          <?php $cekKamar = $koneksi->query("SELECT COUNT(*) as jumlah FROM registrasi_rawat WHERE kamar = '$kamar[namakamar]' and status_antri != 'Pulang'")->fetch_assoc();?>
-                          <?php if($cekKamar['jumlah'] == 0){?>
-                            <option value="<?= $kamar['namakamar']?>"><?= $kamar['namakamar']?></option>
-                          <?php }else{?>
-                          <?php }?>
-                        <?php }?>
+                          <option value="<?= $namakamar ?>"><?= $namakamar ?></option>
+                        <?php
+                          }
+                          $cekKamarStmt->close();
+                          }
+                          $getKamarStmt->close();
+                        ?>
                       </select>
                     </div>
                   </div>
@@ -274,62 +283,56 @@ date_default_timezone_set('Asia/Jakarta');
 
 if (isset ($_POST['save'])) 
 {
+  // $jenis_kunjungan=sani($_POST["jenis_kunjungan"]);
 
-// $jenis_kunjungan=htmlspecialchars($_POST["jenis_kunjungan"]);
+  $id_pasien = sani($_POST["id_pasien"]);
+  $no_rm = sani($_POST["no_rm"]);
+  $nama_pasien = sani($_POST["nama_pasien"]);
+  // $dokter_rawat = sani($_POST["dokter_rawat"]);
+  $perawatan = sani($_POST["perawatan"]);
+  $jadwal = sani($_POST["jadwal"]);
+  $antrian = sani($_POST["antrian"]);
+  $keluhan = sani($_POST["keluhan"]);
+  $carabayar = sani($_POST["carabayar"]);
 
-$id_pasien=htmlspecialchars($_POST["id_pasien"]);
+  $tgl2 = date('Y-m-d');
+  $tgl = date('Ymd', strtotime($jadwal)) + 0;
+  $kode = $tgl;
+  $kode .= "+";
+  $kode .= $antrian;
 
-$no_rm=htmlspecialchars($_POST["no_rm"]);
-
-$nama_pasien=htmlspecialchars($_POST["nama_pasien"]);
-// $dokter_rawat=htmlspecialchars($_POST["dokter_rawat"]);
-$perawatan=htmlspecialchars($_POST["perawatan"]);
-$jadwal=htmlspecialchars($_POST["jadwal"]);
-$antrian=htmlspecialchars($_POST["antrian"]);
-$keluhan=htmlspecialchars($_POST["keluhan"]);
-
-$tgl2=date('Y-m-d');
-$tgl=date('Ymd', strtotime($jadwal))+0;
-$kode=$tgl;
-$kode .="+";
-$kode .=$antrian;
-
-  if($perawatan == "Rawat Inap"){
-    $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk) VALUES ('$nama_pasien','$no_rm', '$jadwal')");
-  }else{
-    $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, perawatan, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, kode, keluhan, kategori) VALUES ('$nama_pasien', '$perawatan', 'Kunjungan Sakit', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]','$kode', '$keluhan', 'online')");
+  if ($perawatan == "Rawat Inap") {
+    $stmt = $koneksi->prepare("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $nama_pasien, $no_rm, $jadwal);
+    $stmt->execute();
+    $stmt->close();
+  } else {
+    $stmt = $koneksi->prepare("INSERT INTO registrasi_rawat (nama_pasien, perawatan, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, kode, keluhan, kategori) VALUES (?, ?, 'Kunjungan Sakit', ?, ?, ?, ?, 'Belum Datang', ?, ?, ?, 'online')");
+    $stmt->bind_param("ssssssssss", $nama_pasien, $perawatan, $id_pasien, $no_rm, $jadwal, $antrian, $carabayar, $kode, $keluhan);
+    $stmt->execute();
+    $stmt->close();
   }
 
-   
-
-    if($perawatan == "Rawat Jalan"){
-
+  if ($perawatan == "Rawat Jalan") {
     echo "
     <script>
-  
-    alert('Berhasil Daftar!');
-    document.location.href='../pasien/riwayatdaftar.php';
-  
+      alert('Berhasil Daftar!');
+      document.location.href='../pasien/riwayatdaftar.php';
     </script>
-  
     ";
-    }
-    // else{
-    //   echo "
-    //   <script>
-    
-    //   alert('Data berhasil didaftarkan!');
-    //   document.location.href='index.php?halaman=daftarigd';
-    
-    //   </script>
-    
-    //   ";
-    // }
+  }
+  // else{
+  //   echo "
+  //   <script>
+  //   alert('Data berhasil didaftarkan!');
+  //   document.location.href='index.php?halaman=daftarigd';
+  //   </script>
+  //   ";
+  // }
 
-if (mysqli_affected_rows($koneksi)>0) {
+  // You may check affected rows if needed
+  // if ($koneksi->affected_rows > 0) {
+  // }
 }
-
-
-} 
 
 ?>

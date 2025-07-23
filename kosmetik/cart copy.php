@@ -34,17 +34,21 @@
 
             <div class="col-sm-8 p-4 d-flex flex-column gap-2">
                 <?php
-                    if(isset($_SESSION['kosmetik']) ){
-                        $id_pasien = $_SESSION['kosmetik']['idpasien'];
+                    if (isset($_SESSION['kosmetik'])) {
+                        $id_pasien = sani($_SESSION['kosmetik']['idpasien']);
 
-                        $products = $koneksi->query("SELECT cart_kosmetik.*,produk_kosmetik.* FROM cart_kosmetik join produk_kosmetik
-                        on cart_kosmetik.produk_id = produk_kosmetik.id_produk  WHERE cart_kosmetik.user_id = '$id_pasien' 
-                        GROUP BY cart_kosmetik.produk_id");
+                        $products = $koneksi->query(
+                            "SELECT cart_kosmetik.*, produk_kosmetik.* 
+                            FROM cart_kosmetik 
+                            JOIN produk_kosmetik ON cart_kosmetik.produk_id = produk_kosmetik.id_produk  
+                            WHERE cart_kosmetik.user_id = '$id_pasien' 
+                            GROUP BY cart_kosmetik.produk_id"
+                        );
 
                         // print_r($products);
 
-                    }else{
-                        echo"
+                    } else {
+                        echo "
                             <script>
                                 alert('Lakukan Login Terlebih Dahulu');
                                 document.location.href='login.php';
