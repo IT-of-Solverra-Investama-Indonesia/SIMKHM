@@ -1,5 +1,5 @@
 <div class="pagetitle">
-    <h1>Rekap Pasien Pulang </h1>
+    <h1>Rekap Pasien Pulang</h1>
 </div>
 <div class="">
     <div class="card shadow p-2 mb-2">
