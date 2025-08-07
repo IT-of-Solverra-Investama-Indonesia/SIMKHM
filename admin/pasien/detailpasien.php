@@ -69,7 +69,7 @@ $pecah=$ambil->fetch_assoc();
                   <h6><?php echo $pecah['nama_lengkap'] ?></h6>
                 </div>
                 <div class="col-md-6">
-                  <label style="font-weight: bold;" for="inputName5" class="form-label">Nama Ibu</label>
+                  <label style="font-weight: bold;" for="inputName5" class="form-label">Nama Ayah</label>
                   <h6><?php echo $pecah['nama_ibu'] ?></h6>
                 </div>
                 <div class="col-md-6">
