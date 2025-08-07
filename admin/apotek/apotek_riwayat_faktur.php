@@ -28,6 +28,8 @@
                         <th>Tgl Beli</th>
                         <th>Tgl Datang</th>
                         <th>Nama</th>
+                        <th>Distributor</th>
+                        <th>Petugas</th>
                         <th>Kode</th>
                         <th>Jumlah</th>
                         <th>Batch</th>
@@ -85,6 +87,8 @@
                             <td><?= $data['tgl_beli'] ?></td>
                             <td><?= $data['tgl_datang'] ?></td>
                             <td><?= $data['nama_obat'] ?></td>
+                            <td><?= $data['produsen'] ?></td>
+                            <td><?= $data['petugas_terima'] ?></td>
                             <td><?= $data['id_obat'] ?></td>
                             <td><?= $data['jml_obat'] ?> <?= $data['bentuk'] ?></td>
                             <td><?= $data['batch'] ?></td>
