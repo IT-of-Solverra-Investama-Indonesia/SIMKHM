@@ -10,8 +10,21 @@ $limit = 20; // Number of entries to show in a page
 
 
 if (isset($_POST['src'])) {
-  $queryKey = " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR diagnosis LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR antrian LIKE '%$_POST[key]%' OR registrasi_rawat.jadwal LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%')";
+  echo "<script>window.location.href='" . $_POST['url'] . "&carabayar=" . $_POST['carabayar'] . "&key=" . $_POST['key'] . "';</script>";
 }
+
+if (isset($_GET['src'])) {
+  $queryKey = "";
+  if ($_GET['key'] != "") {
+    $queryKey .= " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR diagnosis LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR antrian LIKE '%$_POST[key]%' OR registrasi_rawat.jadwal LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%')";
+  }
+  if ($_GET['carabayar'] == 'All') {
+    $queryKey .= " ";
+  } else {
+    $queryKey .= " AND carabayar = '$_GET[carabayar]'";
+  }
+}
+
 if (isset($_GET['day'])) {
   $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' AND shift = '" . $_SESSION['shift'] . "' " . $queryKey . " ORDER BY idrawat DESC";
   $linkPage = "index.php?halaman=daftarregistrasi&day";
@@ -410,7 +423,7 @@ if (isset($_GET['detail'])) {
                   <button class="btn btn-sm btn-primary mb-2 mt-1" data-bs-toggle="modal" data-bs-target="#showKamar">Lihat Kamar Terpakai</button>
                   <!-- Modal -->
                   <div class="modal fade" id="showKamar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                    <div class="modal-dialog modal-dialog-scrollable modal-xl ">
                       <div class="modal-content">
                         <div class="modal-header">
                           <h1 class="modal-title fs-5" id="staticBackdropLabel">Kamar Terpakai</h1>
@@ -433,11 +446,14 @@ if (isset($_GET['detail'])) {
                               </thead>
                               <tbody>
                                 <?php
-                                $getPasienKamar = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri = 'Belum Datang') and perawatan ='Rawat Inap'  order by idrawat desc;");
+                                $getPasienKamar = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN pasien ON registrasi_rawat.no_rm = pasien.no_rm WHERE  (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri = 'Belum Datang') and perawatan ='Rawat Inap'  order by idrawat desc;");
                                 foreach ($getPasienKamar as $kamar) {
                                 ?>
                                   <tr>
-                                    <td><?= $kamar['nama_pasien'] ?></td>
+                                    <td>
+                                      <?= $kamar['nama_pasien'] ?> <br>
+                                      <span style="font-size: 10px;"><?= $kamar['alamat'] ?>, <?= $kamar['kelurahan'] ?>, <?= $kamar['kecamatan'] ?>, <?= $kamar['kota'] ?>, <?= $kamar['provinsi'] ?></span>
+                                    </td>
                                     <td><?= $kamar['perawatan'] ?></td>
                                     <td><?= $kamar['dokter_rawat'] ?></td>
                                     <td><?= $kamar['no_rm'] ?></td>
@@ -452,7 +468,7 @@ if (isset($_GET['detail'])) {
                           </div>
                         </div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                           <!-- <button type="button" class="btn btn-primary">Understood</button> -->
                         </div>
                       </div>
@@ -461,7 +477,20 @@ if (isset($_GET['detail'])) {
 
                   <form method="POST">
                     <div class="row">
-                      <div class="col-9">
+                      <div class="col-4">
+                        <select class="form-select mb-2" name="carabayar">
+                          <option value="All">All</option>
+                          <option value="umum">umum</option>
+                          <option value="bpjs">bpjs</option>
+                          <option value="kosmetik">kosmetik</option>
+                          <option value="spesialis anak">spesialis anak</option>
+                          <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
+                          <option value="gigi umum">gigi umum</option>
+                          <option value="gigi bpjs">gigi bpjs</option>
+                        </select>
+                      </div>
+                      <div class="col-5">
+                        <input type="text" name="url" id="" value="<?= $linkPage ? $linkPage . '&src' : '' ?>" hidden>
                         <input type="text" class="form-control mb-2" placeholder="Search ..." name="key">
                       </div>
                       <div class="col-3">
