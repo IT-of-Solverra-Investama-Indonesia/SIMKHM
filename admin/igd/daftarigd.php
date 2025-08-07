@@ -88,21 +88,23 @@ $pasien = $koneksi->query("SELECT * FROM igd;");
                             <td style="margin-top:10px;"><?php echo $pecah["tgl_masuk"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["jam_masuk"]; ?></td>
                             <td>
-                              <div class="dropdown">
-                                <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
-                                <ul class="dropdown-menu">
-                                  <li><a href="index.php?halaman=detailigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
-                                  <li><a href="index.php?halaman=ubahigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-hospital" style="color:black;"></i> Kajian IGD</a></li>
-                                  <li><a href="index.php?halaman=lpo&igd&id=<?php echo $pecah["no_rm"] ?>&idigd=<?php echo $pecah["idigd"] ?>&tgl=<?php echo $pecah["tgl_masuk"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i> Observasi Perawat</a></li>
-                                  <li><a href="../pasien/gen_con.php?id=<?php echo $pecah["no_rm"]; ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> General Consent</a></li>
-                                  <li><a href="index.php?halaman=falanak&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk Pediatri (Anak)</a></li>
-                                  <li><a href="index.php?halaman=faldewasa&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk (Dewasa)</a></li>
-                                  <li><a href="index.php?halaman=ivl&id=<?php echo $pecah["no_rm"] ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-bandaid-fill" style="color:brown;"></i> IVL</a></li>
-                                  <li><a href="index.php?halaman=hapusigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
-
-                                      <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
-                                </ul>
-                              </div>
+                              <?php if($_SESSION['admin']['level'] == 'sup' OR $_SESSION['admin']['level'] == 'dokter' OR $_SESSION['admin']['level'] == 'igd'){?>
+                                <div class="dropdown">
+                                  <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
+                                  <ul class="dropdown-menu">
+                                    <li><a href="index.php?halaman=detailigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                    <li><a href="index.php?halaman=ubahigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-hospital" style="color:black;"></i> Kajian IGD</a></li>
+                                    <li><a href="index.php?halaman=lpo&igd&id=<?php echo $pecah["no_rm"] ?>&idigd=<?php echo $pecah["idigd"] ?>&tgl=<?php echo $pecah["tgl_masuk"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i> Observasi Perawat</a></li>
+                                    <li><a href="../pasien/gen_con.php?id=<?php echo $pecah["no_rm"]; ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> General Consent</a></li>
+                                    <li><a href="index.php?halaman=falanak&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk Pediatri (Anak)</a></li>
+                                    <li><a href="index.php?halaman=faldewasa&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file" style="color:blueviolet;"></i> Fallrisk (Dewasa)</a></li>
+                                    <li><a href="index.php?halaman=ivl&id=<?php echo $pecah["no_rm"] ?>&igd" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-bandaid-fill" style="color:brown;"></i> IVL</a></li>
+                                    <li><a href="index.php?halaman=hapusigd&id=<?php echo $pecah["idigd"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
+  
+                                        <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
+                                  </ul>
+                                </div>
+                              <?php }?>
                             </td>
                           </tr>
 
