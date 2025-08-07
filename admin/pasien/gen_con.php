@@ -14,7 +14,7 @@ if (isset($_GET['ttdPas'])) {
   require '../phpqrcode/qrlib.php';
   $tempdir = "img-qrcode/";
   if (!file_exists($tempdir))   mkdir($tempdir, 0755);
-  $file_name = $hub['nama_wali'] . ".png";  
+  $file_name = $hub['nama_wali'] . ".png";
   $file_path = $tempdir . $file_name;
   QRcode::png($hub['nama_wali'], $file_path, "H", 6, 4);
   /* param (1)qrcontent,(2)filename,(3)errorcorrectionlevel,(4)pixelwidth,(5)margin */
@@ -213,7 +213,7 @@ if (isset($_GET['ttdPet'])) {
   0in 5.4pt 0in 5.4pt'>
           <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
   margin-bottom:0in;margin-left:115.25pt;text-align:center;line-height:normal'><span style='position:relative;z-index:1'><span style='left:0px;position:
-  absolute;left:-170px;top:-5px;width:154px;height:86px'><img width=154 height=86 src="RM%2001%20REVISI%202%20GENERAL%20CONSENT_files/image001.png"></span></span><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Jalan Raya
+  absolute;left:-170px;top:-5px;width:154px;height:86px'><img width=154 height=86 src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png"></span></span><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Jalan Raya
               Wonorejo No. 167 Kedungjajang, Lumajang</span></p>
           <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
   margin-bottom:0in;margin-left:115.1pt;text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Telp.
@@ -267,8 +267,8 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
           ?>
             <p class=Default style='text-align:justify;line-height:115%'><span lang=IN style='font-size:11.0pt;line-height:115%'>Saya yang bertanda tangan di bawah
                 ini :</span></p>
-            <p class=Default style='text-align:justify;line-height:115%'><span lang=IN style='font-size:11.0pt;line-height:115%'>Nama                          :<input type="text" name="nama_wali" value="<?= $pasien['nama_lengkap'] ?>"> 
-            <select name="jk" id="">
+            <p class=Default style='text-align:justify;line-height:115%'><span lang=IN style='font-size:11.0pt;line-height:115%'>Nama                          :<input type="text" name="nama_wali" value="<?= $pasien['nama_lengkap'] ?>">
+                <select name="jk" id="">
                   <option value="1">L</option>
                   <option value="2">P</option>
                 </select>              </span></p>
@@ -628,25 +628,25 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-          <div class="mb-3">
+            <div class="mb-3">
               <label for="name" class="form-label">Ruangan</label>
-              <input type="text" class="form-control" name="ruangan"  value="<?= $getGCC['ruang']?>">
+              <input type="text" class="form-control" name="ruangan" value="<?= $getGCC['ruang'] ?>">
             </div>
             <legend>Saya yang bertanda tangan di bawah ini : </legend>
             <div class="mb-3">
               <label for="name" class="form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" value="<?= $getGCC['nama_wali']?>">
+              <input type="text" class="form-control" name="nama" value="<?= $getGCC['nama_wali'] ?>">
             </div>
             <div class="mb-3">
               <label for="gender" class="form-label">Jenis Kelamin</label>
               <select class="form-select" name="jk">
-                <option value="L" <?= $getGCC['jk'] == 'L' ? 'selected' : '' ?> >Laki-Laki</option>
+                <option value="L" <?= $getGCC['jk'] == 'L' ? 'selected' : '' ?>>Laki-Laki</option>
                 <option value="P" <?= $getGCC['jk'] == 'P' ? 'selected' : '' ?>>Perempuan</option>
               </select>
             </div>
             <div class="mb-3">
               <label for="birthdate" class="form-label">Tanggal Lahir</label>
-              <input type="date" class="form-control" name="birthdate" value="<?= $getGCC['tgl_lahir']?>">
+              <input type="date" class="form-control" name="birthdate" value="<?= $getGCC['tgl_lahir'] ?>">
             </div>
             <div class="mb-3">
               <label for="age" class="form-label">Umur</label>
@@ -657,30 +657,30 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
             </div>
             <div class="mb-3">
               <label for="address" class="form-label">Alamat</label>
-              <input type="text" class="form-control" name="address" value="<?= $getGCC['alamat']?>">
+              <input type="text" class="form-control" name="address" value="<?= $getGCC['alamat'] ?>">
             </div>
             <div class="mb-3">
               <label for="phonenumber" class="form-label">Telepon/HP</label>
-              <input type="text" class="form-control" name="phonenumber" value="<?= $getGCC['notelp']?>">
+              <input type="text" class="form-control" name="phonenumber" value="<?= $getGCC['notelp'] ?>">
             </div>
             <div class="mb-3">
               <label for="idktpsim" class="form-label">No. KTP/SIM</label>
-              <input type="text" class="form-control" name="idktpsim" value="<?= $getGCC['no_identitas']?>">
+              <input type="text" class="form-control" name="idktpsim" value="<?= $getGCC['no_identitas'] ?>">
             </div>
             <div class="row g-3">
               <div class="col-auto">
-                Bertindak atas 
+                Bertindak atas
               </div>
               <div class="col-auto">
                 <select class="form-select" name="hubungan">
-                  <option value="Diri Sendiri" <?= $getGCC['hubungan'] == 'Diri Sendiri' ? 'selected' : '' ?> >Diri Sendiri</option>
-                  <option value="Suami" <?= $getGCC['hubungan'] == 'Suami' ? 'selected' : '' ?> >Suami</option>
-                  <option value="Istri" <?= $getGCC['hubungan'] == 'Istri' ? 'selected' : '' ?> >Istri</option>
-                  <option value="Anak" <?= $getGCC['hubungan'] == 'Anak' ? 'selected' : '' ?> >Anak</option>
-                  <option value="Ayah" <?= $getGCC['hubungan'] == 'Ayah' ? 'selected' : '' ?> >Ayah</option>
-                  <option value="Ibu" <?= $getGCC['hubungan'] == 'Ibu' ? 'selected' : '' ?> >Ibu</option>
-                  <option value="Saudara Kandung" <?= $getGCC['hubungan'] == 'Saudara Kandung' ? 'selected' : '' ?> >Saudara Kandung</option>
-                  <option value="Wali" <?= $getGCC['hubungan'] == 'Wali' ? 'selected' : '' ?> >Wali</option>
+                  <option value="Diri Sendiri" <?= $getGCC['hubungan'] == 'Diri Sendiri' ? 'selected' : '' ?>>Diri Sendiri</option>
+                  <option value="Suami" <?= $getGCC['hubungan'] == 'Suami' ? 'selected' : '' ?>>Suami</option>
+                  <option value="Istri" <?= $getGCC['hubungan'] == 'Istri' ? 'selected' : '' ?>>Istri</option>
+                  <option value="Anak" <?= $getGCC['hubungan'] == 'Anak' ? 'selected' : '' ?>>Anak</option>
+                  <option value="Ayah" <?= $getGCC['hubungan'] == 'Ayah' ? 'selected' : '' ?>>Ayah</option>
+                  <option value="Ibu" <?= $getGCC['hubungan'] == 'Ibu' ? 'selected' : '' ?>>Ibu</option>
+                  <option value="Saudara Kandung" <?= $getGCC['hubungan'] == 'Saudara Kandung' ? 'selected' : '' ?>>Saudara Kandung</option>
+                  <option value="Wali" <?= $getGCC['hubungan'] == 'Wali' ? 'selected' : '' ?>>Wali</option>
                 </select>
               </div>
               <div class="col-auto">
@@ -694,7 +694,7 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
           </div>
         </form>
         <?php
-        if (isset($_POST['update'])){
+        if (isset($_POST['update'])) {
           $koneksi->query("UPDATE general SET  nama_wali = '$_POST[nama]', tgl_lahir ='$_POST[birthdate]', umur ='$_POST[age]',
           alamat ='$_POST[address]', notelp ='$_POST[phonenumber]', no_identitas ='$_POST[idktpsim]', jk ='$_POST[jk]',
           hubungan ='$_POST[hubungan]', ruang ='$_POST[ruangan]' where id_pasien = '$_GET[id]'");
@@ -710,7 +710,7 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
       </div>
     </div>
   </div>
- 
+
 </body>
 
 </html>
