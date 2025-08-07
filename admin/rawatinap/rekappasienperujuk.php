@@ -77,6 +77,7 @@
                                 <th>Nama</th>
                                 <th>NoRM</th>
                                 <th>Jadwal</th>
+                                <th>BuktiRujuk</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -91,6 +92,13 @@
                                     <td><?= $data['nama_pasien'] ?></td>
                                     <td><?= $data['no_rm'] ?></td>
                                     <td><?= $data['jadwal'] ?></td>
+                                    <td>
+                                        <?php if (empty($data['perujuk_file'])) { ?>
+                                            <span class="badge bg-danger" style="font-size: 12px;">Tidak Ada</span>
+                                        <?php } else { ?>
+                                            <a href="../rawatinap/perujuk_bukti/<?= $data['perujuk_file'] ?>" class="badge bg-warning" style="font-size: 12px;"><i class="bi bi-eye"> Lihat</i></a>
+                                        <?php } ?>
+                                    </td>
                                     <td><?= $data['status_antri'] ?></td>
                                 </tr>
                             <?php }
