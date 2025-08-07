@@ -361,7 +361,7 @@ if (isset($_POST['simpan'])) {
   $koneksi->query("UPDATE registrasi_rawat SET kasir='$username', pembayaran_at = '".date('Y-m-d H:i:s')."' WHERE idrawat='$_GET[id]'");
   echo "
     <script>
-      document.location.href='index.php?halaman=daftarbayar&day';
+      document.location.href='../bayar/printNota.php?id=" . htmlspecialchars($_GET['id']) . "';
     </script>
   ";
 }
