@@ -87,7 +87,7 @@ function ubahNamaLengkap($nama_lengkap, $tanggal_lahir, $jenis_kelamin, $status_
 {
   $usia = hitungUsia($tanggal_lahir);
 
-  if ($usia >= 1 && $usia <= 12) {
+  if ($usia <= 12) {
     return "An " . $nama_lengkap;
   } elseif ($usia >= 13) {
     if ($jenis_kelamin == '1' && $status_nikah != '1') { // '1' untuk laki-laki
