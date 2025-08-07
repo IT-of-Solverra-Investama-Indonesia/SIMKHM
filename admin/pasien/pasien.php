@@ -74,29 +74,34 @@ $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
                     <div class="col-md-6">
                       <label for="inputName5" class="form-label">No RM*</label>
                       <?php
-                      include
+                      $getLastRm = $koneksi->query("SELECT MAX(no_rm) AS max_no_rm FROM pasien WHERE no_rm LIKE '".date('y')."____' AND LENGTH(no_rm) = 6 AND no_rm REGEXP '^[0-9]+$';")->fetch_assoc();
+
+                      if($getLastRm['max_no_rm'] == null){
                         include "../dist/baseUrlAPI.php";
-                      $api_url = $baseUrlLama . "api_personal/api_rekamMedis.php?newRekamMedis";
-
-                      // Inisialisasi cURL
-                      $ch = curl_init();
-                      curl_setopt($ch, CURLOPT_URL, $api_url);
-                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                      curl_setopt($ch, CURLOPT_HEADER, false);
-
-                      // Eksekusi request
-                      $response = curl_exec($ch);
-
-                      // Cek error
-                      if (curl_errno($ch)) {
-                        echo 'Error: ' . curl_error($ch);
-                      } else {
-                        $noRM = $response;
-                        // echo "Nomor Rekam Medis berikutnya: " . $noRM;
+                        $api_url = $baseUrlLama . "api_personal/api_rekamMedis.php?newRekamMedis";
+  
+                        // Inisialisasi cURL
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, $api_url);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_HEADER, false);
+  
+                        // Eksekusi request
+                        $response = curl_exec($ch);
+                        
+                        // Cek error
+                        if (curl_errno($ch)) {
+                          echo 'Error: ' . curl_error($ch);
+                        } else {
+                          $noRM = $response;
+                          // echo "Nomor Rekam Medis berikutnya: " . $noRM;
+                        }
+                        curl_close($ch);
+                      }else{
+                        $noRM = $getLastRm['max_no_rm'] + 1;
                       }
 
                       // Tutup koneksi
-                      curl_close($ch);
                       // $norm = $koneksi->query("SELECT * FROM pasien WHERE no_rm REGEXP '^[0-9]+$' ORDER BY no_rm DESC LIMIT 1")->fetch_assoc();
                       ?>
                       <input type="text" class="form-control" name="no_rm" value="<?= $noRM ?>" id="inputName5" placeholder="Masukkan RM Pasien" required>
