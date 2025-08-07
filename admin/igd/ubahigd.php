@@ -6,7 +6,7 @@ $level = $_SESSION['admin']['level'];
 $shift = $_SESSION['shift'];
 $dokter = $_SESSION['dokter_rawat'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
-$igd = $koneksi->query("SELECT * FROM igd WHERE idigd='$_GET[id]';");
+$igd = $koneksi->query("SELECT * FROM igd WHERE idigd='".htmlspecialchars($_GET['id'])."';");
 $igd = $igd->fetch_assoc();
 $pasien = $koneksi->query("SELECT * FROM pasien INNER JOIN kajian_awal WHERE idpasien='$_GET[id]' AND no_rm = norm;");
 $pecah = $pasien->fetch_assoc();
@@ -428,40 +428,6 @@ $pecah = $pasien->fetch_assoc();
                           <label for="inputName5" class="form-label">Perawat Yang Mengkaji </label>
                           <input type="text" name="perawat" id="" class="form-control" value="<?= $username ?>">
                         </div>
-                        <div class="col-12 mt-2">
-                          <label for="inputName5" class="form-label">Perujuk</label>
-                          <select name="perujuk" class="form-control" id="selectPerujuk">
-                            <option hidden value="">Pilih Perujuk</option>
-                            <option value="Baru">Baru</option>
-                            <?php
-                            $getDataPerujuk = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk != '' GROUP BY perujuk ORDER BY perujuk ASC");
-                            foreach ($getDataPerujuk as $dataPerujuk) {
-                            ?>
-                              <option value="<?= $dataPerujuk['perujuk'] ?>"><?= $dataPerujuk['perujuk'] ?> || <?= $dataPerujuk['perujuk_hp'] ?></option>
-                            <?php } ?>
-                          </select>
-                          <div id="perujukBaru" class="hidden mt-2">
-                            <div style="margin-top:5px;">
-                              <label for="inputName5" class="form-label">Perujuk Baru</label>
-                              <input type="text" name="perujuk_baru" id="" class="form-control" value="<?php echo $igd['perujuk'] ?>">
-                            </div>
-                            <div style="margin-top:5px;">
-                              <label for="inputName5" class="form-label">Hp Perujuk</label>
-                              <input type="number" name="perujuk_hp" id="" class="form-control" value="<?php echo $igd['perujuk_hp'] ?>">
-                            </div>
-                          </div>
-                        </div>
-
-                        <script>
-                          document.getElementById('selectPerujuk').addEventListener('change', function() {
-                            var perujukBaruDiv = document.getElementById('perujukBaru');
-                            if (this.value === 'Baru') {
-                              perujukBaruDiv.classList.remove('hidden');
-                            } else {
-                              perujukBaruDiv.classList.add('hidden');
-                            }
-                          });
-                        </script>
                         
                         <div style="margin-bottom:2px; margin-top:30px">
                           <hr>
@@ -634,12 +600,12 @@ if (isset($_POST['save'])) {
   $faktor_pemberat = $_POST['faktor_pemberat'];
   $penurunan_fungsional = $_POST['penurunan_fungsional'];
 
-  $perujuk = htmlspecialchars($_POST['perujuk'] == 'Baru' ? $_POST['perujuk_baru'] : $_POST['perujuk']);
-  if ($_POST['perujuk'] != 'Baru') {
-    $perujuk_hp = $koneksi->query("SELECT perujuk_hp FROM registrasi_rawat WHERE perujuk = '$perujuk' ORDER BY jadwal DESC LIMIT 1")->fetch_assoc()['perujuk_hp'];
-  } else {
-    $perujuk_hp = htmlspecialchars($_POST['perujuk_hp']);
-  }
+  // $perujuk = htmlspecialchars($_POST['perujuk'] == 'Baru' ? $_POST['perujuk_baru'] : $_POST['perujuk']);
+  // if ($_POST['perujuk'] != 'Baru') {
+  //   $perujuk_hp = $koneksi->query("SELECT perujuk_hp FROM registrasi_rawat WHERE perujuk = '$perujuk' ORDER BY jadwal DESC LIMIT 1")->fetch_assoc()['perujuk_hp'];
+  // } else {
+  //   $perujuk_hp = htmlspecialchars($_POST['perujuk_hp']);
+  // }
   // $rencana_pemulangan=$_POST['rencana_pemulangan'];
   // $rencana_rawat=$_POST['rencana_rawat'];
   // $intruksi_medik=$_POST['intruksi_medik'];
@@ -683,7 +649,7 @@ if (isset($_POST['save'])) {
     $getLast = $koneksi->query("SELECT * FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
     $idrawat = $getLast['idrawat'] + 1;
 
-    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$perujuk', '$perujuk_hp')");
+    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp, perujuk_file) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$igd[perujuk]', '$igd[perujuk_hp]', '$igd[perujuk_file]')");
 
     $tgl = date('Y-m-d');
 
