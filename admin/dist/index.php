@@ -375,7 +375,6 @@ if (!isset($_SESSION['login'])) {
           </li> -->
           </ul>
         </li><!-- End Components Nav -->
-
       <?php } ?>
 
 
@@ -417,6 +416,12 @@ if (!isset($_SESSION['login'])) {
           <a class="nav-link collapsed" href="index.php?halaman=kyc_satusehat">
             <i class="bi bi-person"></i>
             <span>Kyc (Know Your Customer)</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarigd">
+            <i class="bi bi-circle"></i>
+            <span>Daftar IGD</span>
           </a>
         </li>
 
@@ -599,6 +604,12 @@ if (!isset($_SESSION['login'])) {
             <span>Entri Obat</span>
           </a>
         </li><!-- End Contact Page Nav -->
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&all">
+            <i class="bi bi-circle"></i>
+            <span>Kajian Dokter (Rawat Jalan)</span>
+          </a>
+        </li>
       <?php } ?>
 
       <hr>
