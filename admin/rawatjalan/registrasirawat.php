@@ -138,7 +138,7 @@ if (isset($_GET['confirm'])) {
                   <h5 class="card-title">Jenis Pendaftaran</h5>
                   <form class="row g-3" method="post" enctype="multipart/form-data">
 
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                       <label for="inputState" class="form-label">Jenis Kunjungan</label><br>
                       <input required type="radio" name="jenis_kunjungan" value="Kunjungan Sakit" checked>
                       <label class="form-check-label" for="gridRadios1">
@@ -152,12 +152,26 @@ if (isset($_GET['confirm'])) {
                       </span>
                     </div>
                     <br>
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                       <label for="inputState" class="form-label">Jenis Perawatan</label>
                       <select required id="pilihan" name="perawatan" class="form-select">
                         <option hidden>Pilih</option>
                         <option selected value="Rawat Jalan">Rawat Jalan</option>
                         <option value="Rawat Inap">Rawat Inap</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="inputState" class="form-label">Pembayaran</label>
+                      <select id="carabayarr" name="carabayar" class="form-select" required>
+                        <option hidden>Pilih Pembayaran</option>
+                        <option value="bpjs">bpjs</option>
+                        <option selected value="umum">umum</option>
+                        <option value="malam">malam</option>
+                        <option value="spesialis anak">spesialis anak</option>
+                        <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
+                        <option value="gigi umum">gigi umum</option>
+                        <option value="gigi bpjs">gigi bpjs</option>
+                        <option value="kosmetik">kosmetik</option>
                       </select>
                     </div>
                     <!-- <div class="col-md-12">
@@ -188,15 +202,68 @@ if (isset($_GET['confirm'])) {
                     <script>
                       document.getElementById('pilihan').addEventListener('change', function() {
                         var formAn = document.getElementById('ant');
+                        var formRjk = document.getElementById('rjkk');
                         if (this.value === 'Rawat Inap') {
-                          // formLain.classList.remove('hidden');
-                          formAn.classList.add('hidden');
+                          formAn.style.display = 'none';
+                          formRjk.style.display = 'block';
                         } else {
-                          // formLain.classList.add('hidden');
-                          formAn.classList.remove('hidden');
+                          formRjk.style.display = 'none';
+                          formAn.style.display = 'block';
+                        }
+                      });
+                      document.getElementById('carabayarr').addEventListener('change', function() {
+                        var pilihan = document.getElementById('ant');
+                        var newAnt = document.getElementById('antNew');
+                        var antrianNewInput = document.getElementById('antrianNew');
+                        var val = this.value;
+                        if (
+                          val === 'spesialis anak' ||
+                          val === 'spesialis penyakit dalam' ||
+                          val === 'gigi umum' ||
+                          val === 'gigi bpjs'
+                        ) {
+                          pilihan.style.display = 'none';
+                          newAnt.style.display = 'block';
+                          var today = new Date();
+                          var year = today.getFullYear();
+                          var month = String(today.getMonth() + 1).padStart(2, '0');
+                          var day = String(today.getDate()).padStart(2, '0');
+                          var formattedToday = year + '-' + month + '-' + day;
+
+                          // Pastikan input tersedia sebelum AJAX
+                          if (antrianNewInput) {
+                            $.ajax({
+                              url: '../rawatjalan/api_getAntrian.php',
+                              type: 'GET',
+                              dataType: 'json',
+                              data: {
+                                getAntrian: '',
+                                carabayar: val,
+                                tanggal: formattedToday
+                              },
+                              success: function(res) {
+                                // Pastikan response JSON
+                                if (res.status === "success" && res.data && res.data.antrian) {
+                                  antrianNewInput.value = res.data.antrian;
+                                } else {
+                                  antrianNewInput.value = '001';
+                                }
+                              },
+                              error: function(xhr, status, error) {
+                                antrianNewInput.value = '001';
+                                console.error('AJAX Error:', status, error);
+                              }
+                            });
+                          }
+
+                        } else {
+                          newAnt.style.display = 'none';
+                          pilihan.style.display = 'block';
+                          antrianNewInput.value = '';
                         }
                       });
                     </script>
+
                     <div>
                       <h5 class="card-title">Data Umum</h5>
                     </div>
@@ -237,6 +304,46 @@ if (isset($_GET['confirm'])) {
                       <!-- <?= $time ?>
                   <?= $tg ?> -->
                     </div>
+                    <div class="col-md-6" id="rjkk" style="display: none;">
+                      <label for="inputName5" class="form-label">Perujuk</label>
+                      <select name="perujuk" class="form-control" id="selectPerujuk">
+                        <option hidden value="">Pilih Perujuk</option>
+                        <option value="Baru">Baru</option>
+                        <?php
+                        $getDataPerujuk = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk != '' GROUP BY perujuk ORDER BY perujuk ASC");
+                        foreach ($getDataPerujuk as $dataPerujuk) {
+                        ?>
+                          <option value="<?= $dataPerujuk['perujuk'] ?>"><?= $dataPerujuk['perujuk'] ?> || <?= $dataPerujuk['perujuk_hp'] ?></option>
+                        <?php } ?>
+                      </select>
+                      <div id="perujukBaru" class="hidden mt-2">
+                        <div style="margin-top:5px;">
+                          <input type="text" name="perujuk_baru" placeholder="Nama Perujuk Baru" id="" class="form-control" value="">
+                        </div>
+                        <div style="margin-top:5px;">
+                          <input type="number" name="perujuk_hp" placeholder="Hp Perujuk Baru" id="" class="form-control" value="">
+                        </div>
+                      </div>
+                      <div style="margin-top:5px;">
+                        <label for="">Bukti Perujuk</label>
+                        <input type="file" name="perujuk_file" placeholder="File Perujuk Baru" id="" class="form-control" value="">
+                      </div>
+                      <script>
+                        document.getElementById('selectPerujuk').addEventListener('change', function() {
+                          var perujukBaruDiv = document.getElementById('perujukBaru');
+                          if (this.value === 'Baru') {
+                            perujukBaruDiv.classList.remove('hidden');
+                          } else {
+                            perujukBaruDiv.classList.add('hidden');
+                          }
+                        });
+                      </script>
+                    </div>
+                    <div class="col-md-6" id="antNew" style="display: none;">
+                      <label for="inputName5" class="form-label">Antrian Khusus :</label>
+                      <input type="text" name="antrianNew" class="form-control" readonly id="antrianNew">
+                    </div>
+
                     <div class="col-md-6">
                       <label for="inputName5" class="form-label">Jadwal</label>
                       <input type="datetime" class="form-control" name="jadwal" value="<?= date("Y-m-d H:i:s") ?>" placeholder="Masukkan Nama Pasien">
@@ -249,20 +356,6 @@ if (isset($_GET['confirm'])) {
                         foreach ($dokter as $dok) { ?>
                           <option value="<?= $dok['namalengkap'] ?>"><?= $dok['namalengkap'] ?></option>
                         <?php } ?>
-                      </select>
-                    </div>
-                    <div class="col-md-12">
-                      <label for="inputState" class="form-label">Pembayaran</label>
-                      <select id="inputState" name="carabayar" class="form-select" required>
-                        <option hidden>Pilih Pembayaran</option>
-                        <option value="bpjs">bpjs</option>
-                        <option selected value="umum">umum</option>
-                        <option value="malam">malam</option>
-                        <option value="spesialis anak">spesialis anak</option>
-                        <option value="spesialis penyakit dalam">spesialis penyakit dalam</option>
-                        <option value="gigi umum">gigi umum</option>
-                        <option value="gigi bpjs">gigi bpjs</option>
-                        <option value="kosmetik">kosmetik</option>
                       </select>
                     </div>
                     <div class="col-md-6">
@@ -350,8 +443,10 @@ if (isset($_POST['save'])) {
   $perawatan = isset($_POST["perawatan"]) ? htmlspecialchars($_POST["perawatan"]) : '';
   $jadwal = isset($_POST["jadwal"]) ? htmlspecialchars($_POST["jadwal"]) : '';
   $antrian = isset($_POST["antrian"]) ? htmlspecialchars($_POST["antrian"]) : '';
-  // $shift = isset($_POST["shift"]) ? $_POST["shift"] : '';
-  // $poli = isset($_POST["poli"]) ? $_POST["poli"] : '';
+
+  if($_POST['carabayar'] == 'spesialis anak' || $_POST['carabayar'] == 'spesialis penyakit dalam' || $_POST['carabayar'] == 'gigi umum' || $_POST['carabayar'] == 'gigi bpjs'){
+    $antrian = $_POST['antrianNew'] ?? '';
+  }
   $id_get = isset($_GET['id']) ? $_GET['id'] : '';
 
   // Periksa apakah pasien sudah terdaftar hari ini
@@ -376,7 +471,63 @@ if (isset($_POST['save'])) {
   $kode = $tgl . "+" . $antrian;
 
   if ($perawatan == "Rawat Inap") {
-    $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk) VALUES ('$nama_pasien','$no_rm', '$jadwal')");
+    $perujuk = isset($_POST['perujuk']) ? htmlspecialchars($_POST['perujuk']) : '';
+    if ($perujuk == 'Baru') {
+      $perujuk = isset($_POST['perujuk_baru']) ? htmlspecialchars($_POST['perujuk_baru']) : '';
+      $perujuk_hp = isset($_POST['perujuk_hp']) ? htmlspecialchars($_POST['perujuk_hp']) : '';
+    } else {
+      $getPerujuk = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk = '$perujuk' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+      $perujuk_hp = $getPerujuk['perujuk_hp'];
+    }
+
+    $perujuk_file = isset($_FILES['perujuk_file']) ? $_FILES['perujuk_file'] : null;
+    $uniqueName = '';
+    if ($perujuk_file && $perujuk_file['error'] == UPLOAD_ERR_OK) {
+      $uploadDir = '../rawatinap/perujuk_bukti/';
+      if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+      }
+      $ext = strtolower(pathinfo($perujuk_file['name'], PATHINFO_EXTENSION));
+      $uniqueName = uniqid('perujuk_', true) . ($ext ? '.' . $ext : '');
+      $uploadFile = $uploadDir . $uniqueName;
+
+      // Kompres gambar hingga di bawah 100 KB
+      if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+        $tmpPath = $perujuk_file['tmp_name'];
+        $maxSize = 100 * 1024; // 100 KB
+        $quality = 20; // Awal kualitas
+
+        if ($ext == 'jpg' || $ext == 'jpeg') {
+          $img = imagecreatefromjpeg($tmpPath);
+          do {
+            ob_start();
+            imagejpeg($img, null, $quality);
+            $imgData = ob_get_clean();
+            $size = strlen($imgData);
+            $quality -= 5;
+          } while ($size > $maxSize && $quality > 5);
+          file_put_contents($uploadFile, $imgData);
+          imagedestroy($img);
+        } elseif ($ext == 'png') {
+          $img = imagecreatefrompng($tmpPath);
+          $compression = 9;
+          do {
+            ob_start();
+            imagepng($img, null, $compression);
+            $imgData = ob_get_clean();
+            $size = strlen($imgData);
+            $compression++;
+          } while ($size > $maxSize && $compression <= 9);
+          file_put_contents($uploadFile, $imgData);
+          imagedestroy($img);
+        }
+      } else {
+        move_uploaded_file($perujuk_file['tmp_name'], $uploadFile);
+      }
+    } else {
+      $uploadFile = '';
+    }
+    $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk, perujuk, perujuk_hp, perujuk_file) VALUES ('$nama_pasien','$no_rm', '$jadwal', '$perujuk', '$perujuk_hp', '$uniqueName')");
   } else {
     $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, kode, petugaspoli, kategori) VALUES ('$nama_pasien', '$dokter_rawat', '$perawatan', '$_POST[kamar]', '$jenis_kunjungan', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]', '$shift', '$kode', '$poli', 'offline')");
   }

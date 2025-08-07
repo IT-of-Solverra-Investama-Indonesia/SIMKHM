@@ -20,10 +20,7 @@ $hasil=mysqli_num_rows($qu);
 
 
 if ($hasil==0 or $hasil=='NULL') {
-
-
  mysqli_query($koneksi, "INSERT INTO `tgltab` (`tgl`, `no`, `shift`, `urut`, `kode`, `ket`, `jam`) VALUES ('$date', NULL, 'pagi', 'p001', '$date+p001', 'no: 1, shift PAGI, masuk jam: 07.30-08.00', 800)");
-
  mysqli_query($koneksi, "INSERT INTO `tgltab` (`tgl`, `no`, `shift`, `urut`, `kode`, `ket`, `jam`) VALUES ('$date', NULL, 'pagi', 'p002', '$date+p002', 'no: 2, shift PAGI, masuk jam: 07.30-08.00', 800)");
 
  mysqli_query($koneksi, "INSERT INTO `tgltab` (`tgl`, `no`, `shift`, `urut`, `kode`, `ket`, `jam`) VALUES ('$date', NULL, 'pagi', 'p003', '$date+p003', 'no: 3, shift PAGI, masuk jam: 07.30-08.00', 800)");
