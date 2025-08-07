@@ -2,7 +2,19 @@
     $id = htmlspecialchars($_GET['beli']);
     
     $getSinglePembelian = $koneksi->query("SELECT * FROM pembelian_obat WHERE id_beli = '$id'")->fetch_assoc();
-$getSingleCek = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$getSinglePembelian[id_obat]'")->fetch_assoc();
+    $getSingleCek = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$getSinglePembelian[id_obat]'")->fetch_assoc();
+
+    $getBarangSudahDatang = $koneksi->query("SELECT SUM(jml_obat) as total FROM apotek WHERE pembelian_id = '$id'")->fetch_assoc();
+
+    if($getBarangSudahDatang['total'] >= $getSinglePembelian['jml_obat']){
+        echo "
+            <script>
+                alert('Barang Sudah Diterima Semua');
+                document.location.href='index.php?halaman=apotek_terima';
+            </script>
+        ";
+        exit;
+    }
 // if ($getSingleCek->num_rows == 0) {
 //     $koneksi->query("INSERT INTO apotek (nama_obat, tipe, id_obat, bentuk, jml_obat, jml_obat_minim, harga_beli, tgl_beli, margininap, margin_jual, produsen) VALUES ('$getSinglePembelian[nama_obat]', '$getSinglePembelian[tipe]', '$getSinglePembelian[id_obat]', '$getSinglePembelian[bentuk]', '0', '$getSinglePembelian[jml_obat_minim]', '$getSinglePembelian[harga_beli]', '$getSinglePembelian[tgl_beli]', '100', '100', '$getSinglePembelian[produsen]')");
 
@@ -66,28 +78,51 @@ $single = $koneksi->query("SELECT pembelian_obat.* FROM pembelian_obat WHERE id_
         $ppn = $single['ppn'];
         $total = $single['total'];
         $produsen = $single['produsen'];
-        
+        $petugas_terima = $_SESSION['admin']['namalengkap'];
+
+        function compressImage($source, $destination, $quality = 75, $maxSize = 150000) {
+            $info = getimagesize($source);
+            if ($info['mime'] == 'image/jpeg') {
+            $image = imagecreatefromjpeg($source);
+            } elseif ($info['mime'] == 'image/png') {
+            $image = imagecreatefrompng($source);
+            } else {
+            return false;
+            }
+            // Compress and save
+            imagejpeg($image, $destination, $quality);
+            imagedestroy($image);
+            // If still above maxSize, reduce quality further
+            while (filesize($destination) > $maxSize && $quality > 10) {
+            $quality -= 10;
+            $image = imagecreatefromjpeg($destination);
+            imagejpeg($image, $destination, $quality);
+            imagedestroy($image);
+            }
+            return true;
+        }
+
+        // Foto Barang
         $fileName = $_FILES['foto_barang']['name'];
         $tmpName = $_FILES['foto_barang']['tmp_name'];
-        $fileSize = $_FILES['foto_barang']['size'];
-        $fileType = $_FILES['foto_barang']['type'];
         $uploadDir = "../apotek/foto_barang_datang/";
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
         $foto_barang = uniqid() . date('Ymdhis') .'.' . $ext;
         $filePath = $uploadDir . $foto_barang;
-        move_uploaded_file($tmpName, $filePath);
-        
+        // Compress image
+        compressImage($tmpName, $filePath);
+
+        // Foto Faktur
         $fileName1 = $_FILES['foto_faktur']['name'];
         $tmpName1 = $_FILES['foto_faktur']['tmp_name'];
-        $fileSize1 = $_FILES['foto_faktur']['size'];
-        $fileType1 = $_FILES['foto_faktur']['type'];
         $uploadDir1 = "../apotek/foto_faktur/";
         $ext1 = pathinfo($fileName1, PATHINFO_EXTENSION);
         $foto_faktur = uniqid() . date('Ymdhis') .'.' . $ext1;
         $filePath1 = $uploadDir1 . $foto_faktur;
-        move_uploaded_file($tmpName1, $filePath1);
+        // Compress image
+        compressImage($tmpName1, $filePath1);
 
-        $koneksi->query("INSERT INTO apotek (jml_obat_minim, nama_obat, id_obat, jml_obat, produsen, bentuk, tipe, harga_beli, margininap, tgl_beli, tgl_expired, margin_jual, pembelian_id, tgl_datang, batch, foto_faktur, foto_barang) VALUES ('$jml_obat_minim', '$nama_obat', '$id_obat', '$jml_obat', '$produsen', '$bentuk', '$tipe', '$harga_beli', '$margininap', '$tgl_beli', '$tgl_expired', '$margin_jual', '$id', '$tgl_datang', '$batch', '$foto_faktur', '$foto_barang') ");
+        $koneksi->query("INSERT INTO apotek (jml_obat_minim, nama_obat, id_obat, jml_obat, produsen, bentuk, tipe, harga_beli, margininap, tgl_beli, tgl_expired, margin_jual, pembelian_id, tgl_datang, batch, foto_faktur, foto_barang, petugas_terima) VALUES ('$jml_obat_minim', '$nama_obat', '$id_obat', '$jml_obat', '$produsen', '$bentuk', '$tipe', '$harga_beli', '$margininap', '$tgl_beli', '$tgl_expired', '$margin_jual', '$id', '$tgl_datang', '$batch', '$foto_faktur', '$foto_barang', '$petugas_terima') ");
 
         echo "
             <script>
