@@ -170,7 +170,7 @@
                                 <td><?php echo $or["jml_dokter"]; ?></td>
                                 <td>
                                     <?php
-                                    $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                            $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
                                     ?>
                                     Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
                                 </td>
@@ -292,7 +292,7 @@
 
         $tgl_retur = date('Y-m-d');
 
-        $getHargaBeliAkhir = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%$obat_rm_id%' LIMIT 1")->fetch_assoc();
+        $getHargaBeliAkhir = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%$obat_rm_id%' AND ket LIKE '%Resep%' AND id = '".htmlspecialchars($_GET['idrawat'])."' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
         $getJum = $koneksi->query("SELECT * FROM obat_rm WHERE idobat='$obat_rm_id' LIMIT 1")->fetch_assoc();
 
         $hargaSatuan = -1 * ($getHargaBeliAkhir['besaran'] / $getJum['jml_dokter']);
