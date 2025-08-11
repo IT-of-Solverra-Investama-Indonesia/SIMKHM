@@ -1,16 +1,22 @@
+<?php
+$user = $_SESSION['admin']['username'];
+$level = $_SESSION['admin']['level'];
 
-<?php 
-$user=$_SESSION['admin']['username'];
-$level=$_SESSION['admin']['level'];
 
+$ambil = $koneksi->query("SELECT * FROM daftartes;");
 
-$ambil=$koneksi->query("SELECT * FROM daftartes;");
+if(isset($_GET['hapuslabdata'])){
+    $id = $_GET['id'];
+    $koneksi->query("DELETE FROM daftartes WHERE idtes='$id'");
 
+    echo "<script>alert('Data Berhasil Dihapus');</script>";
+    echo "<script>location='index.php?halaman=daftarlabdata';</script>";
+}
 
 ?>
 
 
- <!-- !-- DataTables  -->
+<!-- !-- DataTables  -->
 
 <!-- <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css"> -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -36,55 +42,59 @@ $ambil=$koneksi->query("SELECT * FROM daftartes;");
 <br>
 <br>
 <div class="table-responsive">
-    <table class="table" style="width:100%;" id="myTable" >
-    <thead>
-        <tr>
-            <th>Nama Pemeriksaan</th>
-            <th>Indikator</th>
-            <th>Tipe</th>
-            <th>Harga</th>
-            <th>Aksi</th>
+    <table class="table" style="width:100%;" id="myTable">
+        <thead>
+            <tr>
+                <th>Nama Pemeriksaan</th>
+                <th>Indikator</th>
+                <th>Tipe</th>
+                <th>Harga</th>
+                <th>Aksi</th>
 
-        </tr>
+            </tr>
 
-    </thead>
+        </thead>
 
-    <tbody>
+        <tbody>
 
-            <?php while ($pecah=$ambil->fetch_assoc())  { ?>
-        <tr>
-            <td><?php echo $pecah["nama_tes"]; ?></td>
-            <td><?php echo $pecah["indikator"]; ?></td>
-            <td><?php echo $pecah["tipe"]; ?></td>
-            <td><?php echo $pecah["harga_lab"]; ?></td>
-            <td>
-             <?php if ($level==='lab' or $level==='ceo' or $level==='kasir') : ?>
-             <a href="index.php?halaman=ubahdaftar&id=<?php echo $pecah["idtes"]; ?>" class="btn btn-sm btn-success" style="text-decoration: none; margin-left: 1px; font-weight: bold;">Ubah</a>
-             <?php endif ?>&nbsp;&nbsp;<a href="index.php?halaman=hapuslabdata&id=<?php echo $pecah["idtes"]; ?>" class="btn btn-sm btn-danger" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">Hapus</a></td>
+            <?php while ($pecah = $ambil->fetch_assoc()) { ?>
+                <tr>
+                    <td><?php echo $pecah["nama_tes"]; ?></td>
+                    <td><?php echo $pecah["indikator"]; ?></td>
+                    <td><?php echo $pecah["tipe"]; ?></td>
+                    <td><?php echo $pecah["harga_lab"]; ?></td>
+                    <td>
+                        <?php if ($level === 'lab' or $level === 'ceo' or $level === 'kasir') : ?>
+                            <a href="index.php?halaman=ubahdaftar&id=<?php echo $pecah["idtes"]; ?>" class="btn btn-sm btn-success" style="text-decoration: none; margin-left: 1px; font-weight: bold;">Ubah</a>
+                            <?php endif ?>&nbsp;&nbsp;<a href="index.php?halaman=daftarlabdata&hapuslabdata&id=<?php echo $pecah["idtes"]; ?>" class="btn btn-sm btn-danger" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">Hapus</a>
+                    </td>
 
-        </tr>
-        <?php } ?>
+                </tr>
+            <?php } ?>
 
-    </tbody>
+        </tbody>
 
-</table>
+    </table>
 </div>
 
 
 
 <script>
     $(document).ready(function() {
-        $('#myTable').DataTable( {
-       
-        paging: true,
-        pageLength: 50,
-        lengthChange: true,
-        order: true,
-        lengthMenu: [[10, 50, 25, 100, 300, -1], [10, 25, 100, 300, "All"]],
-        dom: 'B<"clear">lfrtip',
-         buttons: [
-               'excel'
+        $('#myTable').DataTable({
+
+            paging: true,
+            pageLength: 50,
+            lengthChange: true,
+            order: true,
+            lengthMenu: [
+                [10, 50, 25, 100, 300, -1],
+                [10, 25, 100, 300, "All"]
+            ],
+            dom: 'B<"clear">lfrtip',
+            buttons: [
+                'excel'
             ]
-        } );
-    } );
-</script> 
+        });
+    });
+</script>
