@@ -118,7 +118,7 @@
                                 <td><?= $in['petugas'] ?></td>
                                 <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
                                 <td>
-                                    <button class="btn btn-sm btn-warning" onclick="upData('<?= $in['idobat'] ?>','<?= $in['nama_obat'] ?>','<?= $in['kode_obat'] ?>','<?= $in['jenis_obat'] ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
+                                    <button class="btn btn-sm btn-warning" onclick="upData('<?= $in['idobat'] ?>','<?= $in['nama_obat'] ?>','<?= $in['kode_obat'] ?>','<?= $in['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
                                     <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
                                         <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
                                     <?php } else { ?>
@@ -170,7 +170,7 @@
                                 <td><?php echo $or["jml_dokter"]; ?></td>
                                 <td>
                                     <?php
-                            $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                                    $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
                                     ?>
                                     Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
                                 </td>
@@ -184,7 +184,7 @@
                                 <td><?= $or['petugas'] ?></td>
                                 <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
                                 <td>
-                                    <button class="btn btn-sm btn-warning" onclick="upData('<?= $or['idobat'] ?>','<?= $or['nama_obat'] ?>','<?= $or['kode_obat'] ?>','<?= $or['jenis_obat'] ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
+                                    <button class="btn btn-sm btn-warning" onclick="upData('<?= $or['idobat'] ?>','<?= $or['nama_obat'] ?>','<?= $or['kode_obat'] ?>','<?= $or['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
                                     <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
                                         <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
                                     <?php } else { ?>
@@ -210,16 +210,19 @@
                         <th>Nama Obat</th>
                         <th>Jenis Obat</th>
                         <th>Jenis</th>
+                        <th>Harga</th>
                         <th>Jumlah Retur</th>
+                        <th>Sub</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
+                    $nooo = 1;
                     $getRetur = $koneksi->query("SELECT *, obat_rm.obat_igd FROM retur_obat_inap INNER JOIN obat_rm ON obat_rm.idobat = retur_obat_inap.obat_rm_id WHERE idrawat = '" . htmlspecialchars($_GET['idrawat']) . "'");
                     foreach ($getRetur as $retur) {
                     ?>
                         <tr>
-                            <td></td>
+                            <td><?= $nooo++ ?></td>
                             <td><?= $retur['tgl_retur'] ?></td>
                             <td>
                                 <a target="_blank" href="../apotek/retur_obat_inap_print.php?idrawat=<?= $retur['idrawat'] ?>&tgl=<?= $retur['tgl_retur'] ?>" class="badge bg-warning text-light" style="font-size: 12px;">
@@ -229,7 +232,15 @@
                             <td><?= $retur['nama_obat'] ?></td>
                             <td><?= $retur['jenis_obat'] ?></td>
                             <td><?= $retur['obat_igd'] ?></td>
+                            <td>
+                                <?php
+                                $getPriceInDate = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%Retur%' AND ket LIKE '%$retur[idretur]%' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+                                $harga = $getPriceInDate['besaran'] / $retur['jumlah_retur'];
+                                ?>
+                                Rp <?= number_format($harga, 0, 0, '.') ?>
+                            </td>
                             <td><?= $retur['jumlah_retur'] ?></td>
+                            <td>Rp <?= number_format($harga * $retur['jumlah_retur'], 0, 0, '.') ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -237,11 +248,12 @@
         </div>
     </div>
     <script>
-        function upData(idobat, nama_obat, kode_obat, jenis_obat) {
+        function upData(idobat, nama_obat, kode_obat, jenis_obat, harga) {
             document.getElementById('idobat_id').value = idobat;
             document.getElementById('nama_obat_id').value = nama_obat;
             document.getElementById('kode_obat_id').value = kode_obat;
             document.getElementById('jenis_obat_id').value = jenis_obat;
+            document.getElementById('harga_id').value = harga;
         }
     </script>
     <!-- Modal -->
@@ -255,14 +267,17 @@
                 <form method="post">
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-4">
+                            <div class="col-3">
                                 <input type="text" readonly name="nama_obat" id="nama_obat_id" class="form-control form-control-sm mb-1">
                                 <input type="text" readonly name="idobat" id="idobat_id" hidden class="form-control form-control-sm mb-1">
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <input type="text" readonly name="kode_obat" id="kode_obat_id" class="form-control form-control-sm mb-1">
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
+                                <input type="text" readonly name="harga" id="harga_id" class="form-control form-control-sm mb-1">
+                            </div>
+                            <div class="col-3">
                                 <input type="text" readonly name="jenis_obat" id="jenis_obat_id" class="form-control form-control-sm mb-1">
                             </div>
                             <div class="col-12">
@@ -292,10 +307,10 @@
 
         $tgl_retur = date('Y-m-d');
 
-        $getHargaBeliAkhir = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%$obat_rm_id%' AND ket LIKE '%Resep%' AND id = '".htmlspecialchars($_GET['idrawat'])."' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+        $getHargaBeliAkhir = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%$obat_rm_id%' AND ket LIKE '%Resep%' AND id = '" . htmlspecialchars($_GET['idrawat']) . "' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
         $getJum = $koneksi->query("SELECT * FROM obat_rm WHERE idobat='$obat_rm_id' LIMIT 1")->fetch_assoc();
 
-        $hargaSatuan = -1 * ($getHargaBeliAkhir['besaran'] / $getJum['jml_dokter']);
+        $hargaSatuan = -1 * $_POST['harga'];
         $uniqueId = getUniqeIdObat($koneksi);
 
         $koneksi->query("INSERT INTO rawatinapdetail (id, biaya, ket, besaran, tgl, petugas) VALUES ('$idrawat', 'Retur Obat Inap', 'Retur Obat $uniqueId', '" . ($hargaSatuan) * $jumlah_retur . "', '$tgl_retur', '" . $_SESSION['admin']['namalengkap'] . "')");
@@ -310,5 +325,4 @@
         ";
     }
     ?>
-</div>
 </div>
