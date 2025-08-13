@@ -1,13 +1,16 @@
 <div>
     <h5 class="card-title">Dashboard Inap</h5>
-    <div class="card shadow p-2 mb-2">
+    <div class="card p-2 mb-2">
         <form method="get">
             <input type="text" hidden name="halaman" value="dashboardinap" id="">
             <div class="row g-1">
                 <div class="col-9">
                     <select name="dashboardinap" id="" required class="form-control form-control-sm">
                         <option value="">Pilih Jenis Dashboard</option>
-                        <option value="dashboardinapglobal">Dashboard Inap Global</option>
+                        <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'dashboardinapglobal') ? 'selected' : '' ?> value="dashboardinapglobal">Dashboard Inap Global</option>
+                        <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapUsia') ? 'selected' : '' ?> value="RekapUsia">Dashboard Inap Usia</option>
+                        <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapDesa') ? 'selected' : '' ?> value="RekapDesa">Dashboard Inap Desa</option>
+                        <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapDiagnosis') ? 'selected' : '' ?> value="RekapDiagnosis">Dashboard Inap Diagnosis</option>
                     </select>
                 </div>
                 <div class="col-3">
