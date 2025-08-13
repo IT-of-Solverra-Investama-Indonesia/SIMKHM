@@ -56,9 +56,11 @@ $getRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat =
                 <?= $data['nama_obat'] ?>
                 <br>
                 <?php
-                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($data['created_at'])) . "' AND id_obat = '$data[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
-                ?>
-                <?= $data['jumlah_retur'] ?> x Rp<?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?> = Rp<?= number_format($harga * $data['jumlah_retur'], 0, 0, '.') ?>
+                $getPriceInDate = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%Retur%' AND ket LIKE '%$data[idretur]%' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+                $harga = $getPriceInDate['besaran'] / $data['jumlah_retur'];
+            // $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($data['created_at'])) . "' AND id_obat = '$data[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+        ?>
+                <?= $data['jumlah_retur'] ?> x Rp<?= number_format($harga, 0, 0, '.') ?> = Rp<?= number_format($harga * $data['jumlah_retur'], 0, 0, '.') ?>
             </li>
             <?php
             $total += $harga * $data['jumlah_retur'];
