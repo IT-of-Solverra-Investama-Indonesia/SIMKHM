@@ -14,6 +14,7 @@
                     <option value="rataObatPasienBPJS">Rata Obat Pasien BPJS</option>
                     <option value="rataObatPasienBPJSperBulan">Rata Obat Pasien BPJS per Dokter Bulan</option>
                     <option value="rasioBHP">Rasio BHP</option>
+                    <option value="rasioCashflow">Rasio Cashflow</option>
                 </select>
             </div>
             <div class="col-3">
@@ -61,6 +62,10 @@ if (isset($_GET['Poli'])) {
     include '../dashboard/dashboard_detail_rataObatPasienBPJSperBulan.php';
 }elseif (isset($_GET['rasioBHP'])) {
     include '../dashboard/dashboard_detail_rasioBHP.php';
+} elseif (isset($_GET['rasioBHP'])) {
+    include '../dashboard/dashboard_detail_rasioBHP.php';
+} elseif (isset($_GET['rasioCashflow'])) {
+    include '../dashboard/dashboard_detail_rasioCashflow.php';
 } else { ?>
     <div class="card shadow p-2">
         <span><i>Pilih Terlebih Dahulu Dashboard Yang Ingin Anda Lihat</i></span>
