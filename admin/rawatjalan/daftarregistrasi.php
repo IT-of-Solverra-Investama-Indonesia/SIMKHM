@@ -592,40 +592,43 @@ if (isset($_GET['detail'])) {
                               <?php }  ?>
                             </td>
                             <td>
-                              <div class="dropdown">
-                                <?php
-                                $ubah = $koneksi->query("SELECT * FROM kajian_awal WHERE nama_pasien = '$pecah[nama_pasien]';")->fetch_assoc();
-                                ?>
-                                <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
-                                <ul class="dropdown-menu">
-                                  <li>
-                                    <a href="../rawatjalan/printAntrian.php?idrawat=<?php echo $pecah["idrawat"]; ?>" target="_blank" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
-                                      <i class="bi bi-printer text-warning"></i> Print Antrian
-                                    </a>
-                                  </li>
-                                  <?php if (empty($ubah['nama_pasien'])) { ?>
-                                    <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Isi Kajian Awal</a></li>
-                                  <?php } else { ?>
-                                    <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&ubah" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Lihat Kajian Awal</a></li>
-                                  <?php } ?>
-                                  <?php if ($_SESSION['admin']['level'] == 'daftar' or $_SESSION['admin']['level'] == 'sup') { ?>
-                                    <li><button onclick="upData('<?= $pecah['idrawat'] ?>', '<?= date('Y-m-d\TH:i:s+00:00', $jadwal); ?>', '<?php echo $pecah['antrian']; ?>', '<?php echo $pecah['dokter_rawat']; ?>', '<?php echo $pecah['no_rm']; ?>', 'Datang')" data-bs-toggle="modal" data-bs-target="#tambahKeluhanUtama" href="index.php?halaman=daftarregistrasi&day&id=<?php echo $pecah["idrawat"]; ?>&jadwal=<?= date("Y-m-d\TH:i:s+00:00", $jadwal); ?>&antrian=<?php echo $pecah["antrian"]; ?>&dokter=<?php echo $pecah["dokter_rawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&status=datang" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-check-circle" style="color:green;"></i> Datang</button></li>
-                                  <?php } ?>
-                                  <?php $dataPasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap = '$pecah[nama_pasien]'")->fetch_assoc(); ?>
-                                  <li><a href="../pasien/fal-risk.php?id=<?php echo $dataPasien["idpasien"]; ?>&kunjungan=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk</a></li>
-                                  <li>
-                                    <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
-                                      <i class="bi bi-pencil" style="color:green;"></i> Edit
-                                    </a>
-                                  </li>
-                                  <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-
+                              <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                <button class="btn btn-sm btn-warning" onclick="callAntrian('<?= $pecah['idrawat'] ?>')"><i class="bi bi-megaphone"></i></button>
+                                <div class="dropdown">
+                                  <?php
+                                  $ubah = $koneksi->query("SELECT * FROM kajian_awal WHERE nama_pasien = '$pecah[nama_pasien]';")->fetch_assoc();
+                                  ?>
+                                  <i data-bs-toggle="dropdown" style="color: white; font-weight: bold;" class="btn btn-sm btn-primary bi bi-three-dots-vertical"></i>
+                                  <ul class="dropdown-menu">
                                     <li>
-                                      <a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
-                                        <i class="bi bi-trash" style="color:red;"></i> Hapus</a>
+                                      <a href="../rawatjalan/printAntrian.php?idrawat=<?php echo $pecah["idrawat"]; ?>" target="_blank" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
+                                        <i class="bi bi-printer text-warning"></i> Print Antrian
+                                      </a>
                                     </li>
-                                  <?php } ?>
-                                </ul>
+                                    <?php if (empty($ubah['nama_pasien'])) { ?>
+                                      <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Isi Kajian Awal</a></li>
+                                    <?php } else { ?>
+                                      <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&ubah" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Lihat Kajian Awal</a></li>
+                                    <?php } ?>
+                                    <?php if ($_SESSION['admin']['level'] == 'daftar' or $_SESSION['admin']['level'] == 'sup') { ?>
+                                      <li><button onclick="upData('<?= $pecah['idrawat'] ?>', '<?= date('Y-m-d\TH:i:s+00:00', $jadwal); ?>', '<?php echo $pecah['antrian']; ?>', '<?php echo $pecah['dokter_rawat']; ?>', '<?php echo $pecah['no_rm']; ?>', 'Datang')" data-bs-toggle="modal" data-bs-target="#tambahKeluhanUtama" href="index.php?halaman=daftarregistrasi&day&id=<?php echo $pecah["idrawat"]; ?>&jadwal=<?= date("Y-m-d\TH:i:s+00:00", $jadwal); ?>&antrian=<?php echo $pecah["antrian"]; ?>&dokter=<?php echo $pecah["dokter_rawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&status=datang" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-check-circle" style="color:green;"></i> Datang</button></li>
+                                    <?php } ?>
+                                    <?php $dataPasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap = '$pecah[nama_pasien]'")->fetch_assoc(); ?>
+                                    <li><a href="../pasien/fal-risk.php?id=<?php echo $dataPasien["idpasien"]; ?>&kunjungan=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk</a></li>
+                                    <li>
+                                      <a href="index.php?halaman=editrawat&idrawat=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;">
+                                        <i class="bi bi-pencil" style="color:green;"></i> Edit
+                                      </a>
+                                    </li>
+                                    <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+
+                                      <li>
+                                        <a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
+                                          <i class="bi bi-trash" style="color:red;"></i> Hapus</a>
+                                      </li>
+                                    <?php } ?>
+                                  </ul>
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -642,6 +645,34 @@ if (isset($_GET['detail'])) {
                         document.getElementById('dokter_id').value = dokter;
                         document.getElementById('norm_id').value = norm;
                         document.getElementById('status_id').value = status;
+                      }
+                    </script>
+                    <script>
+                      function callAntrian(id) {
+                        if (confirm('Apakah Anda yakin ingin memanggil antrian?')) {
+                          fetch('../api/api_getAntrianTerakhir.php?fungsi=addAntreanToDB', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                              },
+                              body: 'id=' + encodeURIComponent(id)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                              console.log('Success:', data);
+                              if (data.status === 'success') {
+                                alert('Antrian berhasil dipanggil!');
+                                // Optional: refresh halaman atau update UI
+                                // location.reload();
+                              } else {
+                                alert('Error: ' + data.message);
+                              }
+                            })
+                            .catch((error) => {
+                              console.error('Error:', error);
+                              alert('Terjadi kesalahan saat memanggil antrian!');
+                            });
+                        }
                       }
                     </script>
                     <!-- Modal -->
