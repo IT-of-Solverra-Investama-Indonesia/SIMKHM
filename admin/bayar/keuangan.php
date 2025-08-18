@@ -54,7 +54,7 @@
                         <?php
                         $totalBiayaPoli = 0;
                         $totalLab = 0;
-                        $getBiayaPoli = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$tanggal' AND registrasi_rawat.shift IN (" . $shift . ") and (registrasi_rawat.carabayar = 'umum' OR registrasi_rawat.carabayar = 'malam')  GROUP BY registrasi_rawat.idrawat");
+                        $getBiayaPoli = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$tanggal' AND registrasi_rawat.shift IN (" . $shift . ") and (registrasi_rawat.carabayar = 'umum' OR registrasi_rawat.carabayar = 'malam' OR registrasi_rawat.carabayar = 'bpjs') GROUP BY registrasi_rawat.idrawat");
                         foreach ($getBiayaPoli as $dataBiayaPoli) {
                             $biayaRawat = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis= '$dataBiayaPoli[idrawat]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
 
@@ -65,7 +65,7 @@
                         Rp <?= number_format($totalBiayaPoli, 0, 0, '.') ?>
                         <?php
                         $totalPoli += ($totalBiayaPoli);
-                        $totalPoli += ($totalLab);
+                        // $totalPoli += ($totalLab);
                         ?>
                     </td>
                 </tr>
@@ -81,7 +81,7 @@
                             $biayaRawat = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis= '$dataBiayaPoli[idrawat]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
 
                             $totalBiayaPoli += $biayaRawat['poli'];
-                            // $totalLab += ($biayaRawat['biaya_lab'] == '' ? 0 : $biayaRawat['biaya_lab']);
+                            $totalLab += ($biayaRawat['biaya_lab'] == '' ? 0 : $biayaRawat['biaya_lab']);
                         }
                         // 
                         ?>
@@ -89,6 +89,29 @@
                         <?php
                         $totalPoli += ($totalBiayaPoli);
                         // $totalPoli += ($totalLab);
+                        ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Biaya Poli Gigi</td>
+                    <td>
+                        <?php
+                        $totalBiayaPoli = 0;
+                        // $totalLab = 0;
+                        $getBiayaPoli = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$tanggal' AND registrasi_rawat.shift IN (" . $shift . ") and (registrasi_rawat.carabayar = 'gigi umum' OR registrasi_rawat.carabayar = 'gigi bpjs') GROUP BY registrasi_rawat.idrawat");
+                        // $getBiayaPoli = $koneksi->query("SELECT *, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$tanggal' AND registrasi_rawat.shift = 'Pagi' and registrasi_rawat.carabayar LIKE '%spesialis%' GROUP BY registrasi_rawat.idrawat");
+                        foreach ($getBiayaPoli as $dataBiayaPoli) {
+                            $biayaRawat = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis= '$dataBiayaPoli[idrawat]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+
+                            $totalBiayaPoli += $biayaRawat['poli'];
+                            $totalLab += ($biayaRawat['biaya_lab'] == '' ? 0 : $biayaRawat['biaya_lab']);
+                        }
+                        // 
+                        ?>
+                        Rp <?= number_format($totalBiayaPoli, 0, 0, '.') ?>
+                        <?php
+                        $totalPoli += ($totalBiayaPoli);
+                        $totalPoli += ($totalLab);
                         ?>
                     </td>
                 </tr>
