@@ -218,6 +218,12 @@ if (!isset($_SESSION['login'])) {
           </li> -->
           </ul>
         </li><!-- End Components Nav -->
+        <li class="nav-item">
+          <a class="nav-link collapsed" target="_blank" href="../pasien/displayAntrian.php">
+            <i class="bi bi-circle"></i>
+            <span>Display Antrian</span>
+          </a>
+        </li>
       <?php } ?>
 
 
@@ -424,8 +430,12 @@ if (!isset($_SESSION['login'])) {
             <span>Daftar IGD</span>
           </a>
         </li>
-
-
+        <li class="nav-item">
+          <a class="nav-link collapsed" target="_blank" href="../pasien/displayAntrian.php">
+            <i class="bi bi-circle"></i>
+            <span>Display Antrian</span>
+          </a>
+        </li>
         <!-- End Profile Page Nav -->
       <?php } ?>
 

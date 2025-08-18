@@ -85,7 +85,7 @@ if ($row > 0) {
           </ol>
         </nav>
       </div><!-- End Page Title -->
-      <a href="index.php?halaman=dashboard_detail" class="btn btn-sm btn-primary mb-2">Detail Dashboard</a>
+      <a href="index.php?halaman=dashboard_detail"  class="btn btn-sm btn-primary mb-2">Detail Dashboard</a>
       <div class="row">
         <!-- Left side columns -->
         <div class="col">
