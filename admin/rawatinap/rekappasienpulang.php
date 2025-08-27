@@ -31,6 +31,7 @@
                         <th>Kamar</th>
                         <th>Jadwal</th>
                         <th>Tgl Pulang</th>
+                        <th>Diagnosa Dokter</th>
                         <th>Diagnosa Perawat</th>
                         <th>Carabayar</th>
                         <th>Perawat</th>
@@ -53,6 +54,7 @@
                                 <td><?= $data['kamar'] ?></td>
                                 <td><?= $data['tgl_masuk'] ?></td>
                                 <td><?= $data['tgl'] ?></td>
+                                <td><?= $data['diag_krs'] ?></td>
                                 <td><?= $data['diag_prwt'] ?></td>
                                 <td><?= $data['carabayar'] ?></td>
                                 <td><?= $data['perawat'] ?></td>
@@ -61,7 +63,9 @@
                                     $getTotalBiayaSingle = $koneksi->query("SELECT SUM(besaran) as besaran FROM rawatinapdetail WHERE id = '$data[idrawat]'")->fetch_assoc();
                                     $total += $getTotalBiayaSingle['besaran'];
                                     ?>
-                                    Rp<?= number_format($getTotalBiayaSingle['besaran'], 0, 0, '.') ?>
+                                    <a href="index.php?halaman=rekapinap&id=<?= $data['idrawat'] ?>" target="_blank" class="text-decoration-none text-light badge bg-warning" style="font-size: 12px;">
+                                        Rp<?= number_format($getTotalBiayaSingle['besaran'], 0, 0, '.') ?>
+                                    </a>
                                 </td>
                             </tr>
                         <?php } ?>
