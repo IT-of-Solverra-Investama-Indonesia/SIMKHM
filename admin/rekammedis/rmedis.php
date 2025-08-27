@@ -93,7 +93,104 @@ if ($pas['jenis_kelamin'] == '1') {
     }
   });
 </script>
+<script>
+  // Fungsi untuk mengambil dan render data obat tambahan
+  async function getObatTambahan() {
+    const rekamMedisId = document.getElementById('inputRekamMedisIdObatTambahan')?.value;
+    if (!rekamMedisId) return;
+    try {
+      const res = await fetch(`../api/obat_tambahan.php?rekam_medis_id=${encodeURIComponent(rekamMedisId)}`);
+      const data = await res.json();
+      const tbody = document.querySelector('#tabelObatTambahan tbody');
+      tbody.innerHTML = '';
+      if (data.status === 'success' && Array.isArray(data.data)) {
+        data.data.forEach((row, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${row.nama_obat || ''}</td>
+          <td>${row.kode_obat || ''}</td>
+          <td>${row.jumlah || ''}</td>
+          <td>${row.dosis_1 || ''} X ${row.dosis_2 || ''}</td>
+          <td>${row.periode || ''}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" type="button" onclick="hapusObatTambahan(${row.id})">Hapus</button>
+          </td>
+        `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data</td></tr>';
+      }
+    } catch (e) {
+      // Error handling
+      const tbody = document.querySelector('#tabelObatTambahan tbody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Gagal mengambil data</td></tr>';
+    }
+  }
 
+  // Hapus data obat tambahan
+  async function hapusObatTambahan(id) {
+    if (!confirm('Yakin hapus data ini?')) return;
+    try {
+      const res = await fetch('../api/obat_tambahan.php', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        getObatTambahan();
+      } else {
+        alert(data.message || 'Gagal hapus data');
+      }
+    } catch (e) {
+      alert('Gagal hapus data');
+    }
+  }
+
+  // Render data obat tambahan saat halaman pertama kali load
+  document.addEventListener('DOMContentLoaded', getObatTambahan);
+
+  // Panggil getObatTambahan setelah submit
+  document.addEventListener('DOMContentLoaded', function() {
+    const formObatTambahan = document.getElementById('formObatTambahan');
+    if (formObatTambahan) {
+      formObatTambahan.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(formObatTambahan);
+        try {
+          const response = await fetch('../api/obat_tambahan.php', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success' || result.success) {
+            alert('Obat tambahan berhasil disimpan!');
+            formObatTambahan.reset();
+            getObatTambahan();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('obatTambahan'));
+            // if (modal) modal.hide();
+          } else {
+            let errorMsg = result.message || 'Gagal menyimpan obat tambahan';
+            if (result.error) errorMsg += "\n" + result.error;
+            alert(errorMsg);
+          }
+        } catch (err) {
+          if (err instanceof Response) {
+            err.text().then(txt => alert('Error: ' + txt));
+          } else {
+            alert('Terjadi kesalahan saat menyimpan obat tambahan: ' + (err.message || err));
+          }
+        }
+      });
+    }
+  });
+</script>
 <main>
   <div class="">
     <div class="pagetitle mb-0">
@@ -880,6 +977,82 @@ if ($pas['jenis_kelamin'] == '1') {
                           </tbody>
                         </table>
                       </div>
+                      <br>
+                      <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#obatTambahan">+ Obat Tambahan</button>
+                      </div>
+                      <!-- Modal Obat Tambahan -->
+                      <div class="modal fade" id="obatTambahan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h1 class="modal-title fs-5" id="staticBackdropLabel">Obat Tambahan</h1>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <div class="row g-1">
+                                <div class="col-md-4">
+                                  <form id="formObatTambahan" autocomplete="off">
+                                    <div class="row g-1">
+                                      <div class="col-12">
+                                        <select name="kode_obat" class="obat-select form-select form-control form-control-sm mb-2 w-100" style="width:100%;" id="ObatTambahanSelect" autocomplete="off" aria-label="Default select example">
+                                          <option value="">Pilih</option>
+                                        </select>
+                                      </div>
+                                      <div class="col-md-4">
+                                        Jumlah
+                                        <input type="text" name="jumlah" class="form-control form-control-sm" id="inputJumlahObatTambahan" placeholder="Jumlah Obat">
+                                      </div>
+                                      <div class="col-md-8">
+                                        Dosis
+                                        <div class="row g-1">
+                                          <div class="col-8">
+                                            <div class="input-group">
+                                              <input type="text" class="form-control form-control-sm" name="dosis_1" id="inputDosis1ObatTambahan">
+                                              <input type="text" style="text-align: center;" class="form-control form-control-sm" placeholder="X" disabled>
+                                              <input type="text" class="form-control form-control-sm" name="dosis_2" id="inputDosis2ObatTambahan">
+                                            </div>
+                                          </div>
+                                          <div class="col-4">
+                                            <select id="inputPeriodeObatTambahan" name="periode" class="form-select form-select-sm form-control form-control-sm">
+                                              <option>Per Hari</option>
+                                              <option>Per Jam</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <input type="hidden" name="rekam_medis_id" id="inputRekamMedisIdObatTambahan" value="<?= $getLastRM['id_rm'] ?>">
+                                      <button class="btn btn-sm btn-primary" type="submit" id="btnSimpanObatTambahan">Simpan</button>
+                                      <input type="hidden" id="editIdObatTambahan" name="id">
+                                    </div>
+                                  </form>
+                                </div>
+                                <div class="col-md-8">
+                                  <div class="table-responsive">
+                                    <table class="table table-sm table-bordered" id="tabelObatTambahan" style="font-size:12px;">
+                                      <thead>
+                                        <tr>
+                                          <th>No</th>
+                                          <th>Nama</th>
+                                          <th>Kode Obat</th>
+                                          <th>Jumlah</th>
+                                          <th>Dosis</th>
+                                          <th>Periode</th>
+                                          <th>Aksi</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody></tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1505,7 +1678,7 @@ if (isset($_POST['save'])) {
 
   $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$_POST[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
 
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '".date('Y-m-d H:i:s')."' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
 
   if (isset($_GET['inap'])) {
     // $koneksi->query("UPDATE kajian_awal_inap SET  gol_darah = '$_POST[gol_darah]', anamnesa = '$_POST[anamnesa]', diagnosis = '$_POST[diagnosis]', icd = '$_POST[icd]', status_perokok = '$_POST[status_perokok]', status_plg = '$_POST[status_pulang]' WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwal]'");
@@ -1886,7 +2059,7 @@ if (isset($_POST['copy'])) {
 
   $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
 
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '".date('Y-m-d H:i:s')."' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
 
   if (isset($_GET['inap'])) {
     // $koneksi->query("UPDATE kajian_awal_inap SET  gol_darah = '$_POST[gol_darah]', anamnesa = '$_POST[anamnesa]', diagnosis = '$_POST[diagnosis]', icd = '$_POST[icd]', status_perokok = '$_POST[status_perokok]', medika = '$_POST[medika]', nonmedika = '$_POST[nonmedika]', status_plg = '$_POST[status_pulang]' WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwal]'");
