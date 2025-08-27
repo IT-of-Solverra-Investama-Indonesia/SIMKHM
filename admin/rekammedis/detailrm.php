@@ -424,49 +424,80 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[id]';")->fetch_ass
 
                       <div>
                         <h6 class="card-title">Obat Pasien</h6>
-                      </div>
-                      <?php
+                        <?php
 
-                      $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
-                      $obatP = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                        $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
+                        $obatP = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = DATE_FORMAT('$_GET[tgl]', '%Y-%m-%d')");
 
-                      ?>
-                      <!-- <?php
-                            $cek = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM resep INNER JOIN rekam_medis ON rekam_medis.norm = resep.no_rm WHERE resep.no_rm = '$_GET[id]' AND resep.jadwal = '$_GET[tgl]'")->fetch_assoc();
-                            ?> -->
+                        ?>
+                        <!-- <?php
+                              $cek = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM resep INNER JOIN rekam_medis ON rekam_medis.norm = resep.no_rm WHERE resep.no_rm = '$_GET[id]' AND resep.jadwal = '$_GET[tgl]'")->fetch_assoc();
+                              ?> -->
 
-                      <div class="row">
-                        <div class="table-responsive" id="obat">
+                        <div class="row">
+                          <div class="table-responsive" id="obat">
 
-                          <br>
-                          <div id="employee_table">
-                            <table class="table table-bordered">
-                              <thead>
-                                <tr>
-                                  <th width="5%">No.</th>
-                                  <th width="50%">Obat</th>
-                                  <th width="20%">Dosis</th>
-                                  <th width="20%">Jumlah</th>
-                                  <th width="20%">Jenis</th>
-                                  <th width="20%">Durasi</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <?php $no = 1 ?>
-                                <?php foreach ($obat as $obat) : ?>
+                            <br>
+                            <div id="employee_table">
+                              <table class="table table-bordered">
+                                <thead>
                                   <tr>
-                                    <td><?php echo $no; ?></td>
-                                    <td style="margin-top:10px;"><?php echo $obat["nama_obat"]; ?></td>
-                                    <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
-                                    <td style="margin-top:10px;"><?php echo $obat["jml_dokter"]; ?></td>
-                                    <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td>
-                                    <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
+                                    <th width="5%">No.</th>
+                                    <th width="50%">Obat</th>
+                                    <th width="20%">Dosis</th>
+                                    <th width="20%">Jumlah</th>
+                                    <th width="20%">Jenis</th>
+                                    <th width="20%">Durasi</th>
                                   </tr>
-                                  <?php $no += 1 ?>
-                                <?php endforeach ?>
-                              </tbody>
-                            </table>
+                                </thead>
+                                <tbody>
+                                  <?php $no = 1 ?>
+                                  <?php foreach ($obat as $obat) : ?>
+                                    <tr>
+                                      <td><?php echo $no; ?></td>
+                                      <td style="margin-top:10px;"><?php echo $obat["nama_obat"]; ?></td>
+                                      <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
+                                      <td style="margin-top:10px;"><?php echo $obat["jml_dokter"]; ?></td>
+                                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td>
+                                      <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
+                                    </tr>
+                                    <?php $no += 1 ?>
+                                  <?php endforeach ?>
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
+                        </div>
+                        <h6 class="card-title">Obat Tambahan</h6>
+                        <div class="table-responsive">
+                          <table style="font-size: 12px;" class="table table-hover table-striped table-bordered table-sm">
+                            <thead>
+                              <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>Kode</th>
+                                <th>Jumlah</th>
+                                <th>Dosis</th>
+                                <!-- <th>Durasi</th> -->
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <?php
+                              $obat_tambahan = $koneksi->query("SELECT * FROM obat_tambahan WHERE rekam_medis_id = '" . htmlspecialchars($_GET['idrekammedis']) . "'");
+                              ?>
+                              <?php $no = 1;
+                              foreach ($obat_tambahan as $obat) : ?>
+                                <tr>
+                                  <td><?= $no++; ?></td>
+                                  <td><?= $obat["nama_obat"]; ?></td>
+                                  <td><?= $obat["kode_obat"]; ?></td>
+                                  <td><?= $obat["jumlah"]; ?></td>
+                                  <td><?= $obat["dosis_1"]; ?>x<?= $obat["dosis_2"]; ?> <?= $obat["periode"]; ?></td>
+                                  <!-- <td><?= $obat["durasi"]; ?></td> -->
+                                </tr>
+                              <?php endforeach; ?>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
 
