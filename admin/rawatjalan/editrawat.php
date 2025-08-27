@@ -274,7 +274,7 @@ if (isset($_POST['edit'])) {
         $biaya = 200000;
         break;
       case 'spesialis penyakit dalam':
-        $biaya = 200000;
+        $biaya = 250000;
         break;
       case 'gigi umum':
         $biaya = 35000;
