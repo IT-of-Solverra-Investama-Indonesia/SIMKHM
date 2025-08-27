@@ -360,6 +360,28 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                               <?php } ?>
                             </tbody>
                           </table>
+                          <br>
+                          <h6>Obat Tambahan</h6>
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th>Nama</th>
+                                <th>Jumlah</th>
+                                <th>Dosis</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <?php
+                              $obat_tambahan = $koneksi->query("SELECT * FROM obat_tambahan WHERE rekam_medis_id = '" . htmlspecialchars($data['id_rm']) . "'");
+                              foreach ($obat_tambahan as $obat) { ?>
+                                <tr>
+                                  <td><?= $obat['nama_obat'] ?></td>
+                                  <td><?= $obat['jumlah'] ?></td>
+                                  <td><?= $obat['dosis_1'] ?> x <?= $obat['dosis_2'] ?></td>
+                                </tr>
+                              <?php } ?>
+                            </tbody>
+                          </table>
                         </td>
                       </tr>
                     <?php } ?>
@@ -645,7 +667,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 } ?>>
                                 <?php echo $no; ?></td>
                               <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?><br>
-                                <p class="mt-0 mb-0" style="font-size: 8px; line-height: 10px;"><?= $getPasien['alamat'] ?> | <?php echo $getLastRM["diagnosis"]; ?> <br> <?php echo $pecah["jadwal"]; ?></p>
+                                <p class="mt-0 mb-0" style="font-size: 8px; line-height: 10px;">
+                                  <?= $getPasien['alamat'] ?> | <?php echo $getLastRM["diagnosis"]; ?> <br> <?php echo $pecah["jadwal"]; ?><br>
+                                  <?php $getAlergi = $koneksi->query("SELECT *, COUNT(*) as jum FROM kajian_awal WHERE norm='$pecah[no_rm]' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc() ?>
+                                  <?php if ($getAlergi['jum'] != 0) { ?>
+                                    <span class="badge bg-danger" style="font-size: 10px;"><?= $getAlergi['riwayat_alergi'] ?? '' ?></span>
+                                  <?php } ?>
+                                </p>
                               </td>
                               <td style="margin-top:10px;">
                                 <?php echo $pecah["perawatan"]; ?>
@@ -659,7 +687,11 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                               <!-- <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
                               <td style="margin-top: 10px;">
-                                <button class="btn-sm btn btn-warning" style="font-size: 8px;" onclick="alert('Datang: <?= $pecah['datang_at'] ?> | Perawat: <?= $pecah['perawat_at'] ?> | Dokter: <?= $pecah['dokter_at'] ?> | Bayar: <?= $pecah['pembayaran_at'] ?> | Apotek: <?= $pecah['apoteker_check_at'] ?>')"><i class="bi bi-eye"></i></button>
+                                <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['datang_at'] ?>')" class="badge <?= $pecah['datang_at'] == null ? 'bg-danger' : 'bg-success' ?>">Datang</span>
+                                <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['perawat_at'] ?>')" class="badge <?= $pecah['perawat_at'] == null ? 'bg-danger' : 'bg-success' ?>">KajianAwal</span> <br>
+                                <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['dokter_at'] ?>')" class="badge <?= $pecah['dokter_at'] == null ? 'bg-danger' : 'bg-success' ?>">RekamMedis</span>
+                                <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['pembayaran_at'] ?>')" class="badge <?= $pecah['pembayaran_at'] == null ? 'bg-danger' : 'bg-success' ?>">Pembayaran</span> <br>
+                                <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['apoteker_check_at'] ?>')" class="badge <?= $pecah['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>">Skrining Obat</span>
                               </td>
                               <!-- <td style="margin-top:10px;"><?php echo $getLastRM["diagnosis"]; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["carabayar"]; ?></td>
@@ -667,7 +699,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 <td style="margin-top:10px;">
                                   <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'kasir') { ?>
                                     <button class="btn badge bg-warning py-1 px-2 text-light" style="font-size: 12px;" onclick="upDataStatus('<?= $pecah['idrawat'] ?>')" data-bs-toggle="modal" data-bs-target="#editStatusAntri">
-                                      <?= $pecah['status_antri'] ?>
+                                      <?= $pecah['status_antri'] ?> <br>
+                                      <?php if ($pecah['status_antri'] == 'Pulang') { ?>
+                                        <?php
+                                        $getPulang = $koneksi->query("SELECT * FROM pulang WHERE tgl_masuk = '" . date("Y-m-d", strtotime($pecah['jadwal'])) . "' AND norm = '" . $pecah['no_rm'] . "'")->fetch_assoc();
+                                        ?>
+                                        <?= $getPulang['keadaan'] ?>
+                                      <?php } ?>
                                     </button>
                                   <?php } else { ?>
                                     <?= $pecah['status_antri'] ?>
