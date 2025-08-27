@@ -1,6 +1,6 @@
 <div class="card shadow p-2">
     <div class="pagetitle mb-0">
-        <h1>Daftar Obat Expired</h1>
+        <h1>Daftar Obat Akan Expired</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.php?halaman=daftarapotek" style="color:blue;">Apotek</a></li>
@@ -23,8 +23,8 @@
             </thead>
             <tbody>
                 <?php
-                    $date_start = date('Y-m-d', strtotime('-3 months'));
-                    $date_end = date('Y-m-d');
+                    $date_end = date('Y-m-d', strtotime('+3 months'));
+                    $date_start = date('Y-m-d');
 
                     $getData = $koneksi->query("SELECT * FROM apotek WHERE tgl_expired BETWEEN '".$date_start."' AND '".$date_end."' ");
                     foreach ($getData as $data) {
