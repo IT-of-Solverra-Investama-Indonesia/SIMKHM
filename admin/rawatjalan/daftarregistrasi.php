@@ -343,6 +343,28 @@ if (isset($_GET['detail'])) {
                               <?php } ?>
                             </tbody>
                           </table>
+                          <br>
+                          <h6>Obat Tambahan</h6>
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th>Nama</th>
+                                <th>Jumlah</th>
+                                <th>Dosis</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <?php
+                              $obat_tambahan = $koneksi->query("SELECT * FROM obat_tambahan WHERE rekam_medis_id = '" . htmlspecialchars($data['id_rm']) . "'");
+                              foreach ($obat_tambahan as $obat) { ?>
+                                <tr>
+                                  <td><?= $obat['nama_obat'] ?></td>
+                                  <td><?= $obat['jumlah'] ?></td>
+                                  <td><?= $obat['dosis_1'] ?> x <?= $obat['dosis_2'] ?></td>
+                                </tr>
+                              <?php } ?>
+                            </tbody>
+                          </table>
                         </td>
                       </tr>
                     <?php } ?>
@@ -782,7 +804,7 @@ if (isset($_GET['status'])) {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('50000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } elseif ($getBPJS['carabayar'] == 'spesialis anak') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('200000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
-  }elseif($getBPJS['carabayar'] == 'spesialis penyakit dalam'){
+  } elseif ($getBPJS['carabayar'] == 'spesialis penyakit dalam') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('250000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
   } elseif ($getBPJS['carabayar'] == 'gigi umum') {
     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
