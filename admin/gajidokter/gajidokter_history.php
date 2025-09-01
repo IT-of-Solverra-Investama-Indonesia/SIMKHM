@@ -63,12 +63,35 @@
             </div>
             <div class="col-12">
                 <button name="src" class="btn btn-sm btn-primary float-end"><i class="bi bi-search"></i> Search</button>
+                <?php if (isset($_GET['src'])) { ?>
+                    <a href="../gajidokter/export_gaji_dokter_excel.php?tgl_start=<?= $_GET['tgl_start'] ?>&tgl_end=<?= $_GET['tgl_end'] ?>&dokter=<?= $_GET['dokter'] ?>&akun=<?= $_GET['akun'] ?>&unit=<?= $_GET['unit'] ?>&shiftgaji=<?= $_GET['shiftgaji'] ?>"
+                        class="btn btn-sm btn-success me-2 float-end">
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </a>
+                    <a href="../gajidokter/export_gaji_dokter.php?tgl_start=<?= $_GET['tgl_start'] ?>&tgl_end=<?= $_GET['tgl_end'] ?>&dokter=<?= $_GET['dokter'] ?>&akun=<?= $_GET['akun'] ?>&unit=<?= $_GET['unit'] ?>&shiftgaji=<?= $_GET['shiftgaji'] ?>"
+                        class="btn btn-sm btn-warning me-2 float-end">
+                        <i class="bi bi-file-earmark-text"></i> Export CSV
+                    </a>
+                <?php } ?>
             </div>
         </div>
     </form>
 </div>
 
 <div class="card shadow-sm p-2 mt-1">
+    <!-- Tombol Export Semua Data -->
+    <div class="mb-2">
+        <div class="btn-group float-end" role="group">
+            <a href="../gajidokter/export_gaji_dokter_excel.php" class="btn btn-sm btn-success">
+                <i class="bi bi-file-earmark-excel"></i> Export All Data (Excel)
+            </a>
+            <a href="../gajidokter/export_gaji_dokter.php" class="btn btn-sm btn-warning">
+                <i class="bi bi-file-earmark-text"></i> Export All Data (CSV)
+            </a>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
     <div class="table-responsive">
         <table class="table-hover table table-striped" style="font-size: 12px;">
             <thead>
