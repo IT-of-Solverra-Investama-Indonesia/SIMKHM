@@ -982,6 +982,13 @@ if ($pas['jenis_kelamin'] == '1') {
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#obatTambahan">+ Obat Tambahan</button>
                       </div>
                       <!-- Modal Obat Tambahan -->
+                      <script>
+                        $(document).ready(function() {
+                          $('#ObatTambahanSelect').select2({
+                            dropdownParent: $('#obatTambahan')
+                          });
+                        });
+                      </script>
                       <div class="modal fade" id="obatTambahan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
                           <div class="modal-content">
