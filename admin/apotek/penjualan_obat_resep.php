@@ -1,6 +1,101 @@
 <div class="">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Penjualan Obat Resep</h5>
+        <button class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#pasienObatTambahan">Tambah Obat</button>
+    </div>
+    <?php
+    if (isset($_GET['masukanKeranjang'])) {
+        $getObatTambahan = $koneksi->query("SELECT * FROM obat_tambahan WHERE rekam_medis_id = '" . htmlspecialchars($_GET['id_rm']) . "' ");
+        $getRM = $koneksi->query("SELECT * FROM rekam_medis WHERE id_rm = '" . htmlspecialchars($_GET['id_rm']) . "'")->fetch_assoc();
+        foreach ($getObatTambahan as $obat) {
+            $kode_obat = $obat['kode_obat'];
+            $jumlah = $obat['jumlah'];
+            $diskon = 0;
 
-    <h5 class="card-title">Penjualan Obat Resep</h5>
+            $obatLokalSingle = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$kode_obat' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
+            $obatMasterSingle = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$kode_obat'")->fetch_assoc();
+
+            $harga = ($obatLokalSingle['harga_beli'] * ($obatMasterSingle['margin_jual'] / 100));
+            $sub = $harga * $jumlah;
+            $subtotal = $sub - ($sub * $diskon / 100);
+
+            // Tambahkan ke keranjang
+            $_SESSION['keranjang_obat_resep'][] = [
+                'kode' => $obatMasterSingle['kode_obat'],
+                'nama' => $obatMasterSingle['obat_master'],
+                'harga' => $harga,
+                'jumlah' => $jumlah,
+                'diskon' => $diskon,
+                'subtotal' => $subtotal
+            ];
+        }
+
+        echo "<script>
+            alert('Obat berhasil ditambahkan ke keranjang');
+            window.location.href = 'index.php?halaman=$_GET[halaman]&pembeli=" . $getRM['nama_pasien'] . "&id_rm=" . $getRM['id_rm'] . "';
+        </script>";
+        exit();
+    }
+    ?>
+    <!-- Modal -->
+    <div class="modal fade" id="pasienObatTambahan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Obat Tambahan</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped table-sm" style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Nama Pasien</th>
+                                    <th>Jadwal</th>
+                                    <th>Status Pasien</th>
+                                    <th>Obat</th>
+                                    <th>Act</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $getPasienHaveObatTambahan = $koneksi->query("SELECT * FROM rekam_medis INNER JOIN obat_tambahan ON rekam_medis.id_rm = obat_tambahan.rekam_medis_id INNER JOIN registrasi_rawat ON rekam_medis.jadwal = registrasi_rawat.jadwal AND rekam_medis.norm = registrasi_rawat.no_rm  WHERE status_beli = 'Belum Beli' GROUP BY rekam_medis.id_rm ORDER BY rekam_medis.id_rm ASC");
+                                foreach ($getPasienHaveObatTambahan as $row) {
+                                ?>
+                                    <tr>
+                                        <td><?= $row['nama_pasien'] ?></td>
+                                        <td><?= $row['jadwal'] ?></td>
+                                        <td>
+                                            <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $row['datang_at'] ?>')" class="badge <?= $row['datang_at'] == null ? 'bg-danger' : 'bg-success' ?>">Datang</span>
+                                            <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $row['perawat_at'] ?>')" class="badge <?= $row['perawat_at'] == null ? 'bg-danger' : 'bg-success' ?>">KajianAwal</span> <br>
+                                            <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $row['dokter_at'] ?>')" class="badge <?= $row['dokter_at'] == null ? 'bg-danger' : 'bg-success' ?>">RekamMedis</span>
+                                            <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $row['pembayaran_at'] ?>')" class="badge <?= $row['pembayaran_at'] == null ? 'bg-danger' : 'bg-success' ?>">Pembayaran</span> <br>
+                                            <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $row['apoteker_check_at'] ?>')" class="badge <?= $row['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>">Skrining Obat</span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $getObat = $koneksi->query("SELECT * FROM obat_tambahan WHERE rekam_medis_id = '$row[id_rm]' ORDER BY id DESC");
+                                            foreach ($getObat as $obat) {
+                                                echo "- " . $obat['nama_obat'] . " | " . $obat['jumlah'] . "Pcs <br>";
+                                            }
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <a onclick="return confirm('Apakah anda yakin ingin masukan obat ini ke keranjang?')" href="index.php?halaman=<?= htmlspecialchars($_GET['halaman']) ?>&masukanKeranjang&id_rm=<?= $row['id_rm'] ?>" class="btn btn-sm btn-warning">Masukan Keranjang</a>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -249,7 +344,7 @@
                     <input type="date" name="tgl_jual" value="<?= date('Y-m-d') ?>" hidden id="">
                 </div>
                 <div class="col-md-3">
-                    <input type="text" name="akun" class="form-control form-control-sm" id="" placeholder="Nama Pembeli" required value="">
+                    <input type="text" name="akun" class="form-control form-control-sm" id="" placeholder="Nama Pembeli" required value="<?= htmlspecialchars($_GET['pembeli'] ?? "") ?>">
                 </div>
                 <div class="col-md-2">
                     <input type="number" name="" id="dibayar_id" class="form-control form-control-sm" placeholder="Dibayar" oninput="hitungKembalian()">
@@ -282,6 +377,10 @@
                 $koneksi->query("INSERT INTO `penjualan_resep`(`nota`, `tgl_jual`, `kode_obat`, `nama_obat`, `harga_umum`, `diskon_obat`, `jumlah`, `harga_beli`, `akun`, `petugas`, `shift`) VALUES ('" . htmlspecialchars($_POST['nota']) . "','" . htmlspecialchars($_POST['tgl_jual']) . "','" . htmlspecialchars($data['kode']) . "','" . htmlspecialchars($data['nama']) . "','" . htmlspecialchars($data['harga']) . "','" . htmlspecialchars($diskon) . "','" . htmlspecialchars($data['jumlah']) . "','" . htmlspecialchars($obatLokalSingleSave['harga_beli']) . "','" . htmlspecialchars($_POST['akun']) . "','" . htmlspecialchars($_SESSION['admin']['namalengkap']) . "', '" . htmlspecialchars($_SESSION['shift']) . "')");
             }
         }
+        if (isset($_GET['id_rm'])) {
+            $koneksi->query("UPDATE obat_tambahan SET status_beli = 'Sudah Beli' WHERE rekam_medis_id = '" . htmlspecialchars($_GET['id_rm']) . "'");
+        }
+
         unset($_SESSION['keranjang_obat_resep']);
         echo "
         <script>
