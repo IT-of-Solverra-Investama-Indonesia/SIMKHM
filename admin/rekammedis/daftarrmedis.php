@@ -4,22 +4,37 @@ $date = date("Y-m-d");
 
 // $pasien=$koneksi->query("SELECT * FROM rekam_medis JOIN pasien WHERE nama_lengkap = nama_pasien;"); 
 $queryKey = '';
-if (isset($_POST['src'])) {
-  $queryKey .= " AND (nama_pasien LIKE '%$_POST[key]%' or perawatan LIKE '%$_POST[key]%' or dokter_rawat LIKE '%$_POST[key]%' or no_rm LIKE '%$_POST[key]%' or jadwal LIKE '%$_POST[key]%' or antrian LIKE '%$_POST[key]%' or status_antri LIKE '%$_POST[key]%')";
+$searchKey = '';
+
+// Handle search from both POST and GET
+if (isset($_POST['src']) && !empty($_POST['key'])) {
+  // Redirect POST to GET to maintain search in pagination
+  $searchKey = urlencode($_POST['key']);
+  $redirectUrl = $_SERVER['REQUEST_URI'];
+  if (strpos($redirectUrl, '?') !== false) {
+    $redirectUrl .= "&src=1&key=" . $searchKey;
+  } else {
+    $redirectUrl .= "?src=1&key=" . $searchKey;
+  }
+  echo "<script>window.location.href = '$redirectUrl';</script>";
+  exit;
+} elseif (isset($_GET['src']) && isset($_GET['key']) && !empty($_GET['key'])) {
+  $searchKey = htmlspecialchars($_GET['key']);
+  $queryKey .= " AND (nama_pasien LIKE '%$searchKey%' or perawatan LIKE '%$searchKey%' or dokter_rawat LIKE '%$searchKey%' or no_rm LIKE '%$searchKey%' or jadwal LIKE '%$searchKey%' or antrian LIKE '%$searchKey%' or status_antri LIKE '%$searchKey%')";
 }
-
-
 
 if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Jalan';");
   $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri!='Pulang') and perawatan ='Rawat Inap' order by idrawat desc;");
 } elseif (isset($_GET['racik'])) {
+  $date_start = date('Y-m-d', strtotime('-1 days'));
+  $date_end = date('Y-m-d');
   if (isset($_GET['pasrajal'])) {
-    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE nota != '' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Jalan'" . $queryKey . " order by idrawat desc";
+    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Jalan'" . $queryKey . " order by idrawat desc";
   } elseif (isset($_GET['pasinap'])) {
-    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE nota != '' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap'" . $queryKey . " order by idrawat desc";
+    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap'" . $queryKey . " order by idrawat desc";
   } else {
-    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE nota != '' AND (status_antri!='Belum Datang') " . $queryKey . " order by idrawat desc";
+    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri!='Belum Datang') " . $queryKey . " order by idrawat desc";
   }
 
   //   Pagination
@@ -43,18 +58,21 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
     $cekPage = '1';
   }
   // End Pagination
-  if (isset($_POST['src'])) {
-    $pasien = $koneksi->query($queryPasien);
-  } else {
-    $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
-  }
+
+  // Apply pagination to query
+  $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
+
+  // Build link page with search parameters
+  $baseParams = "halaman=daftarrmedis&racik";
   if (isset($_GET['pasrajal'])) {
-    $linkPage = "index.php?halaman=daftarrmedis&racik&pasrajal";
+    $baseParams .= "&pasrajal";
   } elseif (isset($_GET['pasinap'])) {
-    $linkPage = 'index.php?halaman=daftarrmedis&racik&pasinap';
-  } else {
-    $linkPage = "index.php?halaman=daftarrmedis&racik";
+    $baseParams .= "&pasinap";
   }
+  if (isset($_GET['src']) && isset($_GET['key'])) {
+    $baseParams .= "&src=1&key=" . urlencode($searchKey);
+  }
+  $linkPage = "index.php?" . $baseParams;
 } elseif (isset($_GET['detail'])) {
   if (isset($_GET['inap'])) {
     $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap' and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'  order by idrawat desc limit 1;");
@@ -62,6 +80,8 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
     $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0' or status_antri='Pembayaran' or status_antri='Selesai') and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]' and perawatan ='Rawat Jalan' order by idrawat desc Limit 1;");
   }
 } elseif (isset($_GET['all'])) {
+  $baseParams = "halaman=daftarrmedis&all";
+
   if (isset($_GET['perawatan'])) {
     if ($_GET['perawatan'] != 'All') {
       $queryKey .= " AND perawatan = '" . htmlspecialchars($_GET['perawatan']) . "'";
@@ -69,16 +89,23 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
     if ($_GET['carabayar'] != 'All') {
       $queryKey .= " AND carabayar = '" . htmlspecialchars($_GET['carabayar']) . "'";
     }
-    $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&carabayar=' . $_GET['carabayar'] . '&fil=';
+    $baseParams .= "&perawatan=" . urlencode($_GET['perawatan']) . "&carabayar=" . urlencode($_GET['carabayar']) . "&fil";
+
     if (isset($_GET['bulan'])) {
       $queryKey .= " AND DATE_FORMAT(jadwal, '%y/%m') = '" . htmlspecialchars($_GET['bulan']) . "'";
-      $linkPage = 'index.php?halaman=daftarrmedis&all=&perawatan=' . $_GET['perawatan'] . '&fil=&bulan=' . htmlspecialchars($_GET['bulan']) . '';
+      $baseParams .= "&bulan=" . urlencode($_GET['bulan']);
     }
-  } else {
-    $linkPage = "index.php?halaman=daftarrmedis&all";
   }
+
+  if (isset($_GET['src']) && isset($_GET['key'])) {
+    $baseParams .= "&src=1&key=" . urlencode($searchKey);
+  }
+
+  $linkPage = "index.php?" . $baseParams;
+
   // if(isset($_GET['rajal']))
   $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri!='') " . $queryKey . " order by idrawat desc";
+
   //   Pagination
   // Parameters for pagination
   $limit = 20; // Number of entries to show in a page
@@ -100,11 +127,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
     $cekPage = '1';
   }
   // End Pagination
-  if (isset($_POST['src'])) {
-    $pasien = $koneksi->query($queryPasien);
-  } else {
-    $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
-  }
+
+  // Apply pagination to query
+  $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
 } else {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Inap';");
   $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' order by idrawat desc ;");
@@ -823,7 +848,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                                 <!-- <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td> -->
                                 <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
-                                <!-- <td style="margin-top:10px;"><?php echo $getLastRM["diagnosis"]; ?></td> -->
+                                <td style="margin-top:10px;">
+                                  <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['datang_at'] ?>')" class="badge <?= $pecah['datang_at'] == null ? 'bg-danger' : 'bg-success' ?>">Datang</span>
+                                  <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['perawat_at'] ?>')" class="badge <?= $pecah['perawat_at'] == null ? 'bg-danger' : 'bg-success' ?>">KajianAwal</span> <br>
+                                  <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['dokter_at'] ?>')" class="badge <?= $pecah['dokter_at'] == null ? 'bg-danger' : 'bg-success' ?>">RekamMedis</span>
+                                  <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['pembayaran_at'] ?>')" class="badge <?= $pecah['pembayaran_at'] == null ? 'bg-danger' : 'bg-success' ?>">Pembayaran</span> <br>
+                                  <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['apoteker_check_at'] ?>')" class="badge <?= $pecah['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>">Skrining Obat</span>
+                                </td>
                                 <td style="margin-top:10px;"><?php echo $pecah["carabayar"]; ?></td>
                                 <?php if (!isset($_GET['racik'])) { ?>
                                   <td style="margin-top:10px;">
