@@ -978,11 +978,11 @@ if ($pas['jenis_kelamin'] == '1') {
                         </table>
                       </div>
                       <br>
-                      <div class="d-flex justify-content-end">
+                      <!-- <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#obatTambahan">+ Obat Tambahan</button>
-                      </div>
+                      </div> -->
                       <!-- Modal Obat Tambahan -->
-                      <script>
+                      <!-- <script>
                         $(document).ready(function() {
                           $('#ObatTambahanSelect').select2({
                             dropdownParent: $('#obatTambahan')
@@ -1059,7 +1059,7 @@ if ($pas['jenis_kelamin'] == '1') {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                 </div>
