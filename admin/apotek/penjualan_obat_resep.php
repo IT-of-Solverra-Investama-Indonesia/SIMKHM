@@ -1,7 +1,7 @@
 <div class="">
     <div class="d-flex justify-content-between align-items-center">
         <h5 class="card-title">Penjualan Obat Resep</h5>
-        <button class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#pasienObatTambahan">Tambah Obat</button>
+        <!-- <button class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#pasienObatTambahan">Tambah Obat</button> -->
     </div>
     <?php
     if (isset($_GET['masukanKeranjang'])) {
