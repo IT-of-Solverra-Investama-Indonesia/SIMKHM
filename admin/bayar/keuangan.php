@@ -140,6 +140,21 @@
                 </tr>
                 <tr>
                     <td colspan="2">
+                        <?php
+                        $caraBayar = ['umum', 'malam', 'bpjs', 'spesialis anak', 'spesialis penyakit dalam', 'gigi umum', 'gigi bpjs', 'kosmetik'];
+                        foreach ($caraBayar as $cb) {
+                        ?>
+                            <?php
+                            $getJumlahPasienCaraBayar = $koneksi->query("SELECT COUNT(*) as jumlah, registrasi_rawat.kasir, registrasi_rawat.shift FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE perawatan = 'Rawat Jalan' and (status_antri = 'Datang' or status_antri = 'Pembayaran' or status_antri = 'Selesai') and date_format(jadwal, '%Y-%m-%d') = '$tanggal' AND registrasi_rawat.shift IN (" . $shift . ") and (registrasi_rawat.carabayar = '$cb')")->fetch_assoc();
+                            ?>
+                            <?php if ($getJumlahPasienCaraBayar['jumlah'] > 0) { ?>
+                                Jumlah Pasien <b><?= $cb ?>: <?= $getJumlahPasienCaraBayar['jumlah'] ?? 0 ?></b> |
+                            <?php } ?>
+                        <?php } ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
                         <b>
                             <hr class="m-1">
                         </b>
