@@ -7,8 +7,12 @@ date_default_timezone_set('Asia/Jakarta');
   $whereConditionUrl = "";
   if (isset($_GET['src'])) {
     $key = htmlspecialchars($_GET['key']);
+    $carabayar = htmlspecialchars($_GET['carabayar']);
     $whereCondition = " AND (nama_pasien LIKE '%$key%' OR no_rm LIKE '%$key%')";
-    $whereConditionUrl = "&key=$key";
+    $whereConditionUrl = "&src&key=$key&carabayar=$carabayar";
+    if ($carabayar != "" and $carabayar != "All") {
+      $whereCondition .= " AND carabayar = '$carabayar'";
+    }
   }
 
   if (isset($_GET['detail']) and isset($_GET['tgl'])) {
@@ -130,12 +134,26 @@ date_default_timezone_set('Asia/Jakarta');
                     <a href="index.php?halaman=gajidokter_history" class="btn btn-sm btn-primary mb-2">Riwayat Gaji Dokter</a>
 
                     <form method="post">
-                      <div class="row">
-                        <div class="col-4">
+                      <div class="row g-1">
+                        <div class="col-3">
                           Tanggal
                           <input type="date" value="<?= isset($_GET['tgl']) ? $_GET['tgl'] : date('Y-m-d') ?>" class="form-control form-control-sm mb-2" name="tgl">
                         </div>
-                        <div class="col-5">
+                        <div class="col-3">
+                          Cara Bayar
+                          <select name="carabayar" id="" required class="form-control form-control-sm">
+                            <option value="All" selected>All</option>
+                            <option value="umum" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'umum') ? 'selected' : '' ?>>Umum</option>
+                            <option value="bpjs" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'bpjs') ? 'selected' : '' ?>>BPJS</option>
+                            <option value="malam" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'malam') ? 'selected' : '' ?>>Malam</option>
+                            <option value="spesialis anak" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'spesialis anak') ? 'selected' : '' ?>>Spesialis Anak</option>
+                            <option value="spesialis penyakit dalam" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'spesialis penyakit dalam') ? 'selected' : '' ?>>Spesialis Penyakit Dalam</option>
+                            <option value="gigi umum" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'gigi umum') ? 'selected' : '' ?>>Gigi Umum</option>
+                            <option value="gigi bpjs" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'gigi bpjs') ? 'selected' : '' ?>>Gigi BPJS</option>
+                            <option value="kosmetik" <?= (isset($_GET['carabayar']) and $_GET['carabayar'] == 'kosmetik') ? 'selected' : '' ?>>Kosmetik</option>
+                          </select>
+                        </div>
+                        <div class="col-3">
                           Cari
                           <input type="text" name="key" id="" class="form-control form-control-sm">
                           <!-- Shift
@@ -156,7 +174,7 @@ date_default_timezone_set('Asia/Jakarta');
                     if (isset($_POST['search'])) {
                       echo "
                         <script>
-                          document.location.href='index.php?halaman=daftarbayar&src&detail&tgl=" . ($_POST['tgl'] == '' ? date('Y-m-d') : $_POST['tgl']) . "&key=" . $_POST['key'] . "';
+                          document.location.href='index.php?halaman=daftarbayar&src&detail&tgl=" . ($_POST['tgl'] == '' ? date('Y-m-d') : $_POST['tgl']) . "&key=" . $_POST['key'] . "&carabayar=" . $_POST['carabayar'] . "';
                         </script>
                       ";
                     }
@@ -490,10 +508,16 @@ date_default_timezone_set('Asia/Jakarta');
                 <td><?= $data['jadwal'] ?></td>
                 <!--<td><?= $data['antrian'] ?></td>-->
                 <td><?= $data['kamar'] ?></td>
-                <td><?= $data['status_antri'] ?></td>
+                <td>
+                  <?= $data['status_antri'] ?> <br>
+                  <span class="badge <?= $data['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>" data-bs-toggle="tooltip" title="<?= $data['apoteker_check_at'] ?>"><?= $data['apoteker_check_at'] == null ? 'Belum Skrining' : $data['apoteker_check_at'] ?></span>
+                </td>
                 <td><?= $data['carabayar'] ?></td>
                 <td>
-                  <a href="index.php?halaman=rekapinap&id=<?= $data['idrawat'] ?>" style="font-size: 12px;" class="btn btn-danger"><i class="bi bi-cash-coin"></i></a>
+                  <?php
+                  $getNominal = $koneksi->query("SELECT SUM(besaran) as nominal FROM  rawatinapdetail JOIN registrasi_rawat ON rawatinapdetail.id=registrasi_rawat.idrawat WHERE rawatinapdetail.id='$data[idrawat]'")->fetch_assoc();
+                  ?>
+                  <a href="index.php?halaman=rekapinap&id=<?= $data['idrawat'] ?>" style="font-size: 12px;" class="btn btn-danger btn-sm">Rp<?= number_format($getNominal['nominal'], 0, 0, '.') ?></a>
                 </td>
               </tr>
             <?php } ?>
