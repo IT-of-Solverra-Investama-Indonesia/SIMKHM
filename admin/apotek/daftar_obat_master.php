@@ -182,7 +182,7 @@
                 <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&poli=aktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
                 NonAktif
               <?php } ?>
-            </td>
+            </td> 
             <td>
               <?php if ($data['aktif_ranap'] == 'aktif') { ?>
                 <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&ranap=nonaktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
