@@ -209,13 +209,13 @@
                         <tr>
                             <td><?= $retur['kode_obat'] ?></td>
                             <td><?= $retur['nama_obat'] ?></td>
-                            <td><?= $retur['jumlah'] ?></td>
-                            <td>Rp <?= number_format($retur['hargaJual'],0,0,'.') ?></td>
-                            <td>Rp <?= number_format($getObatMasuk['harga_beli'],0,0,'.') ?></td>
-                            <td>Rp <?= number_format($hargaTotal = $retur['hargaJual'] * $retur['jumlah'],0,0,'.') ?></td>
-                            <td>Rp <?= number_format($hargaTotalHPP = $getObatMasuk['harga_beli'] ,0,0,'.')* $retur['jumlah'] ?></td>
-                            <td>Rp <?= number_format($laba = $hargaTotal - $hargaTotalHPP,0,0,'.') ?></td>
-                            <td>Rp <?= number_format($retur['hargaJual'] - $getObatMasuk['harga_beli'],0,0,'.') ?></td>
+                            <td>-<?= $retur['jumlah'] ?></td>
+                            <td>Rp <?= number_format($retur['hargaJual'], 0, 0, '.') ?></td>
+                            <td>Rp <?= number_format($getObatMasuk['harga_beli'], 0, 0, '.') ?></td>
+                            <td>Rp <?= number_format($hargaTotal = $retur['hargaJual'] * $retur['jumlah'], 0, 0, '.') ?></td>
+                            <td>Rp <?= number_format($hargaTotalHPP = $getObatMasuk['harga_beli'], 0, 0, '.') * $retur['jumlah'] ?></td>
+                            <td>Rp <?= number_format($laba = $hargaTotal - $hargaTotalHPP, 0, 0, '.') ?></td>
+                            <td>Rp <?= number_format($retur['hargaJual'] - $getObatMasuk['harga_beli'], 0, 0, '.') ?></td>
                         </tr>
                         <?php
                         $totalTotal += $hargaTotal;
