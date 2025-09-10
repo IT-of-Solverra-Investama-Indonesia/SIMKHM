@@ -152,6 +152,12 @@ if (!isset($_SESSION['login'])) {
           <span>Dashboard Inap</span>
         </a>
       <?php } ?>
+      <?php if ($level == 'sup') { ?>
+        <a class="nav-link collapsed" href="index.php?halaman=dashboardkeuangan">
+          <i class="bi bi-cash-coin"></i>
+          <span>Dashboard Keuangan</span>
+        </a>
+      <?php } ?>
       <!-- End Dashboard Nav -->
 
       <?php if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') { ?>

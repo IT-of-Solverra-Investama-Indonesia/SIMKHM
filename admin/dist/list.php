@@ -137,6 +137,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
 
                     //apotek
                    elseif ($hal=="dashboardapotek"){include '../apotek/dashboardapotek.php';}
+                   elseif ($hal=="dashboardkeuangan"){include '../dashboard/dashboardkeuangan.php';}
                    elseif ($hal=="daftarapotek"){include '../apotek/daftarapotek.php';}
                    elseif ($hal=="tambahapotek"){include '../apotek/tambahapotek.php';}
                    elseif ($hal=="detailapotek"){include '../apotek/detailapotek.php';}
