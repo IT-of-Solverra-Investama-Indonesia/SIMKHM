@@ -176,24 +176,30 @@
             <td>
               <!-- <?= $data['aktif_poli'] == 'aktif' ? '1' : '0' ?> -->
               <?php if ($data['aktif_poli'] == 'aktif') { ?>
-                <a href="index.php?halaman=daftar_obat_master&ubahStatus&poli=nonaktif&idObat=<?= $data['id'] ?>" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
+                <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&poli=nonaktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
+                Aktif
               <?php } else { ?>
-                <a href="index.php?halaman=daftar_obat_master&ubahStatus&poli=aktif&idObat=<?= $data['id'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
+                <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&poli=aktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
+                NonAktif
               <?php } ?>
             </td>
             <td>
               <?php if ($data['aktif_ranap'] == 'aktif') { ?>
-                <a href="index.php?halaman=daftar_obat_master&ubahStatus&ranap=nonaktif&idObat=<?= $data['id'] ?>" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
+                <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&ranap=nonaktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
+                Aktif
               <?php } else { ?>
-                <a href="index.php?halaman=daftar_obat_master&ubahStatus&ranap=aktif&idObat=<?= $data['id'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
+                <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&ranap=aktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
+                NonAktif
               <?php } ?>
               <!-- <?= $data['aktif_ranap']  == 'aktif' ? '1' : '0' ?> -->
             </td>
             <td>
               <?php if ($data['aktif_umum'] == 'aktif') { ?>
-                <a href="index.php?halaman=daftar_obat_master&ubahStatus&umum=nonaktif&idObat=<?= $data['id'] ?>" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
+                <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&umum=nonaktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i></a>
+                Aktif
               <?php } else { ?>
-                <a href="index.php?halaman=daftar_obat_master&ubahStatus&umum=aktif&idObat=<?= $data['id'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
+                <a <?php if($_SESSION['admin']['username'] == 'shab'){?> href="index.php?halaman=daftar_obat_master&ubahStatus&umum=aktif&idObat=<?= $data['id'] ?>" <?php }?> class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i></a>
+                NonAktif
               <?php } ?>
               <!-- <?= $data['aktif_umum']  == 'aktif' ? '1' : '0' ?> -->
             </td>
