@@ -1,13 +1,13 @@
 <div>
     <h5>Dashboard Rasion BHP</h5>
     <?php
-    $date_start = isset($_GET['date_start']) ? $_GET['date_start'] : date('Y-m-d');
+    $date_start = isset($_GET['date_start']) ? $_GET['date_start'] : date('Y-m-1');
     $date_end = isset($_GET['date_end']) ? $_GET['date_end'] : date('Y-m-d');
     $api_url = $baseUrlLama . "api_personal/api_rasio.php?date_start=$date_start&date_end=$date_end";
     ?>
     <div class="card shadow p-2 mb-1">
         <form method="GET">
-            <input type="text" hidden name="halaman" value="dashboard_detail" id="">
+            <input type="text" hidden name="halaman" value="<?= htmlspecialchars($_GET['halaman']) ?>" id="">
             <input type="text" hidden name="rasioBHP" id="">
             <div class="row">
                 <div class="col-5">
@@ -25,7 +25,7 @@
     <div class="card shadow p-2">
         <?php
         // require "../dist/baseUrlAPI.php";
-        
+
         function getRasioBHPFromKHM($date_start, $date_end, $api_url)
         {
             $ch = curl_init();
