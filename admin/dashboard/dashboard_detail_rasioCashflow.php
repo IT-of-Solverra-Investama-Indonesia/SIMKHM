@@ -6,7 +6,7 @@
     <h3>Rasio Cashflow</h3>
     <div class="card shadow p-2 mb-2">
         <form method="get">
-            <input type="text" hidden name="halaman" id="" value="dashboard_detail">
+            <input type="text" hidden name="halaman" id="" value="<?= htmlspecialchars($_GET['halaman']) ?>">
             <input type="text" hidden name="rasioCashflow" id="" value="">
             <div class="row">
                 <div class="col-5">
@@ -31,10 +31,10 @@
             $segments = explode('/', trim($uri, '/'));
             $folder = $segments[0];
             ?>
-            <?php 
-            if($folder != 'simkhm'){
+            <?php
+            if ($folder != 'simkhm') {
                 echo file_get_contents($baseUrlLama . "api_personal/api_rasioCashflow.php?getRasioCashflow&date_start=" . htmlspecialchars($date_start) . "&date_end=" . htmlspecialchars($date_end) . "&html");
-            }else{
+            } else {
                 echo file_get_contents("http://localhost:81/khm/api_personal/api_rasioCashflow.php?getRasioCashflow&date_start=" . htmlspecialchars($date_start) . "&date_end=" . htmlspecialchars($date_end) . "&html");
             }
             ?>
