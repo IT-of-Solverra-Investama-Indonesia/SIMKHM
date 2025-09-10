@@ -443,7 +443,7 @@ if (isset($_GET['detail'])) {
                     <span class="mb-2 mt-0" stxyle="font-size: 9px;">Data ditampilkan pada Tgl <?= date('d-m-Y') ?> pada shift <?= $_SESSION['shift'] ?></span> <br>
                   <?php } ?>
                   <button class="btn btn-sm btn-primary mb-2 mt-1" data-bs-toggle="modal" data-bs-target="#showKamar">Lihat Kamar Terpakai</button>
-                  <!-- Modal -->
+                  <!-- Modal Show Kamar -->
                   <div class="modal fade" id="showKamar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-scrollable modal-xl ">
                       <div class="modal-content">
@@ -582,11 +582,11 @@ if (isset($_GET['detail'])) {
                             ?>
                             <?php if ($pecah['kategori'] == 'offline') { ?>
                               <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" class="bg-secondary text-light" style="margin-top:10px;" onMouseOver="this.style.background-color='red'"><?php echo $pecah["nama_pasien"]; ?> <?= $badge ?><br>
-                                <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
+                                <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> <?= $getSinglePasien['kota'] ?>, <?= $getSinglePasien['kecamatan'] ?>, <?= $getSinglePasien['kelurahan'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
                               </td>
                             <?php } else { ?>
                               <td onclick="toDetaill('<?php echo trim(preg_replace('/\t+/', '', $pecah['no_rm'])); ?>')" style="margin-top:10px; background-color: green; color:white;"><?php echo $pecah["nama_pasien"]; ?> <?= $badge ?><br>
-                                <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
+                                <p class="mt-0 mb-0" style="font-size: 9px; line-height: 11px;"><?= $getSinglePasien['no_bpjs'] ?> <br> <?= $getSinglePasien['kota'] ?>, <?= $getSinglePasien['kecamatan'] ?>, <?= $getSinglePasien['kelurahan'] ?> <br> Jadwal: <?= $pecah['jadwal'] ?> </p>
                               </td>
                             <?php } ?>
                             <?php if (isset($_GET['all'])) { ?>
@@ -632,7 +632,7 @@ if (isset($_GET['detail'])) {
                                     <?php } else { ?>
                                       <li><a href="index.php?halaman=resume&id=<?php echo $pecah["idrawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&ubah" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:blueviolet;"></i> Lihat Kajian Awal</a></li>
                                     <?php } ?>
-                                    <?php if ($_SESSION['admin']['level'] == 'daftar' or $_SESSION['admin']['level'] == 'sup') { ?>
+                                    <?php if ($_SESSION['admin']['level'] == 'daftar' or $_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'igd') { ?>
                                       <li><button onclick="upData('<?= $pecah['idrawat'] ?>', '<?= date('Y-m-d\TH:i:s+00:00', $jadwal); ?>', '<?php echo $pecah['antrian']; ?>', '<?php echo $pecah['dokter_rawat']; ?>', '<?php echo $pecah['no_rm']; ?>', 'Datang')" data-bs-toggle="modal" data-bs-target="#tambahKeluhanUtama" href="index.php?halaman=daftarregistrasi&day&id=<?php echo $pecah["idrawat"]; ?>&jadwal=<?= date("Y-m-d\TH:i:s+00:00", $jadwal); ?>&antrian=<?php echo $pecah["antrian"]; ?>&dokter=<?php echo $pecah["dokter_rawat"]; ?>&norm=<?php echo $pecah["no_rm"]; ?>&status=datang" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-check-circle" style="color:green;"></i> Datang</button></li>
                                     <?php } ?>
                                     <?php $dataPasien = $koneksi->query("SELECT * FROM pasien WHERE nama_lengkap = '$pecah[nama_pasien]'")->fetch_assoc(); ?>
