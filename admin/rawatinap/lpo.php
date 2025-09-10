@@ -60,6 +60,15 @@ function getLastWord($inputString)
   return $lastWord;
 }
 ?>
+
+<?php
+if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
+  $koneksi->query("UPDATE registrasi_rawat SET apoteker_check_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm = '$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' AND perawatan = 'Rawat Inap' ORDER BY idrawat DESC LIMIT 1");
+  echo "<script>alert('Proses Selesai, Pasien Boleh Pulang!');</script>";
+  echo "<script>location='index.php?halaman=lpo&id=$_GET[id]&inap&tgl=$_GET[tgl]';</script>";
+  exit();
+}
+?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -126,11 +135,13 @@ function getLastWord($inputString)
               <div class="card" style="margin-top:10px">
                 <div class="card-body col-md-12">
                   <h5 class="card-title">Data Pasien</h5>
-                  <h5 class="card-title"><?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir: <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?> <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK: <?php if ($pasien["jenis_kelamin"] == 1) {
-                                                                                                                                                                                                                                                                                                                                          echo "Laki-Laki";
-                                                                                                                                                                                                                                                                                                                                        } else {
-                                                                                                                                                                                                                                                                                                                                          echo "Perempuan";
-                                                                                                                                                                                                                                                                                                                                        } ?></h5>
+                  <h5 class="card-title">
+                    <?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir: <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?> <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK: <?php if ($pasien["jenis_kelamin"] == 1) {
+                                                                                                                                                                                                                                                                                                                      echo "Laki-Laki";
+                                                                                                                                                                                                                                                                                                                    } else {
+                                                                                                                                                                                                                                                                                                                      echo "Perempuan";
+                                                                                                                                                                                                                                                                                                                    } ?>
+                  </h5>
                   <div class="row">
                     <div class="col-md-6" style="margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Nama Pasien</label>
@@ -512,8 +523,10 @@ function getLastWord($inputString)
                   <div class="card shadow p-2 mb-1">
                     <label for="">Obat Injeksi </label>
                     <div>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php if ($id['apoteker_check_at'] == null) { ?>
+                        <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                        <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php } ?>
                     </div>
                     <div class="table-responsive">
                       <table class="table table-hover table-striped" style="font-size: 12px;">
@@ -582,13 +595,16 @@ function getLastWord($inputString)
                       </table>
                     </div>
                   </div>
-                </div><br>
+                </div>
+                <br>
                 <div class="col-md-12">
-                  <div class="card shadow p-2">
+                  <div class="card shadow p-2 mb-2">
                     <label for="">Obat Oral</label>
                     <div align="left">
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php if ($id['apoteker_check_at'] == null) { ?>
+                        <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                        <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php } ?>
                     </div>
                     <div class="table-responsive">
                       <table class="table table-hover table-striped" style="font-size: 12px;">
@@ -658,7 +674,11 @@ function getLastWord($inputString)
                     </div>
                   </div>
                 </div>
-
+                <div class="col-12">
+                  <div class="d-flex justify-content-end mb-4 mt-4">
+                    <a class="btn btn-sm btn-primary" onclick="return confirm('Jika sudah yakin maka tombol tambah obat akan hilang, apakah anda yakin akan menyelesaikan inputan obat ?')" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&apotek=done">Obat Sudah di-Input Semua dan Pasien Boleh Pulang</a>
+                  </div>
+                </div>
                 <div class="col-md-12">
                   <div class="card shadow p-3">
                     <h5 class="card-title">Riwayat Observasi</h5>
