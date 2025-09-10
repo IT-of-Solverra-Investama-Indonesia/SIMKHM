@@ -8,13 +8,13 @@
                     <option value="verif">Verif</option>
                     <option value="polibulan">Poli Bulan</option>
                     <option value="polibpjs">Poli BPJS</option>
-                    <option value="omsetKHM">Omset KHM Lama</option>
+                    <!-- <option value="omsetKHM">Omset KHM Lama</option> -->
                     <option value="RekapPasienOnlineOffline">Rekap Pasien Online Offline</option>
-                    <option value="cashflow">Cashflow (Dari akuntansi Aplikasi Lama)</option>
+                    <!-- <option value="cashflow">Cashflow (Dari akuntansi Aplikasi Lama)</option> -->
                     <option value="rataObatPasienBPJS">Rata Obat Pasien BPJS</option>
                     <option value="rataObatPasienBPJSperBulan">Rata Obat Pasien BPJS per Dokter Bulan</option>
-                    <option value="rasioBHP">Rasio BHP</option>
-                    <option value="rasioCashflow">Rasio Cashflow</option>
+                    <!-- <option value="rasioBHP">Rasio BHP</option>
+                    <option value="rasioCashflow">Rasio Cashflow</option> -->
                 </select>
             </div>
             <div class="col-3">
@@ -60,7 +60,7 @@ if (isset($_GET['Poli'])) {
     include '../dashboard/dashboard_detail_rataObatPasienBPJS.php';
 } elseif (isset($_GET['rataObatPasienBPJSperBulan'])) {
     include '../dashboard/dashboard_detail_rataObatPasienBPJSperBulan.php';
-}elseif (isset($_GET['rasioBHP'])) {
+} elseif (isset($_GET['rasioBHP'])) {
     include '../dashboard/dashboard_detail_rasioBHP.php';
 } elseif (isset($_GET['rasioBHP'])) {
     include '../dashboard/dashboard_detail_rasioBHP.php';
