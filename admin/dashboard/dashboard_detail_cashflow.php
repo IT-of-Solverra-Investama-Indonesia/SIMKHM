@@ -22,13 +22,13 @@
     if (isset($_POST['fil'])) {
         echo "
           <script>
-            document.location.href='index.php?halaman=dashboard_detail&cashflow&date_start=" . htmlspecialchars($_POST['date_start']) . "&date_end=" . htmlspecialchars($_POST['date_end']) . "';
+            document.location.href='index.php?halaman=" . htmlspecialchars($_GET['halaman']) . "&cashflow&date_start=" . htmlspecialchars($_POST['date_start']) . "&date_end=" . htmlspecialchars($_POST['date_end']) . "';
           </script>
         ";
     }
     ?>
     <?php
-    $urlFormApp = "index.php?halaman=dashboard_detail&cashflow&&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "";
+    $urlFormApp = "index.php?halaman=" . htmlspecialchars($_GET['halaman']) . "&cashflow&&date_start=" . htmlspecialchars($_GET['date_start']) . "&date_end=" . htmlspecialchars($_GET['date_end']) . "";
     ?>
     <div class="card shadow p-2">
         <div class="table-responsive">
