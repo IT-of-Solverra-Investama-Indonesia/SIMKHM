@@ -56,17 +56,35 @@
                 $totalFinal = 0;
                 $totalRata = 0;
                 // Query data pasien per bulan & dokter
+                // $query = "
+                //     SELECT DATE_FORMAT(jadwal, '%Y-%m') as bulan,
+                //         dokter_rawat,
+                //         COUNT(*) as jumlahpasien
+                //     FROM registrasi_rawat 
+                //     WHERE perawatan = 'Rawat Jalan' 
+                //         " . $whereCaraBayar . " 
+                //         AND status_antri != 'Belum Datang'
+                //         AND DATE_FORMAT(jadwal, '%Y-%m') = '$bulanSaatIni'
+                //     GROUP BY DATE_FORMAT(jadwal, '%Y-%m'), dokter_rawat
+                //     ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, dokter_rawat;
+                // ";
+                
                 $query = "
                     SELECT DATE_FORMAT(jadwal, '%Y-%m') as bulan,
                         dokter_rawat,
                         COUNT(*) as jumlahpasien
-                    FROM registrasi_rawat
+                    FROM registrasi_rawat 
                     WHERE perawatan = 'Rawat Jalan' 
                         " . $whereCaraBayar . " 
                         AND status_antri != 'Belum Datang'
                         AND DATE_FORMAT(jadwal, '%Y-%m') = '$bulanSaatIni'
+                        AND EXISTS (
+                            SELECT 1 FROM obat_rm 
+                            WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien 
+                            AND registrasi_rawat.no_rm = obat_rm.idrm
+                        )
                     GROUP BY DATE_FORMAT(jadwal, '%Y-%m'), dokter_rawat
-                    ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, dokter_rawat;
+                    ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, dokter_rawat
                 ";
                 $getData = $koneksi->query($query);
 
@@ -184,7 +202,7 @@
                         <?php
                         $totalPasien = 0;
                         $total = 0;
-                        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND carabayar = '" . htmlspecialchars($_GET['carabayar']) . "' AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "'");
+                        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND status_antri != 'Belum Datang' AND carabayar = '" . htmlspecialchars($_GET['carabayar']) . "' AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "'");
                         ?>
                         <?php foreach ($getData as $data): ?>
                             <tr>
