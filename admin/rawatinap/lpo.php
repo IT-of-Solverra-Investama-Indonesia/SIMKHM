@@ -523,9 +523,9 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   <div class="card shadow p-2 mb-1">
                     <label for="">Obat Injeksi </label>
                     <div>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
-                        <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                        <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php } ?>
                     </div>
                     <div class="table-responsive">
@@ -601,9 +601,9 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   <div class="card shadow p-2 mb-2">
                     <label for="">Obat Oral</label>
                     <div align="left">
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
-                        <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                        <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php } ?>
                     </div>
                     <div class="table-responsive">
