@@ -5,6 +5,7 @@
             <div class="col-9">
                 <select name="hal" id="" class="form-control">
                     <option value="Poli">Poli</option>
+                    <option value="OmsetRawatJalanCaraBayar">Omset Rawat Jalan per Cara Bayar</option>
                     <option value="verif">Verif</option>
                     <option value="polibulan">Poli Bulan</option>
                     <option value="polibpjs">Poli BPJS</option>
@@ -40,10 +41,11 @@ if (isset($_POST['searching'])) {
 <a href="index.php?halaman=dashboard_detail&polibpjs=<?= date('y/m') ?>" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Poli Bpjs</a>
 <a href="index.php?halaman=dashboard_detail&omsetKHM" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Omset KHM</a>
 <a href="index.php?halaman=dashboard_detail&RekapPasienOnlineOffline" class="btn btn-sm btn-primary m-1" style="max-width: 190px; float: left;">Rekap Pasien Online Offline</a> -->
-<br>
 <?php
 if (isset($_GET['Poli'])) {
     include '../dashboard/dashboard_detail_Poli.php';
+} elseif (isset($_GET['OmsetRawatJalanCaraBayar'])) {
+    include '../dashboard/dashboard_detail_OmsetRawatJalanCaraBayar.php';
 } elseif (isset($_GET['verif'])) {
     include '../dashboard/dashboard_detail_verif.php';
 } elseif (isset($_GET['polibulan'])) {
