@@ -180,9 +180,12 @@
     </div>
 <?php } else { ?>
     <?php if (htmlspecialchars($_GET['detail']) == 'detailTotal') { ?>
+        <?php
+            $carabayar = isset($_GET['carabayar']) ? htmlspecialchars($_GET['carabayar']) : 'bpjs';
+        ?> 
         <div class="card shadow p-2">
             <div class="card-header">
-                <h5 class="card-title">Detail Total Obat Pasien BPJS <?= date('F Y', strtotime($_GET['bulan'])) ?></h5>
+                <h5 class="card-title text-capitalize">Detail Total Obat Pasien <?= $carabayar ?> <?= date('F Y', strtotime($_GET['bulan'])) ?></h5>
             </div>
             <div class="table-responsive">
                 <table class="table table-striped table-sm table-hover" style="font-size: 12px;">
@@ -202,7 +205,17 @@
                         <?php
                         $totalPasien = 0;
                         $total = 0;
-                        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND status_antri != 'Belum Datang' AND carabayar = '" . htmlspecialchars($_GET['carabayar']) . "' AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "'");
+
+                        if ($carabayar == 'all') {
+                            $whereCaraBayar = "AND (carabayar IN ('bpjs', 'umum', 'malam', 'gigi umum', 'gigi bpjs', 'spesialis anak', 'spesialis penyakit dalam', 'kosmetik'))";
+                            $whereCaraBayarR = "AND (r.carabayar IN ('bpjs', 'umum', 'malam', 'gigi umum', 'gigi bpjs', 'spesialis anak', 'spesialis penyakit dalam', 'kosmetik'))";
+                        } else {
+                            $whereCaraBayar = "AND carabayar = '$carabayar'";
+                            $whereCaraBayarR = "AND r.carabayar = '$carabayar'";
+                        }
+                
+                        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND status_antri != 'Belum Datang' " . $whereCaraBayar . " AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "' AND (obat_rm.rekam_medis_id IS NOT NULL OR obat_rm.rekam_medis_id != '')");
+
                         ?>
                         <?php foreach ($getData as $data): ?>
                             <tr>
