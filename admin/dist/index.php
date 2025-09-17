@@ -442,6 +442,11 @@ if (!isset($_SESSION['login'])) {
             <span>Display Antrian</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=rekappasienpulang">
+            <i class="bi bi-circle"></i><span>Rekap Pasien Pulang</span>
+          </a>
+        </li>
         <!-- End Profile Page Nav -->
       <?php } ?>
 
