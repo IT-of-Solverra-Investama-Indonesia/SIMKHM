@@ -73,7 +73,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="8"><b>Total</b></td>
+                        <td colspan="9"><b>Total</b></td>
                         <td><b>Rp<?= number_format($total, 0, 0, '.') ?></b></td>
                     </tr>
                 </tfoot>
