@@ -25,16 +25,16 @@ if (isset($_POST['src']) && !empty($_POST['key'])) {
 
 if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Jalan';");
-  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri!='Pulang') and perawatan ='Rawat Inap' order by idrawat desc;");
+  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri!='Pulang') and perawatan ='Rawat Inap' ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC");
 } elseif (isset($_GET['racik'])) {
   $date_start = date('Y-m-d', strtotime('-1 days'));
   $date_end = date('Y-m-d');
   if (isset($_GET['pasrajal'])) {
-    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Jalan'" . $queryKey . " order by idrawat desc";
+    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Jalan'" . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
   } elseif (isset($_GET['pasinap'])) {
-    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap'" . $queryKey . " order by idrawat desc";
+    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap'" . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
   } else {
-    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri!='Belum Datang') " . $queryKey . " order by idrawat desc";
+    $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat INNER JOIN biaya_rawat ON biaya_rawat.idregis = registrasi_rawat.idrawat WHERE (apoteker_check_at IS NULL OR apoteker_check_at = '' OR apoteker_check_at = '0000-00-00 00:00:00') AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' AND (status_antri!='Belum Datang') " . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
   }
 
   //   Pagination
@@ -75,9 +75,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   $linkPage = "index.php?" . $baseParams;
 } elseif (isset($_GET['detail'])) {
   if (isset($_GET['inap'])) {
-    $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap' and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'  order by idrawat desc limit 1;");
+    $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri='Datang' or  status_antri='Pembayaran' or status_antri='Selesai' or status_antri='Pulang') and perawatan ='Rawat Inap' and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'  ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC limit 1;");
   } else {
-    $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0' or status_antri='Pembayaran' or status_antri='Selesai') and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]' and perawatan ='Rawat Jalan' order by idrawat desc Limit 1;");
+    $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0' or status_antri='Pembayaran' or status_antri='Selesai') and REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]' and perawatan ='Rawat Jalan' ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC Limit 1;");
   }
 } elseif (isset($_GET['all'])) {
   $baseParams = "halaman=daftarrmedis&all";
@@ -104,7 +104,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   $linkPage = "index.php?" . $baseParams;
 
   // if(isset($_GET['rajal']))
-  $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri!='') " . $queryKey . " order by idrawat desc";
+  $queryPasien = "SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri!='') " . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
 
   //   Pagination
   // Parameters for pagination
@@ -132,7 +132,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
 } else {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Inap';");
-  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' order by idrawat desc ;");
+  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC;");
 }
 
 ?>
