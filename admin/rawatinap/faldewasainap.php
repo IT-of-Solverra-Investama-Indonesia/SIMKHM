@@ -638,67 +638,18 @@
     </main>
     <?php
         if(isset($_POST['save'])){
-            
-            if(isset($_POST['no1'])){
-                $no1 = 1;
-            }else{
-                $no1 = 0;
-            }
-            if(isset($_POST['no2'])){
-                $no2 = 1;
-            }else{
-                $no2 = 0;
-            }
-            if(isset($_POST['no3'])){
-                $no3 = 1;
-            }else{
-                $no3 = 0;
-            }
-            if(isset($_POST['no4'])){
-                $no4 = 1;
-            }else{
-                $no4 = 0;
-            }
-            if(isset($_POST['no5'])){
-                $no5 = 1;
-            }else{
-                $no5 = 0;
-            }
-            if(isset($_POST['no6'])){
-                $no6 = 1;
-            }else{
-                $no6 = 0;
-            }
-            if(isset($_POST['no7'])){
-                $no7 = 1;
-            }else{
-                $no7 = 0;
-            }
-            if(isset($_POST['no8'])){
-                $no8 = 1;
-            }else{
-                $no8 = 0;
-            }
-            if(isset($_POST['PK'])){
-                $PK = '1';
-            }else{
-                $PK = '0';
-            }
-            if(isset($_POST['J'])){
-                $J = '1';
-            }else{
-                $J = '0';
-            }
-            if(isset($_POST['T'])){
-                $T = '1';
-            }else{
-                $T = '0';
-            }
-            if(isset($_POST['DLL'])){
-                $DLL = '1';
-            }else{
-                $DLL = '0';
-            }
+            $no1 = isset($_POST['no1']) ? 1 : 0;
+            $no2 = isset($_POST['no2']) ? 1 : 0;
+            $no3 = isset($_POST['no3']) ? 1 : 0;
+            $no4 = isset($_POST['no4']) ? 1 : 0;
+            $no5 = isset($_POST['no5']) ? 1 : 0;
+            $no6 = isset($_POST['no6']) ? 1 : 0;
+            $no7 = isset($_POST['no7']) ? 1 : 0;
+            $no8 = isset($_POST['no8']) ? 1 : 0;
+            $PK = isset($_POST['PK']) ? '1' : '0';
+            $J = isset($_POST['J']) ? '1' : '0';
+            $T = isset($_POST['T']) ? '1' : '0';
+            $DLL = isset($_POST['DLL']) ? '1' : '0';
             
             $obat = implode(", ",$_POST['obat']);
             $koneksi->query("INSERT morse_igd (no_rm, pasien, tgl_masuk, perawat, riwayat_jatuh, medis_sekunder, alat_bantu, terpasang, cara_jalan, status_mental, total, status, obat, no1, no2, no3, no4, no5, no6, no7, no8, status_asesmen, pk, j, t, dll, tipe) VALUES ('$_POST[no_rm]', '$_POST[pasien]', '$_POST[tgl_masuk]', '$_POST[perawat]', '$_POST[riwayat_jatuh]', '$_POST[medis_sekunder]', '$_POST[alat_bantu]', '$_POST[terpasang]', '$_POST[cara_jalan]', '$_POST[status_mental]', '$_POST[total]', '$_POST[status]', '$obat', '$no1', '$no2', '$no3', '$no4', '$no5', '$no6', '$no7', '$no8', '$_POST[status_asesmen]', '$PK','$J','$T','$DLL', 'inap')");
