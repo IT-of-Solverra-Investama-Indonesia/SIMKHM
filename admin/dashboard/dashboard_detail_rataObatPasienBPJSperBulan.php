@@ -106,7 +106,7 @@
                         WHERE idapotek = (
                             SELECT MAX(idapotek) 
                             FROM apotek a2 
-                            WHERE a2.id_obat = a1.id_obat
+                            WHERE a2.id_obat = a1.id_obat AND DATE_FORMAT(a2.tgl_beli, '%Y-%m') <= '$bulanSaatIni'
                         )
                     ) a ON a.id_obat = o.kode_obat
                     WHERE r.perawatan = 'Rawat Jalan'
@@ -213,8 +213,8 @@
                             $whereCaraBayar = "AND carabayar = '$carabayar'";
                             $whereCaraBayarR = "AND r.carabayar = '$carabayar'";
                         }
-                
-                        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND status_antri != 'Belum Datang' " . $whereCaraBayar . " AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "' AND (obat_rm.rekam_medis_id IS NOT NULL OR obat_rm.rekam_medis_id != '')");
+                        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat AND DATE_FORMAT(tgl_beli, '%Y-%m') <= '" . htmlspecialchars($_GET['bulan']) . "' ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND status_antri != 'Belum Datang' " . $whereCaraBayar . " AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "' AND (obat_rm.rekam_medis_id IS NOT NULL OR obat_rm.rekam_medis_id != '')");
+
 
                         ?>
                         <?php foreach ($getData as $data): ?>
