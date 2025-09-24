@@ -225,11 +225,32 @@ if (!isset($_SESSION['login'])) {
           </ul>
         </li><!-- End Components Nav -->
         <li class="nav-item">
-          <a class="nav-link collapsed" target="_blank" href="../pasien/displayAntrian.php">
+          <a class="nav-link collapsed" href="#" onclick="openDisplayAntrian()">
             <i class="bi bi-circle"></i>
             <span>Display Antrian</span>
           </a>
         </li>
+        <script>
+          function openDisplayAntrian() {
+            // Deteksi apakah ada multiple monitor
+            if (screen.availWidth < window.screen.width) {
+              // Kemungkinan ada multiple monitor
+              const secondMonitorLeft = window.screen.width;
+              const windowFeatures = `width=${screen.availWidth},height=${screen.availHeight},left=${secondMonitorLeft},top=0,scrollbars=yes,fullscreen=yes,resizable=no`;
+              
+              const newWindow = window.open('../pasien/displayAntrian.php', 'displayAntrian', windowFeatures);
+            } else {
+              // Single monitor - buka maximized
+              const windowFeatures = `width=${screen.availWidth},height=${screen.availHeight},left=0,top=0,scrollbars=yes,resizable=yes`;
+              const newWindow = window.open('../pasien/displayAntrian.php', 'displayAntrian', windowFeatures);
+            }
+            
+            // Focus pada window baru
+            if (newWindow) {
+              newWindow.focus();
+            }
+          }
+        </script>
       <?php } ?>
 
 
@@ -437,7 +458,7 @@ if (!isset($_SESSION['login'])) {
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link collapsed" target="_blank" href="../pasien/displayAntrian.php">
+          <a class="nav-link collapsed" href="#" onclick="openDisplayAntrian()">
             <i class="bi bi-circle"></i>
             <span>Display Antrian</span>
           </a>
