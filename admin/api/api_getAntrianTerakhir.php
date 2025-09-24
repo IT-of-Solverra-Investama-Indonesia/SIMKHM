@@ -226,6 +226,17 @@ function updateSoundAt()
     }
 }
 
+// Keep Alive function untuk mencegah timeout
+function keepAlive()
+{
+    return [
+        'status' => 'success',
+        'message' => 'Keep alive ping successful',
+        'timestamp' => date('Y-m-d H:i:s'),
+        'server_time' => time()
+    ];
+}
+
 // Main API Handler
 $fungsi = $_GET['fungsi'] ?? '';
 
@@ -242,7 +253,7 @@ if ($fungsi && function_exists($fungsi)) {
     $response = [
         'status' => 'error',
         'message' => 'Parameter fungsi harus diisi',
-        'available_functions' => ['addAntreanToDB', 'addAntreanDokterToDB', 'getAntrianTerakhir', 'getAntrianTerbaru', 'getAntrianAktif', 'updateSoundAt']
+        'available_functions' => ['addAntreanToDB', 'addAntreanDokterToDB', 'getAntrianTerakhir', 'getAntrianTerbaru', 'getAntrianAktif', 'updateSoundAt', 'keepAlive']
     ];
 }
 
