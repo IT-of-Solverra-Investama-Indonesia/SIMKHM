@@ -237,14 +237,14 @@ if (!isset($_SESSION['login'])) {
               // Kemungkinan ada multiple monitor
               const secondMonitorLeft = window.screen.width;
               const windowFeatures = `width=${screen.availWidth},height=${screen.availHeight},left=${secondMonitorLeft},top=0,scrollbars=yes,fullscreen=yes,resizable=no`;
-              
+
               const newWindow = window.open('../pasien/displayAntrian.php', 'displayAntrian', windowFeatures);
             } else {
               // Single monitor - buka maximized
               const windowFeatures = `width=${screen.availWidth},height=${screen.availHeight},left=0,top=0,scrollbars=yes,resizable=yes`;
               const newWindow = window.open('../pasien/displayAntrian.php', 'displayAntrian', windowFeatures);
             }
-            
+
             // Focus pada window baru
             if (newWindow) {
               newWindow.focus();
@@ -466,6 +466,11 @@ if (!isset($_SESSION['login'])) {
         <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=rekappasienpulang">
             <i class="bi bi-circle"></i><span>Rekap Pasien Pulang</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=rekappasienperujuk">
+            <i class="bi bi-circle"></i><span>Rekap Perujuk Pasien</span>
           </a>
         </li>
         <!-- End Profile Page Nav -->
