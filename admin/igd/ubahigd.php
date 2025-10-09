@@ -649,7 +649,7 @@ if (isset($_POST['save'])) {
     $getLast = $koneksi->query("SELECT * FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
     $idrawat = $getLast['idrawat'] + 1;
 
-    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp, perujuk_file) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$igd[perujuk]', '$igd[perujuk_hp]', '$igd[perujuk_file]')");
+    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp, perujuk_file) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '".$tgl_masuk.date(' H:i:s')."', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$igd[perujuk]', '$igd[perujuk_hp]', '$igd[perujuk_file]')");
 
     $tgl = date('Y-m-d');
 
