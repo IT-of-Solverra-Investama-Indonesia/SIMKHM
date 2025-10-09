@@ -80,166 +80,8 @@ include '../dist/function.php';
         </div>
     </div>
     <script>
-        // Variables untuk tracking
-        let speechEnabled = false;
-        let lastActivityTime = Date.now();
-        let isTabActive = true;
-        let heartbeatInterval;
-        let mainInterval;
-
-        // Audio Context untuk mencegah suspend
-        let audioContext;
-
-        // Tracking suara yang sudah dipanggil untuk mencegah repetisi
-        let lastPlayedAudio = {};
-
-        // Console clear timer
-        let consoleClearInterval;
-
-        function initAudioContext() {
-            try {
-                if (!audioContext) {
-                    audioContext = new(window.AudioContext || window.webkitAudioContext)();
-                    console.log('Audio Context initialized');
-                }
-
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume().then(() => {
-                        console.log('Audio Context resumed');
-                    });
-                }
-            } catch (e) {
-                console.warn('Audio Context not supported:', e);
-            }
-        }
-
-        // Keep-alive ping untuk mencegah browser sleep
-        function sendKeepAlive() {
-            fetch('../api/api_getAntrianTerakhir.php?fungsi=keepAlive', {
-                method: 'GET',
-                cache: 'no-cache'
-            }).catch(e => console.log('Keep-alive ping failed:', e));
-        }
-
-        // Clear console setiap 1 jam untuk menjaga performa
-        function clearConsoleHourly() {
-            console.clear();
-            console.log('🧹 Console cleared automatically - ' + new Date().toLocaleTimeString());
-            console.log('📊 System Status: Active - Anti-sleep measures running');
-        }
-
-        // Deteksi tab aktif/tidak aktif
-        function handleVisibilityChange() {
-            isTabActive = !document.hidden;
-            console.log('Tab visibility changed:', isTabActive ? 'active' : 'inactive');
-
-            if (isTabActive) {
-                // Tab aktif kembali - resume semua aktivitas
-                console.log('Tab active - resuming activities');
-                initAudioContext();
-                lastActivityTime = Date.now();
-
-                // Reset interval untuk memastikan responsivitas
-                clearInterval(mainInterval);
-                mainInterval = setInterval(getAntrianBaru, 3000); // Lebih cepat saat aktif
-
-                // Langsung cek antrian baru
-                setTimeout(getAntrianBaru, 500);
-            } else {
-                // Tab tidak aktif - tetap jalankan tapi dengan interval lebih lambat
-                console.log('Tab inactive - continuing with slower interval');
-                clearInterval(mainInterval);
-                mainInterval = setInterval(getAntrianBaru, 8000); // Lebih lambat saat tidak aktif
-            }
-        }
-
-        // Synthetic user activity untuk menjaga browser aktif
-        function simulateActivity() {
-            // Buat event palsu untuk menjaga tab "aktif"
-            const event = new MouseEvent('mousemove', {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                clientX: 1,
-                clientY: 1
-            });
-            document.dispatchEvent(event);
-            lastActivityTime = Date.now();
-        }
-
-        function playNomorAudio(nomor, status, layanan) {
-            console.log('Playing audio for:', nomor, status, layanan);
-
-            // Buat ID unik untuk tracking audio yang sudah diputar
-            const audioId = `${nomor}_${status}_${layanan}`;
-
-            // Cek apakah audio ini sudah diputar dalam 30 detik terakhir
-            const now = Date.now();
-            if (lastPlayedAudio[audioId] && (now - lastPlayedAudio[audioId]) < 30000) {
-                console.log('🔇 Audio skipped - already played recently:', audioId);
-                return; // Skip audio jika baru saja diputar
-            }
-
-            // Update tracking audio yang terakhir diputar
-            lastPlayedAudio[audioId] = now;
-
-            // Pastikan audio context aktif
-            initAudioContext();
-
-            // Coba putar file audio yang sudah digenerate dulu
-            const audioFile = `../audio/${nomor}_${status}.mp3`;
-            const audio = new Audio(audioFile);
-
-            audio.onloadstart = () => console.log('Audio loading:', audioFile);
-            audio.oncanplay = () => console.log('Audio ready:', audioFile);
-            audio.onplay = () => console.log('Audio playing:', audioFile);
-            audio.onerror = (e) => {
-                console.log('Audio file not found, using speech synthesis:', e);
-                // Fallback ke speech synthesis jika file tidak ada
-                fallbackToSpeech(nomor, status, layanan);
-            };
-
-            // Set volume dan play
-            audio.volume = 0.8;
-            audio.play().catch(e => {
-                console.log('Audio play failed, using speech synthesis:', e);
-                fallbackToSpeech(nomor, status, layanan);
-            });
-        }
-
-        function fallbackToSpeech(nomor, status, layanan) {
-            // Buat ID unik untuk tracking speech yang sudah diputar
-            const speechId = `speech_${nomor}_${status}_${layanan}`;
-
-            // Cek apakah speech ini sudah diputar dalam 30 detik terakhir
-            const now = Date.now();
-            if (lastPlayedAudio[speechId] && (now - lastPlayedAudio[speechId]) < 30000) {
-                console.log('🔇 Speech skipped - already played recently:', speechId);
-                return; // Skip speech jika baru saja diputar
-            }
-
-            // Update tracking speech yang terakhir diputar
-            lastPlayedAudio[speechId] = now;
-
-            let text = '';
-            if (status === 'dokter') {
-                text = `................AAntrian ${layanan} nomor ${nomor}. Silahkan menuju ke ruang dokter`;
-            } else if (status === 'perawat') {
-                text = `................AAntrian ${layanan} nomor ${nomor}. Silahkan menuju ke tempat perawat poli`;
-            } else {
-                text = `................AAntrian nomor ${nomor}`;
-            }
-            speakText(text);
-        }
-
         function speakText(text) {
             console.log('Attempting to speak:', text);
-
-            // Pastikan audio context aktif
-            initAudioContext();
-
-            // Simulate activity untuk menjaga browser responsif
-            simulateActivity();
 
             if ('speechSynthesis' in window) {
                 // Cancel any ongoing speech
@@ -258,7 +100,6 @@ include '../dist/function.php';
                     // Add event listeners for debugging
                     utterance.onstart = function() {
                         console.log('✅ Speech started:', text);
-                        lastActivityTime = Date.now();
                     };
 
                     utterance.onend = function() {
@@ -281,6 +122,13 @@ include '../dist/function.php';
                             voice.lang.toLowerCase().includes('id') ||
                             voice.name.toLowerCase().includes('indonesia')
                         );
+
+                        // If no Indonesian voice, try English
+                        // if (!selectedVoice) {
+                        //     selectedVoice = voices.find(voice =>
+                        //         voice.lang.toLowerCase().includes('en')
+                        //     );
+                        // }
 
                         // Use first available voice as fallback
                         if (!selectedVoice && voices.length > 0) {
@@ -350,24 +198,10 @@ include '../dist/function.php';
         }
 
         function getAntrianBaru() {
-            console.log('Fetching antrian baru... Tab active:', isTabActive);
-
-            // Simulate activity untuk menjaga responsivitas
-            simulateActivity();
-
-            const requestStart = Date.now();
-
-            fetch('../api/api_getAntrianTerakhir.php?fungsi=getAntrianTerbaru', {
-                    method: 'GET',
-                    cache: 'no-cache',
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    }
-                })
+            console.log('Fetching antrian baru...');
+            fetch('../api/api_getAntrianTerakhir.php?fungsi=getAntrianTerbaru')
                 .then(response => {
-                    const requestTime = Date.now() - requestStart;
-                    console.log('Response status:', response.status, 'Time:', requestTime + 'ms');
+                    console.log('Response status:', response.status);
                     return response.json();
                 })
                 .then(result => {
@@ -377,45 +211,45 @@ include '../dist/function.php';
                         result.data.forEach(antrian => {
                             console.log('Processing antrian:', antrian);
 
-                            let layanan = '';
+                            let text = '';
                             let elementId = '';
 
                             if (['umum', 'bpjs', 'malam'].includes(antrian.tipe)) {
-                                layanan = 'Poli Umum';
                                 if (antrian.status === 'Dokter') {
+                                    text = `.......AAntrian Poli Umum nomor ${antrian.antrian}. Silahkan menuju ke ruang dokter umum`;
                                     elementId = 'dokter-umum-nomor';
                                 } else if (antrian.status === 'Perawat Poli') {
+                                    text = `.......AAntrian Poli Umum nomor ${antrian.antrian}. Silahkan menuju ke tempat perawat poli`;
                                     elementId = 'perawat-umum-nomor';
                                 }
                             } else if (['gigi umum', 'gigi bpjs'].includes(antrian.tipe)) {
-                                layanan = 'Poli Gigi';
                                 if (antrian.status === 'Dokter') {
+                                    text = `.......AAntrian Poli Gigi nomor ${antrian.antrian}. Silahkan menuju ke ruang dokter gigi`;
                                     elementId = 'dokter-gigi-nomor';
                                 } else if (antrian.status === 'Perawat Poli') {
+                                    text = `.......AAntrian Poli Gigi nomor ${antrian.antrian}. Silahkan menuju ke tempat perawat poli`;
                                     elementId = 'perawat-gigi-nomor';
                                 }
                             } else if (['spesialis anak', 'spesialis penyakit dalam'].includes(antrian.tipe)) {
-                                layanan = 'Poli Spesialis';
                                 if (antrian.status === 'Dokter') {
+                                    text = `.......AAntrian Poli Spesialis nomor ${antrian.antrian}. Silahkan menuju ke ruang dokter spesialis`;
                                     elementId = 'dokter-spesialis-nomor';
                                 } else if (antrian.status === 'Perawat Poli') {
+                                    text = `.......AAntrian Poli Spesialis nomor ${antrian.antrian}. Silahkan menuju ke tempat perawat poli`;
                                     elementId = 'perawat-spesialis-nomor';
                                 }
                             }
 
-                            if (layanan && elementId) {
+                            if (text && elementId) {
                                 const element = document.getElementById(elementId);
                                 if (element) {
                                     element.textContent = antrian.antrian;
                                     console.log('Updated display:', elementId, 'to', antrian.antrian);
                                 }
 
-                                // Gunakan fungsi audio yang baru dengan fallback
-                                const audioStatus = antrian.status === 'Dokter' ? 'dokter' : 'perawat';
-                                console.log('Playing audio for:', antrian.antrian, audioStatus, layanan);
-                                playNomorAudio(antrian.antrian, audioStatus, layanan);
+                                console.log('Playing sound:', text);
+                                speakText(text);
 
-                                // Update sound timestamp
                                 fetch('../api/api_getAntrianTerakhir.php?fungsi=updateSoundAt', {
                                         method: 'POST',
                                         headers: {
@@ -431,7 +265,7 @@ include '../dist/function.php';
                                         console.error('Error updating sound timestamp:', updateError);
                                     });
                             } else {
-                                console.log('No matching configuration for tipe:', antrian.tipe, 'or status:', antrian.status);
+                                console.log('No matching text for tipe:', antrian.tipe, 'or status:', antrian.status);
                             }
                         });
                     } else {
@@ -480,37 +314,11 @@ include '../dist/function.php';
                 });
         }
 
-        // Start intervals dan event listeners
-        setInterval(sendKeepAlive, 30000); // Keep-alive setiap 30 detik
-
-        // Setup console clearing setiap 1 jam (3600000 ms)
-        consoleClearInterval = setInterval(clearConsoleHourly, 3600000);
+        setInterval(getAntrianBaru, 5000);
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
-
-            // Initialize audio context
-            initAudioContext();
-
-            // Setup visibility change detection
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-
-            // Setup page focus/blur detection
-            window.addEventListener('focus', () => {
-                console.log('Window focused');
-                isTabActive = true;
-                initAudioContext();
-                clearInterval(mainInterval);
-                mainInterval = setInterval(getAntrianBaru, 3000);
-                setTimeout(getAntrianBaru, 500);
-            });
-
-            window.addEventListener('blur', () => {
-                console.log('Window blurred');
-                isTabActive = false;
-                clearInterval(mainInterval);
-                mainInterval = setInterval(getAntrianBaru, 8000);
-            });
+            let speechEnabled = false;
 
             const enableSpeech = function() {
                 if (!speechEnabled && 'speechSynthesis' in window) {
@@ -519,10 +327,6 @@ include '../dist/function.php';
                     window.speechSynthesis.speak(testUtterance);
                     speechEnabled = true;
                     console.log('✅ Speech synthesis enabled by user interaction');
-
-                    // Initialize audio context juga
-                    initAudioContext();
-
                     setTimeout(() => {
                         const testAudible = new SpeechSynthesisUtterance('Sistem antrian siap');
                         testAudible.volume = 0.5;
@@ -532,96 +336,21 @@ include '../dist/function.php';
                 }
             };
 
-            // Event listeners untuk enable speech
-            ['click', 'touchstart', 'keydown', 'mousemove'].forEach(eventType => {
+            ['click', 'touchstart', 'keydown'].forEach(eventType => {
                 document.addEventListener(eventType, enableSpeech, {
                     once: true
                 });
             });
 
-            // Auto-enable setelah 3 detik
             setTimeout(() => {
                 if (!speechEnabled) {
                     enableSpeech();
                 }
             }, 3000);
 
-            // Start heartbeat untuk menjaga koneksi
-            heartbeatInterval = setInterval(() => {
-                simulateActivity();
-
-                // Jika sudah lebih dari 5 menit tidak ada aktivitas, simulasikan click
-                if (Date.now() - lastActivityTime > 300000) { // 5 menit
-                    console.log('Simulating click to prevent browser sleep');
-                    simulateActivity();
-                    initAudioContext();
-                }
-
-                // Bersihkan tracking audio lama (lebih dari 5 menit)
-                const now = Date.now();
-                Object.keys(lastPlayedAudio).forEach(key => {
-                    if (now - lastPlayedAudio[key] > 300000) {
-                        delete lastPlayedAudio[key];
-                    }
-                });
-            }, 60000); // Setiap 1 menit
-
-            // Load initial data
             loadAntrianAktif();
-
-            // Start main interval
-            mainInterval = setInterval(getAntrianBaru, 3000);
-
-            // Initial fetch
-            setTimeout(getAntrianBaru, 1000);
-
-            // Log initial system status
-            console.log('🚀 Sistem Antrian Initialized');
-            console.log('✅ Anti-sleep measures: ACTIVE');
-            console.log('🔊 Audio system: READY');
-            console.log('🧹 Console auto-clear: Every 1 hour');
-            console.log('⏰ Keep-alive ping: Every 30 seconds');
+            getAntrianBaru();
         });
-
-        // Prevent page from sleeping dengan berbagai metode
-        let wakeLock = null;
-
-        // Screen Wake Lock API (jika didukung)
-        if ('wakeLock' in navigator) {
-            navigator.wakeLock.request('screen').then(lock => {
-                wakeLock = lock;
-                console.log('Screen wake lock acquired');
-            }).catch(err => {
-                console.log('Wake lock failed:', err);
-            });
-        }
-
-        // Reload halaman jika terlalu lama tidak aktif (failsafe)
-        setInterval(() => {
-            const timeSinceActivity = Date.now() - lastActivityTime;
-            if (timeSinceActivity > 1800000) { // 30 menit
-                console.log('Page inactive too long, reloading...');
-                location.reload();
-            }
-        }, 600000); // Check setiap 10 menit
-
-        /* 
-        SOLUSI MASALAH DELAY 10 MENIT:
-        ================================
-        
-        Masalah: Browser menunda eksekusi JavaScript ketika tab tidak aktif (throttling)
-        
-        Solusi yang diterapkan:
-        1. Audio Context Management - Mencegah audio context suspend
-        2. Visibility API - Deteksi tab aktif/tidak aktif dengan interval berbeda
-        3. Keep-alive Ping - Request ke server setiap 30 detik
-        4. Synthetic Activity - Simulasi mouse movement untuk menjaga tab aktif
-        5. Screen Wake Lock - Mencegah screen sleep (jika didukung browser)
-        6. Focus/Blur Detection - Reset interval saat tab kembali fokus
-        7. Heartbeat System - Monitoring aktivitas dan pembersihan otomatis
-        
-        Hasil: Delay maksimal 8 detik (saat tab tidak aktif) vs 10 menit sebelumnya
-        */
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
