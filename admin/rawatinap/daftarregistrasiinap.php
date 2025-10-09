@@ -16,7 +16,7 @@ if (isset($_GET['all'])) {
       OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%'OR status_antri LIKE '%$_POST[key]%'
       OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
   }
-  $pasiens = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap'  AND status_antri != 'Pulang' " . $queryKey . " ORDER BY idrawat DESC";
+  $pasiens = "SELECT *, (SELECT SUM(besaran) AS biayaObat FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat AND biaya LIKE '%obat%') AS biayaObat, (SELECT SUM(biaya) AS biayaLab FROM lab WHERE id_lab_inap = registrasi_rawat.idrawat) AS biayaLab, (SELECT SUM(besaran) AS biayaTotal FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat) AS biayaTotal FROM registrasi_rawat WHERE perawatan = 'Rawat Inap'  AND status_antri != 'Pulang' " . $queryKey . " ORDER BY idrawat DESC";
   $urlPage = 'index.php?halaman=daftarregistrasiinap';
 }
 // var_dump($pasien);
@@ -84,7 +84,7 @@ if (isset($_POST['src'])) {
 
 <body>
   <main>
-    <div class="container-fluid">
+    <div class="">
       <div class="pagetitle">
         <h1>Daftar Registrasi</h1>
         <nav>
@@ -95,7 +95,7 @@ if (isset($_POST['src'])) {
       </div><!-- End Page Title -->
 
       <section class="section">
-        <div class="container-fluid">
+        <div class="">
           <div class="row">
             <div class="col-lg-12 col-md-12">
               <div class="card">
@@ -120,15 +120,21 @@ if (isset($_POST['src'])) {
 
                   <!-- Multi Columns Form -->
                   <div class="table-responsive">
-                    <table id="" class="table table-striped" style="width:100%">
+                    <table id="" class="table table-striped table-hover table-sm" style="width:100%; font-size: 12px;">
                       <thead>
                         <tr>
                           <th>No</th>
-                          <th>Nama Pasien</th>
-                          <th>Jenis Perawatan</th>
+                          <th>Nama</th>
+                          <th>Perawatan</th>
                           <th>Dokter</th>
-                          <th>No RM</th>
+                          <th>NoRM</th>
                           <th>Jadwal</th>
+                          <th>CaraBayar</th>
+                          <th>BiayaObat</th>
+                          <th>BiayaLab</th>
+                          <th>BiayaObat & Lab</th>
+                          <th>Hari</th>
+                          <th>Biaya/Hari</th>
                           <!-- <th>Antrian</th> -->
                           <th>Status</th>
                           <th></th>
@@ -154,11 +160,35 @@ if (isset($_POST['src'])) {
                             ?>
                             <td style="margin-top:10px;"> <?= $pecah['jadwal'] ?></td>
                             <!-- <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td> -->
-                            <td style="margin-top:10px;">
+                            <td>
+                              <?= $pecah['carabayar'] ?>
+                            </td>
+                            <td>
+                              <?php echo number_format($pecah["biayaObat"], 0, 0, '.'); ?>
+                            </td>
+                            <td>
+                              <?php echo number_format($pecah["biayaLab"], 0, 0, '.'); ?>
+                            </td>
+                            <td>
+                              <?php echo number_format($pecah["biayaObat"] + $pecah["biayaLab"], 0, 0, '.'); ?>
+                            </td>
+                            <td>
+                              <?php
+                              $today = new DateTime(); // Tanggal hari ini
+                              $tanggalMasuk = date('Y-m-d', strtotime($pecah['jadwal']));
+                              $pastDate = new DateTime($tanggalMasuk); // Tanggal masa lalu
+                              $interval = $today->diff($pastDate);
+                              ?>
+                              <?= $interval->days + 1 ?>Hari
+                            </td>
+                            <td>
+                              <?php echo number_format(($pecah["biayaObat"] + $pecah["biayaLab"])/($interval->days + 1), 0, 0, '.'); ?>
+                            </td>
+                            <td>
                               <?php if ($pecah["status_antri"] == 'Datang') { ?>
-                                <h6 style="color:green"><?php echo $pecah["status_antri"]; ?></h6>
+                                <span style="color:green"><?php echo $pecah["status_antri"]; ?></span>
                               <?php } else { ?>
-                                <h6 style="color:red"><?php echo $pecah["status_antri"]; ?></h6>
+                                <span style="color:red"><?php echo $pecah["status_antri"]; ?></span>
                               <?php }  ?>
                             </td>
                             <td>
@@ -260,131 +290,14 @@ if (isset($_POST['src'])) {
 
 </html>
 
-<?php if (isset($_GET['status'])) {
-
-  // $getToken = curl_init();
-  // curl_setopt_array($getToken, array(
-  //   CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/oauth2/v1/accesstoken?grant_type=client_credentials',
-  //   CURLOPT_RETURNTRANSFER => true,
-  //   CURLOPT_ENCODING => '',
-  //   CURLOPT_MAXREDIRS => 10,
-  //   CURLOPT_TIMEOUT => 0,
-  //   CURLOPT_FOLLOWLOCATION => true,
-  //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  //   CURLOPT_CUSTOMREQUEST => 'POST',
-  //   CURLOPT_POSTFIELDS => 'client_id=pnZFT0j4Hs1FKIqQKeRspG1ncJwauPVKNnrT2OeiuPpP2E3l&client_secret=FNTJCctvzsWjmjb7VHGbdzLT1xLG9FcV8bAWql27GKJ8o9S5iXxHvOQYpi85qzzv',
-  //   CURLOPT_HTTPHEADER => array(
-  //     'Content-Type: application/x-www-form-urlencoded',
-  //     'Authorization: Bearer WVqDq4p8tYLyaNtYtCDytoaJLNJj'
-  //   ),
-  // ));
-
-  // $responseToken = curl_exec($getToken);
-
-  // curl_close($getToken);
-  // // echo $responseToken;
-  // $pecahToken = json_decode($responseToken, true);
-  // $token = $pecahToken['access_token'];
-
-  // $getIHS = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$_GET[norm]' LIMIT 1")->fetch_assoc();
-  // $IHS = $getIHS['ihs_id'];
-  // $getIHSDokter = $koneksi->query("SELECT * FROM admin WHERE namalengkap = '$_GET[dokter]' LIMIT 1")->fetch_assoc();
-  // $IHSdokter = $getIHSDokter['ihs_id'];
-
-  // $curl = curl_init();
-  // curl_setopt_array($curl, array(
-  //   CURLOPT_URL => 'https://api-satusehat.kemkes.go.id/fhir-r4/v1/Encounter',
-  //   CURLOPT_RETURNTRANSFER => true,
-  //   CURLOPT_ENCODING => '',
-  //   CURLOPT_MAXREDIRS => 10,
-  //   CURLOPT_TIMEOUT => 0,
-  //   CURLOPT_FOLLOWLOCATION => true,
-  //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  //   CURLOPT_CUSTOMREQUEST => 'POST',
-  //   CURLOPT_POSTFIELDS =>'{
-  //     "resourceType": "Encounter",
-  //     "status": "arrived",
-  //     "class": {
-  //         "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-  //         "code": "AMB",
-  //         "display": "ambulatory"
-  //     },
-  //     "subject": {
-  //         "reference": "Patient/'.$IHS.'",
-  //         "display": "PATIENT '.$_GET['antrian'].'"
-  //     },
-  //     "participant": [
-  //         {
-  //             "type": [
-  //                 {
-  //                     "coding": [
-  //                         {
-  //                             "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
-  //                             "code": "ATND",
-  //                             "display": "attender"
-  //                         }
-  //                     ]
-  //                 }
-  //             ],
-  //             "individual": {
-  //                 "reference": "Practitioner/'.$IHSdokter.'",
-  //                 "display": "'.$_GET['dokter'].'"
-  //             }
-  //         }
-  //     ],
-  //     "period": {
-  //         "start": "'.$_GET['jadwal'].'"
-  //     },
-  //     "statusHistory": [
-  //         {
-  //             "status": "arrived",
-  //             "period": {
-  //                 "start": "'.$_GET['jadwal'].'"
-  //             }
-  //         }
-  //     ],
-  //     "serviceProvider": {
-  //         "reference": "Organization/100015704"
-  //     }
-  // }',
-  //   CURLOPT_HTTPHEADER => array(
-  //     'Content-Type: application/json',
-  //     'Authorization: Bearer '.$token
-  //   ),
-  // ));
-
-  // $response = curl_exec($curl);
-
-  // curl_close($curl);
-  // echo $response;
+<?php
+if (isset($_GET['status'])) {
   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang' WHERE idrawat='$_GET[id]'");
-
-  // $koneksi->query("INSERT INTO biaya_rawat
-
-  //   (poli, idregis)
-
-  //   VALUES ('35000', '$_GET[id]')
-
-  //   ");
-
   echo "
-  <script>
-
-  alert('Berhasil!');
-
-  document.location.href='index.php?halaman=daftarregistrasiinap';
-
-  </script>
-
+    <script>
+      alert('Berhasil!');
+      document.location.href='index.php?halaman=daftarregistrasiinap';
+    </script>
   ";
-  if (mysqli_affected_rows($koneksi) > 0) {
-  }
-} ?>
-<!-- <script>
-    $(document).ready(function() {
-        $('#myTables').DataTable( {
-         search: true,
-         pagination: true
-        } );
-    } );
-</script> -->
+}
+?>
