@@ -479,9 +479,20 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
             <div class="col-lg-12 col-md-12">
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title mb-0" style="margin-bottom: -10px;">Daftar Pasien</h5>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Daftar Pasien</h5>
+                    <div id="rata-obat-container">
+                      <span id="loading-rata-obat" class="badge bg-secondary position-relative">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        <small>Loading...</small>
+                      </span>
+                      <span id="rata-obat-result" class="badge bg-danger" style="display: none;" onclick="refreshRataObat()" title="Klik untuk refresh">
+                        <span id="rata-obat-value"></span>
+                      </span>
+                    </div>
+                  </div>
                   <?php if (!isset($_GET['all'])) { ?>
-                    <p style="margin-top: -20px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data pasien datang pada hari ini saja</p>
+                    <p style="margin-top: 0px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data pasien datang pada hari ini saja</p>
                     <a href="index.php?halaman=daftarrmedis&all" class="btn btn-sm btn-primary mb-2">Pasien All</a>
                     <?php if (isset($_GET['racik'])) { ?>
                       <a href="index.php?halaman=daftarrmedis&racik&pasrajal" class="btn btn-sm btn-primary mb-2">Pasien Rajal</a>
@@ -1126,6 +1137,102 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
+  <script>
+    // Load rata-rata obat per dokter secara asynchronous
+    document.addEventListener('DOMContentLoaded', function() {
+      loadRataRataObat();
+    });
+
+    function loadRataRataObat() {
+      const loadingElement = document.getElementById('loading-rata-obat');
+      const resultElement = document.getElementById('rata-obat-result');
+
+      console.log('🔄 Loading rata-rata obat per dokter...');
+
+      fetch('../api/api_getRataRataObatPerdokter.php?fungsi=getRataRataObat', {
+          method: 'GET',
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => {
+          console.log('📡 Response status:', response.status);
+          return response.json();
+        })
+        .then(data => {
+          console.log('📊 API Response:', data);
+
+          if (data.status === 'success') {
+            loadingElement.style.display = 'none';
+
+            if (data.data && data.data.length > 0) {
+              // Ambil data pertama (karena biasanya hanya ada satu dokter dalam session)
+              const dataObat = data.data[0];
+              const rataRata = dataObat.rata_rata_formatted;
+              const valueElement = document.getElementById('rata-obat-value');
+
+              valueElement.textContent = rataRata;
+              resultElement.title = `Rata-rata biaya obat per pasien: ${rataRata}\nTotal Pasien: ${dataObat.jumlah_pasien}\nTotal Biaya Obat: ${dataObat.total_obat.toLocaleString()}\nDokter: ${dataObat.dokter}\nBulan: ${dataObat.bulan}\nExecution Time: ${data.execution_time || 'N/A'}`;
+
+              console.log('✅ Rata-rata obat berhasil dimuat:', {
+                rataRata: rataRata,
+                totalPasien: dataObat.jumlah_pasien,
+                totalBiayaObat: dataObat.total_obat,
+                executionTime: data.execution_time
+              });
+            } else {
+              const valueElement = document.getElementById('rata-obat-value');
+              valueElement.textContent = '0';
+              resultElement.title = 'Tidak ada data rata-rata obat untuk dokter ini pada bulan ' + (data.bulan || 'ini');
+              console.log('ℹ️ Tidak ada data rata-rata obat');
+            }
+
+            resultElement.style.display = 'inline-block';
+
+          } else {
+            // Error dari API
+            loadingElement.style.display = 'none';
+            const valueElement = document.getElementById('rata-obat-value');
+            valueElement.textContent = 'Error';
+            resultElement.className = 'badge bg-warning';
+            resultElement.title = 'Error: ' + (data.message || 'Gagal memuat data');
+            resultElement.style.display = 'inline-block';
+            console.error('❌ Error dari API:', data.message);
+          }
+        })
+        .catch(error => {
+          // Error network atau parsing
+          console.error('❌ Network Error:', error);
+
+          loadingElement.style.display = 'none';
+          const valueElement = document.getElementById('rata-obat-value');
+          valueElement.textContent = 'Network Error';
+          resultElement.className = 'badge bg-danger';
+          resultElement.title = 'Gagal terhubung ke server: ' + error.message + '\nKlik untuk mencoba lagi';
+          resultElement.style.display = 'inline-block';
+        });
+    }
+
+    // Fungsi untuk refresh rata-rata obat (jika diperlukan)
+    function refreshRataObat() {
+      const loadingElement = document.getElementById('loading-rata-obat');
+      const resultElement = document.getElementById('rata-obat-result');
+
+      // Reset tampilan
+      loadingElement.style.display = 'inline-block';
+      resultElement.style.display = 'none';
+
+      // Load ulang
+      loadRataRataObat();
+    }
+
+    // Auto refresh setiap 5 menit (opsional)
+    setInterval(function() {
+      console.log('🔄 Auto refresh rata-rata obat...');
+      loadRataRataObat();
+    }, 300000); // 5 menit = 300000ms
+  </script>
 
 </body>
 
