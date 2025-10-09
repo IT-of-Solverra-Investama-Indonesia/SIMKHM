@@ -11,6 +11,7 @@
                         <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapUsia') ? 'selected' : '' ?> value="RekapUsia">Dashboard Inap Usia</option>
                         <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapDesa') ? 'selected' : '' ?> value="RekapDesa">Dashboard Inap Desa</option>
                         <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapDiagnosis') ? 'selected' : '' ?> value="RekapDiagnosis">Dashboard Inap Diagnosis</option>
+                        <option <?= (isset($_GET['dashboardinap']) && $_GET['dashboardinap'] == 'RekapPasienCaraBayar') ? 'selected' : '' ?> value="RekapPasienCaraBayar">Dashboard Rekap Inap Cara Bayar</option>
                     </select>
                 </div>
                 <div class="col-3">
