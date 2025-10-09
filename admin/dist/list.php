@@ -19,6 +19,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    
                    elseif ($hal=="dashboard_detail"){include '../dashboard/dashboard_detail.php';}
                    elseif ($hal=="dashboardinap"){include '../dashboard/dashboardinap.php';}
+                   elseif ($hal=="dashboardstaff"){include '../dashboard/dashboardstaff.php';}
 
                    //    Gaji Dokter 
                    elseif ($hal=="gajidokter"){include '../gajidokter/gajidokter.php';}

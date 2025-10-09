@@ -152,12 +152,17 @@ if (!isset($_SESSION['login'])) {
           <span>Dashboard Inap</span>
         </a>
       <?php } ?>
+
       <?php if ($level == 'sup') { ?>
         <a class="nav-link collapsed" href="index.php?halaman=dashboardkeuangan">
           <i class="bi bi-cash-coin"></i>
           <span>Dashboard Keuangan</span>
         </a>
       <?php } ?>
+      <a class="nav-link collapsed" href="index.php?halaman=dashboardstaff">
+        <i class="bi bi-cash-coin"></i>
+        <span>Dashboard Staff</span>
+      </a>
       <!-- End Dashboard Nav -->
 
       <?php if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') { ?>
@@ -655,6 +660,11 @@ if (!isset($_SESSION['login'])) {
           <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&all">
             <i class="bi bi-circle"></i>
             <span>Kajian Dokter (Rawat Jalan)</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=rekappasienpulang">
+            <i class="bi bi-circle"></i><span>Rekap Pasien Pulang</span>
           </a>
         </li>
       <?php } ?>
