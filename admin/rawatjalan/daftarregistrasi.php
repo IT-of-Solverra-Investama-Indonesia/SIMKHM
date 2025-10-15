@@ -28,6 +28,11 @@ if (isset($_GET['src'])) {
 if (isset($_GET['day'])) {
   $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' AND shift = '" . $_SESSION['shift'] . "' " . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
   $linkPage = "index.php?halaman=daftarregistrasi&day";
+
+  if (isset($_GET['carabayarlike'])) {
+    $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' AND shift = '" . $_SESSION['shift'] . "' AND carabayar LIKE '%$_GET[carabayarlike]%' " . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
+    $linkPage = "index.php?halaman=daftarregistrasi&day&carabayarlike=".htmlspecialchars($_GET['carabayarlike']);
+  }
 } elseif (isset($_GET['all'])) {
   $limit = 1;
   $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') > '$date' " . $queryKey . " ORDER BY DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
