@@ -8,20 +8,21 @@ if (isset($_GET['all'])) {
       OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%' OR status_antri LIKE '%$_POST[key]%'
       OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
   }
-  $pasiens = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' " . $queryKey . " ORDER BY idrawat DESC";
-  $urlPage = 'index.php?halaman=daftarregistrasiinap&all';
+  $pasiens = "SELECT *, (SELECT SUM(besaran) AS biayaObat FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat AND biaya LIKE '%obat%') AS biayaObat, (SELECT SUM(biaya) AS biayaLab FROM lab WHERE id_lab_inap = registrasi_rawat.idrawat) AS biayaLab, (SELECT SUM(besaran) AS biayaTotal FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat) AS biayaTotal FROM registrasi_rawat JOIN pasien ON registrasi_rawat.no_rm = pasien.no_rm WHERE perawatan = 'Rawat Inap' " . $queryKey . " ORDER BY idrawat DESC";
+  $urlPage = 'index.php?halaman=daftarregis   trasiinap&all';
 } else {
   if (isset($_POST['src'])) {
     $queryKey .= " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' 
       OR dokter_rawat LIKE '%$_POST[key]%' OR no_rm LIKE '%$_POST[key]%'OR status_antri LIKE '%$_POST[key]%'
       OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
   }
-  $pasiens = "SELECT *, (SELECT SUM(besaran) AS biayaObat FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat AND biaya LIKE '%obat%') AS biayaObat, (SELECT SUM(biaya) AS biayaLab FROM lab WHERE id_lab_inap = registrasi_rawat.idrawat) AS biayaLab, (SELECT SUM(besaran) AS biayaTotal FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat) AS biayaTotal FROM registrasi_rawat WHERE perawatan = 'Rawat Inap'  AND status_antri != 'Pulang' " . $queryKey . " ORDER BY idrawat DESC";
+  // $pasiens = "SELECT *, (SELECT SUM(besaran) AS biayaObat FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat AND biaya LIKE '%obat%') AS biayaObat, (SELECT SUM(biaya) AS biayaLab FROM lab WHERE id_lab_inap = registrasi_rawat.idrawat) AS biayaLab, (SELECT SUM(besaran) AS biayaTotal FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat) AS biayaTotal FROM registrasi_rawat WHERE perawatan = 'Rawat Inap'  AND status_antri != 'Pulang' " . $queryKey . " ORDER BY idrawat DESC";
+  $pasiens = "SELECT pasien.no_bpjs, registrasi_rawat.*, (SELECT SUM(besaran) AS biayaObat FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat AND biaya LIKE '%obat%') AS biayaObat, (SELECT SUM(biaya) AS biayaLab FROM lab WHERE id_lab_inap = registrasi_rawat.idrawat) AS biayaLab, (SELECT SUM(besaran) AS biayaTotal FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat) AS biayaTotal FROM registrasi_rawat JOIN pasien ON registrasi_rawat.no_rm = pasien.no_rm WHERE perawatan = 'Rawat Inap'  AND status_antri != 'Pulang' " . $queryKey . " ORDER BY idrawat DESC";
   $urlPage = 'index.php?halaman=daftarregistrasiinap';
 }
 // var_dump($pasien);
 
-$limit = 100; // Number of entries to show in a page
+$limit = 20; // Number of entries to show in a page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 $resultpasien = $koneksi->query($pasiens);
@@ -124,6 +125,7 @@ if (isset($_POST['src'])) {
                       <thead>
                         <tr>
                           <th>No</th>
+                          <th>No BPJS</th>
                           <th>Nama</th>
                           <th>Perawatan</th>
                           <th>Dokter</th>
@@ -150,6 +152,7 @@ if (isset($_POST['src'])) {
 
                           <tr>
                             <td><?php echo $no; ?></td>
+                            <td style="margin-top:10px;"><?php echo $pecah["no_bpjs"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
@@ -179,10 +182,10 @@ if (isset($_POST['src'])) {
                               $pastDate = new DateTime($tanggalMasuk); // Tanggal masa lalu
                               $interval = $today->diff($pastDate);
                               ?>
-                              <?= $interval->days + 1 ?>Hari
+                              <?= $interval->days ?>Hari
                             </td>
                             <td>
-                              <?php echo number_format(($pecah["biayaObat"] + $pecah["biayaLab"])/($interval->days + 1), 0, 0, '.'); ?>
+                              <?php echo number_format($interval->days == 0 ? $pecah["biayaObat"] + $pecah["biayaLab"] : (($pecah["biayaObat"] + $pecah["biayaLab"]) / ($interval->days)), 0, 0, '.'); ?>
                             </td>
                             <td>
                               <?php if ($pecah["status_antri"] == 'Datang') { ?>
