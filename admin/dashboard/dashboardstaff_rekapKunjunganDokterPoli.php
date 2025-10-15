@@ -20,7 +20,9 @@
                 <tr>
                     <th>Bulan</th>
                     <th>Dokter</th>
+                    <th>JumlahShift</th>
                     <th>JumlahPasienDatang</th>
+                    <th>JumlahPasienDatang/Shift</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +33,14 @@
                     <tr>
                         <td><?php echo $data['bulan']; ?></td>
                         <td><?php echo $data['dokter_rawat']; ?></td>
+                        <td>
+                            <?php
+                            $jumlahShift = $getJumlahShift = $koneksi->query("SELECT * FROM registrasi_rawat WHERE DATE_FORMAT(jadwal, '%Y-%m') = '$data[bulan]' AND dokter_rawat = '$data[dokter_rawat]' GROUP BY DATE_FORMAT(jadwal, '%Y-%m-%d'), shift")->num_rows;
+                            ?>
+                            <?= $jumlahShift ?>x Jaga
+                        </td>
                         <td><?php echo $data['JumlahPasienPoliDatang']; ?></td>
+                        <td><?php echo number_format($data['JumlahPasienPoliDatang'] / $jumlahShift, 2); ?></td>
                     </tr>
                 <?php } ?>
             </tbody>
