@@ -127,7 +127,7 @@ function getRataRataObat()
             $hasil[] = [
                 'bulan' => $bulan,
                 'dokter' => $dokter,
-                'total_obat' => $total,
+                'total_obat' => number_format($total, 0, 0, '.') ?? $total,
                 'jumlah_pasien' => $data['jumlahpasien'],
                 'rata_rata' => $rataRata,
                 'rata_rata_formatted' => number_format($rataRata, 0, 0, '.')
