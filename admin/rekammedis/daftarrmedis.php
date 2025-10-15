@@ -492,7 +492,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                     </div>
                   </div>
                   <?php if (!isset($_GET['all'])) { ?>
-                    <p style="margin-top: 0px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data pasien datang pada hari ini saja</p>
+                    <p style="margin-top: -30px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data pasien datang pada hari ini saja</p>
                     <a href="index.php?halaman=daftarrmedis&all" class="btn btn-sm btn-primary mb-2">Pasien All</a>
                     <?php if (isset($_GET['racik'])) { ?>
                       <a href="index.php?halaman=daftarrmedis&racik&pasrajal" class="btn btn-sm btn-primary mb-2">Pasien Rajal</a>
@@ -1172,7 +1172,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
               const rataRata = dataObat.rata_rata_formatted;
               const valueElement = document.getElementById('rata-obat-value');
 
-              valueElement.textContent = rataRata;
+              valueElement.textContent = '<?= $_SESSION['dokter_rawat'] ?>' + " (" + dataObat.total_obat + "/" + dataObat.jumlah_pasien + ") = " + rataRata;
               resultElement.title = `Rata-rata biaya obat per pasien: ${rataRata}\nTotal Pasien: ${dataObat.jumlah_pasien}\nTotal Biaya Obat: ${dataObat.total_obat.toLocaleString()}\nDokter: ${dataObat.dokter}\nBulan: ${dataObat.bulan}\nExecution Time: ${data.execution_time || 'N/A'}`;
 
               console.log('✅ Rata-rata obat berhasil dimuat:', {
