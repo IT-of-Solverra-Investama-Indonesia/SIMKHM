@@ -19,6 +19,8 @@
       SELECT DATE_FORMAT(jadwal, '%y/%m') as bulan,
         SUM(IF(carabayar='umum',1,0)) AS umum,
         SUM(IF(carabayar='bpjs',1,0)) AS bpjs,
+        SUM(IF(carabayar='gigi umum',1,0)) AS gigiumum,
+        SUM(IF(carabayar='gigi bpjs',1,0)) AS gigibpjs,
         SUM(IF(carabayar='malam',1,0)) AS malam,
         SUM(IF(carabayar='spesialis anak',1,0)) AS spesialisAnak,
         SUM(IF(carabayar='spesialis penyakit dalam',1,0)) AS spesialisPenyakitDalam,
@@ -90,6 +92,8 @@
                         <th class="text-capitalize">hari</th>
                         <th class="text-capitalize">umum</th>
                         <th class="text-capitalize">bpjs</th>
+                        <th class="text-capitalize">gigi umum</th>
+                        <th class="text-capitalize">gigib bpjs</th>
                         <th class="text-capitalize">Anak</th>
                         <th class="text-capitalize">PenyakitDalam</th>
                         <th class="text-capitalize">malam</th>
@@ -117,6 +121,8 @@
                                     <?php echo $poli['bpjs'] ?> || <?php echo number_format($poli['bpjs'] / $poli['harii'], 2) ?>
                                 </a>
                             </td>
+                            <td><?php echo $poli['gigiumum'] ?> || <?php echo number_format($poli['gigiumum'] / $poli['harii'], 2) ?></td>
+                            <td><?php echo $poli['gigibpjs'] ?> || <?php echo number_format($poli['gigibpjs'] / $poli['harii'], 2) ?></td>
                             <td><?php echo $poli['spesialisAnak'] ?> || <?php echo number_format($poli['spesialisAnak'] / $poli['harii'], 2) ?></td>
                             <td><?php echo $poli['spesialisPenyakitDalam'] ?> || <?php echo number_format($poli['spesialisPenyakitDalam'] / $poli['harii'], 2) ?></td>
                             <td><?php echo $poli['malam'] ?> || <?php echo number_format($poli['malam'] / $poli['harii'], 2) ?></td>
