@@ -239,7 +239,8 @@ if (isset($_GET['confirm'])) {
                               data: {
                                 getAntrian: '',
                                 carabayar: val,
-                                tanggal: formattedToday
+                                tanggal: formattedToday,
+                                shift : '<?= $_SESSION['shift'] ?>'
                               },
                               success: function(res) {
                                 // Pastikan response JSON
