@@ -60,6 +60,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="ubahpasien"){include '../pasien/ubahpasien.php';}
                    elseif ($hal=="hapuspasien"){include '../pasien/hapuspasien.php';}
                    elseif ($hal=="pasien"){include '../pasien/pasien.php';}
+                   elseif ($hal=="ubahbpjs"){include '../pasien/ubahbpjs.php';}
 
                    //rating
                    elseif ($hal=="ratingall"){include '../rating/ratingall.php';}

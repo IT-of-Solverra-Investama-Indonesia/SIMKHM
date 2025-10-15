@@ -445,6 +445,12 @@ if (!isset($_SESSION['login'])) {
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarregistrasi&day&carabayarlike=gigi">
+            <i class="bi bi-file-earmark-medical-fill"></i>
+            <span>Pendaftaran One Day Gigi</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=daftarregistrasi&all">
             <i class="bi bi-list"></i>
             <span>Pendaftaran (Diagnosis)</span>
@@ -672,7 +678,13 @@ if (!isset($_SESSION['login'])) {
       <hr>
       </hr>
       <?php if ($level == 'ceo'  or $level == 'sup') { ?>
-
+        <li class="nav-heading">Sup</li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=ubahbpjs">
+            <i class="bi bi-files"></i>
+            <span>Ubah BPJS</span>
+          </a>
+        </li>
         <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=kamar_inap">
             <i class="bi bi-cash-coin"></i>
