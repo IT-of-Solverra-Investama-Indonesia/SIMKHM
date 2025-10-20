@@ -25,7 +25,12 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="gajidokter"){include '../gajidokter/gajidokter.php';}
                    elseif ($hal=="akun_gajidokter"){include '../gajidokter/akun_gajidokter.php';}
                    elseif ($hal=="gajidokter_history"){include '../gajidokter/gajidokter_history.php';}
-                   //    ENd Gaji Dokter 
+                   //    ENd Gaji Dokter
+                   
+                   //    Absensi Dokter
+                   elseif ($hal=="absensidokter"){include '../dokter/absensidokter.php';}
+                     elseif ($hal=="absensidokter_history"){include '../dokter/absensidokter_history.php';}
+                   //    End Absensi Dokter
 
                    //inap
                    elseif ($hal=="daftarregistrasiinap"){include '../rawatinap/daftarregistrasiinap.php';}

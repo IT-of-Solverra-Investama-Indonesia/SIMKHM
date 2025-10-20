@@ -180,6 +180,11 @@ if (!isset($_SESSION['login'])) {
               </a>
             </li>
             <li>
+              <a href="index.php?halaman=daftarregistrasi&day&carabayarlike=gigi">
+                <i class="bi bi-circle"></i><span>Kajian Awal Gigi</span>
+              </a>
+            </li>
+            <li>
               <a href="index.php?halaman=daftarregistrasi&all">
                 <i class="bi bi-circle"></i><span>Pendaftaran (Diagnosis)</span>
               </a>
@@ -274,6 +279,11 @@ if (!isset($_SESSION['login'])) {
               </a>
             </li>
             <li>
+              <a href="index.php?halaman=daftarrmedis&carabayar=gigi">
+                <i class="bi bi-circle"></i><span>Kajian Dokter Gigi (Rawat Jalan)</span>
+              </a>
+            </li>
+            <li>
               <a href="index.php?halaman=daftarrmedis&inap">
                 <i class="bi bi-circle"></i><span>Kajian Dokter (Rawat Inap)</span>
               </a>
@@ -328,7 +338,14 @@ if (!isset($_SESSION['login'])) {
           </ul>
         </li><!-- End Forms Nav -->
         <li class="nav-item">
-
+          <a class="nav-link collapsed" href="index.php?halaman=absensidokter">
+            <i class="bi bi-file-person"></i>
+            <span>Absensi Dokter</span>
+          </a>
+          <a class="nav-link collapsed" href="index.php?halaman=absensidokter_history">
+            <i class="bi bi-person-check"></i>
+            <span>Riwayat Absensi Dokter</span>
+          </a>
           <a class="nav-link collapsed" href="index.php?halaman=daftarpuyer">
             <i class="bi bi-capsule"></i>
             <span>Tambah Paket Racik</span>
@@ -424,6 +441,12 @@ if (!isset($_SESSION['login'])) {
           <a class="nav-link collapsed" href="index.php?halaman=daftarpasien">
             <i class="bi bi-person"></i>
             <span>Pasien</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=ubahbpjs">
+            <i class="bi bi-files"></i>
+            <span>Ubah BPJS</span>
           </a>
         </li>
         <li class="nav-item">
