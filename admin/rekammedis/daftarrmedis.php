@@ -131,8 +131,12 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   // Apply pagination to query
   $pasien = $koneksi->query($queryPasien . " LIMIT $start, $limit;");
 } else {
+  $caraBayarFilter = "  AND carabayar NOT LIKE  '%gigi%'";
+  if (isset($_GET['carabayar'])) {
+    $caraBayarFilter = " AND carabayar LIKE '%" . htmlspecialchars($_GET['carabayar']) . "'%";
+  }
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Inap';");
-  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC;");
+  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' " . $caraBayarFilter . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC;");
 }
 
 ?>
@@ -500,7 +504,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                     <?php } ?>
                     <?php if (isset($_GET['inap'])) { ?>
                       <button class="btn btn-sm btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#showKamar">Lihat Kamar Terpakai</button>
-                      <!-- Modal -->
+                      <!-- Modal LIhat Kamar -->
                       <div class="modal fade" id="showKamar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-scrollable modal-lg">
                           <div class="modal-content">
@@ -730,7 +734,16 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 <span style="font-size: 10px; margin: 1px;" onclick="alert('Pada <?= $pecah['apoteker_check_at'] ?>')" class="badge <?= $pecah['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>">Skrining Obat</span>
                               </td>
                               <!-- <td style="margin-top:10px;"><?php echo $getLastRM["diagnosis"]; ?></td> -->
-                              <td style="margin-top:10px;"><?php echo $pecah["carabayar"]; ?></td>
+                              <td style="margin-top:10px;">
+                                <?php echo $pecah["carabayar"]; ?> <br>
+                                <i>
+                                  <?php
+                                  if ($pecah['carabayar'] == 'bpjs') {
+                                    echo $getPasien['no_bpjs'] ?? '-';
+                                  }
+                                  ?>
+                                </i>
+                              </td>
                               <?php if (!isset($_GET['racik'])) { ?>
                                 <td style="margin-top:10px;">
                                   <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'kasir') { ?>
