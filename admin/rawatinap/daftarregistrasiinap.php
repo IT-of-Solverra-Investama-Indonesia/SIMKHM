@@ -125,7 +125,7 @@ if (isset($_POST['src'])) {
                       <thead>
                         <tr>
                           <th>No</th>
-                          <th>No BPJS</th>
+                          <!-- <th>No BPJS</th> -->
                           <th>Nama</th>
                           <th>Perawatan</th>
                           <th>Dokter</th>
@@ -152,7 +152,7 @@ if (isset($_POST['src'])) {
 
                           <tr>
                             <td><?php echo $no; ?></td>
-                            <td style="margin-top:10px;"><?php echo $pecah["no_bpjs"]; ?></td>
+                            <!-- <td style="margin-top:10px;"><?php echo $pecah["no_bpjs"]; ?></td> -->
                             <td style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
@@ -164,7 +164,14 @@ if (isset($_POST['src'])) {
                             <td style="margin-top:10px;"> <?= $pecah['jadwal'] ?></td>
                             <!-- <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td> -->
                             <td>
-                              <?= $pecah['carabayar'] ?>
+                              <?= $pecah['carabayar'] ?> <br>
+                              <i>
+                                <?php
+                                if ($pecah['carabayar'] == 'bpjs') {
+                                  echo $pecah['no_bpjs'] ?? '-';
+                                }
+                                ?>
+                              </i>
                             </td>
                             <td>
                               <?php echo number_format($pecah["biayaObat"], 0, 0, '.'); ?>
