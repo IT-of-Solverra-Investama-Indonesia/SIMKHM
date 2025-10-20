@@ -317,7 +317,9 @@
 
                                     </td>
                                     <td>
-                                        <!-- <button type="button" onclick="upDataStok('<?= $data['kode_obat'] ?>', '<?= $stokSekarang ?>')" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalUpdateStok">Update Stok</button> -->
+                                        <?php if($_SESSION['admin']['username'] == 'shab'){?>
+                                            <button type="button" onclick="upDataStok('<?= $data['kode_obat'] ?>', '<?= $stokSekarang ?>')" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalUpdateStok">Update Stok</button>
+                                        <?php }?>
 
                                         <?php
                                         $getDataRevisiSementara = $koneksi->query("SELECT *, COUNT(*) as jum FROM revisi_sementara WHERE kode_obat = '$data[kode_obat]' LIMiT 1")->fetch_assoc();
