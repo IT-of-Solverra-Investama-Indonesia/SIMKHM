@@ -1,0 +1,9 @@
+# Protect directory but allow image access
+
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+Allow from all
+</FilesMatch>
+
+# Prevent directory listing
+
+Options -Indexes
