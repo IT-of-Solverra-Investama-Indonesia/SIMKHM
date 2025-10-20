@@ -133,7 +133,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
 } else {
   $caraBayarFilter = "  AND carabayar NOT LIKE  '%gigi%'";
   if (isset($_GET['carabayar'])) {
-    $caraBayarFilter = " AND carabayar LIKE '%" . htmlspecialchars($_GET['carabayar']) . "'%";
+    $caraBayarFilter = " AND carabayar LIKE '%" . htmlspecialchars($_GET['carabayar']) . "%'";
   }
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Inap';");
   $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE (status_antri='Datang' or status_antri='0') and perawatan ='Rawat Jalan' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$date' " . $caraBayarFilter . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC;");
