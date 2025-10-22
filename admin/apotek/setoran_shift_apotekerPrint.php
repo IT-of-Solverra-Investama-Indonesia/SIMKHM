@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../dist/function.php';
 $tanggal = htmlspecialchars($_GET['tanggal']);
 $shift = htmlspecialchars($_GET['shift']);
@@ -42,7 +43,8 @@ $dataSingle = $getData->fetch_assoc();
         <tbody>
             <tr>
                 <td>Nama</td>
-                <td>: <?= $dataSingle['petugas'] ?></td>
+                <!-- <td>: <?= $dataSingle['petugas'] ?></td> -->
+                <td>: <?= $_SESSION['admin']['namalengkap'] ?></td>
             </tr>
             <tr>
                 <td>SHIFT</td>
