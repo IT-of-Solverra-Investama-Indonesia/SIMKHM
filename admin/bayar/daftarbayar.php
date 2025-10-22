@@ -8,10 +8,15 @@ date_default_timezone_set('Asia/Jakarta');
   if (isset($_GET['src'])) {
     $key = htmlspecialchars($_GET['key']);
     $carabayar = htmlspecialchars($_GET['carabayar']);
-    $whereCondition = " AND (nama_pasien LIKE '%$key%' OR no_rm LIKE '%$key%')";
+    $whereCondition = " AND (nama_pasien LIKE '%$key%' OR no_rm LIKE '%$key%' )";
     $whereConditionUrl = "&src&key=$key&carabayar=$carabayar";
     if ($carabayar != "" and $carabayar != "All") {
       $whereCondition .= " AND carabayar = '$carabayar'";
+    }
+    if (isset($_GET['shift']) && $_GET['shift'] != 'All') {
+      $shift = htmlspecialchars($_GET['shift']);
+      $whereCondition .= " AND registrasi_rawat.shift = '$shift'";
+      $whereConditionUrl .= "&shift=$shift";
     }
   }
 
@@ -156,16 +161,19 @@ date_default_timezone_set('Asia/Jakarta');
                         <div class="col-3">
                           Cari
                           <input type="text" name="key" id="" class="form-control form-control-sm">
-                          <!-- Shift
-                          <select name="shift" id="" required class="form-control">
-                            <option value="" hidden>Pilih Shift</option>
+                          <!-- Shift -->
+
+                        </div>
+                        <div class="col-3">
+                          Shift
+                          <select name="shift" id="" required class="form-control form-control-sm">
+                            <option value="All" hidden>All Shift</option>
                             <option value="Pagi">Pagi</option>
                             <option value="Sore">Sore</option>
                             <option value="Malam">Malam</option>
-                          </select> -->
+                          </select> 
                         </div>
-                        <div class="col-3">
-                          <br>
+                        <div class="col-12 content-end text-end">
                           <button class="btn btn-sm btn-primary" name="search"><i class="bi bi-search"></i></button>
                         </div>
                       </div>
@@ -174,7 +182,7 @@ date_default_timezone_set('Asia/Jakarta');
                     if (isset($_POST['search'])) {
                       echo "
                         <script>
-                          document.location.href='index.php?halaman=daftarbayar&src&detail&tgl=" . ($_POST['tgl'] == '' ? date('Y-m-d') : $_POST['tgl']) . "&key=" . $_POST['key'] . "&carabayar=" . $_POST['carabayar'] . "';
+                          document.location.href='index.php?halaman=daftarbayar&src&detail&tgl=" . ($_POST['tgl'] == '' ? date('Y-m-d') : $_POST['tgl']) . "&key=" . $_POST['key'] . "&carabayar=" . $_POST['carabayar'] . "&shift=" . $_POST['shift'] . "';
                         </script>
                       ";
                     }
