@@ -66,6 +66,16 @@
             $date_end = $_GET['date_end'];
             $perujuk = $_GET['perujuk'];
             $perujuk_hp = $_GET['perujuk_hp'];
+
+            if (isset($_GET['hapus'])) {
+                $idrawat = $_GET['hapus'];
+                $koneksi->query("UPDATE registrasi_rawat SET perujuk = '', perujuk_hp = '', perujuk_file = '' WHERE idrawat = '$idrawat'");
+                echo "
+                    <script>
+                        document.location.href='index.php?halaman=rekappasienperujuk&detail&date_start=$date_start&date_end=$date_end&perujuk=$perujuk&perujuk_hp=$perujuk_hp';
+                    </script>
+                ";
+            }
             ?>
             <h5 class="card-title text-capitalize">Data Pasien Rujuk <?= $_GET['perujuk'] ?></h5>
             <div class="card shadow p-2">
@@ -84,6 +94,13 @@
                         <tbody>
                             <?php
                             $getData = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk = '$perujuk' AND perujuk_hp = '$perujuk_hp' AND DATE_FORMAT(jadwal, '%Y-%m-%d') BETWEEN '$date_start' AND '$date_end' order by jadwal asc");
+                            if ($getData->num_rows == 0) {
+                                echo "
+                                    <script>
+                                        document.location.href='index.php?halaman=rekappasienperujuk';
+                                    </script>
+                                ";
+                            }
                             $no = 1;
                             foreach ($getData as $data) {
                             ?>
@@ -100,6 +117,11 @@
                                         <?php } ?>
                                     </td>
                                     <td><?= $data['status_antri'] ?></td>
+                                    <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                        <td>
+                                            <a href="index.php?halaman=rekappasienperujuk&detail&date_start=<?= $_GET['date_start'] ?>&date_end=<?= $_GET['date_end'] ?>&perujuk=<?= $_GET['perujuk'] ?>&perujuk_hp=<?= $_GET['perujuk_hp'] ?>&hapus=<?= $data['idrawat'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
+                                        </td>
+                                    <?php } ?>
                                 </tr>
                             <?php }
                             ?>
