@@ -120,6 +120,7 @@
                                 <th>NIK</th>
                                 <th>Asal Faskes</th>
                                 <th>Foto BPJS</th>
+                                <th>User</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -135,6 +136,7 @@
                                     <td><?= $row['nik'] ?></td>
                                     <td><?= $row['asal_faskes'] ?></td>
                                     <td><img src="<?= htmlspecialchars($row['foto']) ?>" alt="" width="60"></td>
+                                    <td><?= $row['user'] ?></td>
                                     <td>
                                         <a href="#" class="btn btn-warning btn-sm btn-edit"
                                             data-bs-toggle="modal"
@@ -182,9 +184,10 @@ if (isset($_POST['save'])) {
             $foto = $target_file;
         }
     }
-    $sql = "INSERT INTO ubahbpjs (tanggal, nama, nik, asal_faskes, foto) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO ubahbpjs (tanggal, nama, nik, asal_faskes, foto, user) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $koneksi->prepare($sql);
-    $stmt->bind_param("sssss", $tanggal, $nama, $nik, $asal_faskes, $foto);
+    $namaUser = $_SESSION['admin']['namalengkap'];
+    $stmt->bind_param("ssssss", $tanggal, $nama, $nik, $asal_faskes, $foto, $namaUser);
 
     if ($stmt->execute()) {
         echo "<script>alert('Data berhasil ditambahkan');document.location.href='index.php?halaman=ubahbpjs';</script>";
