@@ -407,7 +407,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'export_chunk') {
         exit;
     }
     
-    $conn = ($database === 'simkhmid_database') ? $koneksi : $koneksimaster;
+    $conn = ($database === 'ermkhm_wonorejo') ? $koneksi : $koneksimaster;
     
     if (!$conn) {
         echo json_encode(['error' => 'Database connection failed']);
@@ -481,7 +481,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'import_file') {
         exit;
     }
     
-    $conn = ($database === 'simkhmid_database') ? $koneksi : $koneksimaster;
+    $conn = ($database === 'ermkhm_wonorejo') ? $koneksi : $koneksimaster;
     
     if (!$conn) {
         echo json_encode(['error' => 'Database connection failed']);
@@ -973,7 +973,7 @@ foreach ($uploadedFiles as $file) {
                     <label for="export_database">Pilih Database untuk di-Export:</label>
                     <select id="export_database">
                         <option value="">-- Pilih Database --</option>
-                        <option value="simkhmid_database">simkhmid_database (Main Database)</option>
+                        <option value="ermkhm_wonorejo">ermkhm_wonorejo (Main Database)</option>
                         <option value="simkhmid_master">simkhmid_master (Master Database)</option>
                     </select>
                 </div>
@@ -1045,7 +1045,7 @@ foreach ($uploadedFiles as $file) {
                     <label for="import_database">Pilih Target Database:</label>
                     <select id="import_database">
                         <option value="">-- Pilih Database --</option>
-                        <option value="simkhmid_database">simkhmid_database (Main Database)</option>
+                        <option value="ermkhm_wonorejo">ermkhm_wonorejo (Main Database)</option>
                         <option value="simkhmid_master">simkhmid_master (Master Database)</option>
                     </select>
                 </div>
