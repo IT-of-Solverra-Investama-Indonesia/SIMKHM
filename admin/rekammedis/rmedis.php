@@ -6,6 +6,372 @@ date_default_timezone_set('Asia/Jakarta');
 $username = $_SESSION['admin']['username'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 
+// ==========================================
+// BAGIAN ACTION - DIEKSEKUSI TERLEBIH DAHULU
+// ==========================================
+
+// Action: Selesai Obat
+if (isset($_POST['selesai'])) {
+  $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+  $koneksi->query("UPDATE obat_rm SET status_obat='selesai' WHERE rekam_medis_id='$getLastRM[id_rm]'");
+  echo "<script>alert('Status berhasil diubah menjadi selesai'); document.location.href='index.php?halaman=daftarrmedis';</script>";
+  exit;
+}
+
+// Action: Save Rekam Medis
+if (isset($_POST['save'])) {
+  $jadwal = htmlspecialchars($_POST["jadwal"]);
+  $status_perokok = htmlspecialchars($_POST["status_perokok"]);
+  $anamnesa = htmlspecialchars($_POST["anamnesa"]);
+  $diagnosis = ($_POST['diagnosis'] != 'Diagnosis Baru') ? htmlspecialchars($_POST['diagnosis']) : htmlspecialchars($_POST['diagnosis_new']);
+  $prognosa = htmlspecialchars($_POST["prognosa"]);
+  $icd = htmlspecialchars($_POST["icd"]);
+  $status_pulang = htmlspecialchars($_POST["status_pulang"]);
+  $id_pasien = htmlspecialchars($_POST["id_pasien"]);
+  $gula_darah = htmlspecialchars($_POST['gula_darah']);
+  $kolestrol = htmlspecialchars($_POST['kolestrol']);
+  $asam_urat = htmlspecialchars($_POST['asam_urat']);
+  $objective = htmlspecialchars($_POST['objective']);
+
+  if ($_POST['diagnosis'] == 'Diagnosis Baru') {
+    $koneksimaster->query("INSERT INTO icds_diagnosis (diagnosis, icd, unit, petugas) VALUES ('$diagnosis', '$icd', 'KHM 1', '" . $_SESSION['admin']['namalengkap'] . "')");
+  }
+
+  if ($prognosa == 'Prognosis good') {
+    $prognosacode = '170968001';
+  } elseif ($prognosa == 'Guarded prognosis') {
+    $prognosacode = '170969009';
+  } elseif ($prognosa == 'Fair prognosis') {
+    $prognosacode = '170970005';
+  } else {
+    $prognosacode = '170968001';
+  }
+
+  $koneksi->query("INSERT INTO rekam_medis(nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, kode_prognosa, objective, keluhan_utama) VALUES ('$_POST[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$_POST[gol_darah]', '$_POST[dokter]', '$prognosacode', '$objective', '" . htmlspecialchars($_POST['keluhan_utama']) . "')");
+
+  $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$_POST[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
+
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
+
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+  echo "<script>alert('Successfully to add data'); document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Edit Rekam Medis
+if (isset($_POST['editrm'])) {
+  $jadwal = htmlspecialchars($_POST["jadwal"]);
+  $status_perokok = htmlspecialchars($_POST["status_perokok"]);
+  $anamnesa = htmlspecialchars($_POST["anamnesa"]);
+  $diagnosis = ($_POST['diagnosis'] == 'Diagnosis Baru') ? htmlspecialchars($_POST['diagnosis']) : htmlspecialchars($_POST['diagnosis_new']);
+  $prognosa = htmlspecialchars($_POST["prognosa"]);
+  $icd = htmlspecialchars($_POST["icd"]);
+  $status_pulang = htmlspecialchars($_POST["status_pulang"]);
+  $id_pasien = htmlspecialchars($_POST["id_pasien"]);
+
+  if ($prognosa == 'Prognosis good') {
+    $prognosacode = '170968001';
+  } elseif ($prognosa == 'Guarded prognosis') {
+    $prognosacode = '170969009';
+  } elseif ($prognosa == 'Fair prognosis') {
+    $prognosacode = '170970005';
+  } else {
+    $prognosacode = '170968001';
+  }
+
+  $koneksi->query("UPDATE rekam_medis SET  gol_darah = '$_POST[gol_darah]', anamnesa = '$_POST[anamnesa]', diagnosis = '$diagnosis', prognosa = '$_POST[prognosa]' , icd = '$_POST[icd]', status_perokok = '$_POST[status_perokok]', status_plg ='$status_pulang', dokter = '$_POST[dokter]', kode_prognosa = '$prognosacode' WHERE norm = '$_GET[id]' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
+
+  $koneksi->query("UPDATE kajian_awal SET keluhan_utama='$_POST[keluhan_utama]', riwayat_penyakit='$_POST[riwayat_penyakit]', riwayat_alergi='$_POST[riwayat_alergi]', suhu_tubuh='$_POST[suhu_tubuh]', oksigen='$_POST[oksigen]', sistole='$_POST[sistole]', distole='$_POST[distole]', nadi='$_POST[nadi]', frek_nafas='$_POST[frek_nafas]', nama_vaksin = '$_POST[nama_vaksin]', tgl_vaksin = '$_POST[tgl_vaksin]' WHERE norm='$_GET[id]' AND tgl_rm = '$_GET[tgl]';");
+
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+  echo "<script>document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Hapus Obat
+if (isset($_GET['hapus'])) {
+  $getObatById = $koneksi->query("SELECT * FROM obat_rm WHERE idobat= '$_GET[id]' LIMIT 1")->fetch_assoc();
+  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
+  $stokAkhir = $ObatKode['jml_obat'] + $getObatById['jml_dokter'];
+  $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$_GET[id]'");
+  
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[rm]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[rm]&tgl=$_GET[tgl]";
+  echo "<script>document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Save Obat Racik
+if (isset($_POST['saveob'])) {
+  $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+  
+  $catatan_obat = $_POST['catatan_obat'];
+  $nama = $_POST['nama_obat'];
+  $jml_dokter = $_POST['jml_dokter'];
+  $dosis1_obat = $_POST['dosis1_obat'];
+  $dosis2_obat = $_POST['dosis2_obat'];
+  $per_obat = $_POST['per_obat'];
+  $durasi_obat = $_POST['durasi_obat'];
+  $petunjuk_obat = $_POST['petunjuk_obat'];
+
+  $end = date("H:i:s");
+  $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
+
+  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
+
+  if ($cekPemOb['carabayar'] == 'umum') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'malam') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
+  }
+
+  $subtotal = 0;
+  for ($i = 0; $i < count($nama) - 1; $i++) {
+    foreach ($_POST['catatan_obat'] as $catatan_obat) {
+      foreach ($_POST['dosis1_obat'] as $value2) {
+        foreach ($_POST['dosis2_obat'] as $value3) {
+          foreach ($_POST['per_obat'] as $per_obat) {
+            foreach ($_POST['durasi_obat'] as $durasi_obat) {
+              foreach ($_POST['petunjuk_obat'] as $petunjuk_obat) {
+                foreach ($_POST['jenis_obat'] as $jenis_obat) {
+                  if (isset($_GET['inap'])) {
+                    $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
+                    $m = $ObatKode['margininap'] ?? 0;
+                    if ($m < 100) {
+                      $margin = 1.30;
+                    } else {
+                      $margin = $m / 100;
+                    }
+                    $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
+                    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '" . date('Y-m-d') . "', 'biayaobat', '$harga', 'Resep $_POST[id]', '$username') ");
+                    $subtotal += $harga;
+                  } else {
+                    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
+                  }
+
+                  if ($nama[$i] != '') {
+                    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$value2', dosis2_obat = '$value3', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idrm = '$_GET[id]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', racik = '$_POST[racik]';");
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+  echo "<script>document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Save Obat Jadi Baru
+if (isset($_POST['saveobnew'])) {
+  $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+  
+  $catatan_obat = $_POST['catatan_obat'];
+  $nama = $_POST['nama_obat'];
+  $jml_dokter = $_POST['jml_dokter'];
+  $dosis1_obat = $_POST['dosis1_obat'];
+  $dosis2_obat = $_POST['dosis2_obat'];
+  $per_obat = $_POST['per_obat'];
+  $durasi_obat = $_POST['durasi_obat'];
+  $petunjuk_obat = $_POST['petunjuk_obat'];
+  $jenis_obat = $_POST['jenis_obat'];
+
+  $end = date("H:i:s");
+  $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
+
+  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
+
+  if ($cekPemOb['carabayar'] == 'umum') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'malam') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
+  }
+
+  for ($i = 0; $i < count($nama) - 1; $i++) {
+    if ($nama[$i] != '') {
+      if (isset($_GET['inap'])) {
+        $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE id_obat= '" . $nama[$i] . "'")->fetch_assoc();
+        $m = $ObatKode['margininap'] ?? 0;
+        if ($m < 100) {
+          $margin = 1.30;
+        } else {
+          $margin = $m / 100;
+        }
+        $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
+        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '" . date('Y-m-d') . "', 'biayaobat', '$harga', 'Resep $_POST[id]', '$username') ");
+      } else {
+        $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
+      }
+
+      $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat[$i]', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
+    }
+  }
+
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+  echo "<script>document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Save Obat Paket Jadi
+if (isset($_POST['saveobpaketjadi'])) {
+  $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+  
+  $getPaketObat = $koneksimaster->query("SELECT puyerjadi_detail.* FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_POST['paket']) . "'");
+
+  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
+  if ($cekPemOb['carabayar'] == 'umum') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'malam') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
+  }
+
+  foreach ($getPaketObat as $obat) {
+    if (isset($_GET['inap'])) {
+      $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE id_obat= '" . $obat['kode_obat'] . "'")->fetch_assoc();
+      $m = $ObatKode['margininap'] ?? 0;
+      if ($m < 100) {
+        $margin = 1.30;
+      } else {
+        $margin = $m / 100;
+      }
+      $harga = $ObatKode['harga_beli'] * $margin * $obat['jumlah'];
+      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '" . date('Y-m-d') . "', 'biayaobat', '$harga', 'Resep $_POST[id]', '$username') ");
+    } else {
+      $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND nama_obat= '" . $obat['nama_obat'] . "'")->fetch_assoc();
+    }
+
+    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$obat[ctt_obat]', nama_obat = '$obat[nama_obat]', kode_obat = '$obat[kode_obat]', jml_dokter = '$obat[jumlah]', dosis1_obat = '$obat[dosis1]', dosis2_obat = '$obat[dosis2]', per_obat = '$obat[per]', durasi_obat = '$obat[durasi]', petunjuk_obat = '$obat[petunjuk_pemakaian]', jenis_obat = 'Jadi', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
+  }
+
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+  echo "<script>document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Edit Obat
+if (isset($_POST['edt'])) {
+  $catatan_obat = $_POST['catatan_obat'];
+  $nama = $_POST['nama_obat'];
+  $jml_dokter = $_POST['jml_dokter'];
+  $dosis1_obat = $_POST['dosis1_obat'];
+  $dosis2_obat = $_POST['dosis2_obat'];
+  $per_obat = $_POST['per_obat'];
+  $durasi_obat = $_POST['durasi_obat'];
+  $petunjuk_obat = $_POST['petunjuk_obat'];
+  $idrm = $_POST['idrm'];
+
+  $end = date("H:i:s");
+
+  $getObatById = $koneksi->query("SELECT * FROM obat_rm WHERE idobat= '$_POST[id_obat_sebelum]' LIMIT 1")->fetch_assoc();
+  $ObatKodeUp = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
+  $stokAkhirUp = $ObatKodeUp['jml_obat'] + $getObatById['jml_dokter'];
+
+  $koneksi->query("UPDATE registrasi_rawat SET end='$end' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
+  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE id_obat= '" . $nama . "'")->fetch_assoc();
+  $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
+
+  $koneksi->query("UPDATE obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$_POST[jenis_obat]', idrm = '$idrm' WHERE idobat = '$_POST[id]'");
+
+  $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+  echo "<script>document.location.href='$redirect';</script>";
+  exit;
+}
+
+// Action: Copy Rekam Medis
+if (isset($_POST['copy'])) {
+  $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+  
+  $copy_rm = $koneksi->query("SELECT * FROM rekam_medis WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwalSumber]'")->fetch_assoc();
+  $copy_labpoli = $koneksi->query("SELECT * FROM lab_poli WHERE nama_pasien='$copy_rm[nama_pasien]' AND jadwal = '$_POST[jadwalSumber]' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+
+  $jadwal = htmlspecialchars($_POST['jadwalSekarang']);
+  $status_perokok = htmlspecialchars($copy_rm["status_perokok"]);
+  $anamnesa = htmlspecialchars($copy_rm["anamnesa"]);
+  $diagnosis = htmlspecialchars($copy_rm["diagnosis"]);
+  $prognosa = htmlspecialchars($copy_rm["prognosa"]);
+  $icd = htmlspecialchars($copy_rm["icd"]);
+  $status_pulang = htmlspecialchars($copy_rm["status_pulang"]);
+  $id_pasien = htmlspecialchars($copy_rm["id_pasien"]);
+
+  $gula_darah = htmlspecialchars($copy_labpoli['gula_darah']);
+  $kolestrol = htmlspecialchars($copy_labpoli['kolestrol']);
+  $asam_urat = htmlspecialchars($copy_labpoli['asam_urat']);
+
+  $koneksi->query("INSERT INTO rekam_medis(nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$copy_rm[gol_darah]', '$copy_rm[dokter]', '$gula_darah', '$kolestrol', '$asam_urat')");
+
+  $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
+
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
+
+  $getLay = $koneksi->query("SELECT * FROM layanan WHERE idrm='$_POST[idRmSumber]' AND DATE_FORMAT(tgl_layanan, '%Y-%m-%d') = '$_POST[jadwalSumberYmd]'");
+  foreach ($getLay as $dataLay) {
+    $layanan = $dataLay['layanan'];
+    $kode_layanan = $dataLay['kode_layanan'];
+    $jumlah_layanan = $dataLay['jumlah_layanan'];
+    $id_pasien = $dataLay['id_pasien'];
+    $idrm = $_POST['idKJSekarang'];
+    $koneksi->query("INSERT INTO layanan (layanan, kode_layanan, jumlah_layanan, id_pasien, idrm) VALUES ('$layanan', '-', '$jumlah_layanan', '$id_pasien', '$_GET[id]')");
+
+    $cekPemLay = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
+    $getBiyLain = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$cekPemLay[idrawat]' limit 1")->fetch_assoc();
+
+    if ($getBiyLain['biaya_lain'] == '') {
+      $biyLain = $getBiyLain['biaya_lain'] . $_POST['layanan'];
+    } else {
+      $biyLain = $getBiyLain['biaya_lain'] . ',' . $_POST['layanan'];
+    }
+
+    $ttlBiyLain = intval($getBiyLain['total_lain']) + intval($_POST['harga_layanan']);
+    $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$biyLain', total_lain = '$ttlBiyLain' WHERE idregis='$cekPemLay[idrawat]'");
+  }
+  
+  $end = date("H:i:s");
+  $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
+
+  $getOb = $koneksi->query("SELECT * FROM obat_rm WHERE idrm = '$_POST[idRmSumber]' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = '$_POST[jadwalSumberYmd]'");
+  foreach ($getOb as $dataOb) {
+    $catatan_obat = $dataOb['catatan_obat'];
+    $nama = $dataOb['nama_obat'];
+    $jml_dokter = $dataOb['jml_dokter'];
+    $dosis1_obat = $dataOb['dosis1_obat'];
+    $dosis2_obat = $dataOb['dosis2_obat'];
+    $per_obat = $dataOb['per_obat'];
+    $durasi_obat = $dataOb['durasi_obat'];
+    $petunjuk_obat = $dataOb['petunjuk_obat'];
+    $idrm = $dataOb['idrm'];
+
+    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '" . $nama . "'")->fetch_assoc();
+
+    $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
+
+    if ($cekPemOb['carabayar'] == 'umum') {
+      $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
+    } elseif ($cekPemOb['carabayar'] == 'malam') {
+      $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
+    } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
+      $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
+    }
+
+    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$nama', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$dataOb[jenis_obat]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
+  }
+  
+  echo "<script>alert('Data berhasil diubah'); document.location.href='index.php?halaman=daftarrmedis';</script>";
+  exit;
+}
+
+// ==========================================
+// BAGIAN QUERY DATA - SETELAH ACTION
+// ==========================================
+
 if (isset($_GET['inap'])) {
   $pasien = $koneksi->query("SELECT * FROM kajian_awal_inap INNER JOIN pasien  WHERE norm='$_GET[id]' ORDER BY id_rm DESC LIMIT 1;");
   $pecah = $pasien->fetch_assoc();
@@ -781,7 +1147,24 @@ if ($pas['jenis_kelamin'] == '1') {
                                   <!-- <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td> -->
                                   <!-- <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td> -->
                                   <?php if ($obat["status_obat"] != "selesai") { ?>
-                                    <td style="margin-top:10px;"> <button type="button" class="btn btn-sm btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>"><i class="bi bi-pencil"></i></button>
+                                    <td style="margin-top:10px;"> 
+                                      <button type="button" 
+                                              class="btn btn-sm btn-primary text-right" 
+                                              onclick="openUpdateObat(
+                                                '<?php echo $obat["idobat"]; ?>',
+                                                '<?php echo $obat["kode_obat"]; ?>',
+                                                '<?php echo addslashes($obat["nama_obat"]); ?>',
+                                                '<?php echo addslashes($obat["catatan_obat"]); ?>',
+                                                '<?php echo $obat["jenis_obat"]; ?>',
+                                                '<?php echo $obat["dosis1_obat"]; ?>',
+                                                '<?php echo $obat["dosis2_obat"]; ?>',
+                                                '<?php echo $obat["per_obat"]; ?>',
+                                                '<?php echo $obat["jml_dokter"]; ?>',
+                                                '<?php echo $obat["durasi_obat"]; ?>',
+                                                '<?php echo addslashes($obat["petunjuk_obat"]); ?>'
+                                              )">
+                                        <i class="bi bi-pencil"></i>
+                                      </button>
                                       <?php if (isset($_GET['inap'])) { ?>
                                         <a href="index.php?halaman=rmedis&id=<?php echo $obat["idobat"]; ?>&rm=<?php echo $_GET["id"]; ?>&tgl=<?php echo $_GET["tgl"]; ?>&hapus&inap=<?= $_GET['inap'] ?>" class="btn btn-sm btn-danger text-right"><i class="bi bi-trash"></i></a>
                                       <?php } else { ?>
@@ -791,141 +1174,6 @@ if ($pas['jenis_kelamin'] == '1') {
                                   <?php } ?>
                                   <?php $subtotal += $subharga; ?>
                                 </tr>
-                                <!-- Add Data Modal Obat -->
-                                <div class="modal fade" id="exampleModalEdit<?php echo $obat["idobat"]; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                  <div class="modal-dialog">
-                                    <div class="modal-content">
-                                      <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Edit Obat</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      </div>
-                                      <div class="modal-body">
-                                        <div class="row">
-                                          <form method="post" enctype="multipart/form-data">
-                                            <div class="control-group after-add-more">
-                                              <!-- <div class="modal-body"> -->
-                                              <div class="row">
-                                                <div class="col-md-12">
-                                                  <label for="inputName5" class="form-label">Nama Obat</label>
-                                                  <!-- <input type="text" name="nama_obat" class="form-control form-control-sm" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                                  <select name="nama_obat" onchange="updateCatatan()" id="namaObatEdit<?= $obat['idobat'] ?>" class="obat-select form-select w-100" style="width: 100%;">
-                                                    <option value="<?php echo $obat["kode_obat"]; ?>"><?php echo $obat["nama_obat"]; ?></option>
-                                                    <?php
-                                                    $getObat = $koneksi->query("SELECT * FROM apotek ORDER BY nama_obat ASC");
-                                                    foreach ($getObat as $data) {
-                                                    ?>
-                                                      <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
-                                                    <?php } ?>
-                                                  </select>
-                                                  <script>
-                                                    $(document).ready(function() {
-                                                      $('#namaObatEdit<?= $obat['idobat'] ?>').select2({
-                                                        dropdownParent: $('#exampleModalEdit<?php echo $obat["idobat"]; ?>')
-                                                      });
-                                                    });
-                                                  </script>
-                                                </div>
-                                                <script>
-                                                  function updateCatatan() {
-                                                    var inputState = document.getElementById('nama_obat');
-                                                    var catatanInput = document.getElementById('catatan');
-                                                    var petunjukInput = document.getElementById('petunjuk');
-
-                                                    if (inputState.value === 'glibenclamid' || inputState.value === 'metformin') {
-                                                      catatanInput.value = 'Pagi, Siang, Malam';
-                                                    } else if (inputState.value === 'furosemid') {
-                                                      catatanInput.value = 'Pagi, Siang';
-                                                    } else if (inputState.value === 'Allupurinol 100' || inputState.value === 'Amlodipin 5 mg' || inputState.value === 'Amlodipin 10 mg') {
-                                                      catatanInput.value = 'Pagi, Malam';
-                                                    } else {
-                                                      catatanInput.value = '';
-                                                    }
-
-                                                    if (inputState.value === 'Antasida tab' || inputState.value === 'Omeprazol tab') {
-                                                      petunjukInput.value = 'Sebelum Makan';
-                                                    } else {
-                                                      petunjukInput.value = '';
-                                                    }
-                                                  }
-
-                                                  function updateJumlah() {
-                                                    var dosis1 = document.getElementById('dosis1_obat');
-                                                    var dosis2 = document.getElementById('dosis2_obat');
-                                                    var jml = document.getElementById('jml_obat');
-
-                                                    if (dosis1.value == '3' && dosis2.value == '1') {
-                                                      jml.value = 9;
-                                                    } else if (dosis1.value == '2' && dosis2.value == '1') {
-                                                      jml.value = 6;
-                                                    } else if (dosis1.value == '1' && dosis2.value == '1') {
-                                                      jml.value = 3;
-                                                    } else {
-                                                      jml.value = '';
-                                                    }
-                                                  }
-                                                </script>
-                                              </div>
-                                            </div>
-                                            <div class="row">
-                                              <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                                                <label for="inputName5" class="form-label">Catatan Obat</label>
-                                                <input type="text" name="catatan_obat" class="form-control form-control-sm" id="catatan" placeholder="Masukkan Catatan Waktu" value="<?php echo $obat["catatan_obat"]; ?>">
-                                              </div>
-                                              <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
-                                                <label for="inputName5" class="form-label">Jenis Obat</label>
-                                                <select name="jenis_obat" class="form-select">
-                                                  <option value="Racik">Racik</option>
-                                                  <option value="Jadi">Jadi</option>
-                                                </select>
-                                              </div>
-                                              <label for="inputName5" class="form-label">Dosis</label>
-                                              <div class="col-md-6">
-                                                <div class="input-group">
-                                                  <input oninput="updateJumlah()" type="text" class="form-control form-control-sm" id="dosis1_obat" name="dosis1_obat" value="<?php echo $obat["dosis1_obat"]; ?>">
-                                                  <input type="text" style="text-align: center;" class="form-control form-control-sm" placeholder="X">
-                                                  <input oninput="updateJumlah()" type="text" class="form-control form-control-sm" id="dosis2_obat" name="dosis2_obat" value="<?php echo $obat["dosis2_obat"]; ?>">
-                                                </div>
-                                              </div>
-
-                                              <div class="col-md-6">
-                                                <select id="inputState" name="per_obat" class="form-select">
-                                                  <option value="<?php echo $obat["per_obat"]; ?>"><?php echo $obat["per_obat"]; ?></option>
-                                                  <option>Per Hari</option>
-                                                  <option>Per Jam</option>
-                                                </select>
-                                              </div>
-                                              <div class="col-md-12" style="margin-top:20px">
-                                                <label for="">Jumlah Obat</label>
-                                                <input type="number" name="id_obat_sebelum" class="form-control form-control-sm" id="id_obat_sebelum" hidden placeholder="jumlah obat" value="<?php echo $obat["idobat"]; ?>">
-                                                <input type="number" name="jml_obat_sebelum" class="form-control form-control-sm" id="jml_obat_sebelum" hidden placeholder="jumlah obat" value="<?php echo $obat["jml_dokter"]; ?>">
-                                                <input type="number" name="jml_dokter" class="form-control form-control-sm" id="jml_obat" placeholder="jumlah obat" value="<?php echo $obat["jml_dokter"]; ?>">
-                                              </div>
-                                              <div class="col-md-12" style="margin-top:20px">
-                                                <label for="inputCity" class="form-label">Durasi</label>
-                                                <div class="input-group mb-3">
-                                                  <input type="text" name="durasi_obat" value="<?php echo $obat["durasi_obat"]; ?>" class="form-control form-control-sm" placeholder="Durasi" aria-describedby="basic-addon2">
-                                                  <span class="input-group-text" id="basic-addon2">Hari</span>
-                                                </div>
-                                              </div>
-                                              <div class="col-md-12" style="margin-top:10px">
-                                                <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
-                                                <input type="text" name="petunjuk_obat" value="<?php echo $obat["petunjuk_obat"]; ?>" class="form-control form-control-sm" id="petunjuk" placeholder="Masukkan Petunjuk Pemakaian">
-                                              </div>
-                                            </div>
-                                            <input type="number" name="id" value="<?php echo $obat["idobat"]; ?>" hidden>
-                                            <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
-                                            <input type="hidden" name="idrm" value="<?php echo $_GET['id'] ?>">
-                                            <div class="modal-footer">
-                                              <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                              <input type="submit" class="btn btn-sm btn-primary" name="edt" value="Save changes">
-                                            </div>
-                                          </form>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <!-- end -->
                                 <?php $no += 1 ?>
                               <?php endforeach ?>
                             </tbody>
@@ -1220,6 +1468,91 @@ if ($pas['jenis_kelamin'] == '1') {
                 <div class="modal-footer">
                   <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
                   <input type="submit" class="btn btn-sm btn-primary" name="saveob" value="Save changes">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Edit Obat (Single Instance) -->
+    <div class="modal fade" id="modalEditObat" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Obat</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <form method="post" enctype="multipart/form-data" id="formEditObat">
+                <div class="control-group after-add-more">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <label for="inputName5" class="form-label">Nama Obat</label>
+                      <select name="nama_obat" onchange="updateCatatanEdit()" id="namaObat_edit_id" class="obat-select form-select w-100" style="width: 100%;">
+                        <option value="">Pilih Obat</option>
+                        <?php
+                        $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat != 'V.1394489' AND aktif_poli = 'aktif' ORDER BY obat_master ASC");
+                        foreach ($getObat as $data) {
+                        ?>
+                          <option value="<?= $data['kode_obat'] ?>"><?= $data['obat_master'] ?></option>
+                        <?php } ?>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                    <label for="inputName5" class="form-label">Catatan Obat</label>
+                    <input type="text" name="catatan_obat" class="form-control form-control-sm" id="catatan_edit_id" placeholder="Masukkan Catatan Waktu">
+                  </div>
+                  <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
+                    <label for="inputName5" class="form-label">Jenis Obat</label>
+                    <select name="jenis_obat" class="form-select" id="jenisObat_edit_id">
+                      <option value="Racik">Racik</option>
+                      <option value="Jadi">Jadi</option>
+                    </select>
+                  </div>
+                  <label for="inputName5" class="form-label">Dosis</label>
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <input oninput="updateJumlahEdit()" type="text" class="form-control form-control-sm" id="dosis1_obat_edit_id" name="dosis1_obat">
+                      <input type="text" style="text-align: center;" class="form-control form-control-sm" placeholder="X">
+                      <input oninput="updateJumlahEdit()" type="text" class="form-control form-control-sm" id="dosis2_obat_edit_id" name="dosis2_obat">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <select id="perObat_edit_id" name="per_obat" class="form-select">
+                      <option>Per Hari</option>
+                      <option>Per Jam</option>
+                    </select>
+                  </div>
+                  <div class="col-md-12" style="margin-top:20px">
+                    <label for="">Jumlah Obat</label>
+                    <input type="number" name="id_obat_sebelum" class="form-control form-control-sm" id="id_obat_sebelum_edit_id" hidden placeholder="jumlah obat">
+                    <input type="number" name="jml_obat_sebelum" class="form-control form-control-sm" id="jml_obat_sebelum_edit_id" hidden placeholder="jumlah obat">
+                    <input type="number" name="jml_dokter" class="form-control form-control-sm" id="jml_obat_edit_id" placeholder="jumlah obat">
+                  </div>
+                  <div class="col-md-12" style="margin-top:20px">
+                    <label for="inputCity" class="form-label">Durasi</label>
+                    <div class="input-group mb-3">
+                      <input type="text" name="durasi_obat" id="durasiObat_edit_id" class="form-control form-control-sm" placeholder="Durasi" aria-describedby="basic-addon2">
+                      <span class="input-group-text" id="basic-addon2">Hari</span>
+                    </div>
+                  </div>
+                  <div class="col-md-12" style="margin-top:10px">
+                    <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
+                    <input type="text" name="petunjuk_obat" id="petunjuk_edit_id" class="form-control form-control-sm" placeholder="Masukkan Petunjuk Pemakaian">
+                  </div>
+                </div>
+                <input type="number" name="id" id="idObat_edit_id" hidden>
+                <input type="hidden" name="idrm" value="<?php echo $_GET['id'] ?>">
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
+                  <input type="submit" class="btn btn-sm btn-primary" name="edt" value="Save changes">
                 </div>
               </form>
             </div>
@@ -1652,486 +1985,78 @@ if ($pas['jenis_kelamin'] == '1') {
   }
 </script>
 
-<?php
-if (isset($_POST['save'])) {
-  $jadwal = htmlspecialchars($_POST["jadwal"]);
-  $status_perokok = htmlspecialchars($_POST["status_perokok"]);
-  $anamnesa = htmlspecialchars($_POST["anamnesa"]);
-  $diagnosis = ($_POST['diagnosis'] != 'Diagnosis Baru') ? htmlspecialchars($_POST['diagnosis']) : htmlspecialchars($_POST['diagnosis_new']);
-  $prognosa = htmlspecialchars($_POST["prognosa"]);
-  $icd = htmlspecialchars($_POST["icd"]);
-  $status_pulang = htmlspecialchars($_POST["status_pulang"]);
-  $id_pasien = htmlspecialchars($_POST["id_pasien"]);
-  $gula_darah = htmlspecialchars($_POST['gula_darah']);
-  $kolestrol = htmlspecialchars($_POST['kolestrol']);
-  $asam_urat = htmlspecialchars($_POST['asam_urat']);
-  $objective = htmlspecialchars($_POST['objective']);
+<script>
+  // Inisialisasi Select2 untuk modal edit obat
+  $(document).ready(function() {
+    $('#namaObat_edit_id').select2({
+      dropdownParent: $('#modalEditObat')
+    });
+  });
 
-  if ($_POST['diagnosis'] == 'Diagnosis Baru') {
-    $koneksimaster->query("INSERT INTO icds_diagnosis (diagnosis, icd, unit, petugas) VALUES ('$diagnosis', '$icd', 'KHM 1', '" . $_SESSION['admin']['namalengkap'] . "')");
-  }
-
-  if ($prognosa == 'Prognosis good') {
-    $prognosacode = '170968001';
-  } elseif ($prognosa == 'Guarded prognosis') {
-    $prognosacode = '170969009';
-  } elseif ($prognosa == 'Fair prognosis') {
-    $prognosacode = '170970005';
-  } else {
-    $prognosacode = '170968001';
-  }
-
-  $koneksi->query("INSERT INTO rekam_medis(nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, kode_prognosa, objective, keluhan_utama) VALUES ('$_POST[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$_POST[gol_darah]', '$_POST[dokter]', '$prognosacode', '$objective', '" . htmlspecialchars($_POST['keluhan_utama']) . "')");
-
-  $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$_POST[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
-
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
-
-  if (isset($_GET['inap'])) {
-    // $koneksi->query("UPDATE kajian_awal_inap SET  gol_darah = '$_POST[gol_darah]', anamnesa = '$_POST[anamnesa]', diagnosis = '$_POST[diagnosis]', icd = '$_POST[icd]', status_perokok = '$_POST[status_perokok]', status_plg = '$_POST[status_pulang]' WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwal]'");
-  }
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-        alert('Successfully to add data');
-        document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-        alert('Successfully to add data');
-        document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_POST['editrm'])) {
-  $jadwal = htmlspecialchars($_POST["jadwal"]);
-  $status_perokok = htmlspecialchars($_POST["status_perokok"]);
-  $anamnesa = htmlspecialchars($_POST["anamnesa"]);
-  $diagnosis = ($_POST['diagnosis'] == 'Diagnosis Baru') ? htmlspecialchars($_POST['diagnosis']) : htmlspecialchars($_POST['diagnosis_new']);
-  $prognosa = htmlspecialchars($_POST["prognosa"]);
-  $icd = htmlspecialchars($_POST["icd"]);
-  $status_pulang = htmlspecialchars($_POST["status_pulang"]);
-  $id_pasien = htmlspecialchars($_POST["id_pasien"]);
-
-  if ($prognosa == 'Prognosis good') {
-    $prognosacode = '170968001';
-  } elseif ($prognosa == 'Guarded prognosis') {
-    $prognosacode = '170969009';
-  } elseif ($prognosa == 'Fair prognosis') {
-    $prognosacode = '170970005';
-  } else {
-    $prognosacode = '170968001';
-  }
-
-  $koneksi->query("UPDATE rekam_medis SET  gol_darah = '$_POST[gol_darah]', anamnesa = '$_POST[anamnesa]', diagnosis = '$diagnosis', prognosa = '$_POST[prognosa]' , icd = '$_POST[icd]', status_perokok = '$_POST[status_perokok]', status_plg ='$status_pulang', dokter = '$_POST[dokter]', kode_prognosa = '$prognosacode' WHERE norm = '$_GET[id]' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-
-  $koneksi->query("UPDATE kajian_awal SET keluhan_utama='$_POST[keluhan_utama]', riwayat_penyakit='$_POST[riwayat_penyakit]', riwayat_alergi='$_POST[riwayat_alergi]', suhu_tubuh='$_POST[suhu_tubuh]', oksigen='$_POST[oksigen]', sistole='$_POST[sistole]', distole='$_POST[distole]', nadi='$_POST[nadi]', frek_nafas='$_POST[frek_nafas]', nama_vaksin = '$_POST[nama_vaksin]', tgl_vaksin = '$_POST[tgl_vaksin]' WHERE norm='$_GET[id]' AND tgl_rm = '$_GET[tgl]';");
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_GET['hapus'])) {
-  // Mengambil Obat RM dan Data Stok Sekarang
-  $getObatById = $koneksi->query("SELECT * FROM obat_rm WHERE idobat= '$_GET[id]' LIMIT 1")->fetch_assoc();
-  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
-
-  // Membuat Penambahan obat yang sebelumnya di kurangi saat nambah obat
-  $stokAkhir = $ObatKode['jml_obat'] + $getObatById['jml_dokter'];
-
-  // Obat Jmlah obat sesuai dengan stok yang sudah di kembalikan
-  // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
-  $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$_GET[id]'");
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-        document.location.href='index.php?halaman=rmedis&inap&id=$_GET[rm]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-        document.location.href='index.php?halaman=rmedis&id=$_GET[rm]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_POST['saveob'])) {
-  $catatan_obat = $_POST['catatan_obat'];
-  $nama = $_POST['nama_obat'];
-  $jml_dokter = $_POST['jml_dokter'];
-  $dosis1_obat = $_POST['dosis1_obat'];
-  $dosis2_obat = $_POST['dosis2_obat'];
-  $per_obat = $_POST['per_obat'];
-  $durasi_obat = $_POST['durasi_obat'];
-  $petunjuk_obat = $_POST['petunjuk_obat'];
-
-  $end = date("H:i:s");
-  $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-
-  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
-
-  if ($cekPemOb['carabayar'] == 'umum') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
-  } elseif ($cekPemOb['carabayar'] == 'malam') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
-  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
-  }
-
-  for ($i = 0; $i < count($nama) - 1; $i++) {
-    foreach ($_POST['catatan_obat'] as $catatan_obat) {
-      foreach ($_POST['dosis1_obat'] as $value2) {
-        foreach ($_POST['dosis2_obat'] as $value3) {
-          foreach ($_POST['per_obat'] as $per_obat) {
-            foreach ($_POST['durasi_obat'] as $durasi_obat) {
-              foreach ($_POST['petunjuk_obat'] as $petunjuk_obat) {
-                foreach ($_POST['jenis_obat'] as $jenis_obat) {
-
-                  if (isset($_GET['inap'])) {
-                    $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
-                    // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-                    $m = $ObatKode['margininap'] ?? 0;
-                    if ($m < 100) {
-                      $margin = 1.30;
-                    } else {
-                      $margin = $m / 100;
-                    }
-                    $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
-                    if (isset($_GET['inap'])) {
-                      date_default_timezone_set('Asia/Jakarta');
-                      $tanggal = date('Y-m-d');
-                      $biaya = 'biayaobat';
-                      $id = $_POST["id"];
-                      $resep = 'Resep' . ' ' . $id;
-
-                      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '$tanggal', '$biaya', '$harga', '$resep', '$username') ");
-                    }
-                    // $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$jadwal[idrawat]','" . date('Y-m-d') . "','Obat Inap Apotek " . $nama[$i] . "', '$harga','" . $nama[$i] . "','" . $_SESSION['admin']['username'] . "', '" . $_SESSION['shift'] . "')");
-                    $subtotal += $harga;
-                  } else {
-                    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
-                    // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-                  }
-
-                  if ($nama[$i] != '') {
-                    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$value2', dosis2_obat = '$value3', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idrm = '$_GET[id]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', racik = '$_POST[racik]';");
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  if (isset($_GET['inap'])) {
-    date_default_timezone_set('Asia/Jakarta');
-    $tanggal = date('Y-m-d');
-    $biaya = 'biayaobat';
-    $id = $_POST["id"];
-    $resep = 'Resep' . ' ' . $id;
-
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '$tanggal', '$biaya', '$subtotal', '$resep', '$username') ");
-  }
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_POST['saveobnew'])) {
-  $catatan_obat = $_POST['catatan_obat'];
-  $nama = $_POST['nama_obat'];
-  $jml_dokter = $_POST['jml_dokter'];
-  $dosis1_obat = $_POST['dosis1_obat'];
-  $dosis2_obat = $_POST['dosis2_obat'];
-  $per_obat = $_POST['per_obat'];
-  $durasi_obat = $_POST['durasi_obat'];
-  $petunjuk_obat = $_POST['petunjuk_obat'];
-  $jenis_obat = $_POST['jenis_obat'];
-
-  $end = date("H:i:s");
-  $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-
-  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
-
-  if ($cekPemOb['carabayar'] == 'umum') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
-  } elseif ($cekPemOb['carabayar'] == 'malam') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
-  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
-  }
-
-  for ($i = 0; $i < count($nama) - 1; $i++) {
-    if ($nama[$i] != '') {
-      if (isset($_GET['inap'])) {
-        $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE id_obat= '" . $nama[$i] . "'")->fetch_assoc();
-        // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-        $m = $ObatKode['margininap'] ?? 0;
-        if ($m < 100) {
-          $margin = 1.30;
-        } else {
-          $margin = $m / 100;
-        }
-        $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
-        if (isset($_GET['inap'])) {
-          date_default_timezone_set('Asia/Jakarta');
-          $tanggal = date('Y-m-d');
-          $biaya = 'biayaobat';
-          $id = $_POST["id"];
-          $resep = 'Resep' . ' ' . $id;
-
-          $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '$tanggal', '$biaya', '$harga', '$resep', '$username') ");
-        }
-        // $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$jadwal[idrawat]','" . date('Y-m-d') . "','Obat Inap Apotek " . $nama[$i] . "', '$harga','" . $nama[$i] . "','" . $_SESSION['admin']['username'] . "', '" . $_SESSION['shift'] . "')");
-        $subtotal += $harga;
-      } else {
-        $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
-        $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-      }
-
-      $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat[$i]', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
-    }
-  }
-
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_POST['saveobpaketjadi'])) {
-  $getPaketObat = $koneksimaster->query("SELECT puyerjadi_detail.* FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_POST['paket']) . "'");
-
-  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
-  if ($cekPemOb['carabayar'] == 'umum') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
-  } elseif ($cekPemOb['carabayar'] == 'malam') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
-  } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
-    $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
-  }
-
-  foreach ($getPaketObat as $obat) {
-    if (isset($_GET['inap'])) {
-      $ObatKode = $koneksi->query("SELECT harga_beli, margininap, nama_obat, id_obat FROM apotek WHERE id_obat= '" . $obat['kode_obat'] . "'")->fetch_assoc();
-      // $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-      $m = $ObatKode['margininap'] ?? 0;
-      if ($m < 100) {
-        $margin = 1.30;
-      } else {
-        $margin = $m / 100;
-      }
-      $harga = $ObatKode['harga_beli'] * $margin * $obat['jumlah'];
-      if (isset($_GET['inap'])) {
-        date_default_timezone_set('Asia/Jakarta');
-        $tanggal = date('Y-m-d');
-        $biaya = 'biayaobat';
-        $id = $_POST["id"];
-        $resep = 'Resep' . ' ' . $id;
-
-        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[id]', '$tanggal', '$biaya', '$harga', '$resep', '$username') ");
-      }
-      // $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$jadwal[idrawat]','" . date('Y-m-d') . "','Obat Inap Apotek " . $nama[$i] . "', '$harga','" . $nama[$i] . "','" . $_SESSION['admin']['username'] . "', '" . $_SESSION['shift'] . "')");
-      $subtotal += $harga;
+  // Fungsi untuk membuka modal dan mengisi data
+  function openUpdateObat(idobat, kodeObat, namaObat, catatanObat, jenisObat, dosis1, dosis2, perObat, jumlah, durasi, petunjuk) {
+    // Set nilai ke masing-masing field
+    $('#idObat_edit_id').val(idobat);
+    $('#id_obat_sebelum_edit_id').val(idobat);
+    $('#jml_obat_sebelum_edit_id').val(jumlah);
+    
+    // Set Select2 untuk nama obat
+    // Cek apakah option sudah ada
+    if ($('#namaObat_edit_id option[value="' + kodeObat + '"]').length === 0) {
+      // Tambah option baru jika belum ada
+      var newOption = new Option(namaObat, kodeObat, true, true);
+      $('#namaObat_edit_id').append(newOption).trigger('change');
     } else {
-      $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND nama_obat= '" . $obat['nama_obat'] . "'")->fetch_assoc();
-      $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
+      // Pilih option yang sudah ada
+      $('#namaObat_edit_id').val(kodeObat).trigger('change');
+    }
+    
+    $('#catatan_edit_id').val(catatanObat);
+    $('#jenisObat_edit_id').val(jenisObat);
+    $('#dosis1_obat_edit_id').val(dosis1);
+    $('#dosis2_obat_edit_id').val(dosis2);
+    $('#perObat_edit_id').val(perObat);
+    $('#jml_obat_edit_id').val(jumlah);
+    $('#durasiObat_edit_id').val(durasi);
+    $('#petunjuk_edit_id').val(petunjuk);
+    
+    // Buka modal
+    var modalEditObat = new bootstrap.Modal(document.getElementById('modalEditObat'));
+    modalEditObat.show();
+  }
+
+  // Fungsi untuk update catatan berdasarkan obat yang dipilih
+  function updateCatatanEdit() {
+    var selectElement = document.getElementById('namaObat_edit_id');
+    var selectedText = selectElement.options[selectElement.selectedIndex].text;
+    var catatanInput = document.getElementById('catatan_edit_id');
+    var petunjukInput = document.getElementById('petunjuk_edit_id');
+
+    if (selectedText === 'glibenclamid' || selectedText === 'metformin') {
+      catatanInput.value = 'Pagi, Siang, Malam';
+    } else if (selectedText === 'furosemid') {
+      catatanInput.value = 'Pagi, Siang';
+    } else if (selectedText === 'Allupurinol 100' || selectedText === 'Amlodipin 5 mg' || selectedText === 'Amlodipin 10 mg') {
+      catatanInput.value = 'Pagi, Malam';
     }
 
-    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$obat[ctt_obat]', nama_obat = '$obat[nama_obat]', kode_obat = '$obat[kode_obat]', jml_dokter = '$obat[jumlah]', dosis1_obat = '$obat[dosis1]', dosis2_obat = '$obat[dosis2]', per_obat = '$obat[per]', durasi_obat = '$obat[durasi]', petunjuk_obat = '$obat[petunjuk_pemakaian]', jenis_obat = 'Jadi', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
-  }
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_POST['edt'])) {
-  $catatan_obat = $_POST['catatan_obat'];
-  $nama = $_POST['nama_obat'];
-  $jml_dokter = $_POST['jml_dokter'];
-  $dosis1_obat = $_POST['dosis1_obat'];
-  $dosis2_obat = $_POST['dosis2_obat'];
-  $per_obat = $_POST['per_obat'];
-  $durasi_obat = $_POST['durasi_obat'];
-  $petunjuk_obat = $_POST['petunjuk_obat'];
-  $idrm = $_POST['idrm'];
-
-  $end = date("H:i:s");
-
-  // Mengambil Obat RM dan Data Stok Sekarang
-  $getObatById = $koneksi->query("SELECT * FROM obat_rm WHERE idobat= '$_POST[id_obat_sebelum]' LIMIT 1")->fetch_assoc();
-
-  $ObatKodeUp = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
-
-  // Membuat Penambahan obat yang sebelumnya di kurangi saat nambah obat
-  $stokAkhirUp = $ObatKodeUp['jml_obat'] + $getObatById['jml_dokter'];
-
-  // Obat Jmlah obat sesuai dengan stok yang sudah di kembalikan
-  // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhirUp' WHERE id_obat = '$ObatKodeUp[id_obat]'");
-
-  $koneksi->query("UPDATE registrasi_rawat SET end='$end' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-  $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE id_obat= '" . $nama . "'")->fetch_assoc();
-  $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
-  // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
-
-
-  $koneksi->query("UPDATE obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$_POST[jenis_obat]', idrm = '$idrm' WHERE idobat = '$_POST[id]'
-  ");
-
-  if (isset($_GET['inap'])) {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  } else {
-    echo "
-      <script>
-          document.location.href='index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]';
-      </script>
-    ";
-  }
-}
-
-if (isset($_POST['copy'])) {
-  $copy_rm = $koneksi->query("SELECT * FROM rekam_medis WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwalSumber]'")->fetch_assoc();
-  $copy_labpoli = $koneksi->query("SELECT * FROM lab_poli WHERE nama_pasien='$copy_rm[nama_pasien]' AND jadwal = '$_POST[jadwalSumber]' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
-
-  $jadwal = htmlspecialchars($_POST['jadwalSekarang']);
-  $status_perokok = htmlspecialchars($copy_rm["status_perokok"]);
-  $anamnesa = htmlspecialchars($copy_rm["anamnesa"]);
-  $diagnosis = htmlspecialchars($copy_rm["diagnosis"]);
-  $prognosa = htmlspecialchars($copy_rm["prognosa"]);
-  $icd = htmlspecialchars($copy_rm["icd"]);
-  $status_pulang = htmlspecialchars($copy_rm["status_pulang"]);
-  $id_pasien = htmlspecialchars($copy_rm["id_pasien"]);
-
-  $gula_darah = htmlspecialchars($copy_labpoli['gula_darah']);
-  $kolestrol = htmlspecialchars($copy_labpoli['kolestrol']);
-  $asam_urat = htmlspecialchars($copy_labpoli['asam_urat']);
-
-  $koneksi->query("INSERT INTO rekam_medis(nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$copy_rm[gol_darah]', '$copy_rm[dokter]', '$gula_darah', '$kolestrol', '$asam_urat')");
-
-  $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
-
-  $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
-
-  if (isset($_GET['inap'])) {
-    // $koneksi->query("UPDATE kajian_awal_inap SET  gol_darah = '$_POST[gol_darah]', anamnesa = '$_POST[anamnesa]', diagnosis = '$_POST[diagnosis]', icd = '$_POST[icd]', status_perokok = '$_POST[status_perokok]', medika = '$_POST[medika]', nonmedika = '$_POST[nonmedika]', status_plg = '$_POST[status_pulang]' WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwal]'");
-  }
-
-  $getLay = $koneksi->query("SELECT * FROM layanan WHERE idrm='$_POST[idRmSumber]' AND DATE_FORMAT(tgl_layanan, '%Y-%m-%d') = '$_POST[jadwalSumberYmd]'");
-  foreach ($getLay as $dataLay) {
-    $layanan = $dataLay['layanan'];
-    $kode_layanan = $dataLay['kode_layanan'];
-    $jumlah_layanan = $dataLay['jumlah_layanan'];
-    $id_pasien = $dataLay['id_pasien'];
-    $idrm = $_POST['idKJSekarang'];
-    $koneksi->query("INSERT INTO layanan (layanan, kode_layanan, jumlah_layanan, id_pasien, idrm) VALUES ('$layanan', '-', '$jumlah_layanan', '$id_pasien', '$_GET[id]')");
-
-    $cekPemLay = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
-    $getBiyLain = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$cekPemLay[idrawat]' limit 1")->fetch_assoc();
-
-    if ($getBiyLain['biaya_lain'] == '') {
-      $biyLain = $getBiyLain['biaya_lain'] . $_POST['layanan'];
-    } else {
-      $biyLain = $getBiyLain['biaya_lain'] . ',' . $_POST['layanan'];
+    if (selectedText === 'Antasida tab' || selectedText === 'Omeprazol tab') {
+      petunjukInput.value = 'Sebelum Makan';
     }
-
-    $ttlBiyLain = intval($getBiyLain['total_lain']) + intval($_POST['harga_layanan']);
-
-    $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$biyLain', total_lain = '$ttlBiyLain' WHERE idregis='$cekPemLay[idrawat]'");
   }
-  $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
 
-  $getOb = $koneksi->query("SELECT * FROM obat_rm WHERE idrm = '$_POST[idRmSumber]' AND DATE_FORMAT(tgl_pasien, '%Y-%m-%d') = '$_POST[jadwalSumberYmd]'");
-  foreach ($getOb as $dataOb) {
-    $catatan_obat = $dataOb['catatan_obat'];
-    $nama = $dataOb['nama_obat'];
-    $jml_dokter = $dataOb['jml_dokter'];
-    $dosis1_obat = $dataOb['dosis1_obat'];
-    $dosis2_obat = $dataOb['dosis2_obat'];
-    $per_obat = $dataOb['per_obat'];
-    $durasi_obat = $dataOb['durasi_obat'];
-    $petunjuk_obat = $dataOb['petunjuk_obat'];
-    $idrm = $dataOb['idrm'];
+  // Fungsi untuk auto-update jumlah berdasarkan dosis
+  function updateJumlahEdit() {
+    var dosis1 = document.getElementById('dosis1_obat_edit_id');
+    var dosis2 = document.getElementById('dosis2_obat_edit_id');
+    var jml = document.getElementById('jml_obat_edit_id');
 
-    $end = date("H:i:s");
-    $koneksi->query("UPDATE registrasi_rawat SET end='$end' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
-    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '" . $nama . "'")->fetch_assoc();
-    $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
-    // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
-
-    $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
-
-    if ($cekPemOb['carabayar'] == 'umum') {
-      $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
-    } elseif ($cekPemOb['carabayar'] == 'malam') {
-      $koneksi->query("UPDATE biaya_rawat SET poli = '50000' WHERE idregis='$cekPemOb[idrawat]'");
-    } elseif ($cekPemOb['carabayar'] == 'spesialis penyakit dalam' or $cekPemOb['carabayar'] == 'spesialis anak') {
-      $koneksi->query("UPDATE biaya_rawat SET poli = '300000' WHERE idregis='$cekPemOb[idrawat]'");
+    if (dosis1.value == '3' && dosis2.value == '1') {
+      jml.value = 9;
+    } else if (dosis1.value == '2' && dosis2.value == '1') {
+      jml.value = 6;
+    } else if (dosis1.value == '1' && dosis2.value == '1') {
+      jml.value = 3;
     }
-
-    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$nama', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$dataOb[jenis_obat]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
   }
-  echo "
-    <script>
-      alert('Data berhasil diubah');
-      document.location.href='index.php?halaman=daftarrmedis';
-    </script>
-  ";
-}
-
-?>
+</script>
