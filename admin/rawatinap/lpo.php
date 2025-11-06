@@ -136,11 +136,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                 <div class="card-body col-md-12">
                   <h5 class="card-title">Data Pasien</h5>
                   <h5 class="card-title">
-                    <?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir: <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?> <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK: <?php if ($pasien["jenis_kelamin"] == 1) {
-                                                                                                                                                                                                                                                                                                                      echo "Laki-Laki";
-                                                                                                                                                                                                                                                                                                                    } else {
-                                                                                                                                                                                                                                                                                                                      echo "Perempuan";
-                                                                                                                                                                                                                                                                                                                    } ?>
+                    <?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir: <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?> <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK: <?php if ($pasien["jenis_kelamin"] == 1) { echo "Laki-Laki";} else {echo "Perempuan";} ?>
                   </h5>
                   <div class="row">
                     <div class="col-md-6" style="margin-bottom:0px; visibility: hidden; height: 0.01px;">
@@ -241,7 +237,215 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     jenis2.value = jenisObat;
                   }
                 </script>
-
+                <div class="col-md-12">
+                  <div class="card shadow p-2 mb-1">
+                    <label for="">Obat Injeksi </label>
+                    <div>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php if ($id['apoteker_check_at'] == null) { ?>
+                      <?php } ?>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover table-striped" style="font-size: 12px;">
+                        <thead>
+                          <tr>
+                            <th>No</th>
+                            <th>Obat</th>
+                            <th>Kode Obat</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Sub</th>
+                            <th>Dosis</th>
+                            <th>Jenis</th>
+                            <th>Durasi</th>
+                            <th>Tanggal</th>
+                            <th>Petugas</th>
+                            <th>Act</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php
+                          if (isset($_GET['igd'])) {
+                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi'");
+                            $urlBase = "index.php?halaman=lpo&igd&id=" . htmlspecialchars($_GET['id']) . "&idigd=" . htmlspecialchars($_GET['idigd']) . "&tgl=" . htmlspecialchars($_GET['tgl']);
+                          } else {
+                            $urlBase = "index.php?halaman=lpo&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']);
+                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi'");
+                          }
+                          $noo = 1;
+                          foreach ($injek as $in) {
+                          ?>
+                            <tr>
+                              <td><?php echo $noo++; ?></td>
+                              <td><?php echo $in["nama_obat"]; ?></td>
+                              <td><?php echo $in["kode_obat"]; ?></td>
+                              <td><?php echo $in["jml_dokter"]; ?></td>
+                              <td>
+                                <?php
+                                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($in['created_at'])) . "' AND nama_obat = '$in[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                                ?>
+                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
+                              </td>
+                              <td>
+                                Rp <?= number_format($harga * $in['jml_dokter'], 0, 0, '.') ?>
+                              </td>
+                              <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
+                              <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
+                              <td><?php echo $in["durasi_obat"]; ?> hari</td>
+                              <td>
+                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
+                                  <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
+                                </a>
+                              </td>
+                              <td><?= $in['petugas'] ?></td>
+                              <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
+                              <td>
+                                <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                  <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                <?php } else { ?>
+                                  <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
+                                <?php } ?>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="col-md-12">
+                  <div class="card shadow p-2 mb-2">
+                    <label for="">Obat Oral</label>
+                    <div align="left">
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php if ($id['apoteker_check_at'] == null) { ?>
+                      <?php } ?>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover table-striped" style="font-size: 12px;">
+                        <thead>
+                          <tr>
+                            <th>No</th>
+                            <th>Obat</th>
+                            <th>Kode Obat</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Sub</th>
+                            <th>Dosis</th>
+                            <th>Jenis</th>
+                            <th>Durasi</th>
+                            <th>Tanggal</th>
+                            <th>Petugas</th>
+                            <th>Act</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php
+                          if (isset($_GET['igd'])) {
+                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral'");
+                          } else {
+                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral'");
+                          }
+                          $no = 1;
+                          foreach ($oral as $or) {
+                          ?>
+                            <tr>
+                              <td><?php echo $no++; ?></td>
+                              <td><?php echo $or["nama_obat"]; ?></td>
+                              <td><?php echo $or["kode_obat"]; ?></td>
+                              <td><?php echo $or["jml_dokter"]; ?></td>
+                              <td>
+                                <?php
+                                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
+                                ?>
+                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
+                              </td>
+                              <td>
+                                Rp <?= number_format($harga * $or['jml_dokter'], 0, 0, '.') ?>
+                              </td>
+                              <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
+                              <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
+                              <td><?php echo $or["durasi_obat"]; ?> hari</td>
+                              <td>
+                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
+                                  <?php echo date('Y-m-d', strtotime($or["created_at"])) ?>
+                                </a>
+                              </td>
+                              <td>
+                                <?= $or['petugas'] ?>
+                              </td>
+                              <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
+                              <td>
+                                <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                  <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                <?php } else { ?>
+                                  <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
+                                <?php } ?>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-flex justify-content-end mb-4 mt-4">
+                    <a class="btn btn-sm btn-primary" onclick="return confirm('Jika sudah yakin maka tombol tambah obat akan hilang, apakah anda yakin akan menyelesaikan inputan obat ?')" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&apotek=done">Obat Sudah di-Input Semua dan Pasien Boleh Pulang</a>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="card shadow p-3">
+                    <h5 class="card-title">Riwayat Observasi</h5>
+                    <div class="row">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Pasien</th>
+                            <th>Diagnosa</th>
+                            <th>Tanggal</th>
+                            <th>Jam</th>
+                            <th>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php
+                          if (isset($_GET['igd'])) {
+                            $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'igd'");
+                          } else {
+                            $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap'");
+                          }
+                          ?>
+                          <?php foreach ($getlpo as $data) { ?>
+                            <?php
+                            $datetimeString = "$data[tgl_waktu]";
+                            $datetimeObject = date_create($datetimeString);
+                            $tanggal = date_format($datetimeObject, "Y-m-d");
+                            $jam = date_format($datetimeObject, "H:i:s");
+                            ?>
+                            <tr>
+                              <td><?= $data['pasien'] ?></td>
+                              <td><?= $data['diagnosa'] ?></td>
+                              <td><?= $tanggal ?></td>
+                              <td><?= $jam ?></td>
+                              <td>
+                                <?php if (!isset($_GET['igd'])) { ?>
+                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i class="bi bi-eye"></i></a>
+                                  <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone" class="btn btn-sm btn-warning">Copy</a>
+                                <?php } else { ?>
+                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i class="bi bi-eye"></i></a>
+                                <?php } ?>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
                 <!-- Add Data Modal Obat  Jadi -->
                 <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel" aria-hidden="true">
                   <div class="modal-dialog">
@@ -518,216 +722,6 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   });
                 </script>
                 <!-- end -->
-
-                <div class="col-md-12">
-                  <div class="card shadow p-2 mb-1">
-                    <label for="">Obat Injeksi </label>
-                    <div>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-                      <?php if ($id['apoteker_check_at'] == null) { ?>
-                      <?php } ?>
-                    </div>
-                    <div class="table-responsive">
-                      <table class="table table-hover table-striped" style="font-size: 12px;">
-                        <thead>
-                          <tr>
-                            <th>No</th>
-                            <th>Obat</th>
-                            <th>Kode Obat</th>
-                            <th>Jumlah</th>
-                            <th>Harga</th>
-                            <th>Sub</th>
-                            <th>Dosis</th>
-                            <th>Jenis</th>
-                            <th>Durasi</th>
-                            <th>Tanggal</th>
-                            <th>Petugas</th>
-                            <th>Act</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <?php
-                          if (isset($_GET['igd'])) {
-                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi'");
-                            $urlBase = "index.php?halaman=lpo&igd&id=" . htmlspecialchars($_GET['id']) . "&idigd=" . htmlspecialchars($_GET['idigd']) . "&tgl=" . htmlspecialchars($_GET['tgl']);
-                          } else {
-                            $urlBase = "index.php?halaman=lpo&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']);
-                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi'");
-                          }
-                          $noo = 1;
-                          foreach ($injek as $in) {
-                          ?>
-                            <tr>
-                              <td><?php echo $noo++; ?></td>
-                              <td><?php echo $in["nama_obat"]; ?></td>
-                              <td><?php echo $in["kode_obat"]; ?></td>
-                              <td><?php echo $in["jml_dokter"]; ?></td>
-                              <td>
-                                <?php
-                                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($in['created_at'])) . "' AND nama_obat = '$in[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
-                                ?>
-                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
-                              </td>
-                              <td>
-                                Rp <?= number_format($harga * $in['jml_dokter'], 0, 0, '.') ?>
-                              </td>
-                              <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
-                              <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
-                              <td><?php echo $in["durasi_obat"]; ?> hari</td>
-                              <td>
-                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
-                                  <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
-                                </a>
-                              </td>
-                              <td><?= $in['petugas'] ?></td>
-                              <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
-                              <td>
-                                <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                  <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                                <?php } else { ?>
-                                  <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
-                                <?php } ?>
-                              </td>
-                            </tr>
-                          <?php } ?>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                <br>
-                <div class="col-md-12">
-                  <div class="card shadow p-2 mb-2">
-                    <label for="">Obat Oral</label>
-                    <div align="left">
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-                      <?php if ($id['apoteker_check_at'] == null) { ?>
-                      <?php } ?>
-                    </div>
-                    <div class="table-responsive">
-                      <table class="table table-hover table-striped" style="font-size: 12px;">
-                        <thead>
-                          <tr>
-                            <th>No</th>
-                            <th>Obat</th>
-                            <th>Kode Obat</th>
-                            <th>Jumlah</th>
-                            <th>Harga</th>
-                            <th>Sub</th>
-                            <th>Dosis</th>
-                            <th>Jenis</th>
-                            <th>Durasi</th>
-                            <th>Tanggal</th>
-                            <th>Petugas</th>
-                            <th>Act</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <?php
-                          if (isset($_GET['igd'])) {
-                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral'");
-                          } else {
-                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral'");
-                          }
-                          $no = 1;
-                          foreach ($oral as $or) {
-                          ?>
-                            <tr>
-                              <td><?php echo $no++; ?></td>
-                              <td><?php echo $or["nama_obat"]; ?></td>
-                              <td><?php echo $or["kode_obat"]; ?></td>
-                              <td><?php echo $or["jml_dokter"]; ?></td>
-                              <td>
-                                <?php
-                                $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
-                                ?>
-                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
-                              </td>
-                              <td>
-                                Rp <?= number_format($harga * $or['jml_dokter'], 0, 0, '.') ?>
-                              </td>
-                              <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
-                              <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
-                              <td><?php echo $or["durasi_obat"]; ?> hari</td>
-                              <td>
-                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
-                                  <?php echo date('Y-m-d', strtotime($or["created_at"])) ?>
-                                </a>
-                              </td>
-                              <td>
-                                <?= $or['petugas'] ?>
-                              </td>
-                              <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
-                              <td>
-                                <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                  <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                                <?php } else { ?>
-                                  <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
-                                <?php } ?>
-                              </td>
-                            </tr>
-                          <?php } ?>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="d-flex justify-content-end mb-4 mt-4">
-                    <a class="btn btn-sm btn-primary" onclick="return confirm('Jika sudah yakin maka tombol tambah obat akan hilang, apakah anda yakin akan menyelesaikan inputan obat ?')" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&apotek=done">Obat Sudah di-Input Semua dan Pasien Boleh Pulang</a>
-                  </div>
-                </div>
-                <div class="col-md-12">
-                  <div class="card shadow p-3">
-                    <h5 class="card-title">Riwayat Observasi</h5>
-                    <div class="row">
-                      <table class="table">
-                        <thead>
-                          <tr>
-                            <th>Pasien</th>
-                            <th>Diagnosa</th>
-                            <th>Tanggal</th>
-                            <th>Jam</th>
-                            <th>Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <?php
-                          if (isset($_GET['igd'])) {
-                            $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'igd'");
-                          } else {
-                            $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap'");
-                          }
-                          ?>
-                          <?php foreach ($getlpo as $data) { ?>
-                            <?php
-                            $datetimeString = "$data[tgl_waktu]";
-                            $datetimeObject = date_create($datetimeString);
-                            $tanggal = date_format($datetimeObject, "Y-m-d");
-                            $jam = date_format($datetimeObject, "H:i:s");
-                            ?>
-                            <tr>
-                              <td><?= $data['pasien'] ?></td>
-                              <td><?= $data['diagnosa'] ?></td>
-                              <td><?= $tanggal ?></td>
-                              <td><?= $jam ?></td>
-                              <td>
-                                <?php if (!isset($_GET['igd'])) { ?>
-                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i class="bi bi-eye"></i></a>
-                                  <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone" class="btn btn-sm btn-warning">Copy</a>
-                                <?php } else { ?>
-                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i class="bi bi-eye"></i></a>
-                                <?php } ?>
-                              </td>
-                            </tr>
-                          <?php } ?>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
               <?php } else { ?>
                 <div class="card shadow-sm mb-2 p-2">
                   <h5><b>Entri Obat Jadi</b></h5>
