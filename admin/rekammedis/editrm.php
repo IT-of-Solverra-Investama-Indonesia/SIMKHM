@@ -300,13 +300,13 @@ if (isset($_POST['Update'])) {
                                         <option value="">Pilih</option>
                                         <?php
                                         if (!isset($_GET['inap'])) {
-                                            $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                            $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat != 'V.1394489' AND aktif_poli = 'aktif' ORDER BY obat_master ASC");
                                         } else {
                                             $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                         }
                                         foreach ($getObat as $data) {
                                         ?>
-                                            <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                            <option value="<?= $data['obat_master'] ?>"><?= $data['obat_master'] ?></option>
                                         <?php } ?>
                                     </select>
                                 </div>
@@ -368,13 +368,13 @@ if (isset($_POST['Update'])) {
 
                                     <?php
                                     if (!isset($_GET['inap'])) {
-                                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                        $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat != 'V.1394489' AND aktif_poli = 'aktif' ORDER BY obat_master ASC");
                                     } else {
                                         $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                     }
                                     foreach ($getObat as $data) {
                                     ?>
-                                        <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                        <option value="<?= $data['obat_master'] ?>"><?= $data['obat_master'] ?></option>
                                     <?php } ?>
                                 </select>
 
@@ -553,13 +553,13 @@ if (isset($_POST['saveobnew'])) {
                                         <option value="">Pilih</option>
                                         <?php
                                         if (!isset($_GET['inap'])) {
-                                            $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                            $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat != 'V.1394489' AND aktif_poli = 'aktif' ORDER BY obat_master ASC");
                                         } else {
                                             $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                         }
                                         foreach ($getObat as $data) {
                                         ?>
-                                            <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                            <option value="<?= $data['obat_master'] ?>"><?= $data['obat_master'] ?></option>
                                         <?php } ?>
                                     </select>
                                 </div>
@@ -583,13 +583,13 @@ if (isset($_POST['saveobnew'])) {
                                     <option value="">Pilih</option>
                                     <?php
                                     if (!isset($_GET['inap'])) {
-                                        $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                        $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat != 'V.1394489' AND aktif_poli = 'aktif' ORDER BY obat_master ASC");
                                     } else {
                                         $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                     }
                                     foreach ($getObat as $data) {
                                     ?>
-                                        <option value="<?= $data['nama_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                        <option value="<?= $data['obat_master'] ?>"><?= $data['obat_master'] ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="col-md-12" style="margin-top:20px">
@@ -794,13 +794,13 @@ if (isset($_POST['saveob'])) {
                                             <!-- <option value="">Pilih</option> -->
                                             <?php
                                             if (!isset($_GET['inap'])) {
-                                                $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Rajal' GROUP BY nama_obat ORDER BY nama_obat ASC");
+                                                $getObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat != 'V.1394489' AND aktif_poli = 'aktif' ORDER BY obat_master ASC");
                                             } else {
                                                 $getObat = $koneksi->query("SELECT * FROM apotek WHERE tipe = 'Ranap' GROUP BY nama_obat ORDER BY nama_obat ASC");
                                             }
                                             foreach ($getObat as $data) {
                                             ?>
-                                                <option value="<?= $data['id_obat'] ?>"><?= $data['nama_obat'] ?></option>
+                                                <option value="<?= $data['kode_obat'] ?>"><?= $data['obat_master'] ?></option>
                                             <?php } ?>
                                         </select>
                                     </div>
