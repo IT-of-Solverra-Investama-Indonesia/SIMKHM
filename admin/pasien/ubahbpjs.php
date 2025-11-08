@@ -46,6 +46,10 @@
                         <label for="" class="form-label">Foto</label>
                         <input class="form-control" type="file" name="foto" id="foto">
                     </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">User</label>
+                        <input type="text" class="form-control mb-3" id="user" name="user" required>
+                    </div>
 
             </div>
             <div class="modal-footer">
@@ -88,6 +92,10 @@
                         <input class="form-control" type="file" name="foto" id="foto">
                         <input type="hidden" name="foto_lama" id="edit-foto-lama">
                         <div id="preview-foto-lama" class="mt-2"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">User</label>
+                        <input type="text" class="form-control mb-3" id="edit-user" name="user" required>
                     </div>
             </div>
             <div class="modal-footer">
@@ -146,7 +154,8 @@
                                             data-nama="<?= $row['nama'] ?>"
                                             data-nik="<?= $row['nik'] ?>"
                                             data-asal_faskes="<?= $row['asal_faskes'] ?>"
-                                            data-foto="<?= htmlspecialchars($row['foto']) ?>">
+                                            data-foto="<?= htmlspecialchars($row['foto']) ?>"
+                                            data-user="<?= htmlspecialchars($row['user']) ?>">
                                             Edit
                                         </a>
                                         <a href="index.php?halaman=ubahbpjs&delete=<?= $row['id'] ?>"
@@ -171,6 +180,7 @@ if (isset($_POST['save'])) {
     $nama = htmlspecialchars($_POST['nama']);
     $nik = htmlspecialchars($_POST['nik']);
     $asal_faskes = htmlspecialchars($_POST['asal_faskes']);
+    $user = htmlspecialchars($_POST['user']);
     $foto = null;
     if (!empty($_FILES['foto']['name'])) {
         $target_dir = "foto/";
@@ -186,8 +196,7 @@ if (isset($_POST['save'])) {
     }
     $sql = "INSERT INTO ubahbpjs (tanggal, nama, nik, asal_faskes, foto, user) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $koneksi->prepare($sql);
-    $namaUser = $_SESSION['admin']['namalengkap'];
-    $stmt->bind_param("ssssss", $tanggal, $nama, $nik, $asal_faskes, $foto, $namaUser);
+    $stmt->bind_param("ssssss", $tanggal, $nama, $nik, $asal_faskes, $foto, $user);
 
     if ($stmt->execute()) {
         echo "<script>alert('Data berhasil ditambahkan');document.location.href='index.php?halaman=ubahbpjs';</script>";
@@ -202,6 +211,7 @@ if (isset($_POST['update'])) {
     $nama = htmlspecialchars($_POST['nama']);
     $nik = htmlspecialchars($_POST['nik']);
     $asal_faskes = htmlspecialchars($_POST['asal_faskes']);
+    $user = htmlspecialchars($_POST['user']);
     $foto_lama = $_POST['foto_lama'];
     $foto = $foto_lama;
 
@@ -219,9 +229,9 @@ if (isset($_POST['update'])) {
         }
     }
 
-    $sql = "UPDATE ubahbpjs SET tanggal = ?, nama = ?, nik = ?, asal_faskes = ?, foto = ? WHERE id = ?";
+    $sql = "UPDATE ubahbpjs SET tanggal = ?, nama = ?, nik = ?, asal_faskes = ?, foto = ?, user = ? WHERE id = ?";
     $stmt = $koneksi->prepare($sql);
-    $stmt->bind_param("ssssss", $tanggal, $nama, $nik, $asal_faskes, $foto, $id);
+    $stmt->bind_param("sssssss", $tanggal, $nama, $nik, $asal_faskes, $foto, $user, $id);
 
     if ($stmt->execute()) {
         echo "<script>alert('Data berhasil diupdate');document.location.href='index.php?halaman=ubahbpjs';</script>";
@@ -259,6 +269,7 @@ if (isset($_GET['delete'])) {
             $('#edit-nama').val(button.data('nama'));
             $('#edit-nik').val(button.data('nik'));
             $('#edit-asal_faskes').val(button.data('asal_faskes'));
+            $('#edit-user').val(button.data('user'));
             $('#edit-foto-lama').val(button.data('foto'));
 
             if (button.data('foto')) {
