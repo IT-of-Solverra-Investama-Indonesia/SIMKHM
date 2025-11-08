@@ -1,10 +1,10 @@
 <?php
 //   khm wonorejo
-  $organizationId = '100015704';
-  $locationId = 'b898e537-81a8-4aca-9d76-baff855a9a31';
-  $clientKey = 'pnZFT0j4Hs1FKIqQKeRspG1ncJwauPVKNnrT2OeiuPpP2E3l';
-  $secretKey = 'FNTJCctvzsWjmjb7VHGbdzLT1xLG9FcV8bAWql27GKJ8o9S5iXxHvOQYpi85qzzv';
-  $baseUrl  = 'https://api-satusehat.kemkes.go.id/fhir-r4/v1';
+  // $organizationId = '100015704';
+  // $locationId = 'b898e537-81a8-4aca-9d76-baff855a9a31';
+  // $clientKey = 'pnZFT0j4Hs1FKIqQKeRspG1ncJwauPVKNnrT2OeiuPpP2E3l';
+  // $secretKey = 'FNTJCctvzsWjmjb7VHGbdzLT1xLG9FcV8bAWql27GKJ8o9S5iXxHvOQYpi85qzzv';
+  // $baseUrl  = 'https://api-satusehat.kemkes.go.id/fhir-r4/v1';
   
 //   khm klakah
   // $organizationId = '100015693';
@@ -19,4 +19,11 @@
   // $clientKey = 'lApZ8Rr9TQaRHXEQYXWJWHh3wAVY0nFPYX39OOU26jl0j9rY';
   // $secretKey = 'oDtIeoawi0L7c20LcmBshzBHhdF614CabKhBX9fWSnuZAfsfWisovkumuy0CkYwx';
   // $baseUrl  = 'https://api-satusehat.kemkes.go.id/fhir-r4/v1';
+
+  //   khm kunir
+  $organizationId = '100501839';
+  $locationId = 'd8bf801b-0578-47d9-b233-361bbb229e46';
+  $clientKey = 'GuOjmsR7JghJtN7wA5iLm90RJA7Gcpr0PtSk3MnlNGqu1teo';
+  $secretKey = 'oFdATkxEM1yW8s3I8fQ466s2YAfPAQJeVxC9AVO0UpSdufCfKMSStc2u0I6F8vhR';
+  $baseUrl  = 'https://api-satusehat.kemkes.go.id/fhir-r4/v1';
 ?>
