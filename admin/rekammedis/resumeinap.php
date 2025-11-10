@@ -1,5 +1,5 @@
 <?php 
-error_reporting(0);
+// error_reporting(0);
 $username=$_SESSION['admin']['username'];
 $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $pasien=$koneksi->query("SELECT * FROM registrasi_rawat  WHERE idrawat='$_GET[id]';");
