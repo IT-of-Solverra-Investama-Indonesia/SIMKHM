@@ -31,11 +31,37 @@ $pasien=$pasien->fetch_assoc();
     <script src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
 
 <br>
+<?php 
+    $currentURL = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] : '';
+    $currentURL = strtolower($currentURL);
+
+    if (strpos($currentURL, 'wonorejo') !== false) {
+      $alamat = "Jalan Raya Wonorejo No. 167 Kedungjajang, Lumajang";
+      $nomor = "0822-3388-0001";
+      $email = "husada.mulia@gmail.com";
+      $namaInstansi = "Wonorejo";
+    } elseif (strpos($currentURL, 'klakah') !== false) {
+      $alamat = "Jl. Raya Mlawang - Klakah Lumajang 67356";
+      $nomor = "0812-3457-1010";
+      $email = "husadamuliaklakah@gmail.com";
+      $namaInstansi = "Tunjung";
+    } elseif (strpos($currentURL, 'tunjung') !== false) {
+      $alamat = "Krajani Satu, Tunjung, Kec. Randuagung, Kabupaten Lumajang, Jawa Timur";
+      $nomor = "0813-5555-0275";
+      $email = "husadamuliatunjung@gmail.com";
+      $namaInstansi = "Tunjung";
+    } else {
+      $alamat = "Dsn. Sumber Eling RT.013 RW.003, Ds. Kunir Lor, Kec.Kunir, Kab. Lumajang";
+      $nomor = "0822-3388-0001";
+      $email = "husadamuliakunir@gmail.com";
+      $namaInstansi = "Kunir";
+    }
+?>
 <span>
 <div style="float: left;"><img style=" width: 135px;" src="../dist/assets/img/khm.png" /></div>
 <div style="margin-left: 140px; margin-top: 0.1px;">
 <large style="font-weight: bold; font-size:23px;">LABORATORIUM KLINIK</large><br><large style="font-weight: bold; color: steelblue; font-size:23px;">HUSADA MULIA</large><br>
-<small>Jl.Raya Wonorejo No. 167 Telp. (0334) 7714700 Wonorejo - Lumajang</small><br>
+<small><?= $alamat; ?> Telp. <?= $nomor; ?></small><br>
 <small>PENANGGUNG JAWAB: dr. AINUL INDRA JAYA</small><br>
 </div>
 </span>
