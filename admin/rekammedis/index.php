@@ -8,7 +8,23 @@ if(!isset($_GET['agent_name']) AND !isset($_SESSION['dokter_rawat'])){
   ";
 }
 include "../rawatjalan/api_satusehat.php";
-$init = parse_ini_file("satusehat.ini");
+// Tentukan file .ini berdasarkan URL
+$currentURL = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] : '';
+$currentURL = strtolower($currentURL);
+
+if (strpos($currentURL, 'wonorejo') !== false) {
+  $iniFile = "satusehat_wonorejo.ini";
+} elseif (strpos($currentURL, 'klakah') !== false) {
+  $iniFile = "satusehat_klakah.ini";
+} elseif (strpos($currentURL, 'tunjung') !== false) {
+  $iniFile = "satusehat_tunjung.ini";
+} else {
+  // Default ke kunir
+  $iniFile = "satusehat_kunir.ini";
+}
+
+$init = parse_ini_file($iniFile);
+
 $client_id = $clientKey;
 $client_secret = $secretKey;
 $auth_url = $init["auth_url"];
