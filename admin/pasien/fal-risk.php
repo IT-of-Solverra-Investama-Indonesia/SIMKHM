@@ -172,6 +172,32 @@ if (isset($_GET['jadwal'])) {
   </style>
 
 </head>
+<?php
+$currentURL = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] : '';
+$currentURL = strtolower($currentURL);
+
+if (strpos($currentURL, 'wonorejo') !== false) {
+  $alamat = "Jalan Raya Wonorejo No. 167 Kedungjajang, Lumajang";
+  $nomor = "0822-3388-0001";
+  $email = "husada.mulia@gmail.com";
+  $namaInstansi = "Wonorejo";
+} elseif (strpos($currentURL, 'klakah') !== false) {
+  $alamat = "Jl. Raya Mlawang - Klakah Lumajang 67356";
+  $nomor = "0812-3457-1010";
+  $email = "husadamuliaklakah@gmail.com";
+  $namaInstansi = "Tunjung";
+} elseif (strpos($currentURL, 'tunjung') !== false) {
+  $alamat = "Krajani Satu, Tunjung, Kec. Randuagung, Kabupaten Lumajang, Jawa Timur";
+  $nomor = "0813-5555-0275";
+  $email = "husadamuliatunjung@gmail.com";
+  $namaInstansi = "Tunjung";
+} else {
+  $alamat = "Dsn. Sumber Eling RT.013 RW.003, Ds. Kunir Lor, Kec.Kunir, Kab. Lumajang";
+  $nomor = "0822-3388-0001";
+  $email = "husadamuliakunir@gmail.com";
+  $namaInstansi = "Kunir";
+}
+?>
 
 <body lang=EN-US link="#0563C1" vlink="#954F72" style='word-wrap:break-word'>
 
@@ -189,16 +215,16 @@ if (isset($_GET['jadwal'])) {
                 style='position:relative;z-index:251659264'><span style='left:0px;margin-left: -160px;position:
   absolute;left:0px;top:-6px;width:154px;height:86px'><img width=154 height=86
                     src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png"></span></span><span
-                style='font-size:11.5pt;font-family:"Arial Narrow",sans-serif'>Dsn. Sumber Eling RT.013 RW.003, Ds. Kunir Lor, Kec.Kunir, Kab. Lumajang</span></p>
+                style='font-size:11.5pt;font-family:"Arial Narrow",sans-serif'><?= $alamat ?></span></p>
             <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
   margin-bottom:0in;margin-left:102.5pt;text-align:center;line-height:normal'><span
                 style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Telp.
-                0811-3224-4440</span></p>
+                <?= $nomor ?></span></p>
             <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
   margin-bottom:0in;margin-left:102.5pt;text-align:center;line-height:normal'><span
                 style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Email. </span><a
-                href="mailto:husada.mulia@gmail.com"><i><span style='font-size:12.0pt;
-  font-family:"Arial Narrow",sans-serif'>husada.mulia@gmail.com</span></i></a></p>
+                href="mailto:<?= $email ?>"><i><span style='font-size:12.0pt;
+  font-family:"Arial Narrow",sans-serif'><?= $email ?></span></i></a></p>
           </td>
           <td width=342 valign=top style='width:256.35pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0in 5.4pt 0in 5.4pt;height:63.3pt'>
@@ -223,11 +249,7 @@ if (isset($_GET['jadwal'])) {
         </tr>
       </table>
 
-      <p class=MsoNormal style='margin-bottom:0in'><span style='position:relative;
-z-index:251660288'><span style='position:absolute;left:568px;top:-140px;
-width:168px;height:28px'><img width=168 height=28
-              src="RM%2004.4%20PENGKAJIAN%20RESIKO%20JATUH%20RAWAT%20JALAN_files/image002.png"
-              alt="RM 04.4/RJ/KHM"></span></span></p>
+
 
       <p class=MsoNormal align=center style='margin-top:1.0pt;margin-right:0in;
 margin-bottom:0in;margin-left:0in;text-align:center;line-height:115%'><span
