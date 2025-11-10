@@ -202,6 +202,32 @@ if (isset($_GET['ttdPet'])) {
 
 
 </head>
+<?php
+    $currentURL = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] : '';
+    $currentURL = strtolower($currentURL);
+
+    if (strpos($currentURL, 'wonorejo') !== false) {
+      $alamat = "Jalan Raya Wonorejo No. 167 Kedungjajang, Lumajang";
+      $nomor = "0822-3388-0001";
+      $email = "husada.mulia@gmail.com";
+      $namaInstansi = "Wonorejo";
+    } elseif (strpos($currentURL, 'klakah') !== false) {
+      $alamat = "Jl. Raya Mlawang - Klakah Lumajang 67356";
+      $nomor = "0812-3457-1010";
+      $email = "husadamuliaklakah@gmail.com";
+      $namaInstansi = "Tunjung";
+    } elseif (strpos($currentURL, 'tunjung') !== false) {
+      $alamat = "Krajani Satu, Tunjung, Kec. Randuagung, Kabupaten Lumajang, Jawa Timur";
+      $nomor = "0813-5555-0275";
+      $email = "husadamuliatunjung@gmail.com";
+      $namaInstansi = "Tunjung";
+    } else {
+      $alamat = "Dsn. Sumber Eling RT.013 RW.003, Ds. Kunir Lor, Kec.Kunir, Kab. Lumajang";
+      $nomor = "0822-3388-0001";
+      $email = "husadamuliakunir@gmail.com";
+      $namaInstansi = "Kunir";
+    }
+?>
 
 <body lang=EN-US link=blue vlink=purple style='word-wrap:break-word'>
 
@@ -213,14 +239,13 @@ if (isset($_GET['ttdPet'])) {
   0in 5.4pt 0in 5.4pt'>
           <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
   margin-bottom:0in;margin-left:115.25pt;text-align:center;line-height:normal'><span style='position:relative;z-index:1'><span style='left:0px;position:
-  absolute;left:-170px;top:-5px;width:154px;height:86px'><img width=154 height=86 src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png"></span></span><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Jalan Raya
-              Wonorejo No. 167 Kedungjajang, Lumajang</span></p>
+  absolute;left:-170px;top:-5px;width:154px;height:86px'><img width=154 height=86 src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png"></span></span><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'><?= $alamat ?></span></p>
           <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
   margin-bottom:0in;margin-left:115.1pt;text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Telp.
-              0822-3388-0001</span></p>
+              <?= $nomor ?></span></p>
           <p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
-  margin-bottom:0in;margin-left:115.25pt;text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Email. </span><a href="mailto:husada.mulia@gmail.com"><i><span style='font-size:12.0pt;
-  font-family:"Arial Narrow",sans-serif'>husada.mulia@gmail.com</span></i></a></p>
+  margin-bottom:0in;margin-left:115.25pt;text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:"Arial Narrow",sans-serif'>Email. </span><a href="mailto:<?= $email ?>"><i><span style='font-size:12.0pt;
+  font-family:"Arial Narrow",sans-serif'><?= $email ?></span></i></a></p>
         </td>
         <td width=358 valign=top style='width:268.6pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0in 5.4pt 0in 5.4pt'>
@@ -390,7 +415,7 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>a.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Hak pasien</span></p>
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Pasien berhak memperoleh informasi
-              mengenai tata tertib dan peraturan Klinik Husada Mulia Wonorejo</span></p>
+              mengenai tata tertib dan peraturan Klinik Husada Mulia <?= $namaInstansi?></span></p>
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Pasien berhak mendapatkan pelayanan
               yang aman, bermutu, manusiawi, dan adil sesuai dengan standar profesi
@@ -405,7 +430,7 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>5)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Pasien berhak memberikan
               persetujuan atau menolak atas tindakan yang dilakukan oleh tenaga kesehatan
-              di Klinik Husada Mulia Wonorejo </span></p>
+              di Klinik Husada Mulia <?= $namaInstansi?> </span></p>
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>6)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Pasien berhak mendapatkan kepastian
               isi rekam medis terjaga kerahasiaannya.</span></p>
@@ -413,7 +438,7 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>b.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Kewajiban pasien</span></p>
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Mematuhi peraturan yang berlaku di
-              Klinik Husada Mulia Wonorejo antara lain :</span></p>
+              Klinik Husada Mulia <?= $namaInstansi?> antara lain :</span></p>
           <p class=Default style='margin-left:81.25pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>a)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Antri sesuai urutan </span></p>
           <p class=Default style='margin-left:81.25pt;text-align:justify;text-indent:
@@ -426,7 +451,7 @@ font-family:"Arial Black",sans-serif'>PEMBERIAN INFORMASI &amp; PERSETUJUAN
               dan jujur tentang masalah kesehatan</span></p>
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Mematuhi rencana terapi yang
-              direkomendasikan oleh tenaga Kesehatan di Klinik Husada Mulia Wonorejo</span></p>
+              direkomendasikan oleh tenaga Kesehatan di Klinik Husada Mulia <?= $namaInstansi?></span></p>
           <p class=Default style='margin-left:60.0pt;text-align:justify;text-indent:
   -.25in;line-height:115%'><span style='font-size:11.0pt;line-height:115%'>4)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span style='font-size:11.0pt;line-height:115%'>Menerima segala konsekuensi atas
               keputusan pribadinya untuk menolak rencana terapi yang direkomendasikan oleh
