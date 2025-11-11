@@ -171,7 +171,7 @@ date_default_timezone_set('Asia/Jakarta');
                             <option value="Pagi">Pagi</option>
                             <option value="Sore">Sore</option>
                             <option value="Malam">Malam</option>
-                          </select> 
+                          </select>
                         </div>
                         <div class="col-12 content-end text-end">
                           <button class="btn btn-sm btn-primary" name="search"><i class="bi bi-search"></i></button>
@@ -496,13 +496,16 @@ date_default_timezone_set('Asia/Jakarta');
             if (!isset($_GET['pulang'])) {
               $getData = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND status_antri != 'Pulang' ORDER BY idrawat DESC ");
             } else {
-              $getData = $koneksi->query("SELECT registrasi_rawat.* FROM pulang INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = pulang.norm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = pulang.tgl_masuk WHERE registrasi_rawat.perawatan = 'Rawat Inap' AND pulang.tgl = '" . date('Y-m-d') . "' ORDER BY idrawat DESC ");
+              $getData = $koneksi->query("SELECT registrasi_rawat.*, pulang.keadaan FROM pulang INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = pulang.norm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = pulang.tgl_masuk WHERE registrasi_rawat.perawatan = 'Rawat Inap' AND pulang.tgl = '" . date('Y-m-d') . "' ORDER BY idrawat DESC ");
             }
             foreach ($getData as $data) {
             ?>
               <tr>
                 <td>
-                  <?= $data['nama_pasien'] ?><br>
+                  <?php
+                  $getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$data[no_rm]'")->fetch_assoc();
+                  ?>
+                  <?= $data['nama_pasien'] ?> <b>BIN <?= $getPasien['nama_ibu'] ?></b><br>
                   <?php
                   $getDataPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$data[no_rm]'")->fetch_assoc();
                   ?>
@@ -520,7 +523,12 @@ date_default_timezone_set('Asia/Jakarta');
                   <?= $data['status_antri'] ?> <br>
                   <span class="badge <?= $data['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>" data-bs-toggle="tooltip" title="<?= $data['apoteker_check_at'] ?>"><?= $data['apoteker_check_at'] == null ? 'Belum Skrining' : $data['apoteker_check_at'] ?></span>
                 </td>
-                <td><?= $data['carabayar'] ?></td>
+                <td>
+                  <?= $data['carabayar'] ?> <br>
+                  <?php if (isset($_GET['pulang'])) { ?>
+                    (<?= $data['keadaan'] ?>)
+                  <?php } ?>
+                </td>
                 <td>
                   <?php
                   $getNominal = $koneksi->query("SELECT SUM(besaran) as nominal FROM  rawatinapdetail JOIN registrasi_rawat ON rawatinapdetail.id=registrasi_rawat.idrawat WHERE rawatinapdetail.id='$data[idrawat]'")->fetch_assoc();
