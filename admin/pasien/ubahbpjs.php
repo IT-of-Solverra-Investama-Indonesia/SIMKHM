@@ -47,7 +47,7 @@
                         <input class="form-control" type="file" name="foto" id="foto">
                     </div>
                     <div class="mb-3">
-                        <label for="" class="form-label">User</label>
+                        <label for="" class="form-label">Pemindah</label>
                         <input type="text" class="form-control mb-3" id="user" name="user" required>
                     </div>
 
@@ -94,7 +94,7 @@
                         <div id="preview-foto-lama" class="mt-2"></div>
                     </div>
                     <div class="mb-3">
-                        <label for="" class="form-label">User</label>
+                        <label for="" class="form-label">Pemindah</label>
                         <input type="text" class="form-control mb-3" id="edit-user" name="user" required>
                     </div>
             </div>
@@ -128,7 +128,7 @@
                                 <th>NIK</th>
                                 <th>Asal Faskes</th>
                                 <th>Foto BPJS</th>
-                                <th>User</th>
+                                <th>Pemindah</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
