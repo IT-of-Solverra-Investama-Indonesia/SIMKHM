@@ -5,7 +5,7 @@ $pasien = $koneksi->query("SELECT * FROM pasien WHERE idpasien = '$_GET[id]'")->
 $petugas = $_SESSION['admin']['namalengkap'];
 
 if (isset($_GET['jadwal'])) {
-  $getIdRawat = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM registrasi_rawat WHERE nama_pasien= '$pasien[nama_lengkap]' and jadwal='$_GET[jadwal]'")->fetch_assoc();
+  $getIdRawat = $koneksi->query("SELECT *, COUNT(*) as jumlah FROM registrasi_rawat WHERE no_rm= '$pasien[no_rm]' and jadwal='$_GET[jadwal]'")->fetch_assoc();
 
   if ($getIdRawat['jumlah'] == 0) {
   } else {
