@@ -163,6 +163,12 @@ if (!isset($_SESSION['login'])) {
         <i class="bi bi-cash-coin"></i>
         <span>Dashboard Staff</span>
       </a>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="index.php?halaman=ratingall">
+          <i class="bi bi-star"></i>
+          <span>Rating</span>
+        </a>
+      </li>
       <!-- End Dashboard Nav -->
 
       <?php if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') { ?>
