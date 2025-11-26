@@ -460,6 +460,15 @@ date_default_timezone_set('Asia/Jakarta');
     });
   </script>
 <?php } else { ?>
+  <?php
+  if (isset($_GET['ubahCaraBayar'])) {
+    $ubahCaraBayar = $_GET['carabayar'];
+    $idrawat = $_GET['id'];
+    $koneksi->query("UPDATE registrasi_rawat SET carabayar='$ubahCaraBayar' WHERE idrawat='$idrawat'");
+    echo "<script>alert('Cara Bayar Berhasil Di Ubah');</script>";
+    echo "<script>location='index.php?halaman=daftarbayar&pasienInap';</script>";
+  }
+  ?>
   <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
   <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
@@ -524,7 +533,17 @@ date_default_timezone_set('Asia/Jakarta');
                   <span class="badge <?= $data['apoteker_check_at'] == null ? 'bg-danger' : 'bg-success' ?>" data-bs-toggle="tooltip" title="<?= $data['apoteker_check_at'] ?>"><?= $data['apoteker_check_at'] == null ? 'Belum Skrining' : $data['apoteker_check_at'] ?></span>
                 </td>
                 <td>
-                  <?= $data['carabayar'] ?> <br>
+                  <?php
+                  if ($data['carabayar'] == 'umum') {
+                    $ubahCaraBayar = 'bpjs';
+                  } elseif ($data['carabayar'] == 'bpjs') {
+                    $ubahCaraBayar = 'umum';
+                  }
+                  ?>
+                  <a href="index.php?halaman=daftarbayar&pasienInap&ubahCaraBayar&carabayar=<?= $ubahCaraBayar ?>&id=<?= $data['idrawat'] ?>" onclick="return confirm('Apakah anda yakin ingin mengubah cara bayar ke <?= $ubahCaraBayar ?> ?')" class="badge bg-warning text-light" style="font-size: 12px;">
+                    <?= $data['carabayar'] ?>
+                  </a>
+                  <br>
                   <?php if (isset($_GET['pulang'])) { ?>
                     (<?= $data['keadaan'] ?>)
                   <?php } ?>
