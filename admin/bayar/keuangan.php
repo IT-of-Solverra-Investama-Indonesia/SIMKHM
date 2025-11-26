@@ -143,18 +143,37 @@
                     <td>Rp <?= number_format($totalLab, 0, 0, '.') ?></td>
                 </tr>
                 <?php
-                $getLayanan = $koneksi->query("SELECT layanan, COUNT(*) as JumlahLayanan FROM layanan INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = layanan.idrm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = DATE_FORMAT(layanan.tgl_layanan, '%Y-%m-%d') WHERE perawatan = 'Rawat Jalan' AND DATE_FORMAT(tgl_layanan, '%Y-%m-%d') = '$tanggal' AND registrasi_rawat.shift IN (" . $shift . ") GROUP BY layanan");
+                $getLayanan = $koneksi->query("
+                    SELECT 
+                        layanan.layanan, 
+                        COUNT(*) as JumlahLayanan,
+                        CASE 
+                            WHEN layanan.harga IS NULL OR layanan.harga = '' OR layanan.harga = 0 
+                            THEN COALESCE(master_layanan.harga, 0)
+                            ELSE layanan.harga
+                        END as harga,
+                        (CASE 
+                            WHEN layanan.harga IS NULL OR layanan.harga = '' OR layanan.harga = 0 
+                            THEN COALESCE(master_layanan.harga, 0)
+                            ELSE layanan.harga
+                        END * COUNT(*)) as total_harga
+                    FROM layanan 
+                    INNER JOIN registrasi_rawat 
+                        ON registrasi_rawat.no_rm = layanan.idrm 
+                        AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = DATE_FORMAT(layanan.tgl_layanan, '%Y-%m-%d') 
+                    LEFT JOIN " . $koneksimaster->query("SELECT DATABASE()")->fetch_row()[0] . ".master_layanan 
+                        ON master_layanan.nama_layanan = layanan.layanan
+                    WHERE registrasi_rawat.perawatan = 'Rawat Jalan' 
+                        AND DATE_FORMAT(layanan.tgl_layanan, '%Y-%m-%d') = '$tanggal' 
+                        AND registrasi_rawat.shift IN (" . $shift . ") 
+                    GROUP BY layanan.layanan, layanan.harga, master_layanan.harga
+                ");
                 foreach ($getLayanan as $dataLayanan) {
                 ?>
                     <tr>
                         <td>Layanan/Tindakan <?= $dataLayanan['layanan'] ?></td>
-                        <td>
-                            <?php
-                            $getHargaLayanan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = '$dataLayanan[layanan]'")->fetch_assoc();
-                            ?>
-                            Rp <?= number_format(($getHargaLayanan['harga'] ?? 0) * $dataLayanan['JumlahLayanan'], 0, 0, '.') ?>
-                        </td>
-                        <?php $totalPoli += (($getHargaLayanan['harga'] ?? 0) * $dataLayanan['JumlahLayanan']); ?>
+                        <td>Rp <?= number_format($dataLayanan['total_harga'], 0, 0, '.') ?></td>
+                        <?php $totalPoli += $dataLayanan['total_harga']; ?>
                     </tr>
                 <?php } ?>
                 <tr>
