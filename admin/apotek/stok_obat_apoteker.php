@@ -569,18 +569,24 @@
                             <tr>
                                 <th>Nama</th>
                                 <th>Kode</th>
+                                <th>Pasien</th>
                                 <th>Tanggal</th>
                                 <th>Jumlah Obat</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            $getData = $koneksi->query("SELECT * FROM obat_rm WHERE kode_obat = '$_GET[kode_obat]' AND tgl_pasien <= '$_GET[hinggaTanggal]' ORDER BY tgl_pasien DESC");
+                            $getData = $koneksi->query("SELECT *, (SELECT nama_lengkap FROM pasien WHERE no_rm = obat_rm.idrm) as nama_lengkap FROM obat_rm WHERE kode_obat = '$_GET[kode_obat]' AND tgl_pasien <= '$_GET[hinggaTanggal]' ORDER BY tgl_pasien DESC");
                             foreach ($getData as $data) {
                             ?>
                                 <tr>
                                     <td><?= $data['nama_obat'] ?></td>
                                     <td><?= $data['kode_obat'] ?></td>
+                                    <td>
+                                        <?= $data['nama_lengkap'] ?>
+                                        <br>
+                                        <small>(<?= $data['idrm'] ?>)</small>
+                                    </td>
                                     <td><?= date('Y-m-d', strtotime($data['tgl_pasien'])) ?></td>
                                     <td><?= $data['jml_dokter'] ?></td>
                                 </tr>
@@ -589,7 +595,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3"><b>Total</b></td>
+                                <td colspan="4"><b>Total</b></td>
                                 <td><b><?= $total ?></b></td>
                             </tr>
                         </tfoot>
