@@ -1,4 +1,23 @@
 <?php
+// API Endpoint untuk mendapatkan harga layanan
+if (isset($_GET['api']) && $_GET['api'] == 'get_harga_layanan' && isset($_GET['id_layanan'])) {
+  // Include koneksi database untuk API
+  session_start();
+  include '../dist/function.php';
+
+  header('Content-Type: application/json');
+  $id_layanan = mysqli_real_escape_string($koneksimaster, $_GET['id_layanan']);
+  $getLayanan = $koneksimaster->query("SELECT harga FROM master_layanan WHERE id='$id_layanan'");
+
+  if ($getLayanan && $getLayanan->num_rows > 0) {
+    $layanan = $getLayanan->fetch_assoc();
+    echo json_encode(['success' => true, 'harga' => $layanan['harga']]);
+  } else {
+    echo json_encode(['success' => false, 'message' => 'Layanan tidak ditemukan']);
+  }
+  exit;
+}
+
 $username = $_SESSION['admin']['namalengkap'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $nota = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis='$_GET[id]';")->fetch_assoc();
@@ -95,7 +114,7 @@ $pecah = $pasien->fetch_assoc();
                           <div class="modal-body">
                             <div class="col-md-12">
                               <label for="inputName5" class="form-label">Layanan/Tindakan</label>
-                              <select name="layanan" class="form-control form-control-sm" id="selLay" onchange="SelLay(this)">
+                              <select name="layanan" class="form-control form-control-sm" id="selLay" onchange="getHargaLayanan(this.value)">
                                 <option hidden>Pilih Layanan</option>
                                 <?php
                                 $getLayananMaster = $koneksimaster->query("SELECT * FROM  master_layanan ORDER BY nama_layanan DESC");
@@ -107,9 +126,14 @@ $pecah = $pasien->fetch_assoc();
                                 <?php } ?>
                               </select>
                             </div>
-                            <div class="col-md-12" style="margin-top:0px; height: 0.1px; visibility : hidden;">
-                              <label for="inputName5" class="form-label">Jumlah</label>
-                              <input type="text" name="jumlah_layanan" value="1" class="form-control form-control-sm" id="inputName5" placeholder="Masukkan Jumlah">
+                            <div class="col-md-12" style="margin-top:10px;">
+                              <label for="inputHargaLayanan" class="form-label">Harga</label>
+                              <input type="number" name="harga_layanan" class="form-control form-control-sm" id="inputHargaLayanan" placeholder="Masukkan Harga" readonly>
+                              <small class="text-muted">Harga akan terisi otomatis, tetapi dapat diedit jika diperlukan</small>
+                            </div>
+                            <div class="col-md-12" style="margin-top:10px;">
+                              <label for="inputJumlahLayanan" class="form-label">Jumlah</label>
+                              <input type="number" name="jumlah_layanan" value="1" class="form-control form-control-sm" id="inputJumlahLayanan" placeholder="Masukkan Jumlah">
                             </div>
                             <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>">
                           </div>
@@ -127,10 +151,10 @@ $pecah = $pasien->fetch_assoc();
                     $layanan = $_POST['layanan'];
                     $getLayananMasterById = $koneksimaster->query("SELECT * FROM master_layanan WHERE id='$layanan'")->fetch_assoc();
                     $DaftarLayanan = $nota['biaya_lain'] . "+" . $getLayananMasterById['nama_layanan'];
-                    $HargaLayanan = intval($nota['total_lain']) + $getLayananMasterById['harga'];
+                    $HargaLayanan = intval($nota['total_lain']) + $_POST['harga_layanan'];
                     // $ttlBiyLain = intval($getBiyLain['total_lain']) + intval($_POST['harga_layanan']);
                     $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$DaftarLayanan', total_lain = '$HargaLayanan' WHERE idregis='$_GET[id]'");
-                    $koneksi->query("INSERT INTO layanan (layanan, kode_layanan, jumlah_layanan, id_pasien, idrm, tgl_layanan) VALUES ('$getLayananMasterById[nama_layanan]', '$getLayananMasterById[id]', '1', '$pecah[idpasien]', '$_GET[rm]', '$getRegis[jadwal]')");
+                    $koneksi->query("INSERT INTO layanan (layanan, kode_layanan, harga, jumlah_layanan, id_pasien, idrm, tgl_layanan) VALUES ('$getLayananMasterById[nama_layanan]', '$getLayananMasterById[id]', '$_POST[harga_layanan]', '1', '$pecah[idpasien]', '$_GET[rm]', '$getRegis[jadwal]')");
                     if (isset($_GET['inap'])) {
                       echo "
                             <script>
@@ -347,6 +371,47 @@ $pecah = $pasien->fetch_assoc();
   myModal.addEventListener('shown.bs.modal', function() {
     myInput.focus()
   });
+
+  // Function untuk mendapatkan harga layanan dari API
+  function getHargaLayanan(idLayanan) {
+    if (!idLayanan) {
+      document.getElementById('inputHargaLayanan').value = '';
+      return;
+    }
+
+    // Tampilkan loading
+    const hargaInput = document.getElementById('inputHargaLayanan');
+    hargaInput.value = 'Loading...';
+    hargaInput.readOnly = true;
+
+    // Fetch data dari API
+    fetch('../bayar/bayarrawat.php?api=get_harga_layanan&id_layanan=' + idLayanan)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Set harga dan buat editable
+          hargaInput.value = data.harga;
+          hargaInput.readOnly = false;
+        } else {
+          alert('Gagal mengambil harga layanan: ' + data.message);
+          hargaInput.value = '';
+          hargaInput.readOnly = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengambil harga layanan');
+        hargaInput.value = '';
+        hargaInput.readOnly = false;
+      });
+  }
+
+  // Reset form ketika modal ditutup
+  document.getElementById('exampleModal').addEventListener('hidden.bs.modal', function() {
+    document.getElementById('selLay').value = '';
+    document.getElementById('inputHargaLayanan').value = '';
+    document.getElementById('inputJumlahLayanan').value = '1';
+  });
 </script>
 
 <?php
@@ -358,7 +423,7 @@ if (isset($_POST['simpan'])) {
   $notaNew = $_POST['nota'];
   // $status=$_POST['status'];
   $koneksi->query("UPDATE biaya_rawat SET biaya_lain='$biaya_lain', nota='$notaNew', total_lain='$total_lain', potongan='$potongan', poli = '$_POST[poli]' WHERE idregis='$_GET[id]'");
-  $koneksi->query("UPDATE registrasi_rawat SET kasir='$username', pembayaran_at = '".date('Y-m-d H:i:s')."' WHERE idrawat='$_GET[id]'");
+  $koneksi->query("UPDATE registrasi_rawat SET kasir='$username', pembayaran_at = '" . date('Y-m-d H:i:s') . "' WHERE idrawat='$_GET[id]'");
   echo "
     <script>
       document.location.href='../bayar/printNota.php?id=" . htmlspecialchars($_GET['id']) . "';
