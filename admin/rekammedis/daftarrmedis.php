@@ -25,7 +25,7 @@ if (isset($_POST['src']) && !empty($_POST['key'])) {
 
 if (isset($_GET['inap']) and !isset($_GET['detail'])) {
   // $pasien=$koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE date_format(jadwal, '%Y-%m-%d') = '$date' and (status_antri='Datang' or status_antri='Pembayaran' or status_antri='Selesai') and perawatan ='Rawat Jalan';");
-  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri!='Pulang') and perawatan ='Rawat Inap' ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC");
+  $pasien = $koneksi->query("SELECT *, DATE_FORMAT(jadwal, '%Y-%m-%d') as tgl FROM registrasi_rawat WHERE  (status_antri!='Pulang') and perawatan ='Rawat Inap' ORDER BY CAST(REGEXP_REPLACE(kamar, '[^0-9]', '') AS INT) ASC");
 } elseif (isset($_GET['racik'])) {
   $date_start = date('Y-m-d', strtotime('-1 days'));
   $date_end = date('Y-m-d');
@@ -721,6 +721,15 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <br>
                                   <span style="font-size: 9px;" class="btn btn-sm btn-warning" <?php if ($_SESSION['admin']['level'] == 'sup') { ?> data-bs-toggle="modal" data-bs-target="#updateKamar" onclick="upDataKamar('<?= $pecah['idrawat'] ?>', '<?= $pecah['kamar'] ?>')" <?php } ?>><?= $pecah['kamar'] ?></span>
                                 <?php } ?>
+                                <?php if ($_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'apoteker') { ?>
+                                  <?php
+                                    $getBiaya = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$pecah[idrawat]'")->fetch_assoc();
+                                    if (strpos(($getBiaya['biaya_lain'] ?? ''), 'ODC') !== false) { 
+                                  ?>
+                                    <br>
+                                    <span class="badge bg-info" style="font-size: 9px;">ODC</span>
+                                  <?php } ?>
+                                <?php } ?>
                               </td>
                               <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
                               <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
@@ -828,6 +837,8 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                               <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
                                               <li><a href="index.php?halaman=lpo&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Observasi Perawat</a></li>
                                               <li><a href="index.php?halaman=lpogizi&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit (Gizi)</a></li>
+                                              <li><a href="index.php?halaman=catatanfarmasi&idrawat=<?php echo $pecah["idrawat"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-capsule-pill" style="color: khaki;"></i> Catatan Farmasi</a></li>
+                                              <li><a href="index.php?halaman=catatanlab&idrawat=<?php echo $pecah["idrawat"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eyedropper" style="color:indigo"></i> Catatan Lab</a></li>
                                               <li><a href="index.php?halaman=rekonobat&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-capsule" style="color:orange;"></i> Rekonsiliasi Obat</a></li>
                                               <li><a href="index.php?halaman=asuhangizi&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-medical" style="color:darkblue;"></i> Asuhan Gizi</a></li>
                                               <li><a href="index.php?halaman=edukasi&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-journal-text" style="color:maroon;"></i> Edukasi</a></li>
