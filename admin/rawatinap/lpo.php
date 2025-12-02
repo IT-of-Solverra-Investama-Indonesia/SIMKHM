@@ -122,7 +122,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
         <h1>LAPORAN OBSERVASI PERAWAT</h1>
         <nav>
           <ol class="breadcrumb">
-            <li class="breadcrumb-item active"><a href="index.php?halaman=daftarrmedis" style="color:blue;">Rekam Medis</a></li>
+            <li class="breadcrumb-item active"><a href="index.php?halaman=daftarrmedis" style="color:blue;">Rekam
+                Medis</a></li>
             <li class="breadcrumb-item">Laporan Observasi Perawat</li>
           </ol>
         </nav>
@@ -136,40 +137,60 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                 <div class="card-body col-md-12">
                   <h5 class="card-title">Data Pasien</h5>
                   <h5 class="card-title">
-                    <?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir: <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?> <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK: <?php if ($pasien["jenis_kelamin"] == 1) { echo "Laki-Laki";} else {echo "Perempuan";} ?>
+                    <?php echo $pasien['nama_lengkap'] ?>(<b><?php echo $pasien['no_rm'] ?></b>) | TglLahir:
+                    <?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?> | Alamat: <?php echo $pasien['alamat'] ?>
+                    <br> <?php if (!isset($_GET['igd'])) { ?>Kamar: <?php echo $jadwal['kamar'] ?> |<?php } ?> JK:
+                    <?php if ($pasien["jenis_kelamin"] == 1) {
+                      echo "Laki-Laki";
+                    } else {
+                      echo "Perempuan";
+                    } ?>
                   </h5>
                   <div class="row">
                     <div class="col-md-6" style="margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Nama Pasien</label>
-                      <input type="text" class="form-control" name="pasien" id="inputName5" value="<?php echo $pasien['nama_lengkap'] ?>" placeholder="Masukkan Nama Pasien" readonly>
+                      <input type="text" class="form-control" name="pasien" id="inputName5"
+                        value="<?php echo $pasien['nama_lengkap'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
                     <div class="col-md-6" style="margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">No RM</label>
-                      <input type="text" class="form-control" id="inputName5" name="norm" value="<?php echo $pasien['no_rm'] ?>" placeholder="Masukkan Nama Pasien" readonly>
+                      <input type="text" class="form-control" id="inputName5" name="norm"
+                        value="<?php echo $pasien['no_rm'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
-                    <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
+                    <div class="col-md-6"
+                      style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Tanggal Lahir</label>
-                      <input type="text" class="form-control" id="inputName5" name="tgl_lahir" value="<?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?>" placeholder="Masukkan Nama Pasien" readonly>
+                      <input type="text" class="form-control" id="inputName5" name="tgl_lahir"
+                        value="<?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?>"
+                        placeholder="Masukkan Nama Pasien" readonly>
                     </div>
-                    <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
+                    <div class="col-md-6"
+                      style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                       <label for="inputName5" class="form-label">Alamat</label>
-                      <input type="text" class="form-control" id="inputName5" name="alamat" value="<?php echo $pasien['alamat'] ?>" placeholder="Masukkan Nama Pasien" readonly>
+                      <input type="text" class="form-control" id="inputName5" name="alamat"
+                        value="<?php echo $pasien['alamat'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                     </div>
                     <?php if (!isset($_GET['igd'])) { ?>
-                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
+                      <div class="col-md-6"
+                        style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                         <label for="inputName5" class="form-label">Ruangan</label>
-                        <input type="text" class="form-control" id="inputName5" name="kamar" value="<?php echo $jadwal['kamar'] ?>" placeholder="Masukkan Nama Pasien">
+                        <input type="text" class="form-control" id="inputName5" name="kamar"
+                          value="<?php echo $jadwal['kamar'] ?>" placeholder="Masukkan Nama Pasien">
                       </div>
                     <?php } ?>
                     <?php if ($pasien["jenis_kelamin"] == 1) { ?>
-                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
+                      <div class="col-md-6"
+                        style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                         <label for="inputName5" class="form-label">Jenis Kelamin</label>
-                        <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Laki-laki" placeholder="Masukkan Nama Pasien" readonly>
+                        <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Laki-laki"
+                          placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                     <?php } else { ?>
-                      <div class="col-md-6" style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
+                      <div class="col-md-6"
+                        style="margin-top: 10px; margin-bottom:0px; visibility: hidden; height: 0.01px;">
                         <label for="inputName5" class="form-label">Jenis Kelamin</label>
-                        <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Perempuan" placeholder="Masukkan Nama Pasien" readonly>
+                        <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Perempuan"
+                          placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                     <?php } ?>
                   </div>
@@ -209,7 +230,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     </div>
                     <div class="col-md-6">
                       <label for="">Keluhan Pasien</label>
-                      <textarea name="keluhan_pasien" id="" class="form-control mb-2" placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
+                      <textarea name="keluhan_pasien" id="" class="form-control mb-2"
+                        placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
                     </div>
                     <div class="col-md-6">
                       <label for="">Cairan Infus</label>
@@ -217,7 +239,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     </div>
                     <div class="col-md-6">
                       <label for="">Tindakan</label>
-                      <textarea name="tindakan" id="" class="form-control mb-2" placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
+                      <textarea name="tindakan" id="" class="form-control mb-2"
+                        placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
                     </div>
                     <div class="col-md-6">
                       <label for="">Perawat</label>
@@ -241,8 +264,10 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   <div class="card shadow p-2 mb-1">
                     <label for="">Obat Injeksi </label>
                     <div>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                        data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -275,7 +300,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                           }
                           $noo = 1;
                           foreach ($injek as $in) {
-                          ?>
+                            ?>
                             <tr>
                               <td><?php echo $noo++; ?></td>
                               <td><?php echo $in["nama_obat"]; ?></td>
@@ -285,16 +310,21 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <?php
                                 $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($in['created_at'])) . "' AND nama_obat = '$in[nama_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
                                 ?>
-                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
+                                Rp
+                                <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
                               </td>
                               <td>
                                 Rp <?= number_format($harga * $in['jml_dokter'], 0, 0, '.') ?>
                               </td>
-                              <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?> <?php echo $in["per_obat"]; ?></td>
-                              <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
+                              <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?>
+                                <?php echo $in["per_obat"]; ?>
+                              </td>
+                              <td><?php echo $in["jenis_obat"]; ?>       <?php echo $in["racik"]; ?></td>
                               <td><?php echo $in["durasi_obat"]; ?> hari</td>
                               <td>
-                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
+                                <a target="_blank"
+                                  href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>"
+                                  class="badge bg-warning text-dark" style="font-size: 12px;">
                                   <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
                                 </a>
                               </td>
@@ -302,7 +332,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
                               <td>
                                 <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                  <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                  <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i
+                                      class="bi bi-trash"></i></a>
                                 <?php } else { ?>
                                   <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
                                 <?php } ?>
@@ -319,8 +350,10 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   <div class="card shadow p-2 mb-2">
                     <label for="">Obat Oral</label>
                     <div align="left">
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                        data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -351,7 +384,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                           }
                           $no = 1;
                           foreach ($oral as $or) {
-                          ?>
+                            ?>
                             <tr>
                               <td><?php echo $no++; ?></td>
                               <td><?php echo $or["nama_obat"]; ?></td>
@@ -361,16 +394,21 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <?php
                                 $getPriceInDate = $koneksi->query("SELECT * FROM apotek WHERE tgl_beli <= '" . date('Y-m-d', strtotime($or['created_at'])) . "' AND id_obat = '$or[kode_obat]' ORDER BY tgl_beli DESC LIMIT 1")->fetch_assoc();
                                 ?>
-                                Rp <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
+                                Rp
+                                <?= number_format($harga = $getPriceInDate['harga_beli'] * ($getPriceInDate['margininap'] / 100), 0, 0, '.') ?>
                               </td>
                               <td>
                                 Rp <?= number_format($harga * $or['jml_dokter'], 0, 0, '.') ?>
                               </td>
-                              <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?> <?php echo $or["per_obat"]; ?></td>
-                              <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
+                              <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?>
+                                <?php echo $or["per_obat"]; ?>
+                              </td>
+                              <td><?php echo $or["jenis_obat"]; ?>       <?php echo $or["racik"]; ?></td>
                               <td><?php echo $or["durasi_obat"]; ?> hari</td>
                               <td>
-                                <a target="_blank" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>" class="badge bg-warning text-dark" style="font-size: 12px;">
+                                <a target="_blank"
+                                  href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>"
+                                  class="badge bg-warning text-dark" style="font-size: 12px;">
                                   <?php echo date('Y-m-d', strtotime($or["created_at"])) ?>
                                 </a>
                               </td>
@@ -380,7 +418,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
                               <td>
                                 <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
-                                  <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                  <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i
+                                      class="bi bi-trash"></i></a>
                                 <?php } else { ?>
                                   <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
                                 <?php } ?>
@@ -394,7 +433,10 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                 </div>
                 <div class="col-12">
                   <div class="d-flex justify-content-end mb-4 mt-4">
-                    <a class="btn btn-sm btn-primary" onclick="return confirm('Jika sudah yakin maka tombol tambah obat akan hilang, apakah anda yakin akan menyelesaikan inputan obat ?')" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&apotek=done">Obat Sudah di-Input Semua dan Pasien Boleh Pulang</a>
+                    <a class="btn btn-sm btn-primary"
+                      onclick="return confirm('Jika sudah yakin maka tombol tambah obat akan hilang, apakah anda yakin akan menyelesaikan inputan obat ?')"
+                      href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&apotek=done">Obat Sudah
+                      di-Input Semua dan Pasien Boleh Pulang</a>
                   </div>
                 </div>
                 <div class="col-md-12">
@@ -433,10 +475,15 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <td><?= $jam ?></td>
                               <td>
                                 <?php if (!isset($_GET['igd'])) { ?>
-                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i class="bi bi-eye"></i></a>
-                                  <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone" class="btn btn-sm btn-warning">Copy</a>
+                                  <a class="btn btn-sm btn-primary"
+                                    href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&view=<?= $data['id_lpo'] ?>"><i
+                                      class="bi bi-eye"></i></a>
+                                  <a href="index.php?halaman=lpo&id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&idlpo=<?= $data['id_lpo'] ?>#observasiZone"
+                                    class="btn btn-sm btn-warning">Copy</a>
                                 <?php } else { ?>
-                                  <a class="btn btn-sm btn-primary" href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i class="bi bi-eye"></i></a>
+                                  <a class="btn btn-sm btn-primary"
+                                    href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&igd&view=<?= $data['id_lpo'] ?>&idigd=<?= $_GET['idigd'] ?>"><i
+                                      class="bi bi-eye"></i></a>
                                 <?php } ?>
                               </td>
                             </tr>
@@ -447,11 +494,13 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   </div>
                 </div>
                 <!-- Add Data Modal Obat  Jadi -->
-                <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel"
+                  aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Obat <sup class="badge bg-primary text-light"><a href="<?= getFullUrl() ?>&entriObat=Jadi" class="text-light">NewTab</a></sup></h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Obat <sup class="badge bg-primary text-light"><a
+                              href="<?= getFullUrl() ?>&entriObat=Jadi" class="text-light">NewTab</a></sup></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
@@ -464,7 +513,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                   <label for="inputName5" class="form-label">Nama Obat</label><br>
                                   <input type="text" name="jenis" id="jenis3" hidden>
                                   <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                  <select name="nama_obat[]" class="obat-select form-select mb-2 w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                  <select name="nama_obat[]" class="obat-select form-select mb-2 w-100" style="width:100%;"
+                                    id="selObat1" aria-label="Default select example">
                                     <option value="">Pilih</option>
                                   </select>
                                 </div>
@@ -472,7 +522,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                   <label for="inputName5">Dosis</label>
                                   <div class="input-group">
                                     <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                                    <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X" disabled>X</span>
+                                    <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X"
+                                      disabled>X</span>
                                     <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
                                   </div>
                                 </div>
@@ -485,15 +536,18 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 </div>
                                 <div class="col-md-12">
                                   <label for="">Jumlah Obat</label>
-                                  <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5" placeholder="Jumlah Obat">
+                                  <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
+                                    placeholder="Jumlah Obat">
                                 </div>
                                 <div class="col-md-12">
                                   <label for="inputName5" class="">Petunjuk Pemakaian</label>
-                                  <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                                  <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
+                                    placeholder="Masukkan Petunjuk Pemakaian">
                                 </div>
                                 <div class="col-md-12">
                                   <!-- <label for="inputName5" class="">Catatan Interaksi Obat</label> -->
-                                  <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2" id="inputName5" placeholder="Masukkan Jumlah">
+                                  <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
+                                    id="inputName5" placeholder="Masukkan Jumlah">
                                 </div>
                                 <div class="col-md-12">
                                   <label for="inputName5" class="">Jenis Obat</label>
@@ -505,7 +559,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <div class="col-md-12">
                                   <label for="inputCity" class="">Durasi</label>
                                   <div class="input-group mb-3">
-                                    <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
+                                    <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
+                                      aria-describedby="basic-addon2">
                                     <span class="input-group-text" id="basic-addon2">Hari</span>
                                   </div>
                                 </div>
@@ -522,7 +577,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <div class="control-group2">
                                 <label for="inputName5" class="form-label">Nama Obat</label>
                                 <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                <select name="nama_obat[]" class="obat-select form-select mb-2" id="selObat1" aria-label="Default select example">
+                                <select name="nama_obat[]" class="obat-select form-select mb-2" id="selObat1"
+                                  aria-label="Default select example">
                                   <option value="">Pilih</option>
                                 </select>
 
@@ -531,7 +587,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                     <label for="inputName5" class="">Dosis</label>
                                     <div class="input-group">
                                       <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                                      <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X">X</span>
+                                      <span type="text" style="text-align: center;" class="form-control mb-2"
+                                        placeholder="X">X</span>
                                       <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
                                     </div>
                                   </div>
@@ -545,15 +602,18 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 </div>
                                 <div class="col-md-12">
                                   <label for="">Jumlah Obat</label>
-                                  <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5" placeholder="jumlah obat">
+                                  <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
+                                    placeholder="jumlah obat">
                                 </div>
                                 <div class="col-md-12">
                                   <label for="inputName5">Petunjuk Pemakaian</label>
-                                  <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                                  <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
+                                    placeholder="Masukkan Petunjuk Pemakaian">
                                 </div>
                                 <div class="col-md-12">
                                   <!-- <label for="inputName5">Catatan Interaksi Obat</label> -->
-                                  <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2" id="inputName5" placeholder="Masukkan Jumlah">
+                                  <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
+                                    id="inputName5" placeholder="Masukkan Jumlah">
                                 </div>
                                 <div class="col-md-12">
                                   <label for="inputName5">Jenis Obat</label>
@@ -566,12 +626,15 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <div class="col-md-12">
                                   <label for="inputCity">Durasi</label>
                                   <div class="input-group mb-3">
-                                    <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi" aria-describedby="basic-addon2">
+                                    <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi"
+                                      aria-describedby="basic-addon2">
                                     <span class="input-group-text" id="basic-addon2">Hari</span>
                                   </div>
                                 </div>
-                                <button class="btn btn-danger remove2" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
-                                <button class="btn btn-warning" onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
+                                <button class="btn btn-danger remove2" type="button"><i
+                                    class="glyphicon glyphicon-remove"></i> Batal</button>
+                                <button class="btn btn-warning"
+                                  onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
                                   <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
                                 </button>
                                 <hr>
@@ -580,7 +643,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
 
                             <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
                             <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-                            <input type="hidden" class="form-control" id="inputName5" name="id" value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
+                            <input type="hidden" class="form-control" id="inputName5" name="id"
+                              value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                               <input type="submit" class="btn btn-primary" name="saveobnew" value="Save changes">
@@ -592,14 +656,14 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   </div>
                 </div>
                 <script type="text/javascript">
-                  $(document).ready(function() {
-                    $(".add-more2").click(function() {
+                  $(document).ready(function () {
+                    $(".add-more2").click(function () {
                       var html = $(".copy2").html();
                       $(".after-add-more2").after(html);
                     });
 
                     // saat tombol remove dklik control group akan dihapus 
-                    $("body").on("click", ".remove2", function() {
+                    $("body").on("click", ".remove2", function () {
                       $(this).parents(".control-group2").remove();
                     });
                   });
@@ -607,7 +671,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                 <!-- end -->
 
                 <!-- Add Data Modal Obat Racik -->
-                <div class="modal  fade" role="dialog" id="exampleModal2" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal  fade" role="dialog" id="exampleModal2" aria-labelledby="exampleModalLabel"
+                  aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -623,7 +688,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <div class="col-md-12">
                                   <input hidden type="text" id="jenis2" name="jenis" class="form-control">
                                   <label for="inputName5" class="form-label">Nama Obat</label><br>
-                                  <select name="nama_obat[]" class="obat-select form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
+                                  <select name="nama_obat[]" class="obat-select form-control w-100" style="width:100%;"
+                                    id="selObat1" aria-label="Default select example">
                                     <option value="">Pilih</option>
                                   </select>
                                 </div>
@@ -631,7 +697,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <script></script>
                                 <div class="col-md-12" style="margin-top:20px">
                                   <label for="">Jumlah Obat</label>
-                                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
+                                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
+                                    placeholder="jumlah obat">
                                 </div>
                               </div>
                             </div>
@@ -643,21 +710,25 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <br>
                               <div class="control-group">
                                 <label for="inputName5" class="form-label">Nama Obat</label>
-                                <select name="nama_obat[]" class="obat-select form-control " id="selObat1" aria-label="Default select example">
+                                <select name="nama_obat[]" class="obat-select form-control " id="selObat1"
+                                  aria-label="Default select example">
                                   <option value="">Pilih</option>
                                 </select>
                                 <div class="col-md-12" style="margin-top:20px">
                                   <label for="">Jumlah Obat</label>
-                                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5" placeholder="jumlah obat">
+                                  <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
+                                    placeholder="jumlah obat">
                                 </div>
                                 <br>
-                                <button class="btn btn-danger remove" type="button"><i class="glyphicon glyphicon-remove"></i> Batal</button>
+                                <button class="btn btn-danger remove" type="button"><i
+                                    class="glyphicon glyphicon-remove"></i> Batal</button>
                                 <hr>
                               </div>
                             </div>
                             <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
                               <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
-                              <input type="text" name="catatan_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Jumlah">
+                              <input type="text" name="catatan_obat[]" class="form-control" id="inputName5"
+                                placeholder="Masukkan Jumlah">
                             </div>
                             <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
                               <label for="inputName5" class="form-label">Jenis Obat</label>
@@ -668,7 +739,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                             </div>
                             <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
                               <label for="inputName5" class="form-label">Racik Ke - </label>
-                              <input type="number" name="racik[]" class="form-control" id="inputName5" placeholder="Masukkan racik">
+                              <input type="number" name="racik[]" class="form-control" id="inputName5"
+                                placeholder="Masukkan racik">
                             </div>
                             <label for="inputName5" class="form-label">Dosis</label>
                             <div class="row">
@@ -690,13 +762,15 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                             <div class="col-md-12" style="margin-top:20px">
                               <label for="inputCity" class="form-label">Durasi</label>
                               <div class="input-group mb-3">
-                                <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi" aria-describedby="basic-addon2">
+                                <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
+                                  aria-describedby="basic-addon2">
                                 <span class="input-group-text" id="basic-addon2">Hari</span>
                               </div>
                             </div>
                             <div class="col-md-12" style="margin-top:10px">
                               <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
-                              <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5" placeholder="Masukkan Petunjuk Pemakaian">
+                              <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5"
+                                placeholder="Masukkan Petunjuk Pemakaian">
                             </div>
                             <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
                             <div class="modal-footer">
@@ -710,13 +784,13 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   </div>
                 </div>
                 <script type="text/javascript">
-                  $(document).ready(function() {
-                    $(".add-more").click(function() {
+                  $(document).ready(function () {
+                    $(".add-more").click(function () {
                       var html = $(".copy").html();
                       $(".after-add-more").after(html);
                     });
                     // saat tombol remove dklik control group akan dihapus 
-                    $("body").on("click", ".remove", function() {
+                    $("body").on("click", ".remove", function () {
                       $(this).parents(".control-group").remove();
                     });
                   });
@@ -725,10 +799,11 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
               <?php } else { ?>
                 <div class="card shadow-sm mb-2 p-2">
                   <h5><b>Entri Obat Jadi</b></h5>
-                  <div class="row">
+                  <div class="row g-1">
                     <div class="col-md-2">
                       <label>Nama Obat</label>
-                      <select name="nama_obat" class="obat-select form-control form-control-sm mb-2 w-100" style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
+                      <select name="nama_obat" class="obat-select form-control form-control-sm mb-2 w-100"
+                        style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
                         <option value="">Pilih</option>
                       </select>
                     </div>
@@ -743,7 +818,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <label for="">Dosis</label>
                       <div class="input-group input-group-sm ">
                         <input type="text" class="form-control form-control-sm mb-2" id="dosis1_obat" name="dosis1_obat">
-                        <span type="text" style="text-align: center;" class="form-control form-control-sm mb-2" placeholder="X" disabled>X</span>
+                        <span type="text" style="text-align: center;" class="form-control form-control-sm mb-2"
+                          placeholder="X" disabled>X</span>
                         <input type="text" class="form-control form-control-sm mb-2" id="dosis2_obat" name="dosis2_obat">
                       </div>
                     </div>
@@ -756,12 +832,15 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     </div>
                     <div class="col-md-2">
                       <label for="">Jumlah</label>
-                      <input type="number" name="jml_dokter" class="form-control form-control-sm mb-2" id="inputName5" placeholder="Jumlah Obat">
+                      <input type="number" name="jml_dokter" class="form-control form-control-sm mb-2" id="inputName5"
+                        placeholder="Jumlah Obat">
                     </div>
                     <div class="col-md-2">
                       <label for="inputName5" class="">Petunjuk</label>
-                      <input type="text" name="petunjuk_obat" class="form-control form-control-sm mb-2" id="inputName5" placeholder=" Petunjuk Pemakaian">
-                      <input type="text" name="catatan_obat" value="-" hidden class="form-control form-control-sm mb-2" id="inputName5" placeholder="Masukkan Jumlah">
+                      <input type="text" name="petunjuk_obat" class="form-control form-control-sm mb-2" id="inputName5"
+                        placeholder=" Petunjuk Pemakaian">
+                      <input type="text" name="catatan_obat" value="-" hidden class="form-control form-control-sm mb-2"
+                        id="inputName5" placeholder="Masukkan Jumlah">
                       <select name="jenis_obat" hidden class=" form-control form-control-sm mb-2">
                         <option value="Jadi">Jadi</option>
                       </select>
@@ -769,7 +848,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     <div class="col-md-1">
                       <label for="inputCity" class="">Durasi</label>
                       <div class="input-group mb-3">
-                        <input type="text" name="durasi_obat" class="form-control form-control-sm" placeholder="Durasi" aria-describedby="basic-addon2">
+                        <input type="text" name="durasi_obat" class="form-control form-control-sm" placeholder="Durasi"
+                          aria-describedby="basic-addon2">
                       </div>
                     </div>
                     <div class="col-md-12 text-end">
@@ -821,12 +901,14 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       foreach ($_SESSION['temp_obat'] as $obatSave) {
 
                         // $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '', kode_obat = '', nama_obat = '', jml_dokter = '', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
-
+              
                         $uniqueId = getUniqeIdObat($koneksi);
-                        $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '$_GET[idigd]', obat_igd = '$obatSave[jenis2]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
 
-                        $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-                        $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
+                        $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$id[no_rm]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+
+                        $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $obatSave['id_obat'] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
+
+                        $stokAkhir = $ObatKode['jml_obat'] - $obatSave['jumlah'];
                         $m = $ObatKode['margininap'];
                         if ($m < 100) {
                           $margin = 1.30;
@@ -834,14 +916,16 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                           $margin = $m / 100;
                         }
                         $subtotal = 0;
-                        $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
+                        $harga = $ObatKode['harga_beli'] * $margin * $obatSave['jumlah'];
                         $subtotal += $harga;
                         date_default_timezone_set('Asia/Jakarta');
                         $tanggal = date('Y-m-d');
                         $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-                        $id = $_GET["idrm"];
+                        $id = $id['idrawat'];
                         $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
-                        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '" . $_SESSION['admin']['namalengkap'] . "') ");
+
+                        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$id', '$tanggal', '$biaya', '$harga', '$resep', '" . $_SESSION['admin']['namalengkap'] . "') ");
+
                         // $koneksi->query("INSERT INTO rmedis_obat (id_rm, id_obat, dosis1_obat, dosis2_obat, per_obat, jumlah_obat, petunjuk_obat, catatan_obat, jenis_obat, durasi_obat) VALUES ('" . htmlspecialchars($_GET['id']) . "', '" . $obat['id_obat'] . "', '" . $obat['dosis1_obat'] . "', '" . $obat['dosis2_obat'] . "', '" . $obat['per'] . "', '" . $obat['jumlah'] . "', '" . $obat['petunjuk'] . "', '" . $obat['catatan'] . "', '" . $obat['jenis'] . "', '" . $obat['durasi'] . "')");
                       }
                       unset($_SESSION['temp_obat']);
@@ -883,7 +967,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                 <td><?= $obat['durasi'] ?></td>
                                 <td><?= $obat['jenis2'] ?></td>
                                 <td>
-                                  <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&hapusObatSession=<?= $index ?>" class="btn btn-danger btn-sm">Hapus</a>
+                                  <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&hapusObatSession=<?= $index ?>"
+                                    class="btn btn-danger btn-sm">Hapus</a>
                                 </td>
                               </tr>
                             <?php endforeach; ?>
@@ -896,14 +981,16 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       </table>
                       <?php if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0): ?>
                         <div class="text-end mt-3">
-                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&saveToDatabase" class="btn btn-sm btn-success">Simpan ke Database</a>
-                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&clear_session=true" class="btn btn-sm btn-danger">Bersihkan Session</a>
+                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&saveToDatabase"
+                            class="btn btn-sm btn-success">Simpan ke Database</a>
+                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&clear_session=true"
+                            class="btn btn-sm btn-danger">Bersihkan Session</a>
                         </div>
                       <?php endif; ?>
                     </div>
                   </div>
                   <script>
-                    $(document).ready(function() {
+                    $(document).ready(function () {
                       $('#selectObatJadiEntriObat').select2();
                     });
                   </script>
@@ -1080,7 +1167,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
     echo "<script>alert('Successfully')</script>";
     echo "<script>document.location.href='" . $urlBase . "'</script>";
   }
-  ?>
+?>
 <?php } else { ?>
   <?php $lpo = $koneksi->query("SELECT * FROM lpo WHERE id_lpo = '$_GET[view]'")->fetch_assoc(); ?>
   <!DOCTYPE html>
@@ -1114,7 +1201,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
           <h1>LAPORAN OBSERVASI PERAWAT</h1>
           <nav>
             <ol class="breadcrumb">
-              <li class="breadcrumb-item active"><a href="index.php?halaman=daftarrmedis" style="color:blue;">Rekam Medis</a></li>
+              <li class="breadcrumb-item active"><a href="index.php?halaman=daftarrmedis" style="color:blue;">Rekam
+                  Medis</a></li>
               <li class="breadcrumb-item">Laporan Observasi Perawat</li>
             </ol>
           </nav>
@@ -1126,7 +1214,8 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                 <?php if (isset($_GET['igd'])) { ?>
                   <a href="index.php?halaman=lpo&igd&id=<?= $_GET['id'] ?>&inap" class="btn btn-sm btn-dark">Kembali</a>
                 <?php } else { ?>
-                  <a href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>" class="btn btn-sm btn-dark">Kembali</a>
+                  <a href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>"
+                    class="btn btn-sm btn-dark">Kembali</a>
                 <?php } ?>
                 <div class="card" style="margin-top:10px">
                   <div class="card-body col-md-12">
@@ -1135,35 +1224,43 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     <div class="row">
                       <div class="col-md-6">
                         <label for="inputName5" class="form-label">Nama Pasien</label>
-                        <input type="text" class="form-control" name="pasien" id="inputName5" value="<?php echo $pasien['nama_lengkap'] ?>" placeholder="Masukkan Nama Pasien" readonly>
+                        <input type="text" class="form-control" name="pasien" id="inputName5"
+                          value="<?php echo $pasien['nama_lengkap'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                       <div class="col-md-6" style="margin-bottom:20px;">
                         <label for="inputName5" class="form-label">No RM</label>
-                        <input type="text" class="form-control" id="inputName5" name="norm" value="<?php echo $pasien['no_rm'] ?>" placeholder="Masukkan Nama Pasien" readonly>
+                        <input type="text" class="form-control" id="inputName5" name="norm"
+                          value="<?php echo $pasien['no_rm'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                       <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
                         <label for="inputName5" class="form-label">Tanggal Lahir</label>
-                        <input type="text" class="form-control" id="inputName5" name="tgl_lahir" value="<?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?>" placeholder="Masukkan Nama Pasien" readonly>
+                        <input type="text" class="form-control" id="inputName5" name="tgl_lahir"
+                          value="<?php echo date("d-m-Y", strtotime($pasien['tgl_lahir'])) ?>"
+                          placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                       <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
                         <label for="inputName5" class="form-label">Alamat</label>
-                        <input type="text" class="form-control" id="inputName5" name="alamat" value="<?php echo $pasien['alamat'] ?>" placeholder="Masukkan Nama Pasien" readonly>
+                        <input type="text" class="form-control" id="inputName5" name="alamat"
+                          value="<?php echo $pasien['alamat'] ?>" placeholder="Masukkan Nama Pasien" readonly>
                       </div>
                       <?php if (!isset($_GET['igd'])) { ?>
                         <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
                           <label for="inputName5" class="form-label">Ruangan</label>
-                          <input type="text" class="form-control" id="inputName5" name="kamar" value="<?php echo $jadwal['kamar'] ?>" placeholder="Masukkan Nama Pasien">
+                          <input type="text" class="form-control" id="inputName5" name="kamar"
+                            value="<?php echo $jadwal['kamar'] ?>" placeholder="Masukkan Nama Pasien">
                         </div>
                       <?php } ?>
                       <?php if ($pasien["jenis_kelamin"] == 1) { ?>
                         <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
                           <label for="inputName5" class="form-label">Jenis Kelamin</label>
-                          <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Laki-laki" placeholder="Masukkan Nama Pasien" readonly>
+                          <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Laki-laki"
+                            placeholder="Masukkan Nama Pasien" readonly>
                         </div>
                       <?php } else { ?>
                         <div class="col-md-6" style="margin-top: 10px; margin-bottom:20px;">
                           <label for="inputName5" class="form-label">Jenis Kelamin</label>
-                          <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Perempuan" placeholder="Masukkan Nama Pasien" readonly>
+                          <input type="text" class="form-control" id="inputName5" name="jenis_kelamin" value="Perempuan"
+                            placeholder="Masukkan Nama Pasien" readonly>
                         </div>
                       <?php } ?>
                     </div>
@@ -1175,39 +1272,48 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   <div class="row">
                     <div class="col-md-6">
                       <label for="">Diagnosa</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['diagnosa'] ?>" name="diagnosa" id="" placeholder="Diagnosa">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['diagnosa'] ?>"
+                        name="diagnosa" id="" placeholder="Diagnosa">
                     </div>
                     <div class="col-md-6">
                       <label for="">Tanggal & Waktu</label>
-                      <input type="datetime-local" readonly value="<?= $lpo['tgl_waktu'] ?>" class="form-control mb-3" name="tgl_waktu" id="" placeholder="Tanggal dan Waktu">
+                      <input type="datetime-local" readonly value="<?= $lpo['tgl_waktu'] ?>" class="form-control mb-3"
+                        name="tgl_waktu" id="" placeholder="Tanggal dan Waktu">
                     </div>
                     <div class="col-md-6">
                       <label for="">Tensi Darah</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['tensi'] ?>" name="tensi" id="" placeholder="Tensi Darah">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['tensi'] ?>" name="tensi"
+                        id="" placeholder="Tensi Darah">
                     </div>
                     <div class="col-md-6">
                       <label for="">Suhu Tubuh</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['suhu'] ?>" name="suhu" id="" placeholder="Suhu Tubuh">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['suhu'] ?>" name="suhu" id=""
+                        placeholder="Suhu Tubuh">
                     </div>
                     <div class="col-md-6">
                       <label for="">Cairan Ke</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['cairan'] ?>" name="cairan" id="" placeholder="Cairan Ke">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['cairan'] ?>" name="cairan"
+                        id="" placeholder="Cairan Ke">
                     </div>
                     <div class="col-md-6">
                       <label for="">Volume Cairan</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['volume'] ?>" name="volume" id="" placeholder="Volume Cairan">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['volume'] ?>" name="volume"
+                        id="" placeholder="Volume Cairan">
                     </div>
                     <div class="col-md-6">
                       <label for="">Keadaan Umum</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['keadaan_umum'] ?>" name="keadaan_umum" id="" placeholder="Keadaan Umum">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['keadaan_umum'] ?>"
+                        name="keadaan_umum" id="" placeholder="Keadaan Umum">
                     </div>
                     <div class="col-md-6">
                       <label for="">Keluhan Pasien</label>
-                      <textarea readonly name="keluhan_pasien" id="" class="form-control mb-2" placeholder="Keluahan Pasien"><?= $lpo['keluhan_pasien'] ?></textarea>
+                      <textarea readonly name="keluhan_pasien" id="" class="form-control mb-2"
+                        placeholder="Keluahan Pasien"><?= $lpo['keluhan_pasien'] ?></textarea>
                     </div>
                     <div class="col-md-6">
                       <label for="">Cairan Infus</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['infus'] ?>" name="infus" id="" placeholder="Cairan Infus">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['infus'] ?>" name="infus"
+                        id="" placeholder="Cairan Infus">
                     </div>
                     <!-- <div class="col-md-6">
                                             <label for="">Obat Injeksi</label>
@@ -1219,11 +1325,13 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                                         </div> -->
                     <div class="col-md-6">
                       <label for="">Tindakan</label>
-                      <textarea readonly name="tindakan" id="" class="form-control mb-2" placeholder="Tindakan"><?= $lpo['tindakan'] ?></textarea>
+                      <textarea readonly name="tindakan" id="" class="form-control mb-2"
+                        placeholder="Tindakan"><?= $lpo['tindakan'] ?></textarea>
                     </div>
                     <div class="col-md-6">
                       <label for="">Perawat</label>
-                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['perawat'] ?>" name="perawat" readonly value="<?= $petugas ?>" placeholder="">
+                      <input type="text" class="form-control mb-3" readonly value="<?= $lpo['perawat'] ?>" name="perawat"
+                        readonly value="<?= $petugas ?>" placeholder="">
                     </div>
                   </div>
                 </div>
@@ -1260,15 +1368,17 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
 
                   <?php $no = 1 ?>
 
-                  <?php foreach ($oral as $obat) : ?>
+                  <?php foreach ($oral as $obat): ?>
 
                     <tr>
                       <td><?php echo $no; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["nama_obat"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["kode_obat"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["jml_dokter"]; ?></td>
-                      <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
-                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?php echo $obat["racik"]; ?></td>
+                      <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?>
+                        <?php echo $obat["per_obat"]; ?>
+                      </td>
+                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?>     <?php echo $obat["racik"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
                       <!-- <td style="margin-top:10px;"> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button></td> -->
                     </tr>
@@ -1305,15 +1415,17 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
 
                   <?php $no = 1 ?>
 
-                  <?php foreach ($injek as $obat) : ?>
+                  <?php foreach ($injek as $obat): ?>
 
                     <tr>
                       <td><?php echo $no; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["nama_obat"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["kode_obat"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["jml_dokter"]; ?></td>
-                      <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?> <?php echo $obat["per_obat"]; ?></td>
-                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?php echo $obat["racik"]; ?></td>
+                      <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?>
+                        <?php echo $obat["per_obat"]; ?>
+                      </td>
+                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?>     <?php echo $obat["racik"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
                       <!-- <td style="margin-top:10px;"> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button></td> -->
                     </tr>
