@@ -1,3 +1,43 @@
+<?php
+// API MECHANISM 
+if (isset($_GET['api'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-cache, must-revalidate');
+    if ($_GET['api'] == 'getTotalPerDokter') {
+        include '../dist/function.php';
+        $carabayar = isset($_GET['carabayar']) ? htmlspecialchars(string: $_GET['carabayar']) : 'bpjs';
+        $bulan = isset($_GET['bulan']) ? htmlspecialchars(string: $_GET['bulan']) : date('Y-m');
+        $dokter = isset($_GET['dokter']) ? htmlspecialchars(string: $_GET['dokter']) : '';
+
+        $totalPasien = 0;
+        $total = 0;
+
+        if ($carabayar == 'all') {
+            $whereCaraBayar = "AND (carabayar IN ('bpjs', 'umum', 'malam', 'gigi umum', 'gigi bpjs', 'spesialis anak', 'spesialis penyakit dalam', 'kosmetik'))";
+            $whereCaraBayarR = "AND (r.carabayar IN ('bpjs', 'umum', 'malam', 'gigi umum', 'gigi bpjs', 'spesialis anak', 'spesialis penyakit dalam', 'kosmetik'))";
+        } else {
+            $whereCaraBayar = "AND carabayar = '$carabayar'";
+            $whereCaraBayarR = "AND r.carabayar = '$carabayar'";
+        }
+
+        $getData = $koneksi->query("SELECT DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') AS bulan, registrasi_rawat.*, obat_rm.*, (SELECT harga_beli FROM apotek WHERE id_obat = kode_obat AND DATE_FORMAT(tgl_beli, '%Y-%m') <= '" . htmlspecialchars($_GET['bulan']) . "' ORDER BY idapotek DESC LIMIT 1) AS hpp FROM obat_rm INNER JOIN registrasi_rawat ON DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = obat_rm.tgl_pasien AND registrasi_rawat.no_rm = obat_rm.idrm WHERE DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m') = '" . htmlspecialchars($_GET['bulan']) . "' AND perawatan = 'Rawat Jalan' AND status_antri != 'Belum Datang' " . $whereCaraBayar . " AND dokter_rawat = '" . htmlspecialchars($_GET['dokter']) . "' AND (obat_rm.rekam_medis_id IS NOT NULL OR obat_rm.rekam_medis_id != '')");
+
+        foreach ($getData as $data) {
+            $total += (intval($data['hpp']) ?? 0) * (intval($data['jml_dokter']) ?? 0);
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'total' => $total
+            ]
+        ]);
+    }
+    exit();
+}
+// END API MECHANISM
+?>
+
 <?php if (!isset($_GET['detail'])) { ?>
     <div class="card shadow p-2 mb-2">
         <form method="get">
@@ -68,7 +108,7 @@
                 //     GROUP BY DATE_FORMAT(jadwal, '%Y-%m'), dokter_rawat
                 //     ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, dokter_rawat;
                 // ";
-                
+
                 $query = "
                     SELECT DATE_FORMAT(jadwal, '%Y-%m') as bulan,
                         dokter_rawat,
@@ -152,12 +192,18 @@
                             <td><?= $dokter ?></td>
                             <td><?= $data['jumlahpasien'] ?> Pasien</td>
                             <td>
-                                <a href="index.php?halaman=dashboard_detail&rataObatPasienBPJSperBulan=&bulan=<?= $bulanSaatIni ?>&carabayar=<?= $carabayar ?>&dokter=<?= $dokter ?>&detail=detailTotal" class="badge bg-warning" style="font-size: 12px;">
-                                    <?= number_format($total, 0, 0, '.') ?>
+                                <a href="index.php?halaman=dashboard_detail&rataObatPasienBPJSperBulan=&bulan=<?= $bulanSaatIni ?>&carabayar=<?= $carabayar ?>&dokter=<?= $dokter ?>&detail=detailTotal"
+                                    class="badge bg-warning badge-api-total"
+                                    style="font-size: 12px;"
+                                    data-bulan="<?= $bulanSaatIni ?>"
+                                    data-dokter="<?= $dokter ?>"
+                                    data-carabayar="<?= $carabayar ?>"
+                                    data-pasien="<?= $data['jumlahpasien'] ?>">
+                                    <span class="spinner-border spinner-border-sm"></span>
                                 </a>
                             </td>
-                            <td>
-                                <?= number_format($total / $data['jumlahpasien'], 0, 0, '.') ?>
+                            <td class="td-rata-api">
+                                <span class="spinner-border spinner-border-sm"></span>
                             </td>
                         </tr>
                         <?php
@@ -178,11 +224,75 @@
             </table>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const badges = document.querySelectorAll('.badge-api-total');
+
+            badges.forEach(function(badge) {
+                const bulan = badge.getAttribute('data-bulan');
+                const dokter = badge.getAttribute('data-dokter');
+                const carabayar = badge.getAttribute('data-carabayar');
+                const jumlahPasien = parseInt(badge.getAttribute('data-pasien'));
+                const rataCell = badge.closest('tr').querySelector('.td-rata-api');
+
+                // Build URL
+                const params = new URLSearchParams({
+                    api: 'getTotalPerDokter',
+                    bulan: bulan,
+                    dokter: dokter,
+                    carabayar: carabayar
+                });
+
+                const url = '../dashboard/dashboard_detail_rataObatPasienBPJSperBulan.php?' + params.toString();
+
+                // AJAX request menggunakan XMLHttpRequest (mirip CURL)
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+
+                            if (response.status === 'success') {
+                                const total = response.data.total;
+                                const rataRata = Math.round(total / jumlahPasien);
+
+                                // Format angka Indonesia
+                                badge.textContent = total.toLocaleString('id-ID');
+                                rataCell.textContent = rataRata.toLocaleString('id-ID');
+                            } else {
+                                badge.textContent = 'Error';
+                                rataCell.textContent = 'Error';
+                            }
+                        } catch (e) {
+                            console.error('Parse error:', e);
+                            badge.textContent = 'Error';
+                            rataCell.textContent = 'Error';
+                        }
+                    } else {
+                        badge.textContent = 'Error';
+                        rataCell.textContent = 'Error';
+                    }
+                };
+
+                xhr.onerror = function() {
+                    console.error('Network error');
+                    badge.textContent = 'Error';
+                    rataCell.textContent = 'Error';
+                };
+
+                xhr.send();
+            });
+        });
+    </script>
 <?php } else { ?>
     <?php if (htmlspecialchars($_GET['detail']) == 'detailTotal') { ?>
         <?php
-            $carabayar = isset($_GET['carabayar']) ? htmlspecialchars($_GET['carabayar']) : 'bpjs';
-        ?> 
+        $carabayar = isset($_GET['carabayar']) ? htmlspecialchars($_GET['carabayar']) : 'bpjs';
+        ?>
         <div class="card shadow p-2">
             <div class="card-header">
                 <h5 class="card-title text-capitalize">Detail Total Obat Pasien <?= $carabayar ?> <?= date('F Y', strtotime($_GET['bulan'])) ?></h5>
