@@ -209,6 +209,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                       <th>Pemeriksaan</th>
                       <th>Lab</th>
                       <th>Diagnosis</th>
+                      <th>Layanan</th>
                       <th>Pemeriksaan Fisik</th>
                       <th>Obat</th>
                     </tr>
@@ -278,6 +279,16 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           </table>
                         </td>
                         <td><?= $data['diagnosis'] ?></td>
+                        <td>
+                          <?php
+                          $getLastIdRawat = $koneksi->query("SELECT * FROM registrasi_rawat WHERE REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'  AND jadwal = '$data[jadwal]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+                          $getPembayaran = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$getLastIdRawat[idrawat]'")->fetch_assoc();
+                          $listTindakan = array_filter(explode('+', string: $getPembayaran['biaya_lain']));
+                          foreach ($listTindakan as $item) {
+                            echo "- " . $item . "<br>";
+                          }
+                          ?>
+                        </td>
                         <td>
                           <!-- Button trigger modal -->
                           <?php
