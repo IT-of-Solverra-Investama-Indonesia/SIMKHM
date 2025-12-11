@@ -42,34 +42,77 @@ if (isset($_GET['confirm'])) {
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script>
     $(document).ready(function() {
-      // Fungsi untuk melakukan permintaan AJAX dengan tanggal tertentu
-      function fetchAntrian(tanggal) {
+      // Fungsi untuk fetch antrian reguler
+      function fetchAntrianReguler(tanggal) {
+        // Validasi input tanggal
+        if (!tanggal || tanggal.trim() === '') {
+          $('#antrian').html('<option value="">Silahkan Pilih Antrian</option>');
+          return;
+        }
+
+        // Tampilkan loading untuk antrian reguler
+        $('#loadingText').show();
+        $('#antrian').prop('disabled', true);
+        $('#antrian').html('<option value="">Memuat antrian...</option>');
+
         $.ajax({
           url: '../../pasien/antrian_api.php',
           type: 'POST',
           data: {
-            tanggal: tanggal
+            tanggal: tanggal,
+            jenis: true
           },
           success: function(response) {
-            $('#antrian').html(response);
-          }
+            // Sembunyikan loading
+            $('#loadingText').hide();
+            $('#antrian').prop('disabled', false);
+
+            // Cek apakah response kosong atau hanya whitespace
+            if (response && response.trim() !== '') {
+              $('#antrian').html(response);
+            } else {
+              $('#antrian').html('<option value="">Tidak ada antrian tersedia</option>');
+            }
+          },
+          error: function(xhr, status, error) {
+            // Sembunyikan loading dan tampilkan error
+            $('#loadingText').hide();
+            $('#antrian').prop('disabled', false);
+            $('#antrian').html('<option value="">Error memuat antrian</option>');
+            console.error('Error:', error);
+          },
+          timeout: 30000
         });
+
+        // Trigger update untuk antrian spesialis jika sedang aktif
+        var carabayarVal = $('#carabayarr').val();
+        if (carabayarVal === 'spesialis anak' ||
+          carabayarVal === 'spesialis penyakit dalam' ||
+          carabayarVal === 'gigi umum' ||
+          carabayarVal === 'gigi bpjs') {
+          // Panggil fungsi global jika sudah terdefinisi
+          if (typeof window.fetchAntrianSpesialis === 'function') {
+            window.fetchAntrianSpesialis(carabayarVal);
+          }
+        }
       }
 
-      // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
-      var today = new Date();
-      var year = today.getFullYear();
-      var month = String(today.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
-      var day = String(today.getDate()).padStart(2, '0');
-      var formattedToday = year + '-' + month + '-' + day;
+      // Fetch antrian saat halaman pertama kali dimuat dengan tanggal dari input jadwal
+      var initialJadwal = $('#jadwal').val();
+      if (initialJadwal) {
+        // Ambil hanya bagian tanggal dari datetime-local (format: YYYY-MM-DDTHH:mm)
+        var initialTanggal = initialJadwal.split('T')[0];
+        fetchAntrianReguler(initialTanggal);
+      }
 
-      // Memanggil fungsi fetchAntrian dengan tanggal hari ini saat halaman dimuat
-      fetchAntrian(formattedToday);
-
-      // Menambahkan event listener untuk perubahan pada elemen dengan ID 'jadwal'
+      // Event listener untuk perubahan jadwal
       $('#jadwal').change(function() {
         var tanggal = $(this).val();
-        fetchAntrian(tanggal);
+        if (tanggal) {
+          // Ambil hanya bagian tanggal
+          tanggal = tanggal.split('T')[0];
+        }
+        fetchAntrianReguler(tanggal);
       });
     });
   </script>
@@ -137,7 +180,6 @@ if (isset($_GET['confirm'])) {
                 <div class="card-body">
                   <h5 class="card-title">Jenis Pendaftaran</h5>
                   <form class="row g-3" method="post" enctype="multipart/form-data">
-
                     <div class="col-md-12">
                       <label for="inputState" class="form-label">Jenis Kunjungan</label><br>
                       <input required type="radio" name="jenis_kunjungan" value="Kunjungan Sakit" checked>
@@ -174,31 +216,6 @@ if (isset($_GET['confirm'])) {
                         <option value="kosmetik">kosmetik</option>
                       </select>
                     </div>
-                    <!-- <div class="col-md-12">
-                      <label for="inputState" class="form-label">Keluhan</label>
-                      <textarea name="keluhan_utama" id="" class="form-control"></textarea>
-                    </div> -->
-                    <!-- <div class="hidden" id="kamar">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <label for="inputState" class="form-label">Kamar / Ruangan</label> -->
-                    <!-- <input type="text" class="form-control" value="" name="kamar"> -->
-                    <!-- <select name="kamar" class="form-select" id="">
-                        <option hidden>Pilih Kamar</option>
-                        <?php
-                        $getKamar = $koneksi->query("SELECT * FROM kamar LIMIT 10");
-                        foreach ($getKamar as $kamar) {
-                        ?>
-                          <?php $cekKamar = $koneksi->query("SELECT COUNT(*) as jumlah FROM registrasi_rawat WHERE kamar = '$kamar[namakamar]' and status_antri != 'Pulang'")->fetch_assoc(); ?>
-                          <?php if ($cekKamar['jumlah'] == 0) { ?>
-                            <option value="<?= $kamar['namakamar'] ?>"><?= $kamar['namakamar'] ?></option>
-                          <?php } else { ?>
-                          <?php } ?>
-                        <?php } ?>
-                      </select>
-                    </div>
-                  </div>
-                </div> -->
                     <script>
                       document.getElementById('pilihan').addEventListener('change', function() {
                         var formAn = document.getElementById('ant');
@@ -211,58 +228,86 @@ if (isset($_GET['confirm'])) {
                           formAn.style.display = 'block';
                         }
                       });
-                      document.getElementById('carabayarr').addEventListener('change', function() {
-                        var pilihan = document.getElementById('ant');
-                        var newAnt = document.getElementById('antNew');
-                        var antrianNewInput = document.getElementById('antrianNew');
-                        var val = this.value;
-                        if (
-                          val === 'spesialis anak' ||
-                          val === 'spesialis penyakit dalam' ||
-                          val === 'gigi umum' ||
-                          val === 'gigi bpjs'
-                        ) {
-                          pilihan.style.display = 'none';
-                          newAnt.style.display = 'block';
+                      // Fungsi helper untuk cek apakah cara bayar adalah spesialis
+                      function isCarabayarSpesialis(carabayar) {
+                        return carabayar === 'spesialis anak' ||
+                          carabayar === 'spesialis penyakit dalam' ||
+                          carabayar === 'gigi umum' ||
+                          carabayar === 'gigi bpjs';
+                      }
+
+                      // Fungsi untuk mendapatkan tanggal dari input jadwal atau default hari ini
+                      function getFormattedDate() {
+                        var jadwalInput = document.getElementById('jadwal').value;
+
+                        if (jadwalInput) {
+                          return jadwalInput.split('T')[0];
+                        } else {
                           var today = new Date();
                           var year = today.getFullYear();
                           var month = String(today.getMonth() + 1).padStart(2, '0');
                           var day = String(today.getDate()).padStart(2, '0');
-                          var formattedToday = year + '-' + month + '-' + day;
-
-                          // Pastikan input tersedia sebelum AJAX
-                          if (antrianNewInput) {
-                            $.ajax({
-                              url: '../rawatjalan/api_getAntrian.php',
-                              type: 'GET',
-                              dataType: 'json',
-                              data: {
-                                getAntrian: '',
-                                carabayar: val,
-                                tanggal: formattedToday,
-                                shift : '<?= $_SESSION['shift'] ?>'
-                              },
-                              success: function(res) {
-                                // Pastikan response JSON
-                                if (res.status === "success" && res.data && res.data.antrian) {
-                                  antrianNewInput.value = res.data.antrian;
-                                } else {
-                                  antrianNewInput.value = '001';
-                                }
-                              },
-                              error: function(xhr, status, error) {
-                                antrianNewInput.value = '001';
-                                console.error('AJAX Error:', status, error);
-                              }
-                            });
-                          }
-
-                        } else {
-                          newAnt.style.display = 'none';
-                          pilihan.style.display = 'block';
-                          antrianNewInput.value = '';
+                          return year + '-' + month + '-' + day;
                         }
-                      });
+                      }
+
+                      // Fungsi untuk fetch antrian dari API (dibuat global agar bisa diakses dari jQuery)
+                      window.fetchAntrianSpesialis = function(carabayar) {
+                        var antrianNewInput = document.getElementById('antrianNew');
+                        var formattedDate = getFormattedDate();
+
+                        if (antrianNewInput) {
+                          $.ajax({
+                            url: '../rawatjalan/api_getAntrian.php',
+                            type: 'GET',
+                            dataType: 'json',
+                            data: {
+                              getAntrian: '',
+                              carabayar: carabayar,
+                              tanggal: formattedDate,
+                              <?php if (isset($_GET['book'])) { ?>
+                                jenis: 'booking',
+                              <?php } ?>
+                              shift: '<?= $_SESSION['shift'] ?>'
+                            },
+                            success: function(res) {
+                              if (res.status === "success" && res.data && res.data.antrian) {
+                                antrianNewInput.value = res.data.antrian;
+                              } else {
+                                antrianNewInput.value = '001';
+                              }
+                            },
+                            error: function(xhr, status, error) {
+                              antrianNewInput.value = '001';
+                              console.error('AJAX Error:', status, error);
+                            }
+                          });
+                        }
+                      }
+
+                      // Event listener untuk perubahan cara bayar
+                      var carabayarrElem = document.getElementById('carabayarr');
+                      if (carabayarrElem) {
+                        carabayarrElem.addEventListener('change', function() {
+                          var pilihan = document.getElementById('ant');
+                          var newAnt = document.getElementById('antNew');
+                          var antrianNewInput = document.getElementById('antrianNew');
+                          var val = this.value;
+
+                          if (isCarabayarSpesialis(val)) {
+                            pilihan.style.display = 'none';
+                            newAnt.style.display = 'block';
+                            fetchAntrianSpesialis(val);
+                          } else {
+                            newAnt.style.display = 'none';
+                            pilihan.style.display = 'block';
+                            antrianNewInput.value = '';
+                          }
+                        });
+                      }
+
+                      // Event listener untuk jadwal tidak perlu lagi karena sudah ditangani di jQuery
+                      // Logic fetch antrian spesialis dipanggil dari jQuery event handler
                     </script>
 
                     <div>
@@ -292,18 +337,13 @@ if (isset($_GET['confirm'])) {
                         date_default_timezone_set('Asia/Jakarta');
                         $date = date('Ymd') + 0;
                         $time = date('Hi') - 300;
-                        //var_dump($time);
 
-                        $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat WHERE registrasi_rawat.kode = tgltab.kode) AND tgl=$date AND jam>=$time AND shift='$sif' ORDER BY tgltab.no ASC");
-                        //   $k = $koneksi->query("SELECT * FROM tgltab WHERE tgl>=$tg AND jam>$time ORDER BY tgltab.no ASC");
+                        // $k = mysqli_query($koneksi, "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat WHERE registrasi_rawat.kode = tgltab.kode) AND NOT EXISTS(SELECT antrian FROM registrasi_booking WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d') . "' AND registrasi_booking.kode = tgltab.kode) AND tgl=$date AND jam>=$time AND shift='$sif' ORDER BY tgltab.no ASC");
+                        // 
                         ?>
                         <option value="" width="40">Silahkan Pilih Antrian</option>
-                        <?php foreach ($k as $row3) { ?>
-                          <option value="<?php echo $row3['urut']; ?>" width="40"><?php echo $row3['ket']; ?> </option>
-                        <?php } ?>
+
                       </select>
-                      <!-- <?= $time ?>
-                  <?= $tg ?> -->
                     </div>
                     <div class="col-md-6" id="rjkk" style="display: none;">
                       <label for="inputName5" class="form-label">Perujuk</label>
@@ -347,7 +387,7 @@ if (isset($_GET['confirm'])) {
 
                     <div class="col-md-6">
                       <label for="inputName5" class="form-label">Jadwal</label>
-                      <input type="datetime" class="form-control" name="jadwal" value="<?= date("Y-m-d H:i:s") ?>" placeholder="Masukkan Nama Pasien">
+                      <input type="datetime-local" id="jadwal" class="form-control" name="jadwal" value="<?= date("Y-m-d H:i:s") ?>" placeholder="Masukkan Nama Pasien">
                     </div>
                     <div class="col-md-12">
                       <label for="inputState" class="form-label">Dokter</label>
@@ -410,7 +450,11 @@ if (isset($_GET['confirm'])) {
                     </div>
 
                     <div class="text-center" style="margin-top: 50px; margin-bottom: 80px;">
-                      <button type="submit" name="save" class="btn btn-primary">Simpan</button>
+                      <?php if (!isset($_GET['book'])) { ?>
+                        <button type="submit" name="save" class="btn btn-primary">Simpan</button>
+                      <?php } elseif (isset($_GET['book'])) { ?>
+                        <button type="submit" name="booking" class="btn btn-primary">Booking</button>
+                      <?php } ?>
                       <button type="reset" class="btn btn-secondary">Reset</button>
                     </div>
                   </form><!-- End Multi Columns Form -->
@@ -445,7 +489,7 @@ if (isset($_POST['save'])) {
   $jadwal = isset($_POST["jadwal"]) ? htmlspecialchars($_POST["jadwal"]) : '';
   $antrian = isset($_POST["antrian"]) ? htmlspecialchars($_POST["antrian"]) : '';
 
-  if($_POST['carabayar'] == 'spesialis anak' || $_POST['carabayar'] == 'spesialis penyakit dalam' || $_POST['carabayar'] == 'gigi umum' || $_POST['carabayar'] == 'gigi bpjs'){
+  if ($_POST['carabayar'] == 'spesialis anak' || $_POST['carabayar'] == 'spesialis penyakit dalam' || $_POST['carabayar'] == 'gigi umum' || $_POST['carabayar'] == 'gigi bpjs') {
     $antrian = $_POST['antrianNew'] ?? '';
   }
   $id_get = isset($_GET['id']) ? $_GET['id'] : '';
@@ -537,6 +581,117 @@ if (isset($_POST['save'])) {
     echo "<script>
             alert('Data berhasil didaftarkan!');
             window.location.href='index.php?halaman=daftarregistrasi&day';
+        </script>";
+  } else {
+    echo "<script>
+            alert('Data berhasil didaftarkan!');
+            window.location.href='index.php?halaman=daftarigd';
+        </script>";
+  }
+}
+
+if (isset($_POST['booking'])) {
+  $id_pasien = isset($_POST["id_pasien"]) ? htmlspecialchars($_POST["id_pasien"]) : '';
+  $jenis_kunjungan = isset($_POST["jenis_kunjungan"]) ? htmlspecialchars($_POST["jenis_kunjungan"]) : '';
+  $no_rm = isset($_POST["no_rm"]) ? htmlspecialchars($_POST["no_rm"]) : '';
+  $nama_pasien = isset($_POST["nama_pasien"]) ? htmlspecialchars($_POST["nama_pasien"]) : '';
+  $dokter_rawat = isset($_POST["dokter_rawat"]) ? htmlspecialchars($_POST["dokter_rawat"]) : '';
+  $perawatan = isset($_POST["perawatan"]) ? htmlspecialchars($_POST["perawatan"]) : '';
+  $jadwal = isset($_POST["jadwal"]) ? htmlspecialchars($_POST["jadwal"]) : '';
+  $antrian = isset($_POST["antrian"]) ? htmlspecialchars($_POST["antrian"]) : '';
+
+  if ($_POST['carabayar'] == 'spesialis anak' || $_POST['carabayar'] == 'spesialis penyakit dalam' || $_POST['carabayar'] == 'gigi umum' || $_POST['carabayar'] == 'gigi bpjs') {
+    $antrian = $_POST['antrianNew'] ?? '';
+  }
+  $id_get = isset($_GET['id']) ? $_GET['id'] : '';
+
+  // Periksa apakah pasien sudah terdaftar hari ini
+  $cekDouble = $koneksi->query("SELECT * FROM registrasi_booking WHERE id_pasien = '$id_pasien' AND jadwal LIKE '%" . date('Y-m-d', strtotime($jadwal)) . "%'");
+  if (!$cekDouble) {
+    die("Query Error: " . $koneksi->error);
+  }
+
+  if ($cekDouble->num_rows != 0 && !isset($_GET['confirm'])) {
+    echo "<script>
+        var confirmRegister = confirm('Pasien sudah pernah didaftarkan hari ini, apakah Anda ingin mendaftarkannya lagi?');
+        if (confirmRegister) {
+            window.location.href = window.location.href + '&confirm=yes';
+        } else {
+            window.location.href = 'index.php?halaman=registrasirawat&book&id=$id_get';
+        }
+    </script>";
+    exit(); // Hentikan PHP agar tidak langsung insert
+  }
+
+  $tgl = date('Ymd', strtotime($jadwal)) + 0;
+  $kode = $tgl . "+" . $antrian;
+
+  if ($perawatan == "Rawat Inap") {
+    $perujuk = isset($_POST['perujuk']) ? htmlspecialchars($_POST['perujuk']) : '';
+    if ($perujuk == 'Baru') {
+      $perujuk = isset($_POST['perujuk_baru']) ? htmlspecialchars($_POST['perujuk_baru']) : '';
+      $perujuk_hp = isset($_POST['perujuk_hp']) ? htmlspecialchars($_POST['perujuk_hp']) : '';
+    } else {
+      $getPerujuk = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk = '$perujuk' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+      $perujuk_hp = $getPerujuk['perujuk_hp'];
+    }
+
+    $perujuk_file = isset($_FILES['perujuk_file']) ? $_FILES['perujuk_file'] : null;
+    $uniqueName = '';
+    if ($perujuk_file && $perujuk_file['error'] == UPLOAD_ERR_OK) {
+      $uploadDir = '../rawatinap/perujuk_bukti/';
+      if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+      }
+      $ext = strtolower(pathinfo($perujuk_file['name'], PATHINFO_EXTENSION));
+      $uniqueName = uniqid('perujuk_', true) . ($ext ? '.' . $ext : '');
+      $uploadFile = $uploadDir . $uniqueName;
+
+      // Kompres gambar hingga di bawah 100 KB
+      if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+        $tmpPath = $perujuk_file['tmp_name'];
+        $maxSize = 100 * 1024; // 100 KB
+        $quality = 20; // Awal kualitas
+
+        if ($ext == 'jpg' || $ext == 'jpeg') {
+          $img = imagecreatefromjpeg($tmpPath);
+          do {
+            ob_start();
+            imagejpeg($img, null, $quality);
+            $imgData = ob_get_clean();
+            $size = strlen($imgData);
+            $quality -= 5;
+          } while ($size > $maxSize && $quality > 5);
+          file_put_contents($uploadFile, $imgData);
+          imagedestroy($img);
+        } elseif ($ext == 'png') {
+          $img = imagecreatefrompng($tmpPath);
+          $compression = 9;
+          do {
+            ob_start();
+            imagepng($img, null, $compression);
+            $imgData = ob_get_clean();
+            $size = strlen($imgData);
+            $compression++;
+          } while ($size > $maxSize && $compression <= 9);
+          file_put_contents($uploadFile, $imgData);
+          imagedestroy($img);
+        }
+      } else {
+        move_uploaded_file($perujuk_file['tmp_name'], $uploadFile);
+      }
+    } else {
+      $uploadFile = '';
+    }
+    $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk, perujuk, perujuk_hp, perujuk_file) VALUES ('$nama_pasien','$no_rm', '$jadwal', '$perujuk', '$perujuk_hp', '$uniqueName')");
+  } else {
+    $koneksi->query("INSERT INTO registrasi_booking (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, kode, petugaspoli, kategori) VALUES ('$nama_pasien', '$dokter_rawat', '$perawatan', '$_POST[kamar]', '$jenis_kunjungan', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]', '$shift', '$kode', '$poli', 'offline')");
+  }
+
+  if ($perawatan == "Rawat Jalan") {
+    echo "<script>
+            alert('Data berhasil didaftarkan!');
+            window.location.href='index.php?halaman=daftarpasien';
         </script>";
   } else {
     echo "<script>
