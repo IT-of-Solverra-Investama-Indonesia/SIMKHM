@@ -31,7 +31,7 @@ if (isset($_GET['day'])) {
 
   if (isset($_GET['carabayarlike'])) {
     $queryPasien = "SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Jalan' AND date_format(jadwal, '%Y-%m-%d') = '$date' AND shift = '" . $_SESSION['shift'] . "' AND carabayar LIKE '%$_GET[carabayarlike]%' " . $queryKey . " ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC, FIELD(LEFT(antrian, 1), 'M', 'S', 'P'), CAST(SUBSTRING(antrian, 2) AS UNSIGNED) DESC, idrawat DESC";
-    $linkPage = "index.php?halaman=daftarregistrasi&day&carabayarlike=".htmlspecialchars($_GET['carabayarlike']);
+    $linkPage = "index.php?halaman=daftarregistrasi&day&carabayarlike=" . htmlspecialchars($_GET['carabayarlike']);
   }
 } elseif (isset($_GET['all'])) {
   $limit = 1;
@@ -168,6 +168,7 @@ if (isset($_GET['detail'])) {
                       <th>Pemeriksaan</th>
                       <th>Lab</th>
                       <th>Diagnosis</th>
+                      <th>Layanan</th>
                       <th>Pemeriksaan Fisik</th>
                       <th>Obat</th>
                     </tr>
@@ -237,6 +238,16 @@ if (isset($_GET['detail'])) {
                           </table>
                         </td>
                         <td><?= $data['diagnosis'] ?></td>
+                        <td>
+                          <?php
+                          $getLastIdRawat = $koneksi->query("SELECT * FROM registrasi_rawat WHERE REPLACE(REPLACE(REPLACE(no_rm, '\t', ' '), '  ', ' '), '  ', ' ')  = '$_GET[detail]'  AND jadwal = '$data[jadwal]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+                          $getPembayaran = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$getLastIdRawat[idrawat]'")->fetch_assoc();
+                          $listTindakan = array_filter(explode('+', string: $getPembayaran['biaya_lain']));
+                          foreach ($listTindakan as $item) {
+                            echo "- " . $item . "<br>";
+                          }
+                          ?>
+                        </td>
                         <td>
                           <!-- Button trigger modal -->
                           <?php
