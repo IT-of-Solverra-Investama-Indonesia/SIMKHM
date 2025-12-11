@@ -214,7 +214,7 @@ include '../dist/function.php';
                             let text = '';
                             let elementId = '';
 
-                            if (['umum', 'bpjs', 'malam'].includes(antrian.tipe)) {
+                            if (['umum', 'bpjs', 'malam', 'kosmetik'].includes(antrian.tipe)) {
                                 if (antrian.status === 'Dokter') {
                                     text = `.......AAntrian Poli Umum nomor ${antrian.antrian}. Silahkan menuju ke ruang dokter umum`;
                                     elementId = 'dokter-umum-nomor';
