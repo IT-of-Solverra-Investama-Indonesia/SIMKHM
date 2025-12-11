@@ -602,13 +602,19 @@ if (isset($_SESSION['shift'])) {
 }
 
 // Query untuk mendapatkan antrian yang tersedia pada tanggal tersebut
-$query = "SELECT kode, urut, ket FROM tgltab 
-            WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
-                            WHERE registrasi_rawat.kode = tgltab.kode) 
-            AND tgl=$date AND jam>=$time $whereShiftCondition
-            ORDER BY tgltab.no ASC";
+if(!isset($_POST['jenis'])){
+    $query = "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
+    WHERE registrasi_rawat.kode = tgltab.kode) 
+    AND NOT EXISTS(SELECT antrian FROM registrasi_booking WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($date)) . "' AND registrasi_booking.kode = tgltab.kode) 
+    AND tgl=$date AND jam>=$time $whereShiftCondition ORDER BY tgltab.no ASC";
+}elseif(isset($_POST['jenis'])){
+    $query = "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
+    WHERE registrasi_rawat.kode = tgltab.kode) 
+    AND NOT EXISTS(SELECT antrian FROM registrasi_booking WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($date)) . "' AND registrasi_booking.kode = tgltab.kode) 
+    AND tgl=$date $whereShiftCondition ORDER BY tgltab.no ASC";
+}
 
-    $result = mysqli_query($koneksi, $query);
+$result = mysqli_query($koneksi, $query);
 
     // Buat opsi untuk dropdown antrian
     $options = '<option value="">Silahkan Pilih Antrian</option>';
