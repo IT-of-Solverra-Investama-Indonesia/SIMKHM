@@ -150,7 +150,7 @@ function getAntrianAktif()
         $query = "
             SELECT 
                 CASE 
-                    WHEN tipe IN ('umum', 'bpjs', 'malam') THEN 'umum'
+                    WHEN tipe IN ('umum', 'bpjs', 'malam', 'kosmetik') THEN 'umum'
                     WHEN tipe IN ('gigi umum', 'gigi bpjs') THEN 'gigi'
                     WHEN tipe IN ('spesialis anak', 'spesialis penyakit dalam') THEN 'spesialis'
                     ELSE 'lain'
