@@ -60,14 +60,16 @@ if (isset($_GET['confirm'])) {
           type: 'POST',
           data: {
             tanggal: tanggal,
-            jenis: true
+            <?php if (isset($_GET['book'])) { ?>
+              jenis: true
+            <?php } ?>
           },
           success: function(response) {
             // Sembunyikan loading
             $('#loadingText').hide();
             $('#antrian').prop('disabled', false);
 
-            // Cek apakah response kosong atau hanya whitespace
+            // Cek apakah response kosong atau hanya whitespaceq
             if (response && response.trim() !== '') {
               $('#antrian').html(response);
             } else {
