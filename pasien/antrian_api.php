@@ -1,4 +1,5 @@
 <?php
+session_start();
     // Lakukan koneksi ke database dan setel zona waktu
     include 'function.php'; // Sesuaikan dengan file koneksi yang sesuai dengan konfigurasi database kamu
     date_default_timezone_set("Asia/Jakarta");
