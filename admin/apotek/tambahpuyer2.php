@@ -107,7 +107,7 @@ $obat=$koneksimaster->query("SELECT * FROM puyer;");
   $ambil=$koneksimaster->query("SELECT * FROM puyer join puyer_detail on puyer.id=puyer_detail.id_puyer where puyer.id='$_POST[nama_obat]' ");
         foreach($ambil as $pecah){
           $catatan_obat = $pecah['ctt_paket'];
-          $nama = $pecah['nama_obat'];
+          
           $jml_dokter = $pecah['jml_obat'];
           $dosis1_obat = $pecah['dosis_paket1'];
           $dosis2_obat = $pecah['dosis_paket2'];
@@ -122,8 +122,8 @@ $obat=$koneksimaster->query("SELECT * FROM puyer;");
 
           // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
           
-          $getKodeObat = $koneksimaster->query("SELECT * FROM master_obat WHERE obat_master = '$nama' LIMIT 1")->fetch_assoc();
-
+          $getKodeObat = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$pecah[kode_obat]' LIMIT 1")->fetch_assoc();
+          $nama = $getKodeObat['obat_master'];
           $koneksi->query("INSERT INTO obat_rm SET
               catatan_obat    = '$catatan_obat',
               nama_obat      = '$nama',
