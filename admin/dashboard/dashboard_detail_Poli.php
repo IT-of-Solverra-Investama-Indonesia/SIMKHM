@@ -1,8 +1,8 @@
 <?php if (!isset($_GET['detail_type'])) { ?>
     <?php
-    $bulanSaatIni = date('y/m');
 
-    $bulan6Lalu = date('y/m', strtotime('-6 months'));
+    $bulanSaatIni = isset($_GET['date_start']) ? date('y/m', strtotime($_GET['date_start'])) : date('y/m');
+    $bulan6Lalu = isset($_GET['date_end']) ? date('y/m', strtotime($_GET['date_end'])) : date('y/m', strtotime('-6 months'));
 
     $koneksi->query("DROP TABLE hari");
     $koneksi->query(" 
@@ -79,6 +79,37 @@
 
     $randomToken = encrypt("Solverra Investama", $key, $iv);
     ?>
+    <div class="card p-2 mb-2">
+        <form method="get">
+            <input hidden type="text" name="halaman" value="dashboard_detail" id="">
+            <input hidden type="text" name="Poli" value="" id="">
+            <div class="row g-1">
+                <div class="col-5">
+                    <?php
+                    $input = $bulanSaatIni;
+                    list($day, $month) = explode('/', $input);
+                    $year = date('Y'); // atau gunakan date('Y') untuk tahun sekarang
+                    $output = sprintf('%04d-%02d', $year, (int)$month);
+                    // echo $output; // Output: 2025-06
+                    ?>
+                    <input type="text" placeholder="Dari Bulan" onclick="this.type='month'" onfocus="this.type='month'" onblur="this.type='text'" class="form-control form-control-sm" name="date_start" id="" value="<?= $output ?>">
+                </div>
+                <div class="col-5">
+                    <?php
+                    $input = $bulan6Lalu;
+                    list($day, $month) = explode('/', $input);
+                    $year = date('Y'); // atau gunakan date('Y') untuk tahun sekarang
+                    $output = sprintf('%04d-%02d', $year, (int)$month);
+                    // echo $output; // Output: 2025-06
+                    ?>
+                    <input type="text" placeholder="Sampai Bulan" onclick="this.type='month'" onfocus="this.type='month'" onblur="this.type='text'" class="form-control form-control-sm" name="date_end" id="" value="<?= $output ?>">
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-sm btn-primary w-100" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="card p-2">
         <b> Poli Daerah klik <a href="?halaman=polidaerah">disini</a></b>
         <div href="index.php?halaman=poli">
