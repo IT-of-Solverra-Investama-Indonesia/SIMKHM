@@ -14,6 +14,36 @@ function getFullUrl()
 
   return $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 }
+
+if (isset($_POST['tagTeman'])) {
+  $temanPerawatIds = $_POST['temanPerawat']; // Array of selected nurse IDs
+  $getLastCtt = $koneksi->query("SELECT *, COUNT(id) as total FROM ctt_penyakit_inap WHERE norm='$_GET[id]' order by id DESC LIMIT 1")->fetch_assoc();
+
+  if ($getLastCtt['total'] == 0) {
+    echo "
+      <script>
+        alert('Tidak ada catatan perkembangan penyakit untuk di tag');
+        document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+      </script>
+    ";
+    exit();
+  }
+
+  // Loop through each selected nurse and insert separately
+  foreach ($temanPerawatIds as $temanPerawatId) {
+    $getTeman = $koneksi->query("SELECT * FROM admin WHERE idadmin = '$temanPerawatId'")->fetch_assoc();
+    $petugasName = $getTeman['namalengkap'];
+
+    $koneksi->query("INSERT INTO ctt_penyakit_inap(tgl, norm, ctt_dokter, ctt_tedis, petugas, kamar, pasien, ctt_penyakit_inap.object, alergi, assesment, plan, intruksi, edukasi, dokter) VALUES ('$getLastCtt[tgl]', '$_GET[id]','$getLastCtt[ctt_dokter]', '" . $koneksi->real_escape_string($getLastCtt['ctt_tedis']) . "', '$petugasName', '$getLastCtt[kamar]', '$getLastCtt[pasien]', '" . $koneksi->real_escape_string($getLastCtt['object']) . "', '" . $koneksi->real_escape_string($getLastCtt['alergi']) . "', '" . $koneksi->real_escape_string($getLastCtt['assesment']) . "', '" . $koneksi->real_escape_string($getLastCtt['plan']) . "', '" . $koneksi->real_escape_string($getLastCtt['intruksi']) . "', '" . $koneksi->real_escape_string($getLastCtt['edukasi']) . "','" . $_SESSION['dokter_rawat'] . "')");
+  }
+  echo "
+    <script>
+      alert('Berhasil menandai teman perawat pada catatan perkembangan penyakit.');
+      document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+    </script>
+  ";
+  exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -111,7 +141,7 @@ function getFullUrl()
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="inputName5" class="form-label">Subject</label>
                       <textarea name="ctt_tedis" id="editor" style="width:100%; height:150px">
-                          <?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) { ?>
+                          <?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) { ?>
                             <?= $getDataCopy['ctt_tedis'] ?>
                           <?php } ?>
                       </textarea>
@@ -120,21 +150,21 @@ function getFullUrl()
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="inputName5" class="form-label">Object</label>
                       <textarea name="object" id="editor2" style="width:100%; height:150px">
-                          <?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) { ?>
+                          <?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) { ?>
                             <?= $getDataCopy['object'] ?>
                           <?php } ?>
                       </textarea>
                     </div>
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="">Alergi</label>
-                      <input type="text" name="alergi" id="" class="form-control" value="<?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) {
+                      <input type="text" name="alergi" id="" class="form-control" value="<?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) {
                                                                                             echo $getDataCopy['alergi'];
                                                                                           } ?>" placeholder="Alergi Obat" style="width:100%; height:50px">
                     </div>
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="">Assesment</label>
                       <textarea name="assesment" id="editor3" style="width:100%; height:150px">
-                        <?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) { ?>
+                        <?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) { ?>
                           <?= $getDataCopy['assesment'] ?>
                         <?php } ?>
                       </textarea>
@@ -142,7 +172,7 @@ function getFullUrl()
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="">Plan</label>
                       <textarea name="plan" id="editor4" style="width:100%; height:150px">
-                        <?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) { ?>
+                        <?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) { ?>
                           <?= $getDataCopy['plan'] ?>
                         <?php } ?>
                       </textarea>
@@ -150,7 +180,7 @@ function getFullUrl()
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="">Intruksi</label>
                       <textarea name="intruksi" id="editor5" style="width:100%; height:150px">
-                        <?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) { ?>
+                        <?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) { ?>
                           <?= $getDataCopy['intruksi'] ?>
                         <?php } ?>
                       </textarea>
@@ -158,7 +188,7 @@ function getFullUrl()
                     <div class="col-md-6" style="margin-top:20px;">
                       <label for="">Edukasi</label>
                       <textarea name="edukasi" id="editor6" style="width:100%; height:150px">
-                        <?php if (isset($_GET['ctt']) OR isset($_GET['ubah'])) { ?>
+                        <?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) { ?>
                           <?= $getDataCopy['edukasi'] ?>
                         <?php } ?>
                       </textarea>
@@ -170,11 +200,11 @@ function getFullUrl()
                   </div>
                 </div>
                 <div class="text-center" style="margin-top: -10px; margin-bottom: 40px;">
-                  <?php if(isset($_GET['ubah'])){?>
+                  <?php if (isset($_GET['ubah'])) { ?>
                     <button type="submit" name="update" class="btn btn-success">Update</button>
-                  <?php }else{?>
+                  <?php } else { ?>
                     <button type="submit" name="save" class="btn btn-primary">Simpan</button>
-                  <?php }?>
+                  <?php } ?>
                   <button type="reset" class="btn btn-secondary">Reset</button>
                 </div>
               </div>
@@ -189,6 +219,44 @@ function getFullUrl()
           <div class="card" style="margin-top:10px">
             <div class="card-body col-md-12">
               <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP</h5>
+              <!-- Modal Tag Teman Perawat -->
+              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button>
+              <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Tag Teman Perawat</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post">
+                      <div class="modal-body">
+                        <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
+                        <select name="temanPerawat[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
+                          <?php
+                          $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('perawat', 'inap', 'igd') ORDER BY namalengkap ASC");
+                          foreach ($getPerawat as $perawat) :
+                          ?>
+                            <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" name="tagTeman" class="btn btn-sm btn-primary">Tag Teman Perawat</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <br>
+              Daftar perawat yang ikut merawat pasien : <br>
+              <?php
+              $getcppt = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[id]' GROUP BY petugas ORDER BY id DESC");
+              foreach ($getcppt as $cppt) :
+              ?>
+                <span class="badge bg-success text-capitalize"><?= $cppt['petugas'] ?></span>
+              <?php endforeach; ?>
+              <!-- End Modal Tag Teman Perawat -->
               <div class="table-responsive">
                 <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
                   <thead>
@@ -209,7 +277,7 @@ function getFullUrl()
                   </thead>
                   <tbody>
                     <?php $no = 1;
-                    $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' order by id DESC");
+                    $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' GROUP BY tgl order by id DESC");
                     ?>
                     <?php foreach ($riw as $pecah) : ?>
                       <tr>
@@ -241,8 +309,8 @@ function getFullUrl()
         </div>
       </div>
     </div>
-  </div>
-  </div>
+    </div>
+    </div>
 
   </main>
   <!-- End #main -->
@@ -284,8 +352,24 @@ function getFullUrl()
 
 
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+<!-- Select2 CDN -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
 
+<!-- Initialize Select2 -->
+<script>
+  $(document).ready(function() {
+    $('#selectTemanPerawatCtt').select2({
+      placeholder: "Pilih Teman Perawat",
+      allowClear: true,
+      width: '100%',
+      dropdownParent: $('#tagTeman')
+    });
+  });
+</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
