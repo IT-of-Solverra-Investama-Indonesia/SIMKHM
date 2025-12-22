@@ -64,7 +64,7 @@ $daftar = $koneksimaster->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_
 
           // Tambahkan option baru
           newOptions.forEach(obat => {
-            select.add(new Option(obat.nama_obat, obat.nama_obat));
+            select.add(new Option(obat.nama_obat, obat.kode_obat));
           });
 
           // Kembalikan nilai yang dipilih sebelumnya (jika masih ada)
@@ -170,7 +170,7 @@ $daftar = $koneksimaster->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_
                                           <div class="col-md-12">
                                             <label for="inputName5" class="form-label">Nama Obat</label><br>
                                             <select name="nama_obat" class="obat-select form-control w-100" style="width:100%;" id="selObat1" aria-label="Default select example">
-                                              <option value="<?php echo $pecah["nama_obat"]; ?>"><?php echo $pecah["nama_obat"]; ?></option>
+                                              <option value="<?php echo $pecah["kode_obat"]; ?>"><?php echo $pecah["nama_obat"]; ?></option>
                                             </select>
                                             <br>
                                           </div>
@@ -266,15 +266,12 @@ $daftar = $koneksimaster->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_
 
 
 <?php if (isset($_POST['saveobat'])) {
+  $getSingle = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$_POST[nama_obat]'")->fetch_assoc();
 
   $koneksimaster->query("INSERT INTO puyer_detail 
-
-  (nama_obat, jml_obat, id_puyer)
-
-  VALUES ('$_POST[nama_obat]', '$_POST[jml_obat]', '$_GET[id]')
-
+  (nama_obat, kode_obat, jml_obat, id_puyer)
+  VALUES ('$getSingle[obat_master]', '$getSingle[kode_obat]', '$_POST[jml_obat]', '$_GET[id]')
   ");
-
   echo "
     <script>
     alert('Data berhasil ditambah');
@@ -285,10 +282,12 @@ $daftar = $koneksimaster->query("SELECT * FROM puyer_detail WHERE id_puyer = '$_
 } ?>
 
 <?php if (isset($_POST['editobat'])) {
+  $getSingle = $koneksimaster->query("SELECT * FROM master_obat WHERE kode_obat = '$_POST[nama_obat]'")->fetch_assoc();
 
   $koneksimaster->query("UPDATE puyer_detail SET
 
-    nama_obat      = '$_POST[nama_obat]',
+    nama_obat      = '$getSingle[obat_master]',
+    kode_obat      = '$getSingle[kode_obat]',
     jml_obat      = '$_POST[jml_obat]'
     WHERE id = '$_POST[id]'
   ");
