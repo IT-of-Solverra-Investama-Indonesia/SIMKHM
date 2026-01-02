@@ -6,7 +6,7 @@ $level = $_SESSION['admin']['level'];
 $shift = $_SESSION['shift'];
 $dokter = $_SESSION['dokter_rawat'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
-$igd = $koneksi->query("SELECT * FROM igd WHERE idigd='".htmlspecialchars($_GET['id'])."';");
+$igd = $koneksi->query("SELECT * FROM igd WHERE idigd='" . htmlspecialchars($_GET['id']) . "';");
 $igd = $igd->fetch_assoc();
 $pasien = $koneksi->query("SELECT * FROM pasien INNER JOIN kajian_awal WHERE idpasien='$_GET[id]' AND no_rm = norm;");
 $pecah = $pasien->fetch_assoc();
@@ -29,6 +29,13 @@ $pecah = $pasien->fetch_assoc();
   </style>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script rel="javascript" type="text/javascript" href="js/jquery-1.11.3.min.js"></script>
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 
 <body>
@@ -422,13 +429,36 @@ $pecah = $pasien->fetch_assoc();
                               </select>
                             </div>
                           </div>
+                          <div class="row g-1">
+                            <div class="col-12">
+                              <label for="inputName5" class="form-label">Tag Nama Teman</label>
+                              <select name="teman[]" class="form-select form-select-sm" id="selectTeman" multiple="multiple" style="width: 100%;">
+                                <?php
+                                $getUser = $koneksi->query("SELECT * FROM admin WHERE level = 'inap' OR level = 'igd' OR level = 'perawat'");
+                                $currentUser = $_SESSION['admin']['namalengkap'];
+                                foreach ($getUser as $user) {
+                                  $selected = ($user['namalengkap'] == $currentUser AND $user['level'] == $_SESSION['admin']['level']) ? 'selected' : '';
+                                ?>
+                                  <option value="<?= $user['namalengkap'] ?>" <?= $selected ?>><?= $user['namalengkap'] ?> (<?= $user['level'] ?>)</option>
+                                <?php } ?>
+                              </select>
+                            </div>
+                          </div>
+                          <script>
+                            $(document).ready(function() {
+                              $('#selectTeman').select2({
+                                placeholder: 'Pilih Nama Teman',
+                                allowClear: true,
+                              });
+                            });
+                          </script>
                         </div>
 
                         <div class="col-md-12" style="margin-top:5px;">
                           <label for="inputName5" class="form-label">Perawat Yang Mengkaji </label>
                           <input type="text" name="perawat" id="" class="form-control" value="<?= $username ?>">
                         </div>
-                        
+
                         <div style="margin-bottom:2px; margin-top:30px">
                           <hr>
                           <h5 class="card-title">Asesmen Medis</h5>
@@ -649,12 +679,22 @@ if (isset($_POST['save'])) {
     $getLast = $koneksi->query("SELECT * FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
     $idrawat = $getLast['idrawat'] + 1;
 
-    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp, perujuk_file) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '".$tgl_masuk.date(' H:i:s')."', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$igd[perujuk]', '$igd[perujuk_hp]', '$igd[perujuk_file]')");
+    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, perawat, perujuk, perujuk_hp, perujuk_file) VALUES ('$idrawat', '$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '" . $tgl_masuk . date(' H:i:s') . "', '', 'Belum Datang', '$_POST[carabayar]', '$shift', '" . $_SESSION['admin']['username'] . "', '$igd[perujuk]', '$igd[perujuk_hp]', '$igd[perujuk_file]')");
 
     $tgl = date('Y-m-d');
 
     $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$idrawat', '$tgl', 'BHP IGD', '10000') ");
     $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran) VALUES ('$idrawat', '$tgl', 'Dokter IGD', '25000') ");
+
+    if (isset($_POST['teman']) && is_array($_POST['teman'])) {
+      $shift = isset($_SESSION['shift']) ? $_SESSION['shift'] : '';
+
+      // Loop through each selected user and insert into database
+      foreach ($_POST['teman'] as $petugas) {
+        $petugas = htmlspecialchars($petugas);
+        $koneksi->query("INSERT INTO kajian_awal_inap_tag (idrawat, petugas, shift) VALUES ('$idrawat', '$petugas', '$shift')");
+      }
+    }
   }
   // }
 
