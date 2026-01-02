@@ -17,7 +17,7 @@ function getFullUrl()
 
 if (isset($_POST['tagTeman'])) {
   $temanPerawatIds = $_POST['temanPerawat']; // Array of selected nurse IDs
-  $getLastCtt = $koneksi->query("SELECT *, COUNT(id) as total FROM ctt_penyakit_inap WHERE norm='$_GET[id]' order by id DESC LIMIT 1")->fetch_assoc();
+  $getLastCtt = $koneksi->query("SELECT *, COUNT(id) as total FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND id = '$_POST[id]' order by id DESC LIMIT 1")->fetch_assoc();
 
   if ($getLastCtt['total'] == 0) {
     echo "
@@ -220,7 +220,7 @@ if (isset($_POST['tagTeman'])) {
             <div class="card-body col-md-12">
               <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP</h5>
               <!-- Modal Tag Teman Perawat -->
-              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button>
+              <!-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button> -->
               <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
@@ -230,6 +230,7 @@ if (isset($_POST['tagTeman'])) {
                     </div>
                     <form method="post">
                       <div class="modal-body">
+                        <input type="text" name="id" id="id_id" hidden>
                         <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
                         <select name="temanPerawat[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
                           <?php
@@ -248,14 +249,12 @@ if (isset($_POST['tagTeman'])) {
                   </div>
                 </div>
               </div>
+              <script>
+                function upDataId(id) {
+                  document.getElementById('id_id').value = id;
+                }
+              </script>
               <br>
-              Daftar perawat yang ikut merawat pasien : <br>
-              <?php
-              $getcppt = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[id]' GROUP BY petugas ORDER BY id DESC");
-              foreach ($getcppt as $cppt) :
-              ?>
-                <span class="badge bg-success text-capitalize"><?= $cppt['petugas'] ?></span>
-              <?php endforeach; ?>
               <!-- End Modal Tag Teman Perawat -->
               <div class="table-responsive">
                 <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
@@ -282,20 +281,29 @@ if (isset($_POST['tagTeman'])) {
                     <?php foreach ($riw as $pecah) : ?>
                       <tr>
                         <td><?php echo $no; ?></td>
-                        <td style="margin-top:10px;"><?php echo $pecah["tgl"]; ?></td>
-                        <td style="margin-top:10px;"><?php echo $pecah["ctt_tedis"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["object"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["alergi"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["assesment"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["plan"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["intruksi"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["edukasi"]; ?> </td>
-                        <td style="margin-top:10px;"><?php echo $pecah["petugas"]; ?></td>
-                        <td style="margin-top:10px;"><?php echo $pecah["dokter"]; ?></td>
-                        <td style="margin-top:10px;">
+                        <td>
+                          <?php echo $pecah["tgl"]; ?>
+                          <?php
+                          $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
+                          foreach ($getTagCount as $tag) {
+                            echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
+                          }
+                          ?>
+                        </td>
+                        <td><?php echo $pecah["ctt_tedis"]; ?> </td>
+                        <td><?php echo $pecah["object"]; ?> </td>
+                        <td><?php echo $pecah["alergi"]; ?> </td>
+                        <td><?php echo $pecah["assesment"]; ?> </td>
+                        <td><?php echo $pecah["plan"]; ?> </td>
+                        <td><?php echo $pecah["intruksi"]; ?> </td>
+                        <td><?php echo $pecah["edukasi"]; ?> </td>
+                        <td><?php echo $pecah["petugas"]; ?></td>
+                        <td><?php echo $pecah["dokter"]; ?></td>
+                        <td>
+                          <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
                           <?php if ($pecah['petugas'] === $petugas) { ?>
-                            <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="btn btn-success btn-sm">Edit</a>
-                            <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="btn btn-sm btn-warning">Copy</a>
+                            <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                            <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
                           <?php } ?>
                         </td>
                       </tr>
