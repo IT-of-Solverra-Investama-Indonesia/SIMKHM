@@ -752,7 +752,7 @@ date_default_timezone_set("asia/jakarta");
                   Riwayat Kajian Awal
                 </h5>
                 <div>
-                  <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag</button>
+                  <!-- <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag</button> -->
                   <br>
                   <?php
                     $getTag = $koneksi->query("SELECT * FROM kajian_awal_inap_tag WHERE idrawat = '$_GET[id]'");
@@ -827,28 +827,7 @@ date_default_timezone_set("asia/jakarta");
         </div>
         <div class="modal-body">
           <form method="post">
-            <div class="row g-1">
-              <div class="col-12">
-                <label for="inputName5" class="form-label">Tag Nama Teman</label>
-                <select name="teman[]" class="form-select form-select-sm" id="selectTeman" multiple="multiple" style="width: 100%;">
-                  <?php
-                  $getUser = $koneksi->query("SELECT * FROM admin WHERE level = 'inap' OR level = 'igd' OR level = 'perawat'");
-                  foreach ($getUser as $user) {
-                  ?>
-                    <option value="<?= $user['namalengkap'] ?>"><?= $user['namalengkap'] ?> (<?= $user['level'] ?>)</option>
-                  <?php } ?>
-                </select>
-              </div>
-            </div>
-            <script>
-              $(document).ready(function() {
-                $('#selectTeman').select2({
-                  placeholder: 'Pilih Nama Teman',
-                  allowClear: true,
-                  dropdownParent: $('#tagTeman')
-                });
-              });
-            </script>
+            
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="submit" name="tag_teman" class="btn btn-primary">Simpan Tag</button>
@@ -864,36 +843,6 @@ date_default_timezone_set("asia/jakarta");
 
 
 <?php
-
-if (isset($_POST['tag_teman'])) {
-  if (isset($_POST['teman']) && is_array($_POST['teman'])) {
-    $idrawat = $_GET['id'];
-    $shift = isset($_SESSION['shift']) ? $_SESSION['shift'] : '';
-    
-    // Loop through each selected user and insert into database
-    foreach ($_POST['teman'] as $petugas) {
-      $petugas = htmlspecialchars($petugas);
-      $koneksi->query("INSERT INTO kajian_awal_inap_tag (idrawat, petugas, shift) VALUES ('$idrawat', '$petugas', '$shift')");
-    }
-    
-    if (mysqli_affected_rows($koneksi) > 0) {
-      echo "
-      <script>
-      alert('Tag berhasil disimpan');
-      document.location.href='index.php?halaman=resumeinap&id=$idrawat&norm=$_GET[norm]';
-      </script>
-      ";
-    } else {
-      echo "
-      <script>
-      alert('Gagal menyimpan tag');
-      document.location.href='index.php?halaman=resumeinap&id=$idrawat&norm=$_GET[norm]';
-      </script>
-      ";
-    }
-  }
-}
-
 if (isset($_POST['save'])) {
   // $anatomi = $_FILES["anatomi"]["name"];
   // $lokasi_sementara = $_FILES["anatomi"]["tmp_name"];
@@ -971,7 +920,7 @@ if (isset($_POST['save'])) {
 
   //   ");
 
-  $koneksi->query("INSERT INTO kajian_awal_inap_tag (idrawat, petugas, shift) VALUES ('$_GET[id]', '".$_SESSION['admin']['namalengkap']."', '".$_SESSION['shift']."')");
+  // $koneksi->query("INSERT INTO kajian_awal_inap_tag (idrawat, petugas, shift) VALUES ('$_GET[id]', '".$_SESSION['admin']['namalengkap']."', '".$_SESSION['shift']."')");
   $koneksi->query("INSERT INTO log_user 
 
     (status_log, username_admin, idadmin)
