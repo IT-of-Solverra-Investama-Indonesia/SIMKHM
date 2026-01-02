@@ -46,7 +46,7 @@
             <div class="row g-1">
                 <div class="col-md-6">
                     <div class="card shadow p-2">
-                        <h6><b>Perawatan</b></h6>
+                        <h6><b>Perawat Mengisi/Tag IGD</b></h6>
                         <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
                             <thead>
                                 <tr>
@@ -82,7 +82,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="card shadow p-2">
-                        <h6><b>Perawatan IGD</b></h6>
+                        <h6><b>Perawatan Mengisi/Tag Catatatan Penyakit</b></h6>
                         <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
                             <thead>
                                 <tr>
@@ -94,7 +94,7 @@
                             <tbody>
                                 <?php
                                 $totalPasienIGD = 0;
-                                $getDataIGD = $koneksi->query("SELECT DATE_FORMAT(jadwal, '%M %Y') as Bulan, perawat as Petugas, COUNT(no_rm) as jumlahPasien FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND DATE_FORMAT(jadwal, '%Y-%m') >= '$month_start' AND DATE_FORMAT(jadwal, '%Y-%m') <= '$month_end' GROUP BY DATE_FORMAT(jadwal, '%Y-%m'), perawat ORDER BY DATE_FORMAT(jadwal, '%Y-%m') DESC, perawat ASC");
+                                $getDataIGD = $koneksi->query("SELECT DATE_FORMAT(cpi.tgl, '%M %Y') as Bulan, cpi.petugas as Petugas, COUNT(*) as jumlahPasien FROM ctt_penyakit_inap cpi WHERE DATE_FORMAT(cpi.tgl, '%Y-%m') >= '$month_start' AND DATE_FORMAT(cpi.tgl, '%Y-%m') <= '$month_end' GROUP BY DATE_FORMAT(cpi.tgl, '%Y-%m'), cpi.petugas ORDER BY DATE_FORMAT(cpi.tgl, '%Y-%m') DESC, cpi.petugas ASC");
                                 foreach ($getDataIGD as $dataIGD) {
                                 ?>
                                     <tr>
@@ -174,21 +174,21 @@
                                 <th>No</th>
                                 <th>Petugas</th>
                                 <th>Pasien</th>
-                                <th>Jadwal Pasien</th>
+                                <th>Input Pada</th>
                                 <th>Dokter</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $no = 1;
-                            $getDetail = $koneksi->query("SELECT DATE_FORMAT(jadwal, '%M %Y') as Bulan, perawat as Petugas, nama_pasien, jadwal, dokter_rawat FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND DATE_FORMAT(jadwal, '%Y-%m') >= '$month_start' AND DATE_FORMAT(jadwal, '%Y-%m') <= '$month_end' AND perawat = '$detailPetugas' ORDER BY DATE_FORMAT(jadwal, '%Y-%m-%d') DESC");
+                            $getDetail = $koneksi->query("SELECT cpi.tgl, cpi.petugas as Petugas, cpi.pasien as nama_pasien, cpi.tgl, cpi.dokter as dokter_rawat FROM ctt_penyakit_inap cpi WHERE DATE_FORMAT(cpi.tgl, '%Y-%m') >= '$month_start' AND DATE_FORMAT(cpi.tgl, '%Y-%m') <= '$month_end' AND cpi.petugas = '$detailPetugas' ORDER BY cpi.tgl DESC");
                             foreach ($getDetail as $detail) {
                             ?>
                                 <tr>
                                     <td><?= $no++ ?></td>
                                     <td><?= $detail['Petugas'] ?></td>
                                     <td><?= $detail['nama_pasien'] ?></td>
-                                    <td><?= $detail['jadwal'] ?></td>
+                                    <td><?= $detail['tgl'] ?></td>
                                     <td><?= $detail['dokter_rawat'] ?></td>
                                 </tr>
                             <?php } ?>
