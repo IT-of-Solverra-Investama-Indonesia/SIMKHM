@@ -44,6 +44,19 @@ if (isset($_POST['tagTeman'])) {
   ";
   exit();
 }
+
+if(isset($_GET['delete'])){
+  // $koneksi->query("DELETE FROM ctt_penyakit_inap WHERE id='$_GET[ctt]'");
+  $getCttToDelete = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE id='$_GET[ctt]'")->fetch_assoc();
+  $koneksi->query("DELETE FROM ctt_penyakit_inap WHERE norm='$getCttToDelete[norm]' AND tgl='$getCttToDelete[tgl]'");
+  echo "
+    <script>
+      alert('Berhasil menghapus catatan perkembangan penyakit.');
+      document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+    </script>
+  ";
+  exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -304,6 +317,7 @@ if (isset($_POST['tagTeman'])) {
                           <?php if ($pecah['petugas'] === $petugas) { ?>
                             <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
                             <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
+                            <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
                           <?php } ?>
                         </td>
                       </tr>
@@ -472,7 +486,7 @@ if (isset($_POST['update'])) {
 }
 
 if (isset($_POST['save'])) {
-  $koneksi->query("INSERT INTO ctt_penyakit_inap(tgl, norm, ctt_dokter, ctt_tedis, petugas, kamar, pasien, ctt_penyakit_inap.object, alergi, assesment, plan, intruksi, edukasi, dokter) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[ctt_dokter]', '" . $koneksi->real_escape_string($_POST['ctt_tedis']) . "', '$petugas', '$_POST[kamar]', '$_POST[pasien]', '" . $koneksi->real_escape_string($_POST['object']) . "', '" . $koneksi->real_escape_string($_POST['alergi']) . "', '" . $koneksi->real_escape_string($_POST['assesment']) . "', '" . $koneksi->real_escape_string($_POST['plan']) . "', '" . $koneksi->real_escape_string($_POST['intruksi']) . "', '" . $koneksi->real_escape_string($_POST['edukasi']) . "','" . $_SESSION['dokter_rawat'] . "')");
+  $koneksi->query("INSERT INTO ctt_penyakit_inap(tgl, norm, ctt_dokter, ctt_tedis, petugas, kamar, pasien, ctt_penyakit_inap.object, alergi, assesment, plan, intruksi, edukasi, dokter, shift) VALUES ('$_POST[tgl]', '$_GET[id]','$_POST[ctt_dokter]', '" . $koneksi->real_escape_string($_POST['ctt_tedis']) . "', '$petugas', '$_POST[kamar]', '$_POST[pasien]', '" . $koneksi->real_escape_string($_POST['object']) . "', '" . $koneksi->real_escape_string($_POST['alergi']) . "', '" . $koneksi->real_escape_string($_POST['assesment']) . "', '" . $koneksi->real_escape_string($_POST['plan']) . "', '" . $koneksi->real_escape_string($_POST['intruksi']) . "', '" . $koneksi->real_escape_string($_POST['edukasi']) . "','" . $_SESSION['dokter_rawat'] . "', '" . $_SESSION['shift'] . "')");
   // $koneksi->query("UPDATE ctt_penyakit_inap SET tgl='$_POST[tgl]', norm='$_GET[id]', ctt_dokter='$_POST[ctt_dokter]', ctt_tedis='$_POST[ctt_tedis]', petugas='$petugas', kamar='$_POST[kamar]', pasien='$_POST[pasien]'");
   $koneksi->query("UPDATE registrasi_rawat SET kamar='$_POST[kamar]' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
   echo "
