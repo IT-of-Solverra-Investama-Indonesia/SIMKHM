@@ -11,6 +11,7 @@
                         <option value="rekapPendapatanKasir">Rekap Pendapatan Kasir</option>
                         <option value="rekapKunjunganPerawatPoli">Rekap Kunjungan Perawat Poli</option>
                         <option value="rekapKunjunganDokterPoli">Rekap Kunjungan Dokter Poli</option>
+                        <option value="rekapKunjunganDokterRanap">Rekap Kunjungan Dokter Ranap</option>
                         <option value="rekapStaffInap">Rekap Staff Inap</option>
                     </select>
                 </div>
