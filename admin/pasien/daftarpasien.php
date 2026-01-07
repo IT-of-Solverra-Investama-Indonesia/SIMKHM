@@ -187,6 +187,7 @@ if(isset($_GET['bookingdel'])){
                 <tr>
                   <th>Booking</th>
                   <th>Pasien</th>
+                  <th>NoRm</th>
                   <th>Antrian</th>
                   <th>Carabayar</th>
                   <th>Action</th>
@@ -200,6 +201,7 @@ if(isset($_GET['bookingdel'])){
                   <tr>
                     <td><?php echo date("d-m-Y H:i:s", strtotime($booking['jadwal'])) ?></td>
                     <td><?php echo $booking['nama_pasien'] ?></td>
+                    <td><?php echo $booking['no_rm'] ?></td>
                     <td><?php echo $booking['antrian'] ?></td>
                     <td><?php echo $booking['carabayar'] ?></td>
                     <td>
