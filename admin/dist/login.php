@@ -5,9 +5,16 @@
   // ini_set('session.gc_maxlifetime', $session_duration);
   //jalankan halaman fungsi
   require 'function.php';
-  //jalankan session
-  //cek cookie
-  if (isset($_COOKIE['id']) && isset($_COOKIE['key']) ) {
+
+                    // Jika sudah login, redirect ke index.php
+                    if (isset($_SESSION['login']) && $_SESSION['login'] === true) {
+                      header("location: index.php");
+                      exit;
+                    }
+
+                    //jalankan session
+                    //cek cookie
+                    if (isset($_COOKIE['id']) && isset($_COOKIE['key']) ) {
       $id=$_COOKIE['id'];
       $key=$_COOKIE['key'];
   
@@ -45,16 +52,40 @@
               $_SESSION['shift']=$shift;
               $_SESSION['dokter_rawat']=$dokter_rawat;
               $_SESSION['login_time'] = time();
-              if($row2['level'] == 'dokter'){
-                echo "<script> location='index.php?halaman=daftarrmedis'; </script> ";
+
+      // Simpan ke localStorage untuk auto-login
+      $loginData = json_encode([
+        'username' => $username,
+        'password' => $password,
+        'shift' => $shift,
+        'dokter_rawat' => $dokter_rawat
+      ]);
+
+      if ($row2['level'] == 'dokter') {
+        echo "<script>
+                  localStorage.setItem('khm_login_data', '" . addslashes($loginData) . "');
+                  location='index.php?halaman=daftarrmedis';
+                </script>";
               }elseif($row2['level'] == 'racik'){
-                echo "<script> location='index.php?halaman=daftarrmedis&racik'; </script> ";
+        echo "<script>
+                  localStorage.setItem('khm_login_data', '" . addslashes($loginData) . "');
+                  location='index.php?halaman=daftarrmedis&racik';
+                </script>";
               } elseif ($row2['level'] == 'apoteker') {
-                echo "<script> location='index.php?halaman=tambah_obatmasuk'; </script> ";
+        echo "<script>
+                  localStorage.setItem('khm_login_data', '" . addslashes($loginData) . "');
+                  location='index.php?halaman=tambah_obatmasuk';
+                </script>";
               } elseif ($row2['level'] == 'kasir') {
-                echo "<script> location='index.php?halaman=daftarbayar'; </script> ";
+        echo "<script>
+                  localStorage.setItem('khm_login_data', '" . addslashes($loginData) . "');
+                  location='index.php?halaman=daftarbayar';
+                </script>";
               }else{
-                echo "<script> location='index.php'; </script> ";
+        echo "<script>
+                  localStorage.setItem('khm_login_data', '" . addslashes($loginData) . "');
+                  location='index.php';
+                </script>";
               }
             //header('location:home.php');
             exit;
