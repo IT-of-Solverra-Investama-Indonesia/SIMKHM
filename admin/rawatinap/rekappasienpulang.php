@@ -49,7 +49,13 @@
                         foreach ($getData as $data) {
                     ?>
                             <tr>
-                                <td><?= $data['pasien'] ?></td>
+                                <td>
+                                    <?= $data['pasien'] ?> <br>
+                                    <span style="font-size: 10px;">
+                                        <?php $getDataPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$data[norm]'")->fetch_assoc(); ?>
+                                        <?= $getDataPasien['kota'] ?>, <?= $getDataPasien['kecamatan'] ?>, <?= $getDataPasien['kelurahan'] ?>, <?= $getDataPasien['alamat'] ?>
+                                    </span>
+                                </td>
                                 <td><?= $data['norm'] ?></td>
                                 <td><?= $data['kamar'] ?></td>
                                 <td><?= $data['tgl_masuk'] ?></td>
