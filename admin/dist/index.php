@@ -2,25 +2,118 @@
 
 session_start();
 $session_duration = 8 * 60 * 60;
+
+// Cek apakah session habis
+$sessionExpired = false;
 if (isset($_SESSION['login_time'])) {
   if (time() - $_SESSION['login_time'] > $session_duration) {
-    // Redirect ke halaman login atau berikan pesan sesi kedaluwarsa
-    header("location:logout.php");
+    $sessionExpired = true;
+    // Hapus session yang lama
+    $_SESSION = [];
+    session_unset();
   }
 }
+
 include 'function.php';
-$username = $_SESSION['admin']['username'];
-$level = $_SESSION['admin']['level'];
 
+// Jika session tidak ada atau habis, coba auto-login dari localStorage
+if (!isset($_SESSION['login']) || $sessionExpired) {
+?>
+  <!DOCTYPE html>
+  <html>
 
+  <head>
+    <title>Auto Login...</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
 
-if (!isset($_SESSION['login'])) {
+      .loading {
+        text-align: center;
+      }
 
-  header("location:login.php");
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
 
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Memuat ulang sesi...</p>
+    </div>
+
+    <script>
+      // Coba ambil data login dari localStorage
+      const loginData = localStorage.getItem('khm_login_data');
+
+      if (loginData) {
+        // Parse data login
+        const data = JSON.parse(loginData);
+
+        // Kirim request auto-login ke server
+        fetch('api_autologin.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              // Auto-login berhasil, reload halaman
+              window.location.reload();
+            } else {
+              // Auto-login gagal, hapus localStorage dan redirect ke login
+              localStorage.removeItem('khm_login_data');
+              window.location.href = 'login.php';
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            // Jika terjadi error, redirect ke login
+            localStorage.removeItem('khm_login_data');
+            window.location.href = 'login.php';
+          });
+      } else {
+        // Tidak ada data di localStorage, redirect ke login
+        window.location.href = 'login.php';
+      }
+    </script>
+  </body>
+
+  </html>
+<?php
   exit;
 }
 
+$username = $_SESSION['admin']['username'];
+$level = $_SESSION['admin']['level'];
 
 ?>
 
