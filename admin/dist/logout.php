@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 
 
@@ -12,16 +12,25 @@ session_destroy();
 
 
 
-setcookie('id', '', time()-36000000);
+setcookie('id', '', time() - 36000000);
 
-setcookie('key', '', time()-36000000);
-
-
-
-header("location: login.php");
-
-exit;
-
-
+setcookie('key', '', time() - 36000000);
 
 ?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Logout</title>
+</head>
+
+<body>
+    <script>
+        // Hapus data login dari localStorage
+        localStorage.removeItem('khm_login_data');
+        // Redirect ke halaman login
+        window.location.href = 'login.php';
+    </script>
+</body>
+
+</html>
