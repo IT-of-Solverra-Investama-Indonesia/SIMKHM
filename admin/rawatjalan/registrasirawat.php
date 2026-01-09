@@ -61,7 +61,7 @@ if (isset($_GET['confirm'])) {
           data: {
             tanggal: tanggal,
             <?php if (isset($_GET['book'])) { ?>
-              jenis: true
+              jenis: 'booking'
             <?php } ?>
           },
           success: function(response) {
