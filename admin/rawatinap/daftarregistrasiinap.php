@@ -219,9 +219,11 @@ if (isset($_POST['src'])) {
                                   <li><a href="index.php?halaman=falanakinap&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk (Anak)</a></li>
                                   <li><a href="index.php?halaman=faldewasainap&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk (Dewasa)</a></li>
                                   <li><a href="../pasien/fal-risk.php?id=<?php echo $dataPasien["idpasien"]; ?>&kunjungan=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-printer" style="color:black;"></i> Fall Risk</a></li>
+                                  <?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+                                    <li onclick="upData('<?= $pecah['idrawat'] ?>','<?= $pecah['perujuk'] ?>','<?= $pecah['perujuk_hp'] ?>','<?= $pecah['perujuk_file'] ?>')" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><span class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;"><i class="bi bi-pencil" style="color:warning;"></i> Perujuk</span></li>
+                                  <?php } ?>
 
-                                  <li><a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')">
-                                      <i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
+                                  <li><a href="index.php?halaman=hapuspasien&id=<?php echo $pecah["idrawat"]; ?>&regis" class="dropdown-item" style="text-decoration: none; font-weight: bold; margin-left: 2px;" onclick="return confirm('Anda yakin mau menghapus item ini ?')"><i class="bi bi-trash" style="color:red;"></i> Hapus</a></li>
                                 </ul>
                               </div>
                             </td>
@@ -309,5 +311,109 @@ if (isset($_GET['status'])) {
       document.location.href='index.php?halaman=daftarregistrasiinap';
     </script>
   ";
+}
+?>
+<!-- Modal EDIT PERAWAT -->
+<script>
+  function upData(idrawat, perujuk, perujuk_hp, perujuk_file) {
+    document.getElementById('idrawat').value = idrawat;
+    document.getElementById('perujuk').value = perujuk;
+    document.getElementById('perujuk_hp').value = perujuk_hp;
+    document.getElementById('perujuk_file').value = perujuk_file;
+  }
+</script>
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Update Data</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="text" name="idrawat" id="idrawat" hidden>
+          <div class="mb-3">
+            <label for="perujuk" class="form-label">Nama Perujuk</label>
+            <input type="text" class="form-control" name="perujuk" id="perujuk" required>
+          </div>
+          <div class="mb-3">
+            <label for="perujuk_hp" class="form-label">No Hp Perujuk</label>
+            <input type="text" class="form-control" name="perujuk_hp" id="perujuk_hp" required>
+          </div>
+          <div class="mb-3">
+            <label for="perujuk_file" class="form-label">Bukti Rujuk (Nama File)</label>
+            <input type="file" class="form-control" name="perujuk_file">
+            <input type="text" hidden class="form-control" name="perujuk_file_old" id="perujuk_file">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" name="updateData" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<?php
+if (isset($_POST['updateData'])) {
+  $idrawat = $_POST['idrawat'];
+  $perujuk = $_POST['perujuk'];
+  $perujuk_hp = $_POST['perujuk_hp'];
+  $perujuk_file = $_FILES['perujuk_file'];
+  $perujuk_file_old = $_POST['perujuk_file_old'];
+
+  if ($perujuk_file && $perujuk_file['error'] == UPLOAD_ERR_OK) {
+    $uploadDir = '../rawatinap/perujuk_bukti/';
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
+    }
+    $ext = strtolower(pathinfo($perujuk_file['name'], PATHINFO_EXTENSION));
+    $uniqueName = uniqid('perujuk_', true) . ($ext ? '.' . $ext : '');
+    $uploadFile = $uploadDir . $uniqueName;
+
+    // Kompres gambar hingga di bawah 100 KB
+    if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+      $tmpPath = $perujuk_file['tmp_name'];
+      $maxSize = 100 * 1024; // 100 KB
+      $quality = 20; // Awal kualitas
+
+      if ($ext == 'jpg' || $ext == 'jpeg') {
+        $img = imagecreatefromjpeg($tmpPath);
+        do {
+          ob_start();
+          imagejpeg($img, null, $quality);
+          $imgData = ob_get_clean();
+          $size = strlen($imgData);
+          $quality -= 5;
+        } while ($size > $maxSize && $quality > 5);
+        file_put_contents($uploadFile, $imgData);
+        imagedestroy($img);
+      } elseif ($ext == 'png') {
+        $img = imagecreatefrompng($tmpPath);
+        $compression = 9;
+        do {
+          ob_start();
+          imagepng($img, null, $compression);
+          $imgData = ob_get_clean();
+          $size = strlen($imgData);
+          $compression++;
+        } while ($size > $maxSize && $compression <= 9);
+        file_put_contents($uploadFile, $imgData);
+        imagedestroy($img);
+      }
+    } else {
+      move_uploaded_file($perujuk_file['tmp_name'], $uploadFile);
+    }
+    unlink('../rawatinap/perujuk_bukti/' . $perujuk_file_old);
+  } else {
+    $uniqueName = $perujuk_file_old;
+  }
+
+  $koneksi->query("UPDATE registrasi_rawat SET perujuk = '$perujuk', perujuk_hp = '$perujuk_hp', perujuk_file = '$uniqueName' WHERE idrawat = '$idrawat'");
+  echo "
+        <script>
+            document.location.href='index.php?halaman=daftarregistrasiinap';
+        </script>
+    ";
 }
 ?>
