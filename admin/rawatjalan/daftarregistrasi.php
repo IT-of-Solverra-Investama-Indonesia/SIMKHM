@@ -846,12 +846,14 @@ if (isset($_GET['status'])) {
 
   $curl = curl_init();
   include '../rawatjalan/api_token_wa.php';
+  $mess = $mes . $_GET['id'] . "
+". $hub;
   $data = [
     'phone' => $hp,
     'date' => $tglReminder,
     'time' => $waktuReminder,
     'timezone' => 'Asia/Jakarta',
-    'message' => $mes . $_GET['id'],
+    'message' => $mess,
     'isGroup' => 'true',
   ];
   curl_setopt(
