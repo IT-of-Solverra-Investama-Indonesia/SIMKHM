@@ -122,8 +122,9 @@ function getFullUrl()
                                     <td>
                                         <?php
                                         $BiayaTindakan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = '" . $item . "'")->fetch_assoc();
+                                        $getBiayaByCode = $koneksi->query("SELECT * FROM layanan WHERE kode_layanan = '" . $BiayaTindakan['id'] . "' AND idrm = '" . $dataRawat['no_rm'] . "' AND tgl_layanan = '" . $dataRawat['jadwal'] . "'")->fetch_assoc();
                                         ?>
-                                        :<?= number_format($BiayaTindakan['harga'] ?? 0, 0, 0, '.') ?>
+                                        :<?= number_format($getBiayaByCode['harga'] ? $getBiayaByCode['harga'] : $BiayaTindakan['harga'], 0, 0, '.') ?>
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -283,8 +284,9 @@ function getFullUrl()
                         <td>
                             <?php
                             $BiayaTindakan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = '" . $item . "'")->fetch_assoc();
+                            $getBiayaByCode = $koneksi->query("SELECT * FROM layanan WHERE kode_layanan = '" . $BiayaTindakan['id'] . "' AND idrm = '" . $dataRawat['no_rm'] . "' AND tgl_layanan = '" . $dataRawat['jadwal'] . "'")->fetch_assoc();
                             ?>
-                            :<?= number_format($BiayaTindakan['harga'] ?? 0, 0, 0, '.') ?>
+                            :<?= number_format($getBiayaByCode['harga'] ? $getBiayaByCode['harga'] : $BiayaTindakan['harga'], 0, 0, '.') ?>
                         </td>
                     </tr>
                 <?php } ?>
