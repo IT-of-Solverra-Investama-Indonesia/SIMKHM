@@ -590,20 +590,20 @@ session_start();
     $koneksi->query("DELETE FROM tgltab WHERE tgl='19700101'");
     mysqli_query($koneksi, "DELETE FROM tgltab WHERE tgl = '19700101'");
 
-if (isset($_SESSION['shift'])) {
-    if ($_SESSION['shift'] == 'Pagi') {
-        $sif = 'pagi';
-    } elseif ($_SESSION['shift'] == 'Sore') {
-        $sif = 'sore';
-    } elseif ($_SESSION['shift'] == 'Malam') {
-        $sif = 'malam';
-    }
-
-    $whereShiftCondition = "AND tgltab.shift='$sif'";
-}
 
 // Query untuk mendapatkan antrian yang tersedia pada tanggal tersebut
-if(!isset($_POST['jenis'])){
+if (!isset($_POST['jenis'])) {
+    if (isset($_SESSION['shift'])) {
+        if ($_SESSION['shift'] == 'Pagi') {
+            $sif = 'pagi';
+        } elseif ($_SESSION['shift'] == 'Sore') {
+            $sif = 'sore';
+        } elseif ($_SESSION['shift'] == 'Malam') {
+            $sif = 'malam';
+        }
+
+        $whereShiftCondition = "AND tgltab.shift='$sif'";
+    }
     $query = "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
     WHERE registrasi_rawat.kode = tgltab.kode) 
     AND NOT EXISTS(SELECT antrian FROM registrasi_booking WHERE DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($date)) . "' AND registrasi_booking.kode = tgltab.kode) 
