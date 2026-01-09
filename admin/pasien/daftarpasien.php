@@ -248,6 +248,7 @@ if(isset($_GET['bookingdel'])){
         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
           <i class="bi bi-eye"></i> Daftar Booking
         </button>
+        <a href="?halaman=gabungnorm" class="btn btn-sm btn-warning">Gabung No RM</a>
       </div>
       <h6 class="mb-0  mt-2"><b>Data Pasien</b></h6>
       <div class="table-responsive">
