@@ -44,7 +44,11 @@ if ($row >= 0) {
 ?>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" />
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 	$(document).ready(function() {
 		$('#myTable').DataTable({
@@ -53,7 +57,13 @@ if ($row >= 0) {
 			"searching": true,
 			"ordering": false,
 			"scrollY": "400px",
-			"scrollCollapse": true
+			"scrollCollapse": true,
+			dom: 'Bfrtip',
+			buttons: [{
+				extend: 'excel',
+				text: 'Export Excel',
+				className: 'btn btn-success btn-sm'
+			}]
 		});
 	});
 </script>
@@ -89,7 +99,7 @@ if ($row >= 0) {
 							</td>
 							<td>
 								Rp. <?php echo number_format($pecah["besaran"]) ?>
-								<?php if ($_SESSION['admin']['level']=='sup') { ?>
+								<?php if ($_SESSION['admin']['level'] == 'sup') { ?>
 									<?php if ($pecah["biaya"] == "sewa kamar") { ?>
 										<button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#updateHarga" onclick="upDataHarga('<?= $pecah['id_data'] ?>', '<?= $pecah['besaran'] ?>')">
 											<i class="bi bi-pencil"></i>
@@ -117,12 +127,12 @@ if ($row >= 0) {
 	</div>
 </div>
 <!-- Modal Update Harga -->
- <script>
+<script>
 	function upDataHarga(id, besaran) {
 		$("#id_data").val(id);
 		$("#besaran").val(besaran);
 	}
- </script>
+</script>
 <div class="modal fade" id="updateHarga" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -143,10 +153,10 @@ if ($row >= 0) {
 		</div>
 	</div>
 </div>
-<?php 
-	if(isset($_POST['updateHarga'])){
-		$koneksi->query("UPDATE rawatinapdetail SET besaran = '$_POST[besaran]' WHERE id_data = '$_POST[id_data]'");
-		echo "<script>alert('Data Berhasil Diupdate');</script>";
-		echo "<script>location='index.php?halaman=rekapinap&id=$_GET[id]';</script>";
-	}
+<?php
+if (isset($_POST['updateHarga'])) {
+	$koneksi->query("UPDATE rawatinapdetail SET besaran = '$_POST[besaran]' WHERE id_data = '$_POST[id_data]'");
+	echo "<script>alert('Data Berhasil Diupdate');</script>";
+	echo "<script>location='index.php?halaman=rekapinap&id=$_GET[id]';</script>";
+}
 ?>
