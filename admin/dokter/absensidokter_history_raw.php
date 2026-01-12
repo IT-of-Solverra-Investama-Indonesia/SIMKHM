@@ -44,6 +44,7 @@ include '../dist/function.php';
                                 <th>Rentan Tanggal</th>
                                 <th>Jumlah Absensi Datang</th>
                                 <th>Jumlah Absensi Datang</th>
+                                <th>All</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,6 +65,11 @@ include '../dist/function.php';
                                             <?= $data['jumlah_pulang'] ?>
                                         </button>
                                     </td>
+                                    <td>
+                                        <button onclick="loadIframeAll('?detail=<?= $data['nama_dokter'] ?>&date_start=<?= $date_start ?>&date_end=<?= $date_end ?>')" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdropAll">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             <?php } ?>
                         </tbody>
@@ -76,6 +82,13 @@ include '../dist/function.php';
                 const iframe = `<iframe src="${url}" width="100%" height="500px" style="border:none;"></iframe>`;
                 document.getElementById('showIframe').innerHTML = iframe;
             }
+
+            function loadIframeAll(url) {
+                const iframe = `<iframe src="${url}&tipe_absen=masuk" width="100%" height="500px" style="border:none;"></iframe>`;
+                document.getElementById('showIframeAllMasuk').innerHTML = iframe;
+                const iframePulang = `<iframe src="${url}&tipe_absen=pulang" width="100%" height="500px" style="border:none;"></iframe>`;
+                document.getElementById('showIframeAllPulang').innerHTML = iframePulang;
+            }
         </script>
         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -87,6 +100,34 @@ include '../dist/function.php';
                     <div class="modal-body">
                         <div id="showIframe">
 
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="loadIframe('')" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!-- <button type="button" class="btn btn-primary">Understood</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="staticBackdropAll" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
+                        <button type="button" onclick="loadIframe('')" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-1">
+                            <div class="col-6">
+                                <div id="showIframeAllMasuk">
+
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div id="showIframeAllPulang">
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
