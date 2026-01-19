@@ -38,6 +38,9 @@ if (isset($_GET['confirm'])) {
 </head>
 
 <body>
+  <!-- <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script> -->
+  <!-- Select2 CDN -->
+  
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script>
@@ -115,6 +118,22 @@ if (isset($_GET['confirm'])) {
           tanggal = tanggal.split('T')[0];
         }
         fetchAntrianReguler(tanggal);
+      });
+    });
+  </script>
+
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  
+  <!-- <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script> -->
+  
+  <!-- Initialize Select2 -->
+  <script>
+    $(document).ready(function() {
+      $('#selectTemanPerawatCtt').select2({
+        placeholder: "Pilih Teman Pendaftaran",
+        allowClear: true,
+        width: '100%',
       });
     });
   </script>
@@ -451,6 +470,17 @@ if (isset($_GET['confirm'])) {
                       <input type="text" name="no_identitas" value="<?php echo $pecah['no_identitas'] ?>" class="form-control" id="inputCity" placeholder="Masukkan No. Identitas Pasien">
                     </div>
 
+                    <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
+                    <select name="temanPendaftaran[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
+                      <option selected value="<?= $_SESSION['admin']['idadmin'] ?>"><?= $_SESSION['admin']['namalengkap'] ?> (<?= $_SESSION['admin']['level'] ?>)</option>
+                      <?php
+                      $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('daftar') ORDER BY namalengkap ASC");
+                      foreach ($getPerawat as $perawat) :
+                      ?>
+                        <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
+                      <?php endforeach; ?>
+                    </select>
+
                     <div class="text-center" style="margin-top: 50px; margin-bottom: 80px;">
                       <?php if (!isset($_GET['book'])) { ?>
                         <button type="submit" name="save" class="btn btn-primary">Simpan</button>
@@ -576,8 +606,18 @@ if (isset($_POST['save'])) {
     }
     $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk, perujuk, perujuk_hp, perujuk_file) VALUES ('$nama_pasien','$no_rm', '$jadwal', '$perujuk', '$perujuk_hp', '$uniqueName')");
   } else {
-    $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, kode, petugaspoli, kategori) VALUES ('$nama_pasien', '$dokter_rawat', '$perawatan', '$_POST[kamar]', '$jenis_kunjungan', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]', '$shift', '$kode', '$poli', 'offline')");
+    $shift = $_SESSION['shift'];
+    $getLastId = $koneksi->query("SELECT idrawat FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+    $idrawat = $getLastId ? $getLastId['idrawat'] + 1 : 1;
+    $koneksi->query("INSERT INTO registrasi_rawat (idrawat, nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift, kode, petugaspoli, kategori) VALUES ('$idrawat', '$nama_pasien', '$dokter_rawat', '$perawatan', '$_POST[kamar]', '$jenis_kunjungan', '$id_pasien', '$no_rm', '$jadwal', '$antrian', 'Belum Datang', '$_POST[carabayar]', '$shift', '$kode', '$poli', 'offline')");
+    $temanPendaftaran = isset($_POST['temanPendaftaran']) ? $_POST['temanPendaftaran'] : [];
+    foreach ($temanPendaftaran as $teman) {
+      $getAdmin = $koneksi->query("SELECT * FROM admin WHERE idadmin = '$teman'")->fetch_assoc();
+      $query = "INSERT INTO registrasi_rawat_tag (idrawat, tipe, petugas, shift) VALUES ('$idrawat', 'Pendaftaran', '$getAdmin[namalengkap]', '$shift')";
+      $koneksi->query($query);
+    }
   }
+
 
   if ($perawatan == "Rawat Jalan") {
     echo "<script>
