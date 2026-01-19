@@ -36,8 +36,23 @@ $pecah = $pasien->fetch_assoc();
   <title>KHM WONOREJO</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  
+  <!-- <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script> -->
+  
+  <!-- Initialize Select2 -->
+  <script>
+    $(document).ready(function() {
+      $('#selectTemanPerawatCtt').select2({
+        placeholder: "Pilih Teman Pendaftaran",
+        allowClear: true,
+        width: '100%',
+      });
+    });
+  </script>
 
   <main>
     <div class="">
@@ -286,9 +301,8 @@ $pecah = $pasien->fetch_assoc();
                   </div>
                 </div>
               </div>
-              <br>
-
-              <div id="employee_table">
+                <hr>
+              <div id="employee_table" class="card shadow p-2">
                 <table class="table">
                   <!-- <tr>
                        <td><b>Subtotal</td></b><td style="margin-left: 20px;"><input type="number" value="35000" class="form-control" id="inputCity" placeholder="Subtotal" disabled>
@@ -323,6 +337,28 @@ $pecah = $pasien->fetch_assoc();
                   <tr>
                     <td><b>Total Biaya Lain</td></b>
                     <td style="margin-left: 20px;"><input value="<?= $nota['total_lain'] ?>" type="number" class="form-control" name="total_lain" id="inputCity" placeholder="Masukkan Total Biaya lain"></td>
+                  </tr>
+                  <tr>
+                    <td class="">
+                      <b>Tag Teman Kasir</b>
+                      <?php 
+                        $getTags = $koneksi->query("SELECT * FROM registrasi_rawat_tag WHERE idrawat = '$_GET[id]'");
+                        foreach ($getTags as $tag) {
+                          echo "<br><span class='badge bg-primary text-light'>$tag[petugas]</span>";
+                        }
+                      ?>
+                    </td>
+                    <td>
+                      <select name="temanKasir[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
+                        <option selected value="<?= $_SESSION['admin']['idadmin'] ?>"><?= $_SESSION['admin']['namalengkap'] ?> (<?= $_SESSION['admin']['level'] ?>)</option>
+                        <?php
+                        $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('kasir') ORDER BY namalengkap ASC");
+                        foreach ($getPerawat as $perawat) :
+                        ?>
+                          <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
+                        <?php endforeach; ?>
+                      </select>
+                    </td>
                   </tr>
                   <!-- <tr>
                       <td><b>Total</td></b><td style="margin-left: 20px;"><input value="" type="number" class="form-control" id="inputCity" placeholder="Masukkan Total" disabled></td>
@@ -424,6 +460,16 @@ if (isset($_POST['simpan'])) {
   // $status=$_POST['status'];
   $koneksi->query("UPDATE biaya_rawat SET biaya_lain='$biaya_lain', nota='$notaNew', total_lain='$total_lain', potongan='$potongan', poli = '$_POST[poli]' WHERE idregis='$_GET[id]'");
   $koneksi->query("UPDATE registrasi_rawat SET kasir='$username', pembayaran_at = '" . date('Y-m-d H:i:s') . "' WHERE idrawat='$_GET[id]'");
+
+  $temanKasir = isset($_POST['temanKasir']) ? $_POST['temanKasir'] : [];
+  $idrawat = htmlspecialchars($_GET['id']);
+  $shift = $_SESSION['shift'];
+  foreach ($temanKasir as $teman) {
+    $getAdmin = $koneksi->query("SELECT * FROM admin WHERE idadmin = '$teman'")->fetch_assoc();
+    $query = "INSERT INTO registrasi_rawat_tag (idrawat, tipe, petugas, shift) VALUES ('$idrawat', 'Kasir', '$getAdmin[namalengkap]', '$shift')";
+    $koneksi->query($query);
+  }
+
   echo "
     <script>
       document.location.href='../bayar/printNota.php?id=" . htmlspecialchars($_GET['id']) . "';
