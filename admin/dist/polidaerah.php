@@ -70,10 +70,16 @@
                     <th>Alamat</th>
                     <th>Jadwal</th>
                     <th><?= $_GET['tipe'] ?></th>
+                    <th>WA</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($getData as $data) { ?>
+                <?php 
+                $hp = $data["nohp"];
+                $hp2 = substr($hp, 1);
+                $hp = '62' . $hp2;
+                ?>
                     <tr>
                         <td><?= $data['no_rm'] ?></td>
                         <td><?= $data['nama_pasien'] ?></td>
@@ -82,6 +88,7 @@
                         </td>
                         <td><?= $data['jadwalFinal'] ?></td>
                         <td><?= $data['kelurahan'] ?? $data['diagnosis_dokter'] ?></td>
+                        <td><a href="https://wa.me/<?= $hp ?? '' ?>" target="_blank"><?= $hp ?? '' ?></a></td>
                     </tr>
                 <?php } ?>
             </tbody>
@@ -89,15 +96,34 @@
     </div>
 <?php } ?>
 
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<!-- DataTables Export Excel -->
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.css" />
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+
 <script>
     $(document).ready(function() {
         $('#myTable').DataTable({
-            order: {
-                idx: 1,
-                dir: 'desc'
+            order: [[1, 'desc']],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel"></i> Export Excel',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Data Poli Daerah - <?= date("d-m-Y") ?>',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
             }
         });
     });
