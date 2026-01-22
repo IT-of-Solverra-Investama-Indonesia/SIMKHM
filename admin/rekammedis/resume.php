@@ -997,20 +997,21 @@ date_default_timezone_set("asia/jakarta");
 
 
 
+                    <?php if($_SESSION['admin']['level'] != 'daftar'){?>
+                      <div class="text-center" style="margin-top: 50px; margin-bottom: 80px;">
+                        <?php
+                        $tes = $koneksi->query("SELECT * FROM kajian_awal WHERE norm='$awal[norm]';")->fetch_assoc();
 
-                    <div class="text-center" style="margin-top: 50px; margin-bottom: 80px;">
-                      <?php
-                      $tes = $koneksi->query("SELECT * FROM kajian_awal WHERE norm='$awal[norm]';")->fetch_assoc();
-
-                      ?>
-                      <button type="submit" name="save" class="btn btn-primary">Simpan</button>
-                      <?php if (empty($tes)) { ?>
-                        <!-- <button type="submit" name="save" class="btn btn-primary">Simpan</button> -->
-                      <?php } else { ?>
-                        <!-- <button type="submit" name="ubah" class="btn btn-info">Ubah</button> -->
-                      <?php } ?>
-                      <button type="reset" class="btn btn-secondary">Reset</button>
-                    </div>
+                        ?>
+                        <button type="submit" name="save" class="btn btn-primary">Simpan</button>
+                        <?php if (empty($tes)) { ?>
+                          <!-- <button type="submit" name="save" class="btn btn-primary">Simpan</button> -->
+                        <?php } else { ?>
+                          <!-- <button type="submit" name="ubah" class="btn btn-info">Ubah</button> -->
+                        <?php } ?>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                      </div>
+                    <?php }?>
                   </form><!-- End Multi Columns Form -->
 
                 </div>
