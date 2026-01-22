@@ -256,6 +256,10 @@ $level = $_SESSION['admin']['level'];
         <i class="bi bi-cash-coin"></i>
         <span>Dashboard Staff</span>
       </a>
+      <a class="nav-link collapsed" href="index.php?halaman=dashboardkpim">
+        <i class="bi bi-cash-coin"></i>
+        <span>Dashboard KPIM</span>
+      </a>
       <li class="nav-item">
         <a class="nav-link collapsed" href="index.php?halaman=ratingall">
           <i class="bi bi-star"></i>
