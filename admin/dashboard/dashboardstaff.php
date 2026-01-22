@@ -14,7 +14,7 @@
                         <option value="rekapKunjunganDokterRanap">Rekap Kunjungan Dokter Ranap</option>
                         <option value="rekapStaffInap">Rekap Staff Inap</option>
                         <?php if($_SESSION['admin']['level'] == 'sup'){?>
-                            <option value="rekapBonusKPIMStaff">Rekap Bonus KPIM Staff</option>
+                            <!-- <option value="rekapBonusKPIMStaff">Rekap Bonus KPIM Staff</option> -->
                         <?php }?>
                     </select>
                 </div>
