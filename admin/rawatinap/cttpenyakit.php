@@ -231,7 +231,7 @@ if(isset($_GET['delete'])){
         <div class="col-md-12">
           <div class="card" style="margin-top:10px">
             <div class="card-body col-md-12">
-              <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP</h5>
+              <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SAAT INI</h5>
               <!-- Modal Tag Teman Perawat -->
               <!-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button> -->
               <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -288,8 +288,11 @@ if(isset($_GET['delete'])){
                     </tr>
                   </thead>
                   <tbody>
-                    <?php $no = 1;
-                    $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' GROUP BY tgl order by id DESC");
+                    <?php 
+                    $getPulangTerakhir = $koneksi->query("SELECT * FROM pulang WHERE norm='$_GET[id]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+
+                    $no = 1;
+                    $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . $getPulangTerakhir['tgl'] . "' GROUP BY tgl order by id DESC");
                     ?>
                     <?php foreach ($riw as $pecah) : ?>
                       <tr>
@@ -326,6 +329,93 @@ if(isset($_GET['delete'])){
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="card shadow p-2">
+            <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SEBELUMNYA <?= isset($_GET['bulan']) ? $_GET['bulan'] : 'ALL' ?></h5>
+            <div class="table-responsive">
+              <?php if(!isset($_GET['bulan'])){?>
+                <table class="table-hover table table-sm table-striped" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>Bulan</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                      $no=1;
+                      $getBulanLalu = $koneksi->query("SELECT DATE_FORMAT(tgl, '%Y-%m') as bulan FROM ctt_penyakit_inap WHERE norm='$_GET[id]' GROUP BY DATE_FORMAT(tgl, '%Y-%m') ORDER BY tgl DESC");
+                      foreach($getBulanLalu as $bulanLalu):
+                    ?>
+                    <tr>
+                      <td><?= $bulanLalu['bulan'] ?></td>
+                      <td><a href="index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&bulan=<?= $bulanLalu['bulan'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
+                    </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              <?php }else{?>
+                <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Tgl&Jam</th>
+                      <th>Subjek</th>
+                      <th>Objek</th>
+                      <th>Alergi</th>
+                      <th>Assesment</th>
+                      <th>Plan</th>
+                      <th>Intruksi</th>
+                      <th>Edukasi</th>
+                      <th>Petugas</th>
+                      <th>Dokter</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php 
+                    $getPulangTerakhir['tgl'] = date('Y-m-d', strtotime($_GET['bulan'].'-01')); // Set tanggal pulang terakhir ke kemarin agar semua data muncul
+                    $no = 1;
+                    $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . $getPulangTerakhir['tgl'] . "' GROUP BY tgl order by id DESC");
+                    ?>
+                    <?php foreach ($riw as $pecah) : ?>
+                      <tr>
+                        <td><?php echo $no; ?></td>
+                        <td>
+                          <?php echo $pecah["tgl"]; ?>
+                          <?php
+                          $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
+                          foreach ($getTagCount as $tag) {
+                            echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
+                          }
+                          ?>
+                        </td>
+                        <td><?php echo $pecah["ctt_tedis"]; ?> </td>
+                        <td><?php echo $pecah["object"]; ?> </td>
+                        <td><?php echo $pecah["alergi"]; ?> </td>
+                        <td><?php echo $pecah["assesment"]; ?> </td>
+                        <td><?php echo $pecah["plan"]; ?> </td>
+                        <td><?php echo $pecah["intruksi"]; ?> </td>
+                        <td><?php echo $pecah["edukasi"]; ?> </td>
+                        <td><?php echo $pecah["petugas"]; ?></td>
+                        <td><?php echo $pecah["dokter"]; ?></td>
+                        <td>
+                          <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
+                          <?php if ($pecah['petugas'] === $petugas) { ?>
+                            <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                            <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
+                            <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
+                          <?php } ?>
+                        </td>
+                      </tr>
+                      <?php $no += 1 ?>
+                    <?php endforeach ?>
+                  </tbody>
+                </table>
+              <?php }?>
             </div>
           </div>
         </div>
