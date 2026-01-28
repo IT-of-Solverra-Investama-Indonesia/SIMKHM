@@ -9,6 +9,12 @@
                     <option value="perawat">Perawat</option>
                     <option value="kasir">Kasir</option>
                     <option value="pendaftaran">Pendaftaran</option>
+                    <option value="ahliGiziJuruMasak">Ahli Gizi Juru Masak</option>
+                    <option value="lab">Lab</option>
+                    <option value="racik">Racik</option>
+                    <option value="kebersihan">Kebersihan</option>
+                    <option value="igd">IGD</option>
+                    <option value="perawatInap">Perawat Inap</option>
                 </select>
             </div>
             <div class="col-2">
@@ -17,9 +23,11 @@
         </div>
     </form>
 </div>
+<div class="p-0">
 <?php
     if (isset($_GET['kpim'])) {
         $kpim = htmlspecialchars($_GET['kpim']);
         include 'dashboardkpim_' . $kpim . '.php';
     }
 ?>
+</div>
