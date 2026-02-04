@@ -19,7 +19,7 @@
                     $tgl = sani($_GET['tgl']);
                     $getRiwayat = $koneksi->query("SELECT * FROM lab_hasil WHERE norm = '$norm' GROUP BY tgl_hasil ORDER BY tgl_inap DESC");
                     foreach ($getRiwayat as $riwayat) {
-    
+
                     ?>
                         <tr>
                             <td><?= $riwayat['pasien'] ?></td>
@@ -27,17 +27,10 @@
                             <td><?= $riwayat['tgl_inap'] ?></td>
                             <td><?= $riwayat['tgl_hasil'] ?></td>
                             <td>
-                                <?php
-                                $dataPemeriksaan = '';
-                                $getPemeriksaan = $koneksi->query("SELECT * FROM lab_hasil WHERE norm = '$norm' AND tgl_hasil = '{$riwayat['tgl_hasil']}'");
-                                foreach ($getPemeriksaan as $pemeriksaan) {
-                                    $dataPemeriksaan .= $pemeriksaan['nama_periksa'] . ' : ' . $pemeriksaan['hasil_periksa'] . '<br>';   
-                                }
-                                ?>
-    
-                                <button type="button" onclick="document.querySelector('#hasilPemeriksaan').innerHTML = '<?= $dataPemeriksaan ?>'" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+
+                                <a href="../lab/printlabinap.php?id=<?= $riwayat['id_inap'] ?>&tgl=<?= date('Y-m-d', strtotime($riwayat['tgl_inap'])) ?>" target="_blank" class="btn btn-sm btn-primary">
                                     <i class="bi bi-eye"></i>
-                                </button>
+                                </a>
                             </td>
                             <!-- <td><?= $riwayat['pasien'] ?></td> -->
                         </tr>
