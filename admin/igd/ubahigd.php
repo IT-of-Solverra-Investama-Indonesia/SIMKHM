@@ -437,7 +437,7 @@ $pecah = $pasien->fetch_assoc();
                                 $getUser = $koneksi->query("SELECT * FROM admin WHERE level = 'inap' OR level = 'igd' OR level = 'perawat'");
                                 $currentUser = $_SESSION['admin']['namalengkap'];
                                 foreach ($getUser as $user) {
-                                  $selected = ($user['namalengkap'] == $currentUser AND $user['level'] == $_SESSION['admin']['level']) ? 'selected' : '';
+                                  $selected = ($user['namalengkap'] == $currentUser and $user['level'] == $_SESSION['admin']['level']) ? 'selected' : '';
                                 ?>
                                   <option value="<?= $user['namalengkap'] ?>" <?= $selected ?>><?= $user['namalengkap'] ?> (<?= $user['level'] ?>)</option>
                                 <?php } ?>
@@ -464,7 +464,7 @@ $pecah = $pasien->fetch_assoc();
                           <h5 class="card-title">Asesmen Medis</h5>
                         </div>
 
-                        <?php if ($level == 'dokter') { ?>
+                        <?php if ($level == 'dokter' or $level == 'sup') { ?>
                           <div class="col-md-4" style="margin-top:5px; margin-bottom:10px">
                             <label for="inputName5" class="form-label">Tanggal dan Jam </label>
                             <input type="datetime-local" name="tgl" id="" class="form-control" value="<?php echo $igd['tgl'] ?>">
@@ -480,8 +480,29 @@ $pecah = $pasien->fetch_assoc();
                           </div>
 
                           <div class="col-md-12" style="margin-top:5px;">
-                            <label for="inputName5" class="form-label">Pemeriksaan Penunjang </label>
-                            <input type="text" name="penunjang" id="" value="<?php echo $igd['penunjang'] ?>" class="form-control">
+                            <label for="inputName5" class="form-label">Pemeriksaan Penunjang (Foto)</label>
+                            <input type="file" name="penunjang_foto[]" id="penunjang_foto" class="form-control" accept="image/*" capture="environment" multiple>
+                            <small class="text-muted">Klik untuk membuka kamera atau pilih file. Bisa pilih multiple foto.</small>
+
+                            <?php
+                            // Tampilkan foto yang sudah ada
+                            if (!empty($igd['penunjang'])) {
+                              $foto_list = json_decode($igd['penunjang'], true);
+                              if (is_array($foto_list) && count($foto_list) > 0) {
+                                echo '<div class="mt-2"><label>Foto yang sudah ada:</label><div class="row">';
+                                foreach ($foto_list as $foto) {
+                                  if (file_exists('../igd/pemeriksaan_penunjang/' . $foto)) {
+                                    echo '<div class="col-md-3 mb-2">';
+                                    echo '<img src="../igd/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-thumbnail" style="max-height: 150px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')"><br>';
+                                    echo '<small>' . htmlspecialchars($foto) . '</small>';
+                                    echo '<br><a href="?halaman=ubahigd&id=' . $_GET['id'] . '&hapus_foto=' . urlencode($foto) . '" class="btn btn-sm btn-danger mt-1" onclick="return confirm(\'Hapus foto ini?\')">Hapus</a>';
+                                    echo '</div>';
+                                  }
+                                }
+                                echo '</div></div>';
+                              }
+                            }
+                            ?>
                           </div>
 
                           <div class="col-md-12" style="margin-top:5px;">
@@ -517,8 +538,29 @@ $pecah = $pasien->fetch_assoc();
                           </div>
 
                           <div class="col-md-12" style="margin-top:5px;">
-                            <label for="inputName5" class="form-label">Pemeriksaan Penunjang </label>
-                            <input type="text" name="penunjang" id="" value="<?php echo $igd['penunjang'] ?>" class="form-control" readonly>
+                            <label for="inputName5" class="form-label">Pemeriksaan Penunjang (Foto)</label>
+                            <?php
+                            // Tampilkan foto di mode readonly
+                            if (!empty($igd['penunjang'])) {
+                              $foto_list = json_decode($igd['penunjang'], true);
+                              if (is_array($foto_list) && count($foto_list) > 0) {
+                                echo '<div class="row">';
+                                foreach ($foto_list as $foto) {
+                                  if (file_exists('../igd/pemeriksaan_penunjang/' . $foto)) {
+                                    echo '<div class="col-md-3 mb-2">';
+                                    echo '<img src="../igd/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-thumbnail" style="max-height: 200px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')"><br>';
+                                    echo '<small>' . htmlspecialchars($foto) . '</small>';
+                                    echo '</div>';
+                                  }
+                                }
+                                echo '</div>';
+                              } else {
+                                echo '<p class="text-muted">Tidak ada foto</p>';
+                              }
+                            } else {
+                              echo '<p class="text-muted">Tidak ada foto</p>';
+                            }
+                            ?>
                           </div>
 
                           <div class="col-md-12" style="margin-top:5px;">
@@ -603,6 +645,34 @@ $pecah = $pasien->fetch_assoc();
 
 
 <?php
+// Handle hapus foto
+if (isset($_GET['hapus_foto'])) {
+  $foto_hapus = $_GET['hapus_foto'];
+  $igd_data = $koneksi->query("SELECT penunjang FROM igd WHERE idigd='" . htmlspecialchars($_GET['id']) . "'")->fetch_assoc();
+
+  if (!empty($igd_data['penunjang'])) {
+    $foto_list = json_decode($igd_data['penunjang'], true);
+    if (is_array($foto_list)) {
+      // Hapus dari array
+      $foto_list = array_filter($foto_list, function ($f) use ($foto_hapus) {
+        return $f !== $foto_hapus;
+      });
+
+      // Hapus file fisik
+      $file_path = '../igd/pemeriksaan_penunjang/' . $foto_hapus;
+      if (file_exists($file_path)) {
+        unlink($file_path);
+      }
+
+      // Update database
+      $foto_json = json_encode(array_values($foto_list));
+      $koneksi->query("UPDATE igd SET penunjang='" . mysqli_real_escape_string($koneksi, $foto_json) . "' WHERE idigd='" . htmlspecialchars($_GET['id']) . "'");
+
+      echo "<script>alert('Foto berhasil dihapus'); window.location.href='index.php?halaman=ubahigd&id=" . $_GET['id'] . "';</script>";
+    }
+  }
+}
+
 if (isset($_POST['save'])) {
 
   $no_rm = $_POST['no_rm'];
@@ -654,6 +724,50 @@ if (isset($_POST['save'])) {
 
   // move_uploaded_file($lokasi, '../igd/foto/'.$gambar_anatomi);
 
+  // Handle upload foto pemeriksaan penunjang
+  $foto_penunjang_array = array();
+
+  // Ambil foto lama dari database
+  $igd_lama = $koneksi->query("SELECT penunjang FROM igd WHERE idigd='$_GET[id]'")->fetch_assoc();
+  if (!empty($igd_lama['penunjang'])) {
+    $foto_lama = json_decode($igd_lama['penunjang'], true);
+    if (is_array($foto_lama)) {
+      $foto_penunjang_array = $foto_lama;
+    }
+  }
+
+  // Proses upload foto baru
+  if (isset($_FILES['penunjang_foto']) && !empty($_FILES['penunjang_foto']['name'][0])) {
+    $upload_dir = '../igd/pemeriksaan_penunjang/';
+
+    // Buat folder jika belum ada
+    if (!file_exists($upload_dir)) {
+      mkdir($upload_dir, 0777, true);
+    }
+
+    $total_files = count($_FILES['penunjang_foto']['name']);
+
+    for ($i = 0; $i < $total_files; $i++) {
+      if ($_FILES['penunjang_foto']['error'][$i] == 0) {
+        $file_name = $_FILES['penunjang_foto']['name'][$i];
+        $file_tmp = $_FILES['penunjang_foto']['tmp_name'][$i];
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+        // Generate nama file unik
+        $new_file_name = 'penunjang_' . $no_rm . '_' . time() . '_' . $i . '.' . $file_ext;
+        $upload_path = $upload_dir . $new_file_name;
+
+        // Upload file
+        if (move_uploaded_file($file_tmp, $upload_path)) {
+          $foto_penunjang_array[] = $new_file_name;
+        }
+      }
+    }
+  }
+
+  // Convert array ke JSON untuk disimpan di database
+  $penunjang_json = json_encode($foto_penunjang_array);
+
   if ($_POST['tindak'] == 'Rawat') {
     if ($_POST['kamar'] == "") {
       echo "
@@ -667,9 +781,9 @@ if (isset($_POST['save'])) {
   }
 
   if ($level == "igd" or $level == "perawat" or $level == "sup") {
-    $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]', tindak_rujuk_keterangan = '$_POST[tindak_rujuk_keterangan]' WHERE idigd='$_GET[id]' ");
+    $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]', tindak_rujuk_keterangan = '$_POST[tindak_rujuk_keterangan]', penunjang='" . mysqli_real_escape_string($koneksi, $penunjang_json) . "' WHERE idigd='$_GET[id]' ");
   } elseif ($level == "dokter") {
-    $koneksi->query("UPDATE igd SET penunjang='$_POST[penunjang]',dkerja='$_POST[dkerja]', dbanding='$_POST[dbanding]', tgl='$_POST[tgl]', sub='$_POST[sub]', ob='$_POST[ob]', dokter='$_POST[dokter]', rencana_rawat='$_POST[rencana_rawat]' WHERE idigd='$_GET[id]' ");
+    $koneksi->query("UPDATE igd SET penunjang='" . mysqli_real_escape_string($koneksi, $penunjang_json) . "',dkerja='$_POST[dkerja]', dbanding='$_POST[dbanding]', tgl='$_POST[tgl]', sub='$_POST[sub]', ob='$_POST[ob]', dokter='$_POST[dokter]', rencana_rawat='$_POST[rencana_rawat]' WHERE idigd='$_GET[id]' ");
   }
 
   $countigd = $koneksi->query("SELECT *, COUNT(perawat) as jumlah FROM igd WHERE idigd = '$_GET[id]' LIMIT 1")->fetch_assoc();

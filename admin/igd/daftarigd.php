@@ -17,7 +17,7 @@ if(isset($_GET['src'])){
   }
 }
 
-$query = "SELECT * FROM igd WHERE 1=1 $whereClause ORDER BY tgl_masuk DESC ";
+$query = "SELECT * FROM igd WHERE 1=1 $whereClause ORDER BY idigd DESC ";
 
 //   Pagination
 // Parameters for pagination
