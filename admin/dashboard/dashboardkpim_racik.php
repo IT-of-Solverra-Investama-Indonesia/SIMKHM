@@ -56,7 +56,7 @@
                     <tr>
                         <td><?= $no++ ?></td>
                         <td><?= date('F Y', strtotime($poli['bulan'])) ?></td>
-                        <td><?= $poli['umum'] ?></td>
+                        <td><?= $poli['jumlah'] ?></td>
                         <td>
                             <?php 
                                 $nominalKPIM = 80;
@@ -64,7 +64,7 @@
                             <?= $nominalKPIM ?>
                         </td>
                         <td>
-                            <?= 'Rp ' . number_format($poli['umum'] * $nominalKPIM, 0, ',', '.'); ?>
+                            <?= 'Rp ' . number_format($poli['jumlah'] * $nominalKPIM, 0, ',', '.'); ?>
                         </td>
                     </tr>
                 <?php }?>
