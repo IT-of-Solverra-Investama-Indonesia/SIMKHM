@@ -62,11 +62,122 @@ function getLastWord($inputString)
 ?>
 
 <?php
+// Handle hapus foto penunjang
+if (isset($_GET['hapus_foto_penunjang'])) {
+  $foto_hapus = $_GET['hapus_foto_penunjang'];
+  $id_lpo = $_GET['id_lpo'];
+
+  $lpo_data = $koneksi->query("SELECT penunjang FROM lpo WHERE id_lpo='$id_lpo'")->fetch_assoc();
+
+  if (!empty($lpo_data['penunjang'])) {
+    $foto_list = json_decode($lpo_data['penunjang'], true);
+    if (is_array($foto_list)) {
+      // Hapus dari array
+      $foto_list = array_filter($foto_list, function ($f) use ($foto_hapus) {
+        return $f !== $foto_hapus;
+      });
+
+      // Hapus file fisik
+      $file_path = '../rawatinap/pemeriksaan_penunjang/' . $foto_hapus;
+      if (file_exists($file_path)) {
+        unlink($file_path);
+      }
+
+      // Update database
+      $foto_json = json_encode(array_values($foto_list));
+      $koneksi->query("UPDATE lpo SET penunjang='" . mysqli_real_escape_string($koneksi, $foto_json) . "' WHERE id_lpo='$id_lpo'");
+
+      if (isset($_GET['igd'])) {
+        echo "<script>alert('Foto berhasil dihapus'); window.location.href='index.php?halaman=lpo&igd&id=" . $_GET['id'] . "&idigd=" . $_GET['idigd'] . "&tgl=" . $_GET['tgl'] . "';</script>";
+      } else {
+        echo "<script>alert('Foto berhasil dihapus'); window.location.href='index.php?halaman=lpo&id=" . $_GET['id'] . "&inap&tgl=" . $_GET['tgl'] . "';</script>";
+      }
+    }
+  }
+}
+
 if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
   $koneksi->query("UPDATE registrasi_rawat SET apoteker_check_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm = '$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' AND perawatan = 'Rawat Inap' ORDER BY idrawat DESC LIMIT 1");
   echo "<script>alert('Proses Selesai, Pasien Boleh Pulang!');</script>";
   echo "<script>location='index.php?halaman=lpo&id=$_GET[id]&inap&tgl=$_GET[tgl]';</script>";
   exit();
+}
+
+// Handle Simpan Penggunaan Obat
+if (isset($_POST['savePenggunaan'])) {
+  // Cek apakah ada obat yang dipilih
+  if (isset($_POST['idobatcheck']) && !empty($_POST['idobatcheck'])) {
+    // Cek apakah ada jam yang dipilih
+    if (isset($_POST['digunakan']) && !empty($_POST['digunakan'])) {
+      $jam_dipilih = $_POST['digunakan']; // Array jam yang dipilih
+      $id_obat_list = $_POST['idobatcheck']; // Array id obat yang dipilih
+
+      // Gabungkan jam-jam yang dipilih menjadi string
+      $jam_baru = implode(', ', $jam_dipilih);
+
+      $success_count = 0;
+      $error_count = 0;
+
+      // Loop untuk setiap obat yang dipilih
+      foreach ($id_obat_list as $idobat) {
+        // Escape untuk keamanan
+        $idobat = mysqli_real_escape_string($koneksi, $idobat);
+
+        // Ambil data penggunaan yang sudah ada
+        $query_cek = mysqli_query($koneksi, "SELECT digunakan_pada FROM obat_rm WHERE idobat = '$idobat'");
+        $data_obat = mysqli_fetch_assoc($query_cek);
+
+        if ($data_obat) {
+          $digunakan_lama = trim($data_obat['digunakan_pada']);
+
+          // Jika sudah ada jam sebelumnya, pisahkan dan gabung dengan yang baru
+          if (!empty($digunakan_lama)) {
+            // Pecah jam lama menjadi array
+            $jam_lama_array = array_map('trim', explode(',', $digunakan_lama));
+
+            // Gabungkan dengan jam baru
+            $jam_gabung_array = array_merge($jam_lama_array, $jam_dipilih);
+
+            // Hilangkan duplikat dan urutkan
+            $jam_gabung_array = array_unique($jam_gabung_array);
+
+            // Urutkan jam secara kronologis
+            usort($jam_gabung_array, function ($a, $b) {
+              return strcmp($a, $b);
+            });
+
+            // Gabungkan kembali menjadi string
+            $jam_final = implode(', ', $jam_gabung_array);
+          } else {
+            // Jika belum ada jam sebelumnya, gunakan jam baru saja
+            $jam_final = $jam_baru;
+          }
+
+          // Update ke database
+          $update_query = "UPDATE obat_rm SET digunakan_pada = '$jam_final' WHERE idobat = '$idobat'";
+
+          if (mysqli_query($koneksi, $update_query)) {
+            $success_count++;
+          } else {
+            $error_count++;
+          }
+        }
+      }
+
+      echo "<script>alert('Penggunaan obat berhasil disimpan!\\n\\nBerhasil: $success_count obat\\nGagal: $error_count obat');</script>";
+
+      // Redirect untuk refresh halaman
+      if (isset($_GET['igd'])) {
+        echo "<script>location='index.php?halaman=lpo&igd&id=" . $_GET['id'] . "&idigd=" . $_GET['idigd'] . "&tgl=" . $_GET['tgl'] . "';</script>";
+      } else {
+        echo "<script>location='index.php?halaman=lpo&id=" . $_GET['id'] . "&inap&tgl=" . $_GET['tgl'] . "';</script>";
+      }
+    } else {
+      echo "<script>alert('Silakan pilih minimal satu jam penggunaan!');</script>";
+    }
+  } else {
+    echo "<script>alert('Silakan pilih obat yang akan dicatat penggunaannya!');</script>";
+  }
 }
 ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -246,6 +357,11 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <label for="">Perawat</label>
                       <input type="text" class="form-control mb-3" name="perawat" <?= $ConditionCopy != 0 ? "value='$dataCopy[perawat]'" : "" ?> readonly value="<?= $petugas ?>" placeholder="">
                     </div>
+                    <div class="col-md-12">
+                      <label for="penunjang_foto" class="form-label">Pemeriksaan Penunjang (Foto)</label>
+                      <input type="file" name="penunjang_foto[]" id="penunjang_foto" class="form-control" accept="image/*" capture="environment" multiple>
+                      <small class="text-muted">Klik untuk membuka kamera atau pilih file. Bisa pilih multiple foto.</small>
+                    </div>
                   </div>
                   <div class="text-center" style="margin-top: 10px; margin-bottom: 40px;">
                     <button type="submit" name="save" class="btn btn-primary">Simpan Dulu</button>
@@ -262,12 +378,12 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                 </script>
                 <div class="col-md-12">
                   <div class="card shadow p-2 mb-1">
-                    <label for="">Obat Injeksi </label>
+                    <b for="">Obat Injeksi </b>
                     <div>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                      <!-- <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
                         data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
                       <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -275,6 +391,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <table class="table table-hover table-striped" style="font-size: 12px;">
                         <thead>
                           <tr>
+                            <th></th>
                             <th>No</th>
                             <th>Obat</th>
                             <th>Kode Obat</th>
@@ -292,18 +409,33 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                         <tbody>
                           <?php
                           if (isset($_GET['igd'])) {
-                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi'");
+                            $getLatLpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'igd' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY id_lpo DESC LIMIT 1")->fetch_assoc();
+                            if (!isset($_GET['tglobat'])) {
+                              $tgl = date('Y-m-d', strtotime($getLatLpo['created_at']));
+                            } else {
+                              $tgl = $_GET['tglobat'];
+                            }
+                            $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
+                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi' ORDER BY idobat DESC");
                             $urlBase = "index.php?halaman=lpo&igd&id=" . htmlspecialchars($_GET['id']) . "&idigd=" . htmlspecialchars($_GET['idigd']) . "&tgl=" . htmlspecialchars($_GET['tgl']);
                           } else {
+                            $getLatLpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY id_lpo DESC LIMIT 1")->fetch_assoc();
+                            if (!isset($_GET['tglobat'])) {
+                              $tgl = date('Y-m-d', strtotime($getLatLpo['created_at']));
+                            } else {
+                              $tgl = $_GET['tglobat'];
+                            }
+                            $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
+                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' ORDER BY idobat DESC");
                             $urlBase = "index.php?halaman=lpo&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']);
-                            $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi'");
                           }
                           $noo = 1;
                           foreach ($injek as $in) {
-                            ?>
+                          ?>
                             <tr>
+                              <td><input type="checkbox" name="idobatcheck[]" value="<?= $in['idobat'] ?>" id=""></td>
                               <td><?php echo $noo++; ?></td>
-                              <td><?php echo $in["nama_obat"]; ?></td>
+                              <td><?php echo $in["nama_obat"]; ?> <br> <span style="font-size: 10px;"><?= $in['digunakan_pada'] ?></span></td>
                               <td><?php echo $in["kode_obat"]; ?></td>
                               <td><?php echo $in["jml_dokter"]; ?></td>
                               <td>
@@ -319,7 +451,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?>
                                 <?php echo $in["per_obat"]; ?>
                               </td>
-                              <td><?php echo $in["jenis_obat"]; ?>       <?php echo $in["racik"]; ?></td>
+                              <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
                               <td><?php echo $in["durasi_obat"]; ?> hari</td>
                               <td>
                                 <a target="_blank"
@@ -342,18 +474,28 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                           <?php } ?>
                         </tbody>
                       </table>
+                      <div>
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="09:00"> 09:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="12:00"> 12:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="15:00"> 15:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="18:00"> 18:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="21:00"> 21:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="24:00"> 24:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="05:00"> 05:00
+                        <button class="btn btn-primary btn-sm text-right" type="submit" name="savePenggunaan">Simpan Penggunaan</button>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <br>
                 <div class="col-md-12">
-                  <div class="card shadow p-2 mb-2">
-                    <label for="">Obat Oral</label>
+                  <div class="card shadow p-2 mb-2 mt-0">
+                    <b for="">Obat Oral</b>
                     <div align="left">
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                      <!-- <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
                         data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
                       <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -361,6 +503,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <table class="table table-hover table-striped" style="font-size: 12px;">
                         <thead>
                           <tr>
+                            <td></td>
                             <th>No</th>
                             <th>Obat</th>
                             <th>Kode Obat</th>
@@ -378,16 +521,31 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                         <tbody>
                           <?php
                           if (isset($_GET['igd'])) {
-                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral'");
+                            $getLatLpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'igd' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY id_lpo DESC LIMIT 1")->fetch_assoc();
+                            if (!isset($_GET['tglobat'])) {
+                              $tgl = date('Y-m-d', strtotime($getLatLpo['created_at']));
+                            } else {
+                              $tgl = $_GET['tglobat'];
+                            }
+                            $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
+                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral' ORDER BY idobat DESC");
                           } else {
-                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral'");
+                            $getLatLpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY id_lpo DESC LIMIT 1")->fetch_assoc();
+                            if (!isset($_GET['tglobat'])) {
+                              $tgl = date('Y-m-d', strtotime($getLatLpo['created_at']));
+                            } else {
+                              $tgl = $_GET['tglobat'];
+                            }
+                            $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
+                            $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral' ORDER BY idobat DESC");
                           }
                           $no = 1;
                           foreach ($oral as $or) {
-                            ?>
+                          ?>
                             <tr>
+                              <td><input type="checkbox" name="idobatcheck[]" value="<?= $or['idobat'] ?>" id=""></td>
                               <td><?php echo $no++; ?></td>
-                              <td><?php echo $or["nama_obat"]; ?></td>
+                              <td><?php echo $or["nama_obat"]; ?> <br> <span style="font-size: 10px;"><?= $or['digunakan_pada'] ?></span></td>
                               <td><?php echo $or["kode_obat"]; ?></td>
                               <td><?php echo $or["jml_dokter"]; ?></td>
                               <td>
@@ -403,7 +561,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <td><?php echo $or["dosis1_obat"]; ?> X <?php echo $or["dosis2_obat"]; ?>
                                 <?php echo $or["per_obat"]; ?>
                               </td>
-                              <td><?php echo $or["jenis_obat"]; ?>       <?php echo $or["racik"]; ?></td>
+                              <td><?php echo $or["jenis_obat"]; ?> <?php echo $or["racik"]; ?></td>
                               <td><?php echo $or["durasi_obat"]; ?> hari</td>
                               <td>
                                 <a target="_blank"
@@ -428,17 +586,27 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                           <?php } ?>
                         </tbody>
                       </table>
+                      <div>
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="09:00"> 09:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="12:00"> 12:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="15:00"> 15:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="18:00"> 18:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="21:00"> 21:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="24:00"> 24:00
+                        <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="05:00"> 05:00
+                        <button class="btn btn-primary btn-sm text-right" type="submit" name="savePenggunaan">Simpan Penggunaan</button>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="col-12">
+                <!-- <div class="col-12">
                   <div class="d-flex justify-content-end mb-4 mt-4">
                     <a class="btn btn-sm btn-primary"
                       onclick="return confirm('Jika sudah yakin maka tombol tambah obat akan hilang, apakah anda yakin akan menyelesaikan inputan obat ?')"
                       href="index.php?halaman=lpo&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&apotek=done">Obat Sudah
                       di-Input Semua dan Pasien Boleh Pulang</a>
                   </div>
-                </div>
+                </div> -->
                 <div class="col-md-12">
                   <div class="card shadow p-3">
                     <h5 class="card-title">Riwayat Observasi</h5>
@@ -450,6 +618,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                             <th>Diagnosa</th>
                             <th>Tanggal</th>
                             <th>Jam</th>
+                            <th>Foto Penunjang</th>
                             <th>Aksi</th>
                           </tr>
                         </thead>
@@ -473,6 +642,26 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                               <td><?= $data['diagnosa'] ?></td>
                               <td><?= $tanggal ?></td>
                               <td><?= $jam ?></td>
+                              <td>
+                                <?php
+                                if (!empty($data['penunjang'])) {
+                                  $foto_list = json_decode($data['penunjang'], true);
+                                  if (is_array($foto_list) && count($foto_list) > 0) {
+                                    echo '<span class="badge bg-success">' . count($foto_list) . ' foto</span>';
+                                    echo '<br>';
+                                    foreach (array_slice($foto_list, 0, 2) as $foto) {
+                                      if (file_exists('../rawatinap/pemeriksaan_penunjang/' . $foto)) {
+                                        echo '<img src="../rawatinap/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" style="width: 40px; height: 40px; object-fit: cover; margin: 2px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')">';
+                                      }
+                                    }
+                                  } else {
+                                    echo '<span class="text-muted">-</span>';
+                                  }
+                                } else {
+                                  echo '<span class="text-muted">-</span>';
+                                }
+                                ?>
+                              </td>
                               <td>
                                 <?php if (!isset($_GET['igd'])) { ?>
                                   <a class="btn btn-sm btn-primary"
@@ -656,14 +845,14 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   </div>
                 </div>
                 <script type="text/javascript">
-                  $(document).ready(function () {
-                    $(".add-more2").click(function () {
+                  $(document).ready(function() {
+                    $(".add-more2").click(function() {
                       var html = $(".copy2").html();
                       $(".after-add-more2").after(html);
                     });
 
                     // saat tombol remove dklik control group akan dihapus 
-                    $("body").on("click", ".remove2", function () {
+                    $("body").on("click", ".remove2", function() {
                       $(this).parents(".control-group2").remove();
                     });
                   });
@@ -784,13 +973,13 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                   </div>
                 </div>
                 <script type="text/javascript">
-                  $(document).ready(function () {
-                    $(".add-more").click(function () {
+                  $(document).ready(function() {
+                    $(".add-more").click(function() {
                       var html = $(".copy").html();
                       $(".after-add-more").after(html);
                     });
                     // saat tombol remove dklik control group akan dihapus 
-                    $("body").on("click", ".remove", function () {
+                    $("body").on("click", ".remove", function() {
                       $(this).parents(".control-group").remove();
                     });
                   });
@@ -901,7 +1090,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       foreach ($_SESSION['temp_obat'] as $obatSave) {
 
                         // $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '', kode_obat = '', nama_obat = '', jml_dokter = '', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
-              
+
                         $uniqueId = getUniqeIdObat($koneksi);
 
                         $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$id[no_rm]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
@@ -990,7 +1179,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                     </div>
                   </div>
                   <script>
-                    $(document).ready(function () {
+                    $(document).ready(function() {
                       $('#selectObatJadiEntriObat').select2();
                     });
                   </script>
@@ -999,7 +1188,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
             </div>
           </div>
         </div>
-        </from>
+      </form>
 
     </div>
   </main>
@@ -1011,11 +1200,46 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
   // $uniqueId = getUniqueId($koneksi);
 
   if (isset($_POST['save'])) {
+    // Handle upload foto pemeriksaan penunjang
+    $foto_penunjang_array = array();
+
+    // Proses upload foto baru
+    if (isset($_FILES['penunjang_foto']) && !empty($_FILES['penunjang_foto']['name'][0])) {
+      $upload_dir = '../rawatinap/pemeriksaan_penunjang/';
+
+      // Buat folder jika belum ada
+      if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+      }
+
+      $total_files = count($_FILES['penunjang_foto']['name']);
+
+      for ($i = 0; $i < $total_files; $i++) {
+        if ($_FILES['penunjang_foto']['error'][$i] == 0) {
+          $file_name = $_FILES['penunjang_foto']['name'][$i];
+          $file_tmp = $_FILES['penunjang_foto']['tmp_name'][$i];
+          $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+          // Generate nama file unik
+          $new_file_name = 'lpo_' . $_POST['norm'] . '_' . time() . '_' . $i . '.' . $file_ext;
+          $upload_path = $upload_dir . $new_file_name;
+
+          // Upload file
+          if (move_uploaded_file($file_tmp, $upload_path)) {
+            $foto_penunjang_array[] = $new_file_name;
+          }
+        }
+      }
+    }
+
+    // Convert array ke JSON untuk disimpan di database
+    $penunjang_json = mysqli_real_escape_string($koneksi, json_encode($foto_penunjang_array));
+
     if (isset($_GET['igd'])) {
 
-      $koneksi->query("INSERT INTO lpo (pasien, norm, tgl_lahir, alamat, kamar, jenis_kelamin, diagnosa, tgl_waktu, tensi, suhu, cairan, volume, keadaan_umum, keluhan_pasien, infus, obat_injeksi, obat_oral, tindakan, perawat, status, idigd) VALUES ('$_POST[pasien]', '$_POST[norm]', '$_POST[tgl_lahir]', '$_POST[alamat]', '$_POST[kamar]', '$_POST[jenis_kelamin]', '$_POST[diagnosa]', '$_POST[tgl_waktu]', '$_POST[tensi]', '$_POST[suhu]', '$_POST[cairan]', '$_POST[volume]', '$_POST[keadaan_umum]', '$_POST[keluhan_pasien]', '$_POST[infus]', '$_POST[obat_injeksi]', '$_POST[obat_oral]', '$_POST[tindakan]', '$_POST[perawat]', 'igd', '$_GET[idigd]')");
+      $koneksi->query("INSERT INTO lpo (pasien, norm, tgl_lahir, alamat, kamar, jenis_kelamin, diagnosa, tgl_waktu, tensi, suhu, cairan, volume, keadaan_umum, keluhan_pasien, infus, obat_injeksi, obat_oral, tindakan, perawat, status, idigd, penunjang) VALUES ('$_POST[pasien]', '$_POST[norm]', '$_POST[tgl_lahir]', '$_POST[alamat]', '$_POST[kamar]', '$_POST[jenis_kelamin]', '$_POST[diagnosa]', '$_POST[tgl_waktu]', '$_POST[tensi]', '$_POST[suhu]', '$_POST[cairan]', '$_POST[volume]', '$_POST[keadaan_umum]', '$_POST[keluhan_pasien]', '$_POST[infus]', '$_POST[obat_injeksi]', '$_POST[obat_oral]', '$_POST[tindakan]', '$_POST[perawat]', 'igd', '$_GET[idigd]', '$penunjang_json')");
     } else {
-      $koneksi->query("INSERT INTO lpo (pasien, norm, tgl_lahir, alamat, kamar, jenis_kelamin, diagnosa, tgl_waktu, tensi, suhu, cairan, volume, keadaan_umum, keluhan_pasien, infus, obat_injeksi, obat_oral, tindakan, perawat, status) VALUES ('$_POST[pasien]', '$_POST[norm]', '$_POST[tgl_lahir]', '$_POST[alamat]', '$_POST[kamar]', '$_POST[jenis_kelamin]', '$_POST[diagnosa]', '$_POST[tgl_waktu]', '$_POST[tensi]', '$_POST[suhu]', '$_POST[cairan]', '$_POST[volume]', '$_POST[keadaan_umum]', '$_POST[keluhan_pasien]', '$_POST[infus]', '$_POST[obat_injeksi]', '$_POST[obat_oral]', '$_POST[tindakan]', '$_POST[perawat]', 'inap')");
+      $koneksi->query("INSERT INTO lpo (pasien, norm, tgl_lahir, alamat, kamar, jenis_kelamin, diagnosa, tgl_waktu, tensi, suhu, cairan, volume, keadaan_umum, keluhan_pasien, infus, obat_injeksi, obat_oral, tindakan, perawat, status, penunjang) VALUES ('$_POST[pasien]', '$_POST[norm]', '$_POST[tgl_lahir]', '$_POST[alamat]', '$_POST[kamar]', '$_POST[jenis_kelamin]', '$_POST[diagnosa]', '$_POST[tgl_waktu]', '$_POST[tensi]', '$_POST[suhu]', '$_POST[cairan]', '$_POST[volume]', '$_POST[keadaan_umum]', '$_POST[keluhan_pasien]', '$_POST[infus]', '$_POST[obat_injeksi]', '$_POST[obat_oral]', '$_POST[tindakan]', '$_POST[perawat]', 'inap', '$penunjang_json')");
     }
     if (isset($_GET['igd'])) {
       echo "
@@ -1167,7 +1391,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
     echo "<script>alert('Successfully')</script>";
     echo "<script>document.location.href='" . $urlBase . "'</script>";
   }
-?>
+  ?>
 <?php } else { ?>
   <?php $lpo = $koneksi->query("SELECT * FROM lpo WHERE id_lpo = '$_GET[view]'")->fetch_assoc(); ?>
   <!DOCTYPE html>
@@ -1333,6 +1557,31 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <input type="text" class="form-control mb-3" readonly value="<?= $lpo['perawat'] ?>" name="perawat"
                         readonly value="<?= $petugas ?>" placeholder="">
                     </div>
+                    <div class="col-md-12">
+                      <label for="" class="form-label">Pemeriksaan Penunjang (Foto)</label>
+                      <?php
+                      // Tampilkan foto di mode view
+                      if (!empty($lpo['penunjang'])) {
+                        $foto_list = json_decode($lpo['penunjang'], true);
+                        if (is_array($foto_list) && count($foto_list) > 0) {
+                          echo '<div class="row">';
+                          foreach ($foto_list as $foto) {
+                            if (file_exists('../rawatinap/pemeriksaan_penunjang/' . $foto)) {
+                              echo '<div class="col-md-3 mb-2">';
+                              echo '<img src="../rawatinap/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-thumbnail" style="max-height: 200px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')"><br>';
+                              echo '<small>' . htmlspecialchars($foto) . '</small>';
+                              echo '</div>';
+                            }
+                          }
+                          echo '</div>';
+                        } else {
+                          echo '<p class="text-muted">Tidak ada foto</p>';
+                        }
+                      } else {
+                        echo '<p class="text-muted">Tidak ada foto</p>';
+                      }
+                      ?>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1378,7 +1627,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?>
                         <?php echo $obat["per_obat"]; ?>
                       </td>
-                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?>     <?php echo $obat["racik"]; ?></td>
+                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?php echo $obat["racik"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
                       <!-- <td style="margin-top:10px;"> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button></td> -->
                     </tr>
@@ -1425,7 +1674,7 @@ if (isset($_GET['apotek']) && $_GET['apotek'] == 'done') {
                       <td style="margin-top:10px;"><?php echo $obat["dosis1_obat"]; ?> X <?php echo $obat["dosis2_obat"]; ?>
                         <?php echo $obat["per_obat"]; ?>
                       </td>
-                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?>     <?php echo $obat["racik"]; ?></td>
+                      <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?php echo $obat["racik"]; ?></td>
                       <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td>
                       <!-- <td style="margin-top:10px;"> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $obat["idobat"]; ?>">Edit</button></td> -->
                     </tr>
