@@ -11,8 +11,8 @@
                     <option value="pendaftaran">Pendaftaran</option>
                     <option value="ahliGiziJuruMasak">Ahli Gizi Juru Masak</option>
                     <option value="lab">Lab</option>
-                    <option value="racik">Racik</option>
-                    <option value="kebersihan">Kebersihan</option>
+                    <option value="racik">Apotek</option>
+                    <option value="kebersihan">Kebersihan, Juru Parkir, Driver</option>
                     <option value="igd">IGD</option>
                     <option value="perawatInap">Perawat Inap</option>
                 </select>
