@@ -99,6 +99,9 @@
                         <td>
                             <?php
                                 $kpimProsentase = 1;
+                                if (strpos($currentUrl, 'klakah') !== false) {
+                                    $kpimProsentase = 0.5;
+                                }
                             ?>
                             <?= $kpimProsentase ?>%
                         </td>

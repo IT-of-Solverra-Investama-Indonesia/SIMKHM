@@ -24,10 +24,10 @@
     </form>
 </div>
 <div class="p-0">
-<?php
+    <?php
     if (isset($_GET['kpim'])) {
         $kpim = htmlspecialchars($_GET['kpim']);
         include 'dashboardkpim_' . $kpim . '.php';
     }
-?>
+    ?>
 </div>
