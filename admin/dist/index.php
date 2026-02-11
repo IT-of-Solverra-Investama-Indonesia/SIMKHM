@@ -697,6 +697,27 @@ $level = $_SESSION['admin']['level'];
         <!-- End Profile Page Nav -->
       <?php } ?>
 
+      <?php
+        if($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') {
+          $getRegistrasiInap = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND status_antri != 'Pulang' ORDER BY idrawat DESC");
+          $notifRanap = 0;
+          foreach ($getRegistrasiInap as $ranapNotif) {
+            $getObatInapUnSee = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$ranapNotif[no_rm]' AND tgl_pasien='" . date('Y-m-d', strtotime($ranapNotif['jadwal'])) . "' AND see_apotek_at IS NULL")->num_rows;
+            if ($getObatInapUnSee > 0) {
+              $notifRanap += $getObatInapUnSee;
+            }
+          }
+
+          if($notifRanap > 0){
+            echo "
+              <audio autoplay>
+                <source src='https://public-assets.content-platform.envatousercontent.com/bb57cbaa-7c56-447b-a9ae-a6d964b90750/ae7d06ae-d4c7-485c-96e6-edc50ecd062e/preview.m4a' type='audio/mpeg'>
+              </audio>
+            ";
+          }
+        }
+      ?>
+
       <?php if ($level == 'apoteker' or $level == 'ceo'  or $level == 'sup') { ?>
         <li class="nav-heading">Apoteker</li>
         <li class="nav-item">
@@ -740,10 +761,15 @@ $level = $_SESSION['admin']['level'];
             <i class="bi bi-capsule"></i>
             <span>Rekap Obat</span>
           </a> -->
-          <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&inap">
+            <i class="bi bi-capsule"></i>
+            <span>Rawat Inap <?php if ($notifRanap > 0) { echo "<span class='badge bg-danger'>($notifRanap)</span>"; } ?></span>
+          </a>
+
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
             <i class="bi bi-capsule"></i>
             <span>Entri Obat Inap</span>
-          </a>
+          </a> -->
           <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_umum">
             <i class="bi bi-cart-check"></i>
             <span>Penjualan Obat Umum</span>
@@ -799,10 +825,14 @@ $level = $_SESSION['admin']['level'];
             <i class="bi bi-capsule"></i>
             <span>Terima Obat</span>
           </a>
-          <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
+          <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&inap">
+            <i class="bi bi-capsule"></i>
+            <span>Rawat Inap <span>Rawat Inap <?php if ($notifRanap > 0) { echo "<span class='badge bg-danger'>($notifRanap)</span>"; } ?></span></span>
+          </a>
+          <!-- <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
             <i class="bi bi-capsule"></i>
             <span>Entri Obat Inap</span>
-          </a>
+          </a> -->
           <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_umum">
             <i class="bi bi-cart-check"></i>
             <span>Penjualan Obat Umum</span>
