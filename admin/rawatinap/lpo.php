@@ -380,10 +380,10 @@ if (isset($_POST['savePenggunaan'])) {
                   <div class="card shadow p-2 mb-1">
                     <b for="">Obat Injeksi </b>
                     <div>
-                      <!-- <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
                         data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
                       <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
+                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -1589,13 +1589,23 @@ if (isset($_POST['savePenggunaan'])) {
           </div>
           <div class="card shadow p-3">
             <h5 class="card-title">Obat Oral</h5>
+            <?php
+            $dateLPO = date("H:00", strtotime($lpo['tgl_waktu']));
 
-            <?php if (isset($_GET['igd'])) {
+            $whereClause = "";
 
-              $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral'");
+            if ($dateLPO == "24:00" or $dateLPO == "00:00" or $dateLPO == "05:00") {
+              $whereClause = " AND (DATE(created_at) = '" . date('Y-m-d', strtotime($lpo['tgl_waktu'] . ' -1 day')) . "' AND digunakan_pada LIKE '%$dateLPO%')";
             } else {
-              $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral'");
-            } ?>
+              $whereClause = " AND (DATE(created_at) = '" . date('Y-m-d', strtotime($lpo['tgl_waktu'])) . "' AND digunakan_pada LIKE '%$dateLPO%')";
+            }
+
+            if (isset($_GET['igd'])) {
+              $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'oral' " . $whereClause);
+            } else {
+              $oral = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'oral' " . $whereClause);
+            }
+            ?>
 
 
             <br>
@@ -1639,9 +1649,9 @@ if (isset($_POST['savePenggunaan'])) {
 
             <?php if (isset($_GET['igd'])) {
 
-              $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi'");
+              $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND idigd='$_GET[idigd]' AND obat_igd = 'injeksi' " . $whereClause);
             } else {
-              $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi'");
+              $injek = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' " . $whereClause);
             }
 
             ?>
