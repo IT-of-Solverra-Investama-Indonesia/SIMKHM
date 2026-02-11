@@ -71,6 +71,14 @@ function getUniqeIdObat($koneksi)
   }
   return $newId;
 }
+function getUniqeIdObatRetur($koneksi)
+{
+  $newId = $koneksi->query("SELECT * FROM retur_obat_inap ORDER BY idretur DESC LIMIT 1")->fetch_assoc()['idobat'] + 1;
+  while ($koneksi->query("SELECT COUNT(*) FROM retur_obat_inap WHERE idretur = $newId")->fetch_row()[0] > 0) {
+    $newId++;
+  }
+  return $newId;
+}
 
 function getLastWord($inputString)
 {
@@ -218,6 +226,98 @@ if (isset($_GET['idObat'])) {
   </script>
   ";
 }
+
+if (isset($_GET['copyObat'])) {
+  $tgl = $_GET['tglobat'];
+  $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
+  $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' " . $whereTgl);
+  foreach ($obat as $row) {
+    $catatan_obat = $row['catatan_obat'];
+    $nama = $row['kode_obat'];
+    $jml_dokter = $row['jml_dokter'];
+    $dosis1_obat = $row['dosis1_obat'];
+    $dosis2_obat = $row['dosis2_obat'];
+    $per_obat = $row['per_obat'];
+    $durasi_obat = $row['durasi_obat'];
+    $jenis_obat = $row['jenis_obat'];
+    $petunjuk_obat = $row['petunjuk_obat'];
+    $idrm = $row['idrm'];
+
+    $end = date("H:i:s");
+    $uniqueId = getUniqeIdObat($koneksi);
+
+    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
+    $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
+    $m = $ObatKode['margininap'];
+    if ($m < 100) {
+      $margin = 1.30;
+    } else {
+      $margin = $m / 100;
+    }
+    $subtotal = 0;
+    $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter;
+    $subtotal += $harga;
+    date_default_timezone_set('Asia/Jakarta');
+    $tanggal = date('Y-m-d');
+    $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
+    $id = $row["idrm"];
+    $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
+
+    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$row[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
+
+    $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$row[idigd]', obat_igd = '$row[obat_igd]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+  }
+  echo "
+  <script>
+    alert('Obat pada Tanggal $_GET[tglobat] Berhasil Di Copy');
+    document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+  </script>
+  ";
+}
+
+if ($_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'apoteker') {
+  $getLatLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC LIMIT 1")->fetch_assoc();
+  if (!isset($_GET['tglobat'])) {
+    $tgl = date('Y-m-d', strtotime($getLatLpo['created_at']));
+  } else {
+    $tgl = $_GET['tglobat'];
+  }
+  $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
+  $injek = $koneksi->query("UPDATE obat_rm SET see_apotek_at = CURDATE() WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND see_apotek_at IS NULL " . $whereTgl);
+}
+
+if (isset($_POST['addRetur'])) {
+  $pasien = $koneksi->query("SELECT * FROM pasien  WHERE no_rm='$_GET[id]';")->fetch_assoc();
+
+  $idrawat = $id['idrawat'];
+  $no_rm = $pasien['no_rm'];
+  $nama_pasien = $pasien['nama_lengkap'];
+
+  $obat_rm_id = $_POST['idobat'];
+  $kode_obat = $_POST['kode_obat'];
+  $nama_obat = $_POST['nama_obat'];
+  $jenis_obat = $_POST['jenis_obat'];
+  $jumlah_retur = $_POST['jumlah_retur'];
+
+  $tgl_retur = date('Y-m-d');
+
+  $getHargaBeliAkhir = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%$obat_rm_id%' AND ket LIKE '%Resep%' AND id = '" . htmlspecialchars($id['idrawat']) . "' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+  $getJum = $koneksi->query("SELECT * FROM obat_rm WHERE idobat='$obat_rm_id' LIMIT 1")->fetch_assoc();
+
+  $hargaSatuan = -1 * $_POST['harga'];
+  $uniqueId = getUniqeIdObatRetur($koneksi);
+
+  $koneksi->query("INSERT INTO rawatinapdetail (id, biaya, ket, besaran, tgl, petugas) VALUES ('$idrawat', 'Retur Obat Inap', 'Retur Obat $uniqueId', '" . ($hargaSatuan) * $jumlah_retur . "', '$tgl_retur', '" . $_SESSION['admin']['namalengkap'] . "')");
+
+  $koneksi->query("INSERT INTO `retur_obat_inap`(`idretur`, `idrawat`, `no_rm`, `nama_pasien`, `obat_rm_id`, `kode_obat`, `nama_obat`, `jenis_obat`, `jumlah_retur`, `tgl_retur`) VALUES ('$uniqueId', '$idrawat','$no_rm','$nama_pasien','$obat_rm_id','$kode_obat','$nama_obat','$jenis_obat','$jumlah_retur','$tgl_retur')");
+
+  echo "
+            <script>
+                alert('Successfully');
+                window.location.href = '?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+            </script>
+        ";
+}
 ?>
 
 <!DOCTYPE html>
@@ -230,6 +330,9 @@ if (isset($_GET['idObat'])) {
   <title>KHM WONOREJO</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
 </head>
 
 <body>
@@ -346,7 +449,7 @@ if (isset($_GET['idObat'])) {
                 </div>
               </div>
               <?php if (!isset($_GET['entriObat'])) { ?>
-                <?php if($_SESSION['admin']['level'] != 'racik' AND $_SESSION['admin']['level'] != 'apoteker'){?>
+                <?php if ($_SESSION['admin']['level'] != 'racik') { ?>
                   <div class="card mb-1">
                     <div class="card-body">
                       <div style="margin-bottom:1px; margin-top:30px" id="editorZone">
@@ -386,7 +489,9 @@ if (isset($_GET['idObat'])) {
                         </div>
                         <div class="col-md-6" style="margin-top:20px;">
                           <label for="">Alergi</label>
-                          <input type="text" name="alergi" id="editor7" class="form-control" value="<?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) {echo $getDataCopy['alergi']; } ?>" placeholder="Alergi Obat" style="width:100%; height:50px">
+                          <input type="text" name="alergi" id="editor7" class="form-control" value="<?php if (isset($_GET['ctt']) or isset($_GET['ubah'])) {
+                                                                                                      echo $getDataCopy['alergi'];
+                                                                                                    } ?>" placeholder="Alergi Obat" style="width:100%; height:50px">
                         </div>
                         <div class="col-md-6" style="margin-top:20px;">
                           <label for="">Assesment</label>
@@ -435,7 +540,7 @@ if (isset($_GET['idObat'])) {
                       <button type="reset" class="btn btn-secondary">Reset</button>
                     </div>
                   </div>
-                <?php }?>
+                <?php } ?>
               <?php } ?>
             </div>
           </div>
@@ -469,7 +574,7 @@ if (isset($_GET['idObat'])) {
                 $getLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC");
                 foreach ($getLpo as $lpop) {
                 ?>
-                  <span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'" class="badge bg-warning" style="font-size"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span>
+                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span> <i onclick="document.location.href='?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>&copyObat'" class="bi bi-copy"></i></span>
                 <?php } ?>
               </div>
               <div class="table-responsive">
@@ -505,7 +610,7 @@ if (isset($_GET['idObat'])) {
                     foreach ($injek as $in) {
                     ?>
                       <tr>
-                        <td><?php echo $noo++; ?></td>
+                        <td class="text-light <?= $in['see_apotek_at'] == null ? 'bg-danger' : 'bg-success' ?>"><?php echo $noo++; ?></td>
                         <td><?php echo $in["nama_obat"]; ?></td>
                         <td><?php echo $in["kode_obat"]; ?></td>
                         <td><?php echo $in["jml_dokter"]; ?></td>
@@ -534,7 +639,8 @@ if (isset($_GET['idObat'])) {
                         <td><?= $in['petugas'] ?></td>
                         <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
                         <td>
-                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
+                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'dokter') { ?>
+                            <button class="btn btn-sm btn-warning" onclick="upData('<?= $in['idobat'] ?>','<?= $in['nama_obat'] ?>','<?= $in['kode_obat'] ?>','<?= $in['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
                             <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i
                                 class="bi bi-trash"></i></a>
                           <?php } else { ?>
@@ -565,7 +671,7 @@ if (isset($_GET['idObat'])) {
                 $getLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC");
                 foreach ($getLpo as $lpop) {
                 ?>
-                  <span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'" class="badge bg-warning" style="font-size"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span>
+                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span> <i onclick="document.location.href='?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>&copyObat'" class="bi bi-copy"></i></span>
                 <?php } ?>
               </div>
               <div class="table-responsive">
@@ -602,7 +708,7 @@ if (isset($_GET['idObat'])) {
                     foreach ($oral as $or) {
                     ?>
                       <tr>
-                        <td><?php echo $no++; ?></td>
+                        <td class="text-light <?= $or['see_apotek_at'] == null ? 'bg-danger' : 'bg-success' ?>"><?php echo $no++; ?></td>
                         <td><?php echo $or["nama_obat"]; ?></td>
                         <td><?php echo $or["kode_obat"]; ?></td>
                         <td><?php echo $or["jml_dokter"]; ?></td>
@@ -633,7 +739,8 @@ if (isset($_GET['idObat'])) {
                         </td>
                         <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
                         <td>
-                          <?php if ($_SESSION['admin']['level'] == 'sup' OR $_SESSION['admin']['level'] == 'apoteker' OR $_SESSION['admin']['level'] == 'racik') { ?>
+                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'dokter') { ?>
+                            <button class="btn btn-sm btn-warning" onclick="upData('<?= $or['idobat'] ?>','<?= $or['nama_obat'] ?>','<?= $or['kode_obat'] ?>','<?= $or['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
                             <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i
                                 class="bi bi-trash"></i></a>
                           <?php } else { ?>
@@ -647,6 +754,103 @@ if (isset($_GET['idObat'])) {
               </div>
             </div>
           </div>
+          <div class="col-md-12">
+            <div class="card shadow p-2 mb-1">
+              <b>Riwayat Retur Obat</b>
+              <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Tgl</th>
+                      <th>Kode</th>
+                      <th>Nama Obat</th>
+                      <th>Jenis Obat</th>
+                      <th>Jenis</th>
+                      <th>Harga</th>
+                      <th>Jumlah Retur</th>
+                      <th>Sub</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    $nooo = 1;
+                    $getRetur = $koneksi->query("SELECT *, obat_rm.obat_igd FROM retur_obat_inap INNER JOIN obat_rm ON obat_rm.idobat = retur_obat_inap.obat_rm_id WHERE idrawat = '" . htmlspecialchars($id['idrawat']) . "'");
+                    foreach ($getRetur as $retur) {
+                    ?>
+                      <tr>
+                        <td><?= $nooo++ ?></td>
+                        <td><?= $retur['tgl_retur'] ?></td>
+                        <td>
+                          <a target="_blank" href="../apotek/retur_obat_inap_print.php?idrawat=<?= $retur['idrawat'] ?>&tgl=<?= $retur['tgl_retur'] ?>" class="badge bg-warning text-light" style="font-size: 12px;">
+                            <?= $retur['kode_obat'] ?>
+                          </a>
+                        </td>
+                        <td><?= $retur['nama_obat'] ?></td>
+                        <td><?= $retur['jenis_obat'] ?></td>
+                        <td><?= $retur['obat_igd'] ?></td>
+                        <td>
+                          <?php
+                          $getPriceInDate = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%Retur%' AND ket LIKE '%$retur[idretur]%' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+                          $harga = $getPriceInDate['besaran'] / $retur['jumlah_retur'];
+                          ?>
+                          Rp <?= number_format($harga, 0, 0, '.') ?>
+                        </td>
+                        <td><?= $retur['jumlah_retur'] ?></td>
+                        <td>Rp <?= number_format($harga * $retur['jumlah_retur'], 0, 0, '.') ?></td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <script>
+            function upData(idobat, nama_obat, kode_obat, jenis_obat, harga) {
+              document.getElementById('idobat_id').value = idobat;
+              document.getElementById('nama_obat_id').value = nama_obat;
+              document.getElementById('kode_obat_id').value = kode_obat;
+              document.getElementById('jenis_obat_id').value = jenis_obat;
+              document.getElementById('harga_id').value = harga;
+            }
+          </script>
+          <!-- Modal -->
+          <div class="modal fade" id="AddRetur" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="staticBackdropLabel">Retur Obat</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post">
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-3">
+                        <input type="text" readonly name="nama_obat" id="nama_obat_id" class="form-control form-control-sm mb-1">
+                        <input type="text" readonly name="idobat" id="idobat_id" hidden class="form-control form-control-sm mb-1">
+                      </div>
+                      <div class="col-3">
+                        <input type="text" readonly name="kode_obat" id="kode_obat_id" class="form-control form-control-sm mb-1">
+                      </div>
+                      <div class="col-3">
+                        <input type="text" readonly name="harga" id="harga_id" class="form-control form-control-sm mb-1">
+                      </div>
+                      <div class="col-3">
+                        <input type="text" readonly name="jenis_obat" id="jenis_obat_id" class="form-control form-control-sm mb-1">
+                      </div>
+                      <div class="col-12">
+                        <input type="number" autofocus name="jumlah_retur" id="jumlah_retur_id" placeholder="Jumlah Retur" class="form-control form-control-sm mb-1">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" name="addRetur" class="btn btn-sm btn-primary">Retur</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
           <!-- <div class="col-12">
             <div class="d-flex justify-content-end mb-4 mt-4">
               <a class="btn btn-sm btn-primary"
@@ -655,199 +859,246 @@ if (isset($_GET['idObat'])) {
                 di-Input Semua dan Pasien Boleh Pulang</a>
             </div>
           </div> -->
-          <?php if($_SESSION['admin']['level'] != 'racik' AND $_SESSION['admin']['level'] != 'apoteker'){?>
-            <div class="col-md-12 <?= isset($_GET['bulan']) ? 'd-none' : '' ?>">
-              <div class="card mb-1" style="margin-top:0px">
-                <div class="card-body col-md-12">
-                  <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SAAT INI</h5>
-                  <!-- Modal Tag Teman Perawat -->
-                  <!-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button> -->
-                  <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Tag Teman Perawat</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form method="post">
-                          <div class="modal-body">
-                            <input type="text" name="id" id="id_id" hidden>
-                            <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
-                            <select name="temanPerawat[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
-                              <?php
-                              $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('perawat', 'inap', 'igd') ORDER BY namalengkap ASC");
-                              foreach ($getPerawat as $perawat) :
-                              ?>
-                                <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
-                              <?php endforeach; ?>
-                            </select>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" name="tagTeman" class="btn btn-sm btn-primary">Tag Teman Perawat</button>
-                          </div>
-                        </form>
+          <div class="col-md-12 <?= isset($_GET['bulan']) ? 'd-none' : '' ?>">
+            <div class="card mb-1" style="margin-top:0px">
+              <div class="card-body col-md-12">
+                <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SAAT INI</h5>
+                <!-- Modal Tag Teman Perawat -->
+                <!-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button> -->
+                <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Tag Teman Perawat</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
+                      <form method="post">
+                        <div class="modal-body">
+                          <input type="text" name="id" id="id_id" hidden>
+                          <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
+                          <select name="temanPerawat[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
+                            <?php
+                            $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('perawat', 'inap', 'igd') ORDER BY namalengkap ASC");
+                            foreach ($getPerawat as $perawat) :
+                            ?>
+                              <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
+                            <?php endforeach; ?>
+                          </select>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="submit" name="tagTeman" class="btn btn-sm btn-primary">Tag Teman Perawat</button>
+                        </div>
+                      </form>
                     </div>
                   </div>
-                  <script>
-                    function upDataId(id) {
-                      document.getElementById('id_id').value = id;
-                    }
-                  </script>
-                  <br>
-                  <!-- End Modal Tag Teman Perawat -->
-                  <div class="table-responsive">
-                    <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
-                      <thead>
-                        <tr>
-                          <th>No</th>
-                          <th>Tgl&Jam</th>
-                          <th>Subjek</th>
-                          <th>Objek</th>
-                          <th>Alergi</th>
-                          <th>Assesment</th>
-                          <th>Plan</th>
-                          <th>Intruksi</th>
-                          <th>Edukasi</th>
-                          <th>Petugas</th>
-                          <th>Dokter</th>
-                          <th>Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        $getPulangTerakhir = $koneksi->query("SELECT * FROM pulang WHERE norm='$_GET[id]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
-
-                        $no = 1;
-                        $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' GROUP BY tgl order by id DESC");
-                        ?>
-                        <?php foreach ($riw as $pecah) : ?>
-                          <tr>
-                            <td><?php echo $no; ?></td>
-                            <td>
-                              <?php echo $pecah["tgl"]; ?>
-                              <?php
-                              $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
-                              foreach ($getTagCount as $tag) {
-                                echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
-                              }
-                              ?>
-                            </td>
-                            <td><?php echo $pecah["ctt_tedis"]; ?> </td>
-                            <td><?php echo $pecah["object"]; ?> </td>
-                            <td><?php echo $pecah["alergi"]; ?> </td>
-                            <td><?php echo $pecah["assesment"]; ?> </td>
-                            <td><?php echo $pecah["plan"]; ?> </td>
-                            <td><?php echo $pecah["intruksi"]; ?> </td>
-                            <td><?php echo $pecah["edukasi"]; ?> </td>
-                            <td><?php echo $pecah["petugas"]; ?></td>
-                            <td><?php echo $pecah["dokter"]; ?></td>
-                            <td>
-                              <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
-                              <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
-                                <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
-                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
-                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
-                              <?php } ?>
-                            </td>
-                          </tr>
-                          <?php $no += 1 ?>
-                        <?php endforeach ?>
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="card shadow p-2">
-                <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SEBELUMNYA <?= isset($_GET['bulan']) ? $_GET['bulan'] : 'ALL' ?></h5>
+                <script>
+                  function upDataId(id) {
+                    document.getElementById('id_id').value = id;
+                  }
+                </script>
+                <br>
+                <!-- End Modal Tag Teman Perawat -->
                 <div class="table-responsive">
-                  <?php if (!isset($_GET['bulan'])) { ?>
-                    <table class="table-hover table table-sm table-striped" style="font-size: 12px;">
-                      <thead>
+                  <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Tgl&Jam</th>
+                        <th>Subjek</th>
+                        <th>Objek</th>
+                        <th>Alergi</th>
+                        <th>Assesment</th>
+                        <th>Plan</th>
+                        <th>Intruksi</th>
+                        <th>Edukasi</th>
+                        <th>Petugas</th>
+                        <th>Dokter</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $getPulangTerakhir = $koneksi->query("SELECT * FROM pulang WHERE norm='$_GET[id]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+
+                      $no = 1;
+                      $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' GROUP BY tgl order by id DESC");
+                      ?>
+                      <?php foreach ($riw as $pecah) : ?>
                         <tr>
-                          <th>Bulan</th>
-                          <th>Action</th>
+                          <td><?php echo $no; ?></td>
+                          <td>
+                            <?php echo $pecah["tgl"]; ?>
+                            <?php
+                            $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
+                            foreach ($getTagCount as $tag) {
+                              echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
+                            }
+                            ?>
+                          </td>
+                          <td><?php echo $pecah["ctt_tedis"]; ?> </td>
+                          <td><?php echo $pecah["object"]; ?> </td>
+                          <td><?php echo $pecah["alergi"]; ?> </td>
+                          <td><?php echo $pecah["assesment"]; ?> </td>
+                          <td><?php echo $pecah["plan"]; ?> </td>
+                          <td><?php echo $pecah["intruksi"]; ?> </td>
+                          <td><?php echo $pecah["edukasi"]; ?> </td>
+                          <td><?php echo $pecah["petugas"]; ?></td>
+                          <td><?php echo $pecah["dokter"]; ?></td>
+                          <td>
+                            <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
+                            <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
+                              <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
+                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
+                            <?php } ?>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        $no = 1;
-                        $getBulanLalu = $koneksi->query("SELECT DATE_FORMAT(tgl, '%Y-%m') as bulan FROM ctt_penyakit_inap WHERE norm='$_GET[id]' GROUP BY DATE_FORMAT(tgl, '%Y-%m') ORDER BY tgl DESC");
-                        foreach ($getBulanLalu as $bulanLalu):
-                        ?>
-                          <tr>
-                            <td><?= $bulanLalu['bulan'] ?></td>
-                            <td><a href="index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&bulan=<?= $bulanLalu['bulan'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
-                          </tr>
-                        <?php endforeach; ?>
-                      </tbody>
-                    </table>
-                  <?php } else { ?>
-                    <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
-                      <thead>
-                        <tr>
-                          <th>No</th>
-                          <th>Tgl&Jam</th>
-                          <th>Subjek</th>
-                          <th>Objek</th>
-                          <th>Alergi</th>
-                          <th>Assesment</th>
-                          <th>Plan</th>
-                          <th>Intruksi</th>
-                          <th>Edukasi</th>
-                          <th>Petugas</th>
-                          <th>Dokter</th>
-                          <th>Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        $getPulangTerakhir['tgl'] = date('Y-m-d', strtotime($_GET['bulan'] . '-01')); // Set tanggal pulang terakhir ke kemarin agar semua data muncul
-                        $no = 1;
-                        $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . $getPulangTerakhir['tgl'] . "' GROUP BY tgl order by id DESC");
-                        ?>
-                        <?php foreach ($riw as $pecah) : ?>
-                          <tr>
-                            <td><?php echo $no; ?></td>
-                            <td>
-                              <?php echo $pecah["tgl"]; ?>
-                              <?php
-                              $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
-                              foreach ($getTagCount as $tag) {
-                                echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
-                              }
-                              ?>
-                            </td>
-                            <td><?php echo $pecah["ctt_tedis"]; ?> </td>
-                            <td><?php echo $pecah["object"]; ?> </td>
-                            <td><?php echo $pecah["alergi"]; ?> </td>
-                            <td><?php echo $pecah["assesment"]; ?> </td>
-                            <td><?php echo $pecah["plan"]; ?> </td>
-                            <td><?php echo $pecah["intruksi"]; ?> </td>
-                            <td><?php echo $pecah["edukasi"]; ?> </td>
-                            <td><?php echo $pecah["petugas"]; ?></td>
-                            <td><?php echo $pecah["dokter"]; ?></td>
-                            <td>
-                              <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
-                              <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
-                                <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
-                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
-                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
-                              <?php } ?>
-                            </td>
-                          </tr>
-                          <?php $no += 1 ?>
-                        <?php endforeach ?>
-                      </tbody>
-                    </table>
-                  <?php } ?>
+                        <?php $no += 1 ?>
+                      <?php endforeach ?>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
-          <?php } ?>
+          </div>
+          <div class="col-12">
+            <div class="card shadow p-2 mb-1">
+              <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SEBELUMNYA <?= isset($_GET['bulan']) ? $_GET['bulan'] : 'ALL' ?></h5>
+              <div class="table-responsive">
+                <?php if (!isset($_GET['bulan'])) { ?>
+                  <table class="table-hover table table-sm table-striped" style="font-size: 12px;">
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $no = 1;
+                      $getBulanLalu = $koneksi->query("SELECT DATE_FORMAT(tgl, '%Y-%m') as bulan FROM ctt_penyakit_inap WHERE norm='$_GET[id]' GROUP BY DATE_FORMAT(tgl, '%Y-%m') ORDER BY tgl DESC");
+                      foreach ($getBulanLalu as $bulanLalu):
+                      ?>
+                        <tr>
+                          <td><?= $bulanLalu['bulan'] ?></td>
+                          <td><a href="index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&bulan=<?= $bulanLalu['bulan'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
+                        </tr>
+                      <?php endforeach; ?>
+                    </tbody>
+                  </table>
+                <?php } else { ?>
+                  <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Tgl&Jam</th>
+                        <th>Subjek</th>
+                        <th>Objek</th>
+                        <th>Alergi</th>
+                        <th>Assesment</th>
+                        <th>Plan</th>
+                        <th>Intruksi</th>
+                        <th>Edukasi</th>
+                        <th>Petugas</th>
+                        <th>Dokter</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $getPulangTerakhir['tgl'] = date('Y-m-d', strtotime($_GET['bulan'] . '-01')); // Set tanggal pulang terakhir ke kemarin agar semua data muncul
+                      $no = 1;
+                      $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . $getPulangTerakhir['tgl'] . "' GROUP BY tgl order by id DESC");
+                      ?>
+                      <?php foreach ($riw as $pecah) : ?>
+                        <tr>
+                          <td><?php echo $no; ?></td>
+                          <td>
+                            <?php echo $pecah["tgl"]; ?>
+                            <?php
+                            $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
+                            foreach ($getTagCount as $tag) {
+                              echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
+                            }
+                            ?>
+                          </td>
+                          <td><?php echo $pecah["ctt_tedis"]; ?> </td>
+                          <td><?php echo $pecah["object"]; ?> </td>
+                          <td><?php echo $pecah["alergi"]; ?> </td>
+                          <td><?php echo $pecah["assesment"]; ?> </td>
+                          <td><?php echo $pecah["plan"]; ?> </td>
+                          <td><?php echo $pecah["intruksi"]; ?> </td>
+                          <td><?php echo $pecah["edukasi"]; ?> </td>
+                          <td><?php echo $pecah["petugas"]; ?></td>
+                          <td><?php echo $pecah["dokter"]; ?></td>
+                          <td>
+                            <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
+                            <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
+                              <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
+                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
+                            <?php } ?>
+                          </td>
+                        </tr>
+                        <?php $no += 1 ?>
+                      <?php endforeach ?>
+                    </tbody>
+                  </table>
+                <?php } ?>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="card shadow p-2">
+              <h5 class="card-title">CATATAN FARMASI</h5>
+              <?php
+              $riwayat_catatan = $koneksi->query("SELECT * FROM catatan_farmasi WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' ORDER BY created_at DESC");
+              ?>
+              <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Nama Pasien</th>
+                      <th>Catatan</th>
+                      <th>No RM</th>
+                      <th>Jadwal</th>
+                      <th>Dibuat Oleh</th>
+                      <th>Dibuat Pada</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    if ($riwayat_catatan->num_rows > 0) {
+                      $no = 1;
+                      while ($row = $riwayat_catatan->fetch_assoc()) {
+                    ?>
+                        <tr>
+                          <td><?= $no++ ?></td>
+                          <td><?= htmlspecialchars($row['nama_pasien']) ?></td>
+                          <td><?= htmlspecialchars($row['catatan']) ?></td>
+                          <td><?= htmlspecialchars($row['no_rm']) ?></td>
+                          <td><?= date('d-m-Y H:i', strtotime($row['jadwal'])) ?></td>
+                          <td><?= htmlspecialchars($row['created_by']) ?></td>
+                          <td><?= date('d-m-Y H:i:s', strtotime($row['created_at'])) ?></td>
+                        </tr>
+                      <?php
+                      }
+                    } else {
+                      ?>
+                      <tr>
+                        <td colspan="7" class="text-center text-muted">
+                          <i class="bi bi-inbox"></i> Belum ada catatan farmasi untuk pasien ini
+                        </td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       <?php } else { ?>
         <div class="card shadow-sm mb-2 p-2">
