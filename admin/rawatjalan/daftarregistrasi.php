@@ -810,109 +810,257 @@ if (isset($_GET['detail'])) {
 
 <?php
 if (isset($_GET['status'])) {
+  // PENGIRIMAN WA DENGAN Qiscus
+  $qiscus_app_id     = "mmgpu-ibeqprelthdmxcb";
+  $qiscus_secret_key = "1ac1eb8eb81ee5adda8fae7233733b4c";
+  $qiscus_channel_id = "8307";
+  $template_namespace = "fd4d98c9_14c0_4dc8_ba92_8dcdb8f73883";
+  $template_name      = "konfirmasi_layanan";
+
+  // Ambil data kunjungan awal
   $getBPJS = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$_GET[id]'")->fetch_assoc();
   $jam = date('H:i:s', strtotime($_GET['jadwal']));
+
+  // Update status antrian
   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', datang_at= '" . date('Y-m-d H:i:s') . "', perawat='" . $_SESSION['admin']['namalengkap'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
 
+  // Insert biaya rawat berdasarkan cara bayar
   if ($getBPJS['carabayar'] == 'bpjs') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $biaya = '0';
   } elseif ($getBPJS['carabayar'] == 'malam') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('50000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $biaya = '50000';
   } elseif ($getBPJS['carabayar'] == 'spesialis anak') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('200000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $biaya = '200000';
   } elseif ($getBPJS['carabayar'] == 'spesialis penyakit dalam') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('250000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $biaya = '250000';
   } elseif ($getBPJS['carabayar'] == 'gigi umum') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
-  } elseif ($getBPJS['carabayar'] == 'gigi bpjs') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
-  } elseif ($getBPJS['carabayar'] == 'kosmetik') {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $biaya = '35000';
+  } elseif ($getBPJS['carabayar'] == 'gigi bpjs' || $getBPJS['carabayar'] == 'kosmetik') {
+    $biaya = '0';
   } else {
-    $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+    $biaya = '35000';
   }
 
-  // Logika Untuk Mengirim Link Rating Otomatis
-  $ambilDataKunjungan = $koneksi->query("SELECT * FROM registrasi_rawat JOIN pasien where idrawat='$_GET[id]' and registrasi_rawat.no_rm = '$_GET[norm]'");
-  $pecahData = $ambilDataKunjungan->fetch_assoc();
+  $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('$biaya', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
 
+  // Ambil data pasien untuk pesan WA
+  // Pastikan query ini mengambil 'nama_pasien' dan 'nohp'
   $getPasienForSendMessage = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm) = TRIM('$_GET[norm]') ORDER BY idpasien DESC LIMIT 1")->fetch_assoc();
 
+  $nama_pasien = $getPasienForSendMessage['nama_lengkap']; // Asumsi nama kolomnya 'nama_pasien'
   $hp = $getPasienForSendMessage["nohp"];
-  $hp2 = substr($hp, 1);
-  $hp = '62' . $hp2;
-  $tglReminder = date('Y-m-d', strtotime("+1 days"));
-  $waktuReminder = date('H:i:s');
+
+  // Format Nomor HP ke format 62 (Qiscus butuh format internasional tanpa +)
+  // Hapus karakter selain angka
+  $hp = preg_replace('/[^0-9]/', '', $hp);
+  if (substr($hp, 0, 1) == '0') {
+    $hp = '62' . substr($hp, 1);
+  } elseif (substr($hp, 0, 2) != '62') {
+    $hp = '62' . $hp; // Jaga-jaga jika inputnya tidak ada 0 di depan
+  }
+
+  $currentURL = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] : '';
+  $currentURL = strtolower($currentURL);
+  if (strpos($currentURL, 'wonorejo') !== false) {
+    $nama_klinik  = "wonorejo";
+  } elseif (strpos($currentURL, 'klakah') !== false) {
+    $nama_klinik  = "klakah";
+  } elseif (strpos($currentURL, 'tunjung') !== false) {
+    $nama_klinik  = "tunjung";
+  } else {
+    $nama_klinik  = "kunir";
+  }
+
+  // Data Variabel Template
+  $id_transaksi = $_GET['id'];
+
 
   $curl = curl_init();
-  include '../rawatjalan/api_token_wa.php';
-  $mess = $mes . $_GET['id'] . "
-". $hub;
-  $data = [
-    'phone' => $hp,
-    'date' => $tglReminder,
-    'time' => $waktuReminder,
-    'timezone' => 'Asia/Jakarta',
-    'message' => $mess,
-    'isGroup' => 'true',
-  ];
-  curl_setopt(
-    $curl,
-    CURLOPT_HTTPHEADER,
-    array(
-      "Authorization: $token",
-    )
-  );
-  curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-  curl_setopt($curl, CURLOPT_URL,  "https://jogja.wablas.com/api/schedule");
-  curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 
-  $result = curl_exec($curl);
+  // Susun Payload JSON sesuai dokumentasi Qiscus & Template Utility Anda
+  $payload = [
+    "to" => $hp,
+    "type" => "template",
+    "template" => [
+      "namespace" => $template_namespace,
+      "name" => $template_name,
+      "language" => [
+        "policy" => "deterministic",
+        "code" => "id"
+      ],
+      "components" => [
+        [
+          "type" => "body",
+          "parameters" => [
+            [
+              "type" => "text",
+              "text" => $nama_pasien
+            ],
+            [
+              "type" => "text",
+              "text" => $nama_klinik
+            ],
+            [
+              "type" => "text",
+              "text" => $id_transaksi
+            ]
+          ]
+        ],
+        [
+          "type" => "button",
+          "sub_type" => "url",
+          "index" => "0",
+          "parameters" => [
+            [
+              "type" => "text",
+              "text" => "$nama_klinik/admin/rating/rating.php?id=$id_transaksi"
+            ]
+          ]
+        ]
+      ]
+    ]
+  ];
+
+  curl_setopt_array($curl, array(
+    CURLOPT_URL => "https://omnichannel.qiscus.com/whatsapp/v1/{$qiscus_app_id}/{$qiscus_channel_id}/messages",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => "",
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 30,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => "POST",
+    CURLOPT_POSTFIELDS => json_encode($payload),
+    CURLOPT_HTTPHEADER => array(
+      "Qiscus-App-Id: " . $qiscus_app_id,
+      "Qiscus-Secret-Key: " . $qiscus_secret_key,
+      "Content-Type: application/json"
+    ),
+  ));
+
+  $response = curl_exec($curl);
+  $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE); // Cek HTTP Status Code
+  $err = curl_error($curl);
+
   curl_close($curl);
-  echo "<pre>";
-  print_r($result);
 
-  // Menanyakan kabar setelah 3 hari 
-  $tglReminder1 = date('Y-m-d', strtotime("+3 days"));
-  // $tglReminder1 = date('Y-m-d');
-  $waktuReminder1 = date('H:i:s', strtotime('+1 minutes'));
+  echo "<h3>Status Debugging:</h3>";
+  echo "HTTP Status Code: " . $http_code . "<br>";
 
-  $curl1 = curl_init();
-  include '../rawatjalan/api_token_wa.php';
-  $data1 = [
-    'phone' => $hp,
-    'date' => $tglReminder1,
-    'time' => $waktuReminder1,
-    'timezone' => 'Asia/Jakarta',
-    'message' => '*Assalamualaikum wr wb*
-Halo ' . $getPasienForSendMessage["nama_lengkap"] . ' 👋, bagaimana kabarnya? Semoga sehat selalu. Kami dari Klinik Husada Mulia ingin memastikan kenyamanan dan kesehatan Anda. 😊
+  if ($err) {
+    echo "cURL Error #: " . $err;
+  } else {
+    echo "Response dari Qiscus:<br>";
+    echo "<pre>";
+    print_r(json_decode($response, true));
+    echo "</pre>";
+  }
 
-Sudah 3 hari sejak kunjungan terakhir Anda ke klinik kami. Kami ingin bertanya, bagaimana kondisi kesehatan Anda saat ini? Apakah ada keluhan atau hal yang ingin didiskusikan?
 
-Tim kami selalu siap membantu dan memberikan dukungan untuk kebutuhan Anda. Terima kasih telah mempercayai Klinik Husada Mulia dalam perawatan kesehatan Anda.🙏✨',
-    'isGroup' => 'true',
-  ];
-  curl_setopt(
-    $curl1,
-    CURLOPT_HTTPHEADER,
-    array(
-      "Authorization: $token",
-    )
-  );
-  curl_setopt($curl1, CURLOPT_CUSTOMREQUEST, "POST");
-  curl_setopt($curl1, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($curl1, CURLOPT_POSTFIELDS, http_build_query($data1));
-  curl_setopt($curl1, CURLOPT_URL,  "https://jogja.wablas.com/api/schedule");
-  curl_setopt($curl1, CURLOPT_SSL_VERIFYHOST, 0);
-  curl_setopt($curl1, CURLOPT_SSL_VERIFYPEER, 0);
+  // PENGIRIMAN WA DENGAN WABLAS
+  //   $getBPJS = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$_GET[id]'")->fetch_assoc();
+  //   $jam = date('H:i:s', strtotime($_GET['jadwal']));
+  //   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Datang', start = '$jam', datang_at= '" . date('Y-m-d H:i:s') . "', perawat='" . $_SESSION['admin']['namalengkap'] . "', keluhan = '" . htmlspecialchars($_GET['keluhanUtama']) . "' WHERE idrawat='$_GET[id]'");
 
-  $result1 = curl_exec($curl1);
-  curl_close($curl1);
-  echo "<pre>";
-  print_r($result1);
+  //   if ($getBPJS['carabayar'] == 'bpjs') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } elseif ($getBPJS['carabayar'] == 'malam') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('50000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } elseif ($getBPJS['carabayar'] == 'spesialis anak') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('200000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } elseif ($getBPJS['carabayar'] == 'spesialis penyakit dalam') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('250000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } elseif ($getBPJS['carabayar'] == 'gigi umum') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } elseif ($getBPJS['carabayar'] == 'gigi bpjs') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } elseif ($getBPJS['carabayar'] == 'kosmetik') {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('0', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   } else {
+  //     $koneksi->query("INSERT INTO biaya_rawat (poli, idregis, kasir, shift) VALUES ('35000', '$_GET[id]', '', '" . $_SESSION['shift'] . "')");
+  //   }
+
+  //   // Logika Untuk Mengirim Link Rating Otomatis
+  //   $ambilDataKunjungan = $koneksi->query("SELECT * FROM registrasi_rawat JOIN pasien where idrawat='$_GET[id]' and registrasi_rawat.no_rm = '$_GET[norm]'");
+  //   $pecahData = $ambilDataKunjungan->fetch_assoc();
+
+  //   $getPasienForSendMessage = $koneksi->query("SELECT * FROM pasien WHERE TRIM(no_rm) = TRIM('$_GET[norm]') ORDER BY idpasien DESC LIMIT 1")->fetch_assoc();
+
+  //   $hp = $getPasienForSendMessage["nohp"];
+  //   $hp2 = substr($hp, 1);
+  //   $hp = '62' . $hp2;
+  //   $tglReminder = date('Y-m-d', strtotime("+1 days"));
+  //   $waktuReminder = date('H:i:s');
+
+  //   $curl = curl_init();
+  //   include '../rawatjalan/api_token_wa.php';
+  //   $mess = $mes . $_GET['id'] . "
+  // ". $hub;
+  //   $data = [
+  //     'phone' => $hp,
+  //     'date' => $tglReminder,
+  //     'time' => $waktuReminder,
+  //     'timezone' => 'Asia/Jakarta',
+  //     'message' => $mess,
+  //     'isGroup' => 'true',
+  //   ];
+  //   curl_setopt(
+  //     $curl,
+  //     CURLOPT_HTTPHEADER,
+  //     array(
+  //       "Authorization: $token",
+  //     )
+  //   );
+  //   curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
+  //   curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+  //   curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+  //   curl_setopt($curl, CURLOPT_URL,  "https://jogja.wablas.com/api/schedule");
+  //   curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+  //   curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+
+  //   $result = curl_exec($curl);
+  //   curl_close($curl);
+  //   echo "<pre>";
+  //   print_r($result);
+  //   // END Logika Untuk Mengirim Link Rating Otomatis
+
+//   // Menanyakan kabar setelah 3 hari 
+//   $tglReminder1 = date('Y-m-d', strtotime("+3 days"));
+//   // $tglReminder1 = date('Y-m-d');
+//   $waktuReminder1 = date('H:i:s', strtotime('+1 minutes'));
+
+//   $curl1 = curl_init();
+//   include '../rawatjalan/api_token_wa.php';
+//   $data1 = [
+//     'phone' => $hp,
+//     'date' => $tglReminder1,
+//     'time' => $waktuReminder1,
+//     'timezone' => 'Asia/Jakarta',
+//     'message' => '*Assalamualaikum wr wb*
+// Halo ' . $getPasienForSendMessage["nama_lengkap"] . ' 👋, bagaimana kabarnya? Semoga sehat selalu. Kami dari Klinik Husada Mulia ingin memastikan kenyamanan dan kesehatan Anda. 😊
+
+// Sudah 3 hari sejak kunjungan terakhir Anda ke klinik kami. Kami ingin bertanya, bagaimana kondisi kesehatan Anda saat ini? Apakah ada keluhan atau hal yang ingin didiskusikan?
+
+// Tim kami selalu siap membantu dan memberikan dukungan untuk kebutuhan Anda. Terima kasih telah mempercayai Klinik Husada Mulia dalam perawatan kesehatan Anda.🙏✨',
+//     'isGroup' => 'true',
+//   ];
+//   curl_setopt(
+//     $curl1,
+//     CURLOPT_HTTPHEADER,
+//     array(
+//       "Authorization: $token",
+//     )
+//   );
+//   curl_setopt($curl1, CURLOPT_CUSTOMREQUEST, "POST");
+//   curl_setopt($curl1, CURLOPT_RETURNTRANSFER, true);
+//   curl_setopt($curl1, CURLOPT_POSTFIELDS, http_build_query($data1));
+//   curl_setopt($curl1, CURLOPT_URL,  "https://jogja.wablas.com/api/schedule");
+//   curl_setopt($curl1, CURLOPT_SSL_VERIFYHOST, 0);
+//   curl_setopt($curl1, CURLOPT_SSL_VERIFYPEER, 0);
+
+//   $result1 = curl_exec($curl1);
+//   curl_close($curl1);
+//   echo "<pre>";
+//   print_r($result1);
   // END Menanyakan kabar setelah 3 hari 
   // End Logic
 

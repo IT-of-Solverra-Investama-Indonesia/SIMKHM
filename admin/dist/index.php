@@ -1,4 +1,89 @@
 <?php
+include 'function.php';
+
+$qiscus_app_id      = "mmgpu-ibeqprelthdmxcb";
+$qiscus_secret_key  = "1ac1eb8eb81ee5adda8fae7233733b4c";
+$qiscus_channel_id  = "8307";
+$template_namespace = "fd4d98c9_14c0_4dc8_ba92_8dcdb8f73883";
+$template_name      = "konfirmasi_status_kesehatan";
+
+$target_date = date('Y-m-d', strtotime("-3 days"));
+
+$url_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (strpos($url_path, 'wonorejo') !== false) {
+  $nama_klinik_sender = "wonorejo";
+} elseif (strpos($url_path, 'klakah') !== false) {
+  $nama_klinik_sender = "klakah";
+} elseif (strpos($url_path, 'tunjung') !== false) {
+  $nama_klinik_sender = "tunjung";
+} else {
+  $nama_klinik_sender = "kunir";
+}
+
+
+$sql_check = "SELECT r.idrawat, r.no_rm, p.nama_lengkap, p.nohp 
+              FROM registrasi_rawat r 
+              JOIN pasien p ON r.no_rm = p.no_rm 
+              WHERE r.status_antri != 'Belum Datang' 
+              AND DATE(r.jadwal) = '$target_date' 
+              AND r.wa_at IS NULL 
+              LIMIT 5";
+
+$result_check = $koneksi->query($sql_check);
+
+if ($result_check->num_rows > 0) {
+  while ($row = $result_check->fetch_assoc()) {
+
+    $hp = preg_replace('/[^0-9]/', '', $row['nohp']);
+    if (substr($hp, 0, 1) == '0') {
+      $hp = '62' . substr($hp, 1);
+    } elseif (substr($hp, 0, 2) != '62') {
+      $hp = '62' . $hp;
+    }
+
+    $payload = [
+      "to" => $hp,
+      "type" => "template",
+      "template" => [
+        "namespace" => $template_namespace,
+        "name" => $template_name,
+        "language" => ["policy" => "deterministic", "code" => "id"],
+        "components" => [
+          [
+            "type" => "body",
+            "parameters" => [
+              ["type" => "text", "text" => $row['nama_lengkap']],
+              ["type" => "text", "text" => $nama_klinik_sender]
+            ]
+          ]
+        ]
+      ]
+    ];
+
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://omnichannel.qiscus.com/whatsapp/v1/{$qiscus_app_id}/{$qiscus_channel_id}/messages",
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode($payload),
+      CURLOPT_HTTPHEADER => array(
+        "Qiscus-App-Id: " . $qiscus_app_id,
+        "Qiscus-Secret-Key: " . $qiscus_secret_key,
+        "Content-Type: application/json"
+      ),
+      CURLOPT_TIMEOUT => 5
+    ));
+
+    $response = curl_exec($curl);
+    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+
+    $waktu_sekarang = date('Y-m-d H:i:s');
+
+    $koneksi->query("UPDATE registrasi_rawat SET wa_at = '$waktu_sekarang' WHERE idrawat = '{$row['idrawat']}'");
+  }
+}
+
 
 session_start();
 $session_duration = 8 * 60 * 60;
@@ -14,7 +99,6 @@ if (isset($_SESSION['login_time'])) {
   }
 }
 
-include 'function.php';
 
 // Jika session tidak ada atau habis, coba auto-login dari localStorage
 if (!isset($_SESSION['login']) || $sessionExpired) {
