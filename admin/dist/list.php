@@ -93,6 +93,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="master_poli"){include '../rekammedis/master_poli.php';}
                    elseif ($hal=="master_layanan"){include '../rekammedis/master_layanan.php';}
                    elseif ($hal=="rmedis_editObatJenis"){include '../rekammedis/rmedis_editObatJenis.php';}
+                   elseif ($hal=="resumemedisinap"){include '../rekammedis/resumemedisinap.php';}
 
                    //pembayaran
                    elseif ($hal=="bayarrawat"){include '../bayar/bayarrawat.php';}
