@@ -24,6 +24,10 @@ $nota = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis='$_GET[id]';")-
 $pasien = $koneksi->query("SELECT * FROM pasien INNER JOIN rekam_medis ON rekam_medis.norm=pasien.no_rm WHERE TRIM(norm)='$_GET[rm]';");
 $getRegis = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$_GET[id]'")->fetch_assoc();
 $pecah = $pasien->fetch_assoc();
+
+if (!isset($_SESSION['teman_kasir'])) {
+  $_SESSION['teman_kasir'] = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -40,9 +44,9 @@ $pecah = $pasien->fetch_assoc();
 
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  
+
   <!-- <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script> -->
-  
+
   <!-- Initialize Select2 -->
   <script>
     $(document).ready(function() {
@@ -301,7 +305,7 @@ $pecah = $pasien->fetch_assoc();
                   </div>
                 </div>
               </div>
-                <hr>
+              <hr>
               <div id="employee_table" class="card shadow p-2">
                 <table class="table">
                   <!-- <tr>
@@ -341,16 +345,25 @@ $pecah = $pasien->fetch_assoc();
                   <tr>
                     <td class="">
                       <b>Tag Teman Kasir</b>
-                      <?php 
-                        $getTags = $koneksi->query("SELECT * FROM registrasi_rawat_tag WHERE idrawat = '$_GET[id]'");
-                        foreach ($getTags as $tag) {
-                          echo "<br><span class='badge bg-primary text-light'>$tag[petugas]</span>";
-                        }
+                      <?php
+                      $getTags = $koneksi->query("SELECT * FROM registrasi_rawat_tag WHERE idrawat = '$_GET[id]'");
+                      foreach ($getTags as $tag) {
+                        echo "<br><span class='badge bg-primary text-light'>$tag[petugas]</span>";
+                      }
                       ?>
                     </td>
                     <td>
                       <select name="temanKasir[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
-                        <option selected value="<?= $_SESSION['admin']['idadmin'] ?>"><?= $_SESSION['admin']['namalengkap'] ?> (<?= $_SESSION['admin']['level'] ?>)</option>
+                        <?php if ($_SESSION['teman_kasir']  != []) { ?>
+                          <?php foreach ($_SESSION['teman_kasir'] as $teman) { ?>
+                              <?php 
+                              $getAdmin = $koneksi->query("SELECT * FROM admin WHERE idadmin = '$teman'")->fetch_assoc();
+                              ?>
+                            <option selected value="<?= $teman ?>"><?= $getAdmin['namalengkap'] ?> (<?= $getAdmin['level'] ?>)</option>
+                          <?php } ?>
+                        <?php } else { ?>
+                          <option selected value="<?= $_SESSION['admin']['idadmin'] ?>"><?= $_SESSION['admin']['namalengkap'] ?> (<?= $_SESSION['admin']['level'] ?>)</option>
+                        <?php } ?>
                         <?php
                         $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('kasir') ORDER BY namalengkap ASC");
                         foreach ($getPerawat as $perawat) :
@@ -462,6 +475,9 @@ if (isset($_POST['simpan'])) {
   $koneksi->query("UPDATE registrasi_rawat SET kasir='$username', pembayaran_at = '" . date('Y-m-d H:i:s') . "' WHERE idrawat='$_GET[id]'");
 
   $temanKasir = isset($_POST['temanKasir']) ? $_POST['temanKasir'] : [];
+
+  $_SESSION['teman_kasir'] = $temanKasir;
+
   $idrawat = htmlspecialchars($_GET['id']);
   $shift = $_SESSION['shift'];
   foreach ($temanKasir as $teman) {
