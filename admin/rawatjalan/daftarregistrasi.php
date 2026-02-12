@@ -625,6 +625,8 @@ if (isset($_GET['detail'])) {
                             <td style="margin-top:10px;">
                               <?php if ($pecah["status_antri"] == 'Datang') { ?>
                                 <span style="color:green"><?php echo $pecah["status_antri"]; ?></span>
+                              <?php } elseif($pecah["status_antri"] == 'Pembayaran') { ?>
+                                <span style="color:blue"><?php echo $pecah["status_antri"]; ?></span>
                               <?php } else { ?>
                                 <span style="color:red"><?php echo $pecah["status_antri"]; ?></span>
                               <?php }  ?>
