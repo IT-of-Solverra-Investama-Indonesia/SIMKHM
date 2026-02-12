@@ -99,7 +99,7 @@ if ($row >= 0) {
 							</td>
 							<td>
 								Rp. <?php echo number_format($pecah["besaran"]) ?>
-								<?php if ($_SESSION['admin']['level'] == 'sup') { ?>
+								<?php if ($_SESSION['admin']['level'] == 'sup' OR $_SESSION['admin']['level'] == 'kasir') { ?>
 									<?php if ($pecah["biaya"] == "sewa kamar") { ?>
 										<button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#updateHarga" onclick="upDataHarga('<?= $pecah['id_data'] ?>', '<?= $pecah['besaran'] ?>')">
 											<i class="bi bi-pencil"></i>
