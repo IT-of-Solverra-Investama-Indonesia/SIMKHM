@@ -69,6 +69,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="hapuspasien"){include '../pasien/hapuspasien.php';}
                    elseif ($hal=="pasien"){include '../pasien/pasien.php';}
                    elseif ($hal=="ubahbpjs"){include '../pasien/ubahbpjs.php';}
+                   elseif ($hal=="dashboard_ubahbpjs"){include '../pasien/dashboard_ubahbpjs.php';}
                    elseif ($hal=="gabungnorm"){include '../pasien/gabungnorm.php';}
 
                    //rating
