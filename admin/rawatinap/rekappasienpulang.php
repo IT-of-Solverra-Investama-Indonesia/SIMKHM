@@ -44,7 +44,7 @@
                         $date_start = $_POST['date_start'];
                         $date_end = $_POST['date_end'];
                         $total = 0;
-                        $query = "SELECT pulang.*, registrasi_rawat.carabayar, registrasi_rawat.idrawat FROM pulang INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = pulang.norm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = pulang.tgl_masuk WHERE tgl BETWEEN '$date_start' AND '$date_end' ORDER BY tgl DESC";
+                        $query = "SELECT pulang.*, registrasi_rawat.carabayar, registrasi_rawat.idrawat FROM pulang INNER JOIN registrasi_rawat ON registrasi_rawat.no_rm = pulang.norm AND DATE_FORMAT(registrasi_rawat.jadwal, '%Y-%m-%d') = pulang.tgl_masuk WHERE tgl BETWEEN '$date_start' AND '$date_end' AND registrasi_rawat.perawatan = 'Rawat Inap' ORDER BY tgl DESC";
                         $getData = $koneksi->query($query);
                         foreach ($getData as $data) {
                     ?>
