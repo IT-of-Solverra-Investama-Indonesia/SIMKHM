@@ -5,8 +5,16 @@ $id = $_GET['id'];
 // $user=$_SESSION['login']['username'];
 
 // $ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
-$ambil = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$id' ");
-$pecah = $ambil->fetch_assoc();
+if(!isset($_GET['igd'])){
+  $ambil = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat='$id' ");
+  $pecah = $ambil->fetch_assoc();
+}else if(isset($_GET['igd'])){
+  $ambil = $koneksi->query("SELECT * FROM igd WHERE idigd='$id' ");
+  $pecah = $ambil->fetch_assoc();
+  $pecah['idrawat'] = $pecah['idigd'];
+  $pecah['antrian'] = '';
+  $pecah['dokter_rawat'] = $pecah['dokter'];
+}
 
 $ambil2 = $koneksi->query("SELECT * FROM daftartes GROUP BY tipe ");
 // $pecah=$ambil->fetch_assoc();
@@ -176,46 +184,47 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_ass
 
 
     <?php
-
-    if (!isset($_GET['inap'])) {
-      if (isset($_POST['save'])) {
-
-        $pasienlab = $_POST['pasienlab'];
-        $normlab = $_POST['normlab'];
-        $id_lab = $_POST['id_lab'];
-        $tipe_lab = $_POST['tipe_lab'];
-        $umur_lab = $_POST['umur_lab'];
-        $register_lab = $_POST['register_lab'];
-        $dokter_lab = $_POST['dokter_lab'];
-        $alamat_lab = $_POST['alamat_lab'];
-        $biaya = $_POST['biaya'];
-
-
-
-        $jumlahFile = count($_POST['tipe_lab']);
-
-        for ($i = 0; $i < $jumlahFile; $i++) {
-
-          foreach ($_POST['pasienlab'] as $value3) {
-            foreach ($_POST['normlab'] as $value4) {
-              foreach ($_POST['id_lab'] as $value5) {
-                foreach ($_POST['umur_lab'] as $value9) {
-                  foreach ($_POST['register_lab'] as $value6) {
-                    foreach ($_POST['alamat_lab'] as $value7) {
-                      foreach ($_POST['dokter_lab'] as $value8) {
-
-                        $koneksi->query("INSERT INTO lab SET
-            tipe_lab    = '$tipe_lab[$i]',
-            pasienlab   = '$value3',
-            normlab   = '$value4',
-            id_lab   = '$value5',
-            umur_lab   = '$value9',
-            register_lab   = '$value6',
-            alamat_lab   = '$value7',
-            dokter_lab   = '$value8',
-            biaya   = '$biaya[$i]'
-            ;
-        ");
+    if(!isset($_GET['igd'])){
+      if (!isset($_GET['inap'])) {
+        if (isset($_POST['save'])) {
+  
+          $pasienlab = $_POST['pasienlab'];
+          $normlab = $_POST['normlab'];
+          $id_lab = $_POST['id_lab'];
+          $tipe_lab = $_POST['tipe_lab'];
+          $umur_lab = $_POST['umur_lab'];
+          $register_lab = $_POST['register_lab'];
+          $dokter_lab = $_POST['dokter_lab'];
+          $alamat_lab = $_POST['alamat_lab'];
+          $biaya = $_POST['biaya'];
+  
+  
+  
+          $jumlahFile = count($_POST['tipe_lab']);
+  
+          for ($i = 0; $i < $jumlahFile; $i++) {
+  
+            foreach ($_POST['pasienlab'] as $value3) {
+              foreach ($_POST['normlab'] as $value4) {
+                foreach ($_POST['id_lab'] as $value5) {
+                  foreach ($_POST['umur_lab'] as $value9) {
+                    foreach ($_POST['register_lab'] as $value6) {
+                      foreach ($_POST['alamat_lab'] as $value7) {
+                        foreach ($_POST['dokter_lab'] as $value8) {
+  
+                          $koneksi->query("INSERT INTO lab SET
+              tipe_lab    = '$tipe_lab[$i]',
+              pasienlab   = '$value3',
+              normlab   = '$value4',
+              id_lab   = '$value5',
+              umur_lab   = '$value9',
+              register_lab   = '$value6',
+              alamat_lab   = '$value7',
+              dokter_lab   = '$value8',
+              biaya   = '$biaya[$i]'
+              ;
+          ");
+                        }
                       }
                     }
                   }
@@ -223,12 +232,58 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_ass
               }
             }
           }
+          echo "<div class='alert alert-success'>Data Tersimpan</div>";
+  
+          echo "<meta http-equiv='refresh' content='1;url=index.php?halaman=daftarlab'>";
         }
-        echo "<div class='alert alert-success'>Data Tersimpan</div>";
-
-        echo "<meta http-equiv='refresh' content='1;url=index.php?halaman=daftarlab'>";
+      } else {
+        if (isset($_POST['save'])) {
+          $pasienlab = $_POST['pasienlab'];
+          $normlab = $_POST['normlab'];
+          $id_lab_inap = $_POST['id_lab'];
+          $tipe_lab = $_POST['tipe_lab'];
+          // $umur_lab=$_POST['umur_lab'];
+          // $register_lab=$_POST['register_lab'];
+          // $dokter_lab=$_POST['dokter_lab'];
+          // $alamat_lab=$_POST['alamat_lab'];
+          $biaya = $_POST['biaya'];
+  
+  
+  
+          $jumlahFile = count($_POST['tipe_lab']);
+  
+          for ($i = 0; $i < $jumlahFile; $i++) {
+  
+            foreach ($_POST['pasienlab'] as $value3) {
+              foreach ($_POST['normlab'] as $value4) {
+                foreach ($_POST['id_lab'] as $value5) {
+                  // foreach ($_POST['umur_lab'] as $value9){
+                  // foreach ($_POST['register_lab'] as $value6){
+                  // foreach ($_POST['alamat_lab'] as $value7){
+                  // foreach ($_POST['dokter_lab'] as $value8){
+  
+                  $koneksi->query("INSERT INTO lab SET
+              tipe_lab    = '$tipe_lab[$i]',
+              pasienlab   = '$value3',
+              normlab   = '$value4',
+              id_lab_inap   = '$value5',
+              -- umur_lab   = '$value9',
+              -- register_lab   = '$value6',
+              -- alamat_lab   = '$value7',
+              -- dokter_lab   = '$value8',
+              biaya   = '$biaya[$i]'
+              ;
+          ");
+                }
+              }
+            }
+          }
+          echo "<div class='alert alert-success'>Data Tersimpan</div>";
+  
+          echo "<meta http-equiv='refresh' content='1;url=index.php?halaman=daftarlabinap'>";
+        }
       }
-    } else {
+    }else if(isset($_GET['igd'])){
       if (isset($_POST['save'])) {
         $pasienlab = $_POST['pasienlab'];
         $normlab = $_POST['normlab'];
@@ -255,24 +310,23 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_ass
                 // foreach ($_POST['dokter_lab'] as $value8){
 
                 $koneksi->query("INSERT INTO lab SET
-            tipe_lab    = '$tipe_lab[$i]',
-            pasienlab   = '$value3',
-            normlab   = '$value4',
-            id_lab_inap   = '$value5',
-            -- umur_lab   = '$value9',
-            -- register_lab   = '$value6',
-            -- alamat_lab   = '$value7',
-            -- dokter_lab   = '$value8',
-            biaya   = '$biaya[$i]'
-            ;
-        ");
+              tipe_lab    = '$tipe_lab[$i]',
+              pasienlab   = '$value3',
+              normlab   = '$value4',
+              id_lab_igd   = '$value5',
+              -- umur_lab   = '$value9',
+              -- register_lab   = '$value6',
+              -- alamat_lab   = '$value7',
+              -- dokter_lab   = '$value8',
+              biaya   = '$biaya[$i]'
+              ;
+          ");
               }
             }
           }
         }
         echo "<div class='alert alert-success'>Data Tersimpan</div>";
-
-        echo "<meta http-equiv='refresh' content='1;url=index.php?halaman=daftarlabinap'>";
+        echo "<meta http-equiv='refresh' content='1;url=index.php?halaman=daftarlabigd'>";
       }
     }
 
