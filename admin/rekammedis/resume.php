@@ -944,7 +944,6 @@ date_default_timezone_set("asia/jakarta");
                         <!-- <input type="text" class="form-control" placeholder="kognitif" name="kognitif" value="<?= $awal['kognitif'] ?>" aria-describedby="basic-addon2" value="<?php echo $awal['kognitif'] ?>"> -->
                       </div>
                     </div>
-
                     <br>
                     <br>
                     <div class="col-md-12">
