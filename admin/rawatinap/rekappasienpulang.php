@@ -72,6 +72,9 @@
                                     <a href="index.php?halaman=rekapinap&id=<?= $data['idrawat'] ?>" target="_blank" class="text-decoration-none text-light badge bg-warning" style="font-size: 12px;">
                                         Rp<?= number_format($getTotalBiayaSingle['besaran'], 0, 0, '.') ?>
                                     </a>
+                                    <a href="index.php?halaman=cttpenyakit_obat&id=<?= $data['idrawat'] ?>&inap&tgl=<?= $data['tgl'] ?>" class="text-decoration-none text-dark badge bg-info" style="font-size: 12px;">
+                                        Obat
+                                    </a>
                                 </td>
                             </tr>
                         <?php } ?>
