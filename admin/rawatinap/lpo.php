@@ -241,7 +241,7 @@ if (isset($_POST['savePenggunaan'])) {
       </div><!-- End Page Title -->
 
       <form class="row g-3" method="post" enctype="multipart/form-data">
-        <div class="container">
+        <div class="">
           <div class="row">
             <div class="col-md-12">
               <div class="card" style="margin-top:10px">
@@ -308,66 +308,69 @@ if (isset($_POST['savePenggunaan'])) {
                 </div>
               </div>
               <?php if (!isset($_GET['entriObat'])) { ?>
-                <div class="card shadow p-3" id="observasiZone">
-                  <h5 class="card-title">OBSERVASI PERAWAT</h5>
-                  <div class="row">
-                    <div class="col-md-6">
-                      <label for="">Diagnosa</label>
-                      <input type="text" class="form-control mb-3" name="diagnosa" <?= $ConditionCopy != 0 ? "value='$dataCopy[diagnosa]'" : "" ?> id="" placeholder="Diagnosa">
+                <?php if (!isset($_GET['insertObatDokterIgd'])) { ?>
+                  <div class="card shadow p-3" id="observasiZone">
+                    <h5 class="card-title">OBSERVASI PERAWAT</h5>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="">Diagnosa</label>
+                        <input type="text" class="form-control mb-3" name="diagnosa" <?= $ConditionCopy != 0 ? "value='$dataCopy[diagnosa]'" : "" ?> id="" placeholder="Diagnosa">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Tanggal & Waktu</label>
+                        <input type="datetime-local" class="form-control mb-3" name="tgl_waktu" <?= $ConditionCopy != 0 ? "value='$dataCopy[tgl_waktu]'" : "" ?> id="" placeholder="Tanggal dan Waktu">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Tensi Darah</label>
+                        <input type="text" class="form-control mb-3" name="tensi" <?= $ConditionCopy != 0 ? "value='$dataCopy[tensi]'" : "" ?> id="" placeholder="Tensi Darah">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Suhu Tubuh</label>
+                        <input type="text" class="form-control mb-3" name="suhu" <?= $ConditionCopy != 0 ? "value='$dataCopy[suhu]'" : "" ?> id="" placeholder="Suhu Tubuh">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Cairan Ke</label>
+                        <input type="text" class="form-control mb-3" name="cairan" <?= $ConditionCopy != 0 ? "value='$dataCopy[cairan]'" : "" ?> id="" placeholder="Cairan Ke">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Volume Cairan</label>
+                        <input type="text" class="form-control mb-3" name="volume" <?= $ConditionCopy != 0 ? "value='$dataCopy[volume]'" : "" ?> id="" placeholder="Volume Cairan">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Keadaan Umum</label>
+                        <input type="text" class="form-control mb-3" name="keadaan_umum" <?= $ConditionCopy != 0 ? "value='$dataCopy[keadaan_umum]'" : "" ?> id="" placeholder="Keadaan Umum">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Keluhan Pasien</label>
+                        <textarea name="keluhan_pasien" id="" class="form-control mb-2"
+                          placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Cairan Infus</label>
+                        <input type="text" class="form-control mb-3" name="infus" <?= $ConditionCopy != 0 ? "value='$dataCopy[infus]'" : "" ?> id="" placeholder="Cairan Infus">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Tindakan</label>
+                        <textarea name="tindakan" id="" class="form-control mb-2"
+                          placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="">Perawat</label>
+                        <input type="text" class="form-control mb-3" name="perawat" <?= $ConditionCopy != 0 ? "value='$dataCopy[perawat]'" : "" ?> readonly value="<?= $petugas ?>" placeholder="">
+                      </div>
+                      <div class="col-md-12">
+                        <label for="penunjang_foto" class="form-label">Pemeriksaan Penunjang (Foto)</label>
+                        <input type="file" name="penunjang_foto[]" id="penunjang_foto" class="form-control" accept="image/*" capture="environment" multiple>
+                        <small class="text-muted">Klik untuk membuka kamera atau pilih file. Bisa pilih multiple foto.</small>
+                      </div>
                     </div>
-                    <div class="col-md-6">
-                      <label for="">Tanggal & Waktu</label>
-                      <input type="datetime-local" class="form-control mb-3" name="tgl_waktu" <?= $ConditionCopy != 0 ? "value='$dataCopy[tgl_waktu]'" : "" ?> id="" placeholder="Tanggal dan Waktu">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Tensi Darah</label>
-                      <input type="text" class="form-control mb-3" name="tensi" <?= $ConditionCopy != 0 ? "value='$dataCopy[tensi]'" : "" ?> id="" placeholder="Tensi Darah">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Suhu Tubuh</label>
-                      <input type="text" class="form-control mb-3" name="suhu" <?= $ConditionCopy != 0 ? "value='$dataCopy[suhu]'" : "" ?> id="" placeholder="Suhu Tubuh">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Cairan Ke</label>
-                      <input type="text" class="form-control mb-3" name="cairan" <?= $ConditionCopy != 0 ? "value='$dataCopy[cairan]'" : "" ?> id="" placeholder="Cairan Ke">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Volume Cairan</label>
-                      <input type="text" class="form-control mb-3" name="volume" <?= $ConditionCopy != 0 ? "value='$dataCopy[volume]'" : "" ?> id="" placeholder="Volume Cairan">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Keadaan Umum</label>
-                      <input type="text" class="form-control mb-3" name="keadaan_umum" <?= $ConditionCopy != 0 ? "value='$dataCopy[keadaan_umum]'" : "" ?> id="" placeholder="Keadaan Umum">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Keluhan Pasien</label>
-                      <textarea name="keluhan_pasien" id="" class="form-control mb-2"
-                        placeholder="Keluahan Pasien"><?= $ConditionCopy != 0 ? "$dataCopy[keluhan_pasien]" : "" ?></textarea>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Cairan Infus</label>
-                      <input type="text" class="form-control mb-3" name="infus" <?= $ConditionCopy != 0 ? "value='$dataCopy[infus]'" : "" ?> id="" placeholder="Cairan Infus">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Tindakan</label>
-                      <textarea name="tindakan" id="" class="form-control mb-2"
-                        placeholder="Tindakan"><?= $ConditionCopy != 0 ? "$dataCopy[tindakan]" : "" ?></textarea>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="">Perawat</label>
-                      <input type="text" class="form-control mb-3" name="perawat" <?= $ConditionCopy != 0 ? "value='$dataCopy[perawat]'" : "" ?> readonly value="<?= $petugas ?>" placeholder="">
-                    </div>
-                    <div class="col-md-12">
-                      <label for="penunjang_foto" class="form-label">Pemeriksaan Penunjang (Foto)</label>
-                      <input type="file" name="penunjang_foto[]" id="penunjang_foto" class="form-control" accept="image/*" capture="environment" multiple>
-                      <small class="text-muted">Klik untuk membuka kamera atau pilih file. Bisa pilih multiple foto.</small>
+                    <div class="text-center" style="margin-top: 10px; margin-bottom: 40px;">
+                      <button type="submit" name="save" class="btn btn-primary">Simpan Dulu</button>
+                      <button type="reset" class="btn btn-secondary">Reset</button>
                     </div>
                   </div>
-                  <div class="text-center" style="margin-top: 10px; margin-bottom: 40px;">
-                    <button type="submit" name="save" class="btn btn-primary">Simpan Dulu</button>
-                    <button type="reset" class="btn btn-secondary">Reset</button>
-                  </div>
-                </div>
+                <?php } ?>
+
                 <script>
                   function changeJenis(jenisObat) {
                     var jenis3 = document.getElementById('jenis3');
@@ -380,10 +383,14 @@ if (isset($_POST['savePenggunaan'])) {
                   <div class="card shadow p-2 mb-1">
                     <b for="">Obat Injeksi </b>
                     <div>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php if ($_SESSION['admin']['level'] == 'igd' or $_SESSION['admin']['level'] == 'inap' or $_SESSION['admin']['level'] == 'dokter' or $_SESSION['admin']['level'] == 'sup') { ?>
+                        <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                          data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                      <?php } ?>
+                      <?php if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'dokter' or $_SESSION['admin']['level'] == 'sup') { ?>
+                        <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                          data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php } ?>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -492,10 +499,12 @@ if (isset($_POST['savePenggunaan'])) {
                   <div class="card shadow p-2 mb-2 mt-0">
                     <b for="">Obat Oral</b>
                     <div align="left">
-                      <!-- <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                      <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
+                      <?php if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'dokter' or $_SESSION['admin']['level'] == 'sup') { ?>
+                        <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                          data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                        <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                          data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                      <?php } ?>
                       <?php if ($id['apoteker_check_at'] == null) { ?>
                       <?php } ?>
                     </div>
@@ -1298,10 +1307,14 @@ if (isset($_POST['savePenggunaan'])) {
                   date_default_timezone_set('Asia/Jakarta');
                   $tanggal = date('Y-m-d');
                   $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-                  $id = $_POST["idrm"];
+                  $id = isset($_POST["idrm"]) && $_POST['idrm'] !== '' ? $_POST["idrm"] : $_GET["idigd"];
                   $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
 
-                  $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
+                  if (!isset($_GET['idigd'])) {
+                    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas', '" . $_SESSION['shift'] . "') ");
+                  } else {
+                    $koneksi->query("INSERT INTO igddetail (id, tgl, biaya, besaran, ket, petugas, shiftinap ) VALUES ('$_GET[idigd]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas','" . $_SESSION['shift'] . "') ");
+                  }
 
                   // $subtotal += $harga;
 
@@ -1319,13 +1332,13 @@ if (isset($_POST['savePenggunaan'])) {
     if (isset($_GET['igd'])) {
       echo "
               <script>
-                document.location.href='index.php?halaman=lpo&id=$_GET[id]&idigd=$_GET[idigd]&tgl=$_GET[tgl]&igd';
+                document.location.href='".getFullUrl()."';
               </script>
             ";
     } else {
       echo "
               <script>
-                document.location.href='index.php?halaman=lpo&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+                document.location.href='". getFullUrl()."';
               </script>
             ";
     }
@@ -1361,10 +1374,14 @@ if (isset($_POST['savePenggunaan'])) {
       date_default_timezone_set('Asia/Jakarta');
       $tanggal = date('Y-m-d');
       $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-      $id = $_POST["idrm"];
+      $id = isset($_POST["idrm"]) && $_POST['idrm'] !== '' ? $_POST["idrm"] : $_GET["idigd"];
       $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
 
-      $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
+      if (!isset($_GET['idigd'])) {
+        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas', '" . $_SESSION['shift'] . "') ");
+      } else {
+        $koneksi->query("INSERT INTO igddetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$_GET[idigd]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas','" . $_SESSION['shift'] . "') ");
+      }
 
       $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
     }
@@ -1372,13 +1389,13 @@ if (isset($_POST['savePenggunaan'])) {
     if (isset($_GET['igd'])) {
       echo "
           <script>
-            document.location.href='index.php?halaman=lpo&id=$_GET[id]&idigd=$_GET[idigd]&tgl=$_GET[tgl]&igd';
+            document.location.href='".getFullUrl()."';
           </script>
         ";
     } else {
       echo "
           <script>
-            document.location.href='index.php?halaman=lpo&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+            document.location.href='". getFullUrl()."';
           </script>
         ";
     }
@@ -1387,7 +1404,11 @@ if (isset($_POST['savePenggunaan'])) {
   if (isset($_GET['idObat'])) {
     $idObat = $_GET['idObat'];
     $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$idObat'");
-    $koneksi->query("DELETE FROM rawatinapdetail WHERE TRIM(SUBSTRING_INDEX(ket, ' ', -1)) = '$idObat'");
+    if (!isset($_GET['idigd'])) {
+      $koneksi->query("DELETE FROM rawatinapdetail WHERE TRIM(SUBSTRING_INDEX(ket, ' ', -1)) = '$idObat'");
+    } else {
+      $koneksi->query("DELETE FROM igddetail WHERE TRIM(SUBSTRING_INDEX(ket, ' ', -1)) = '$idObat'");
+    }
     echo "<script>alert('Successfully')</script>";
     echo "<script>document.location.href='" . $urlBase . "'</script>";
   }
