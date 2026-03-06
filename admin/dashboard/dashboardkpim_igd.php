@@ -4,7 +4,7 @@
         <div class="row g-1">
             <div class="col-5">
                 <input type="text" name="halaman" value="dashboardkpim" hidden id="">
-                <input type="text" name="kpim" value="kebersihan" hidden id="">
+                <input type="text" name="kpim" value="igd" hidden id="">
                 <label for="">Dari Bulan:</label>
                 <input type="month" name="month_start" min="2026-01" class="form-control form-control-sm" value="<?= $month_start = isset($_GET['month_start']) ? htmlspecialchars($_GET['month_start']) : date('Y-m') ?>" required>
             </div>
