@@ -400,6 +400,14 @@ if (isset($_GET['confirm'])) {
                           }
                         });
                       </script>
+                      <div class="mt-2">
+                        <label for="">Pengantar</label>
+                        <input type="text" name="nama_pengantar" class="form-control" id="">
+                      </div>
+                      <div class="mt-2">
+                        <label for="">No Telp Pengantar</label>
+                        <input type="number" name="notelp_pengantar" class="form-control" id="">
+                      </div>
                     </div>
                     <div class="col-md-6" id="antNew" style="display: none;">
                       <label for="inputName5" class="form-label">Antrian Khusus :</label>
@@ -547,7 +555,7 @@ if (isset($_POST['save'])) {
   $tgl = date('Ymd') + 0;
   $kode = $tgl . "+" . $antrian;
 
-  if ($perawatan == "Rawat Inap") {
+  if ($perawatan == "Rawat Inap") { 
     $perujuk = isset($_POST['perujuk']) ? htmlspecialchars($_POST['perujuk']) : '';
     if ($perujuk == 'Baru') {
       $perujuk = isset($_POST['perujuk_baru']) ? htmlspecialchars($_POST['perujuk_baru']) : '';
@@ -556,6 +564,9 @@ if (isset($_POST['save'])) {
       $getPerujuk = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perujuk = '$perujuk' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
       $perujuk_hp = $getPerujuk['perujuk_hp'];
     }
+
+    $nama_pengantar = isset($_POST['nama_pengantar']) ? htmlspecialchars($_POST['nama_pengantar']) : '';
+    $notelp_pengantar = isset($_POST['notelp_pengantar']) ? htmlspecialchars($_POST['notelp_pengantar']) : '';
 
     $perujuk_file = isset($_FILES['perujuk_file']) ? $_FILES['perujuk_file'] : null;
     $uniqueName = '';
@@ -604,7 +615,7 @@ if (isset($_POST['save'])) {
     } else {
       $uploadFile = '';
     }
-    $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk, perujuk, perujuk_hp, perujuk_file) VALUES ('$nama_pasien','$no_rm', '$jadwal', '$perujuk', '$perujuk_hp', '$uniqueName')");
+    $koneksi->query("INSERT INTO igd (nama_pasien, no_rm, tgl_masuk, perujuk, perujuk_hp, perujuk_file, nama_pengantar, notelp_pengantar, carabayar) VALUES ('$nama_pasien','$no_rm', '$jadwal', '$perujuk', '$perujuk_hp', '$uniqueName', '$nama_pengantar', '$notelp_pengantar', '$_POST[carabayar]')");
   } else {
     $shift = $_SESSION['shift'];
     $getLastId = $koneksi->query("SELECT idrawat FROM registrasi_rawat ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
