@@ -47,7 +47,23 @@ if (isset($_POST['save'])) {
     $prognosacode = '170968001';
   }
 
-  $koneksi->query("INSERT INTO rekam_medis(nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, kode_prognosa, objective, keluhan_utama) VALUES ('$_POST[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$_POST[gol_darah]', '$_POST[dokter]', '$prognosacode', '$objective', '" . htmlspecialchars($_POST['keluhan_utama']) . "')");
+  $getRegistrasiRawat = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+  $checkPickIgd = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE registrasi_id='$getRegistrasiRawat[idrawat]'")->fetch_assoc();
+
+  if($checkPickIgd['jum'] > 0){
+    $newId = $checkPickIgd['rekam_medis_id'];
+  }else{
+    $getLastRekamMedis = $koneksi->query("SELECT * FROM rekam_medis ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+    $newId = $getLastRekamMedis['id_rm'] + 1;
+
+    $checkDoublePick = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE rekam_medis_id='$newId'")->fetch_assoc();
+
+    if($checkDoublePick['jum'] > 0){
+      $newId = $newId + 1;
+    }
+  }
+
+  $koneksi->query("INSERT INTO rekam_medis(id_rm, nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, kode_prognosa, objective, keluhan_utama) VALUES ('$newId', '$_POST[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$_POST[gol_darah]', '$_POST[dokter]', '$prognosacode', '$objective', '" . htmlspecialchars($_POST['keluhan_utama']) . "')");
 
   $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$_POST[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
 
@@ -306,7 +322,23 @@ if (isset($_POST['copy'])) {
   $kolestrol = htmlspecialchars($copy_labpoli['kolestrol']);
   $asam_urat = htmlspecialchars($copy_labpoli['asam_urat']);
 
-  $koneksi->query("INSERT INTO rekam_medis(nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$copy_rm[gol_darah]', '$copy_rm[dokter]', '$gula_darah', '$kolestrol', '$asam_urat')");
+  $getRegistrasiRawat = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+  $checkPickIgd = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE registrasi_id='$getRegistrasiRawat[idrawat]'")->fetch_assoc();
+
+  if ($checkPickIgd['jum'] > 0) {
+    $newId = $checkPickIgd['rekam_medis_id'];
+  } else {
+    $getLastRekamMedis = $koneksi->query("SELECT * FROM rekam_medis ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+    $newId = $getLastRekamMedis['id_rm'] + 1;
+
+    $checkDoublePick = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE rekam_medis_id='$newId'")->fetch_assoc();
+
+    if ($checkDoublePick['jum'] > 0) {
+      $newId = $newId + 1;
+    }
+  }
+
+  $koneksi->query("INSERT INTO rekam_medis(id_rm, nama_pasien, norm, jadwal, status_perokok, anamnesa, diagnosis, prognosa, icd, status_plg, id_pasien, gol_darah, dokter, gula_darah, kolestrol, asam_urat) VALUES ('$newId', '$copy_rm[nama_pasien]', '$_GET[id]','$jadwal', '$status_perokok', '$anamnesa', '$diagnosis', '$prognosa', '$icd', '$status_pulang', '$id_pasien', '$copy_rm[gol_darah]', '$copy_rm[dokter]', '$gula_darah', '$kolestrol', '$asam_urat')");
 
   $koneksi->query("INSERT INTO lab_poli (nama_pasien, jadwal, gula_darah, kolestrol, asam_urat) VALUES ('$copy_rm[nama_pasien]', '$jadwal', '$gula_darah', '$kolestrol', '$asam_urat')");
 
