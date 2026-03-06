@@ -51,6 +51,7 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="rekappasienperujuk"){include '../rawatinap/rekappasienperujuk.php';}
 
                    elseif ($hal=="cttpenyakit"){include '../rawatinap/cttpenyakit.php';}
+                   elseif ($hal=="cttpenyakit_obat"){include '../rawatinap/cttpenyakit_obat.php';}
                    elseif ($hal=="rekonobat"){include '../rawatinap/rekonobat.php';}
                    elseif ($hal=="edukasi"){include '../rawatinap/edukasi.php';}
                    elseif ($hal=="pulang"){include '../rawatinap/pulang.php';}
@@ -123,7 +124,11 @@ $hal = isset($_GET['halaman']) ? $_GET['halaman'] : '';
                    elseif ($hal=="daftarlabdata"){include '../lab/daftarlabdata.php';}
                    elseif ($hal=="tambahlab"){include '../lab/tambahlab.php';}
                    elseif ($hal=="ubahdaftar"){include '../lab/ubahdaftar.php';}
-
+                   elseif ($hal=="daftarlabigd"){include '../lab/daftarlabigd.php';}
+                   elseif ($hal=="isilabigd"){include '../lab/isilabigd.php';}
+                   elseif ($hal=="detaillabigd"){include '../lab/detaillabigd.php';}
+                   elseif ($hal=="ubahhasiligd"){include '../lab/ubahhasiligd.php';}
+                   
                    //radio
                    elseif ($hal=="daftarradio"){include '../radiologi/daftarradio.php';}
                    elseif ($hal=="tambahradio"){include '../radiologi/tambahradio.php';}
