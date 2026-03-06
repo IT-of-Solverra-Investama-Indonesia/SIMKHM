@@ -637,6 +637,12 @@ $level = $_SESSION['admin']['level'];
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link collapsed" href="index.php?halaman=dashboard_ubahbpjs">
+            <i class="bi bi-files"></i>
+            <span>Rekap Ubah BPJS</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=daftarpasienkosmetik">
             <i class="bi bi-person"></i>
             <span>Pasien Kosmetik</span>
@@ -698,11 +704,11 @@ $level = $_SESSION['admin']['level'];
       <?php } ?>
 
       <?php
+      $notifRanap = 0;
       if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') {
         $getRegistrasiInap = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND status_antri != 'Pulang' ORDER BY idrawat DESC");
-        $notifRanap = 0;
         foreach ($getRegistrasiInap as $ranapNotif) {
-          $getObatInapUnSee = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$ranapNotif[no_rm]' AND tgl_pasien='" . date('Y-m-d', strtotime($ranapNotif['jadwal'])) . "' AND see_apotek_at IS NULL")->num_rows;
+          $getObatInapUnSee = $koneksi->query("SELECT * FROM obat_rm_request  WHERE idrm = '$ranapNotif[no_rm]' AND tgl_pasien='" . date('Y-m-d', strtotime($ranapNotif['jadwal'])) . "' AND see_apotek_at IS NULL")->num_rows;
           if ($getObatInapUnSee > 0) {
             $notifRanap += $getObatInapUnSee;
           }
@@ -893,6 +899,10 @@ $level = $_SESSION['admin']['level'];
             <i class="bi bi-clipboard2-pulse"></i>
             <span>Lab (Inap)</span>
           </a>
+          <a class="nav-link collapsed" href="index.php?halaman=daftarlabigd">
+            <i class="bi bi-clipboard2-pulse"></i>
+            <span>Lab (IGD)</span>
+          </a>
         </li><!-- End Profile Page Nav -->
       <?php } ?>
 
@@ -943,7 +953,7 @@ $level = $_SESSION['admin']['level'];
         <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=dashboard_ubahbpjs">
             <i class="bi bi-files"></i>
-            <span>Dashboard Ubah BPJS</span>
+            <span>Rekap Ubah BPJS</span>
           </a>
         </li>
         <li class="nav-item">
