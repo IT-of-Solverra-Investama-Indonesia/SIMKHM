@@ -782,7 +782,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <?php if (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
                                     <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                       <?php
-                                      $getObatInapUnSee = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$pecah[no_rm]' AND tgl_pasien='" . date('Y-m-d', strtotime($pecah['jadwal'])) . "' AND see_apotek_at IS NULL")->num_rows;
+                                      $getObatInapUnSee = $koneksi->query("SELECT * FROM obat_rm_request  WHERE idrm = '$pecah[no_rm]' AND tgl_pasien='" . date('Y-m-d', strtotime($pecah['jadwal'])) . "' AND see_apotek_at IS NULL")->num_rows;
                                       ?>
                                       <?php if ($getObatInapUnSee > 0) { ?>
                                         <span class="badge bg-danger" style="font-size: 10px;">Obat Baru <?= $getObatInapUnSee ?></span>
@@ -811,9 +811,12 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                           <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                             <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
                                             <li><a href="index.php?halaman=catatanfarmasi&idrawat=<?php echo $pecah["idrawat"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-capsule-pill" style="color: khaki;"></i> Catatan Farmasi</a></li>
-                                            <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Cek Obat</a></li>
-                                            <li><a href="index.php?halaman=lpogizi&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit (Gizi)</a></li>
-                                            <li><a href="index.php?halaman=rekonobat&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-capsule" style="color:orange;"></i> Rekonsiliasi Obat</a></li>
+                                            <li><a href="index.php?halaman=cttpenyakit_obat&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Cek Obat</a></li>
+                                            <!-- <li><a href="index.php?halaman=lpogizi&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit (Gizi)</a></li> -->
+                                            <?php if ($_SESSION['admin']['level'] == 'apoteker') { ?>
+                                              <li><a href="index.php?halaman=edukasi&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-journal-text" style="color:maroon;"></i> Edukasi</a></li>
+                                              <li><a href="index.php?halaman=rekonobat&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-capsule" style="color:orange;"></i> Rekonsiliasi Obat</a></li>
+                                            <?php } ?>
                                           <?php } ?>
                                         <?php } else { ?>
                                           <i data-bs-toggle="dropdown" style="color: white; font-weight: bold;" class="btn btn-sm btn-primary bi bi-three-dots-vertical"></i>
