@@ -10,6 +10,7 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
 
 $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ")->fetch_assoc();
 
+
 function getFullUrl()
 {
   $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ||
@@ -71,9 +72,19 @@ function getUniqeIdObat($koneksi)
   }
   return $newId;
 }
+
+function getUniqeIdObatRequest($koneksi)
+{
+  $newId = $koneksi->query("SELECT * FROM obat_rm_request ORDER BY idobat DESC LIMIT 1")->fetch_assoc()['idobat'] + 1;
+  while ($koneksi->query("SELECT COUNT(*) FROM obat_rm_request WHERE idobat = $newId")->fetch_row()[0] > 0) {
+    $newId++;
+  }
+  return $newId;
+}
+
 function getUniqeIdObatRetur($koneksi)
 {
-  $newId = $koneksi->query("SELECT * FROM retur_obat_inap ORDER BY idretur DESC LIMIT 1")->fetch_assoc()['idobat'] + 1;
+  $newId = $koneksi->query("SELECT * FROM retur_obat_inap ORDER BY idretur DESC LIMIT 1")->fetch_assoc()['idretur'] + 1;
   while ($koneksi->query("SELECT COUNT(*) FROM retur_obat_inap WHERE idretur = $newId")->fetch_row()[0] > 0) {
     $newId++;
   }
@@ -107,216 +118,18 @@ function getLastWord($inputString)
   // Return the last word
   return $lastWord;
 }
-if (isset($_POST['saveob'])) {
-  $catatan_obat = $_POST['catatan_obat'];
-  $nama = $_POST['nama_obat'];
-  $jml_dokter = $_POST['jml_dokter'];
-  $dosis1_obat = $_POST['dosis1_obat'];
-  $dosis2_obat = $_POST['dosis2_obat'];
-  $per_obat = $_POST['per_obat'];
-  $durasi_obat = $_POST['durasi_obat'];
-  $petunjuk_obat = $_POST['petunjuk_obat'];
-  $end = date("H:i:s");
 
-  $koneksi->query("UPDATE registrasi_rawat SET end='$end' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' AND perawatan = 'Rawat Inap' ORDER BY idrawat DESC LIMIT 1;");
-  $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' AND perawatan = 'Rawat Inap' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
-  $koneksi->query("UPDATE biaya_rawat SET poli = '35000' WHERE idregis='$cekPemOb[idrawat]'");
+if (isset($_POST['requestObat'])) {
+  $idrawat = $_POST['idrawat'];
+  $getSingle = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$idrawat'")->fetch_assoc();
+  $koneksi->query("INSERT INTO `obat_request`(`request_obat`, `idrawat`, `nama_pasien`, `no_rm`, `jadwal`, `apotek_at`, `petugas`) VALUES ('" . $koneksi->real_escape_string($_POST['request']) . "','$idrawat','$getSingle[nama_pasien]','$getSingle[no_rm]','$getSingle[jadwal]', NULL, '" . $_SESSION['admin']['namalengkap'] . "')");
 
-  for ($i = 0; $i < count($nama) - 1; $i++) {
-    foreach ($_POST['catatan_obat'] as $catatan_obat) {
-      foreach ($_POST['per_obat'] as $per_obat) {
-        foreach ($_POST['durasi_obat'] as $durasi_obat) {
-          foreach ($_POST['petunjuk_obat'] as $petunjuk_obat) {
-            foreach ($_POST['jenis_obat'] as $jenis_obat) {
-              foreach ($_POST['racik'] as $racik) {
-                $uniqueId = getUniqeIdObat($koneksi);
-
-                $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat = '" . $nama[$i] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-
-                $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-
-                $m = $ObatKode['margininap'];
-                if ($m < 100) {
-                  $margin = 1.30;
-                } else {
-                  $margin = $m / 100;
-                }
-                $subtotal = 0;
-                $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
-
-                date_default_timezone_set('Asia/Jakarta');
-                $tanggal = date('Y-m-d');
-                $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-                $id = $_POST["idrm"];
-                $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
-
-                $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
-
-                // $subtotal += $harga;
-
-                // $koneksi->query("UPDATE apotek SET jml_obat = '$stokAkhir' WHERE id_obat = '$ObatKode[id_obat]'");
-
-                $koneksi->query("INSERT INTO obat_rm SET idobat = '$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$_GET[idigd]', tgl_pasien = '$_GET[tgl]', obat_igd = '$_POST[jenis]', racik = '$racik', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
-              }
-            }
-          }
-        }
-      }
-    }
-  }
   echo "
-  <script>
-    document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
-  </script>
+    <script>
+      alert('Obat berhasil di request, silahkan tunggu konfirmasi dari apotek!');
+      window.location.href = '?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
+    </script>
   ";
-}
-
-if (isset($_POST['saveobnew'])) {
-  $catatan_obat = $_POST['catatan_obat'];
-  $nama = $_POST['nama_obat'];
-  $jml_dokter = $_POST['jml_dokter'];
-  $dosis1_obat = $_POST['dosis1_obat'];
-  $dosis2_obat = $_POST['dosis2_obat'];
-  $per_obat = $_POST['per_obat'];
-  $durasi_obat = $_POST['durasi_obat'];
-  $jenis_obat = $_POST['jenis_obat'];
-  $petunjuk_obat = $_POST['petunjuk_obat'];
-  $idrm = $_POST['idrm'];
-
-  $end = date("H:i:s");
-  for ($i = 0; $i < count($nama) - 1; $i++) {
-    $uniqueId = getUniqeIdObat($koneksi);
-
-    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-    $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter[$i];
-    $m = $ObatKode['margininap'];
-    if ($m < 100) {
-      $margin = 1.30;
-    } else {
-      $margin = $m / 100;
-    }
-    $subtotal = 0;
-    $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter[$i];
-    $subtotal += $harga;
-    date_default_timezone_set('Asia/Jakarta');
-    $tanggal = date('Y-m-d');
-    $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-    $id = $_POST["idrm"];
-    $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
-
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
-
-    $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
-  }
-
-  echo "
-  <script>
-    document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
-  </script>
-  ";
-}
-
-if (isset($_GET['idObat'])) {
-  $idObat = $_GET['idObat'];
-  $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$idObat'");
-  $koneksi->query("DELETE FROM rawatinapdetail WHERE TRIM(SUBSTRING_INDEX(ket, ' ', -1)) = '$idObat'");
-  echo "
-  <script>
-    document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
-  </script>
-  ";
-}
-
-if (isset($_GET['copyObat'])) {
-  $tgl = $_GET['tglobat'];
-  $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
-  $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' " . $whereTgl);
-  foreach ($obat as $row) {
-    $catatan_obat = $row['catatan_obat'];
-    $nama = $row['kode_obat'];
-    $jml_dokter = $row['jml_dokter'];
-    $dosis1_obat = $row['dosis1_obat'];
-    $dosis2_obat = $row['dosis2_obat'];
-    $per_obat = $row['per_obat'];
-    $durasi_obat = $row['durasi_obat'];
-    $jenis_obat = $row['jenis_obat'];
-    $petunjuk_obat = $row['petunjuk_obat'];
-    $idrm = $row['idrm'];
-
-    $end = date("H:i:s");
-    $uniqueId = getUniqeIdObat($koneksi);
-
-    $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-    $stokAkhir = $ObatKode['jml_obat'] - $jml_dokter;
-    $m = $ObatKode['margininap'];
-    if ($m < 100) {
-      $margin = 1.30;
-    } else {
-      $margin = $m / 100;
-    }
-    $subtotal = 0;
-    $harga = $ObatKode['harga_beli'] * $margin * $jml_dokter;
-    $subtotal += $harga;
-    date_default_timezone_set('Asia/Jakarta');
-    $tanggal = date('Y-m-d');
-    $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-    $id = $row["idrm"];
-    $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
-
-    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$row[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
-
-    $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$row[idigd]', obat_igd = '$row[obat_igd]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
-  }
-  echo "
-  <script>
-    alert('Obat pada Tanggal $_GET[tglobat] Berhasil Di Copy');
-    document.location.href='index.php?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
-  </script>
-  ";
-}
-
-if ($_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'apoteker') {
-  $getLatLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC LIMIT 1")->fetch_assoc();
-  if (!isset($_GET['tglobat'])) {
-    $tgl = date('Y-m-d', strtotime($getLatLpo['created_at']));
-  } else {
-    $tgl = $_GET['tglobat'];
-  }
-  $whereTgl = " AND date_format(created_at, '%Y-%m-%d') = '$tgl'";
-  $injek = $koneksi->query("UPDATE obat_rm SET see_apotek_at = CURDATE() WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND see_apotek_at IS NULL " . $whereTgl);
-}
-
-if (isset($_POST['addRetur'])) {
-  $pasien = $koneksi->query("SELECT * FROM pasien  WHERE no_rm='$_GET[id]';")->fetch_assoc();
-
-  $idrawat = $id['idrawat'];
-  $no_rm = $pasien['no_rm'];
-  $nama_pasien = $pasien['nama_lengkap'];
-
-  $obat_rm_id = $_POST['idobat'];
-  $kode_obat = $_POST['kode_obat'];
-  $nama_obat = $_POST['nama_obat'];
-  $jenis_obat = $_POST['jenis_obat'];
-  $jumlah_retur = $_POST['jumlah_retur'];
-
-  $tgl_retur = date('Y-m-d');
-
-  $getHargaBeliAkhir = $koneksi->query("SELECT * FROM rawatinapdetail WHERE ket LIKE '%$obat_rm_id%' AND ket LIKE '%Resep%' AND id = '" . htmlspecialchars($id['idrawat']) . "' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
-  $getJum = $koneksi->query("SELECT * FROM obat_rm WHERE idobat='$obat_rm_id' LIMIT 1")->fetch_assoc();
-
-  $hargaSatuan = -1 * $_POST['harga'];
-  $uniqueId = getUniqeIdObatRetur($koneksi);
-
-  $koneksi->query("INSERT INTO rawatinapdetail (id, biaya, ket, besaran, tgl, petugas) VALUES ('$idrawat', 'Retur Obat Inap', 'Retur Obat $uniqueId', '" . ($hargaSatuan) * $jumlah_retur . "', '$tgl_retur', '" . $_SESSION['admin']['namalengkap'] . "')");
-
-  $koneksi->query("INSERT INTO `retur_obat_inap`(`idretur`, `idrawat`, `no_rm`, `nama_pasien`, `obat_rm_id`, `kode_obat`, `nama_obat`, `jenis_obat`, `jumlah_retur`, `tgl_retur`) VALUES ('$uniqueId', '$idrawat','$no_rm','$nama_pasien','$obat_rm_id','$kode_obat','$nama_obat','$jenis_obat','$jumlah_retur','$tgl_retur')");
-
-  echo "
-            <script>
-                alert('Successfully');
-                window.location.href = '?halaman=cttpenyakit&id=$_GET[id]&inap&tgl=$_GET[tgl]';
-            </script>
-        ";
 }
 ?>
 
@@ -538,6 +351,30 @@ if (isset($_POST['addRetur'])) {
                         <button type="submit" name="save" class="btn btn-primary">Simpan</button>
                       <?php } ?>
                       <button type="reset" class="btn btn-secondary">Reset</button>
+                      <a href="?halaman=cttpenyakit_obat&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>" class="btn btn-success"><?= $_SESSION['admin']['level'] == 'dokter' ? 'Ajukan Obat' : 'Cek Obat' ?></a>
+                    </div>
+                  </div>
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="ajukanObat" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Ajukan Obat Ke Apoteker</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post">
+                          <div class="modal-body">
+                            <input type="text" name="idrawat" value="<?= $jadwal['idrawat'] ?>" hidden>
+                            <label for="">Request Obat</label>
+                            <textarea name="request" id="request_obat"><ul><li>&nbsp;</li></ul></textarea>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" name="requestObat" class="btn btn-primary">Ajukan Obat</button>
+                          </div>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 <?php } ?>
@@ -550,6 +387,356 @@ if (isset($_POST['addRetur'])) {
     <div class="">
       <?php if (!isset($_GET['entriObat'])) { ?>
         <div class="row">
+          <div class="col-md-12 <?= isset($_GET['bulan']) ? 'd-none' : '' ?>">
+            <div class="card mb-1" style="margin-top:0px">
+              <div class="card-body col-md-12">
+                <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SAAT INI</h5>
+                <!-- Modal Tag Teman Perawat -->
+                <!-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button> -->
+                <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Tag Teman Perawat</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method="post">
+                        <div class="modal-body">
+                          <input type="text" name="id" id="id_id" hidden>
+                          <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
+                          <select name="temanPerawat[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
+                            <?php
+                            $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('perawat', 'inap', 'igd') ORDER BY namalengkap ASC");
+                            foreach ($getPerawat as $perawat) :
+                            ?>
+                              <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
+                            <?php endforeach; ?>
+                          </select>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="submit" name="tagTeman" class="btn btn-sm btn-primary">Tag Teman Perawat</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                <script>
+                  function upDataId(id) {
+                    document.getElementById('id_id').value = id;
+                  }
+                </script>
+                <br>
+                <!-- End Modal Tag Teman Perawat -->
+                <div class="table-responsive">
+                  <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Tipe</th>
+                        <th>Tgl&Jam</th>
+                        <th>Subjek</th>
+                        <th>Objek</th>
+                        <th>Alergi</th>
+                        <th>Assesment</th>
+                        <th>Plan</th>
+                        <th>Intruksi</th>
+                        <th>Edukasi</th>
+                        <th>Petugas</th>
+                        <th>Dokter</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $getPulangTerakhir = $koneksi->query("SELECT * FROM pulang WHERE norm='$_GET[id]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+
+                      $no = 1;
+                      $riw = $koneksi->query("
+                        SELECT 
+                          id,
+                          tgl,
+                          ctt_tedis,
+                          object,
+                          alergi,
+                          assesment,
+                          plan,
+                          intruksi,
+                          edukasi,
+                          petugas,
+                          dokter,
+                          norm,
+                          'Catatan Penyakit' as tipe_data
+                        FROM ctt_penyakit_inap 
+                        WHERE norm='$_GET[id]' 
+                          AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' 
+                        
+                        UNION ALL
+                        
+                        SELECT 
+                          NULL as id,
+                          created_at as tgl,
+                          catatan as ctt_tedis,
+                          '' as object,
+                          '' as alergi,
+                          '' as assesment,
+                          '' as plan,
+                          '' as intruksi,
+                          '' as edukasi,
+                          created_by as petugas,
+                          '' as dokter,
+                          no_rm as norm,
+                          'Catatan Farmasi' as tipe_data
+                        FROM catatan_farmasi 
+                        WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' AND DATE_FORMAT(created_at, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' 
+                        
+                        UNION ALL
+                              
+                        SELECT 
+                          NULL as id,
+                          created_at as tgl,
+                          catatan as ctt_tedis,
+                          '' as object,
+                          '' as alergi,
+                          '' as assesment,
+                          '' as plan,
+                          '' as intruksi,
+                          '' as edukasi,
+                          created_by as petugas,
+                          '' as dokter,
+                          no_rm as norm,
+                          'Catatan Lab' as tipe_data
+                        FROM catatan_lab
+                        WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' AND DATE_FORMAT(created_at, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "'
+
+                        ORDER BY tgl DESC
+                      ");
+                      ?>
+                      <?php foreach ($riw as $pecah) : ?>
+                        <tr>
+                          <td><?php echo $no; ?></td>
+                          <td>
+                            <?php if ($pecah['tipe_data'] == 'Catatan Farmasi') { ?>
+                              <span class="badge bg-info text-light">Farmasi</span>
+                            <?php } else if ($pecah['tipe_data'] == 'Catatan Lab') { ?>
+                              <span class="badge bg-secondary text-light">Laboratorium</span>
+                            <?php } else { ?>
+                              <span class="badge bg-primary text-light">Penyakit</span>
+                            <?php } ?>
+                          </td>
+                          <td>
+                            <?php echo $pecah["tgl"]; ?>
+                            <?php if ($pecah['tipe_data'] == 'Catatan Penyakit') { ?>
+                              <?php
+                              $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
+                              foreach ($getTagCount as $tag) {
+                                echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
+                              }
+                              ?>
+                            <?php } ?>
+                          </td>
+                          <td><?php echo $pecah["ctt_tedis"]; ?> </td>
+                          <td><?php echo $pecah["object"]; ?> </td>
+                          <td><?php echo $pecah["alergi"]; ?> </td>
+                          <td><?php echo $pecah["assesment"]; ?> </td>
+                          <td><?php echo $pecah["plan"]; ?> </td>
+                          <td><?php echo $pecah["intruksi"]; ?> </td>
+                          <td><?php echo $pecah["edukasi"]; ?> </td>
+                          <td><?php echo $pecah["petugas"]; ?></td>
+                          <td><?php echo $pecah["dokter"]; ?></td>
+                          <td>
+                            <?php if ($pecah['tipe_data'] == 'Catatan Penyakit') { ?>
+                              <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
+                              <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
+                                <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
+                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
+                              <?php } ?>
+                            <?php } else { ?>
+                              <span class="badge bg-secondary">-</span>
+                            <?php } ?>
+                          </td>
+                        </tr>
+                        <?php $no += 1 ?>
+                      <?php endforeach ?>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow p-2 mb-1">
+              <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SEBELUMNYA <?= isset($_GET['bulan']) ? $_GET['bulan'] : 'ALL' ?></h5>
+              <div class="table-responsive">
+                <?php if (!isset($_GET['bulan'])) { ?>
+                  <table class="table-hover table table-sm table-striped" style="font-size: 12px;">
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $no = 1;
+                      $getBulanLalu = $koneksi->query("
+                        SELECT DATE_FORMAT(tgl, '%Y-%m') as bulan FROM ctt_penyakit_inap WHERE norm='$_GET[id]'
+                        UNION
+                        SELECT DATE_FORMAT(created_at, '%Y-%m') as bulan FROM catatan_farmasi WHERE no_rm='$_GET[id]'
+                        UNION
+                        SELECT DATE_FORMAT(created_at, '%Y-%m') as bulan FROM catatan_lab WHERE no_rm='$_GET[id]'
+                        ORDER BY bulan DESC
+                      ");
+                      foreach ($getBulanLalu as $bulanLalu):
+                      ?>
+                        <tr>
+                          <td><?= $bulanLalu['bulan'] ?></td>
+                          <td><a href="index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&bulan=<?= $bulanLalu['bulan'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
+                        </tr>
+                      <?php endforeach; ?>
+                    </tbody>
+                  </table>
+                <?php } else { ?>
+                  <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Tipe</th>
+                        <th>Tgl&Jam</th>
+                        <th>Subjek</th>
+                        <th>Objek</th>
+                        <th>Alergi</th>
+                        <th>Assesment</th>
+                        <th>Plan</th>
+                        <th>Intruksi</th>
+                        <th>Edukasi</th>
+                        <th>Petugas</th>
+                        <th>Dokter</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $getPulangTerakhir['tgl'] = date('Y-m-d', strtotime($_GET['bulan'] . '-01')); // Set tanggal pulang terakhir ke kemarin agar semua data muncul
+                      $no = 1;
+                      $riw = $koneksi->query("
+                        SELECT 
+                          id,
+                          tgl,
+                          ctt_tedis,
+                          object,
+                          alergi,
+                          assesment,
+                          plan,
+                          intruksi,
+                          edukasi,
+                          petugas,
+                          dokter,
+                          norm,
+                          'Catatan Penyakit' as tipe_data
+                        FROM ctt_penyakit_inap 
+                        WHERE norm='$_GET[id]' 
+                          AND DATE_FORMAT(tgl, '%Y-%m') = '" . $_GET['bulan'] . "'
+                        
+                        UNION ALL
+                        
+                        SELECT 
+                          NULL as id,
+                          created_at as tgl,
+                          catatan as ctt_tedis,
+                          '' as object,
+                          '' as alergi,
+                          '' as assesment,
+                          '' as plan,
+                          '' as intruksi,
+                          '' as edukasi,
+                          created_by as petugas,
+                          '' as dokter,
+                          no_rm as norm,
+                          'Catatan Farmasi' as tipe_data
+                        FROM catatan_farmasi 
+                        WHERE no_rm='$_GET[id]'
+                          AND DATE_FORMAT(created_at, '%Y-%m') = '" . $_GET['bulan'] . "'
+                        
+                        UNION ALL
+                              
+                        SELECT 
+                          NULL as id,
+                          created_at as tgl,
+                          catatan as ctt_tedis,
+                          '' as object,
+                          '' as alergi,
+                          '' as assesment,
+                          '' as plan,
+                          '' as intruksi,
+                          '' as edukasi,
+                          created_by as petugas,
+                          '' as dokter,
+                          no_rm as norm,
+                          'Catatan Lab' as tipe_data
+                        FROM catatan_lab
+                        WHERE no_rm='$_GET[id]'
+                          AND DATE_FORMAT(created_at, '%Y-%m') = '" . $_GET['bulan'] . "'
+
+                        ORDER BY tgl DESC
+                      ");
+                      ?>
+                      <?php foreach ($riw as $pecah) : ?>
+                        <tr>
+                          <td><?php echo $no; ?></td>
+                          <td>
+                            <?php if ($pecah['tipe_data'] == 'Catatan Farmasi') { ?>
+                              <span class="badge bg-info text-light">Farmasi</span>
+                            <?php } else if ($pecah['tipe_data'] == 'Catatan Lab') { ?>
+                              <span class="badge bg-secondary text-light">Laboratorium</span>
+                            <?php } else { ?>
+                              <span class="badge bg-primary text-light">Penyakit</span>
+                            <?php } ?>
+                          </td>
+                          <td>
+                            <?php echo $pecah["tgl"]; ?>
+                            <?php if ($pecah['tipe_data'] == 'Catatan Penyakit') { ?>
+                              <?php
+                              $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
+                              foreach ($getTagCount as $tag) {
+                                echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
+                              }
+                              ?>
+                            <?php } ?>
+                          </td>
+                          <td><?php echo $pecah["ctt_tedis"]; ?> </td>
+                          <td><?php echo $pecah["object"]; ?> </td>
+                          <td><?php echo $pecah["alergi"]; ?> </td>
+                          <td><?php echo $pecah["assesment"]; ?> </td>
+                          <td><?php echo $pecah["plan"]; ?> </td>
+                          <td><?php echo $pecah["intruksi"]; ?> </td>
+                          <td><?php echo $pecah["edukasi"]; ?> </td>
+                          <td><?php echo $pecah["petugas"]; ?></td>
+                          <td><?php echo $pecah["dokter"]; ?></td>
+                          <td>
+                            <?php if ($pecah['tipe_data'] == 'Catatan Penyakit') { ?>
+                              <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
+                              <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
+                                <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
+                                <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
+                              <?php } ?>
+                            <?php } else { ?>
+                              <span class="badge bg-secondary">-</span>
+                            <?php } ?>
+                          </td>
+                        </tr>
+                        <?php $no += 1 ?>
+                      <?php endforeach ?>
+                    </tbody>
+                  </table>
+                <?php } ?>
+              </div>
+            </div>
+          </div>
+
           <script>
             function changeJenis(jenisObat) {
               var jenis3 = document.getElementById('jenis3');
@@ -558,14 +745,110 @@ if (isset($_POST['addRetur'])) {
               jenis2.value = jenisObat;
             }
           </script>
+
+          <div class="col-12">
+            <div class="card shadow p-3 mb-1">
+              <h5 class="card-title">FOTO DOKUMEN PENUNJANG</h5>
+              <div class="d-flex flex-wrap gap-3">
+                <?php
+                $getlpo = $koneksi->query("SELECT * FROM lpo WHERE pasien = '$pasien[nama_lengkap]' AND norm = '$pasien[no_rm]' AND status = 'inap' AND (penunjang != '' OR penunjang != null OR penunjang != '[]')");
+                $hasFoto = false;
+                foreach ($getlpo as $data) {
+                  if (!empty($data['penunjang'])) {
+                    $foto_list = json_decode($data['penunjang'], true);
+                    if (is_array($foto_list) && count($foto_list) > 0) {
+                      $hasFoto = true;
+                      foreach ($foto_list as $index => $foto) {
+                        if (file_exists('../rawatinap/pemeriksaan_penunjang/' . $foto)) {
+                          echo '<div class="position-relative" style="border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0;">';
+                          echo '<img src="../rawatinap/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" 
+                                style="width: 120px; height: 120px; object-fit: cover; cursor: pointer; transition: transform 0.2s;" 
+                                onclick="window.open(this.src, \'_blank\')" 
+                                onmouseover="this.style.transform=\'scale(1.05)\'" 
+                                onmouseout="this.style.transform=\'scale(1)\'"
+                                title="Klik untuk memperbesar - ' . htmlspecialchars($data['tgl_waktu']) . '">';
+                          echo '<div class="position-absolute top-0 end-0 m-1"><span class="badge bg-success" style="font-size: 9px;">' . date('d/m/y', strtotime($data['tgl_waktu'])) . '</span></div>';
+                          echo '<div class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-50 text-white text-center py-1" style="font-size: 10px;">Foto ' . ($index + 1) . '</div>';
+                          echo '</div>';
+                        }
+                      }
+                    }
+                  }
+                }
+                if (!$hasFoto) {
+                  echo '<div class="alert alert-info mb-0 w-100" style="font-size: 13px;"><i class="bi bi-info-circle"></i> Tidak ada foto dokumen penunjang</div>';
+                }
+                ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card sahdow p-2 mb-1">
+              <label for="">Pengajuan Obat Dokter</label>
+              <div>
+                <a href="?halaman=cttpenyakit_obat&id=<?php echo $_GET['id']; ?>&inap&tgl=<?php echo $_GET['tgl']; ?>" class="btn btn-sm btn-primary">Ajukan Obat</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover table-striped" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Tipe</th>
+                      <th>Obat</th>
+                      <th>Kode Obat</th>
+                      <th>Jumlah</th>
+                      <th>Dosis</th>
+                      <th>Jenis</th>
+                      <th>Durasi</th>
+                      <th>Tanggal</th>
+                      <th>Petugas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    $injek = $koneksi->query("SELECT * FROM obat_rm_request WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]'");
+                    $urlBase = "index.php?halaman=cttpenyakit_obat&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']);
+                    $noo = 1;
+                    foreach ($injek as $in) {
+                    ?>
+                      <tr>
+                        <td class="text-light <?= $in['see_apotek_at'] == null ? 'bg-danger' : 'bg-success' ?>"><?php echo $noo++; ?></td>
+                        <td><?php echo $in["obat_igd"]; ?></td>
+                        <td><?php echo $in["nama_obat"]; ?></td>
+                        <td><?php echo $in["kode_obat"]; ?></td>
+                        <td><?php echo $in["jml_dokter"]; ?></td>
+                        <td><?php echo $in["dosis1_obat"]; ?> X <?php echo $in["dosis2_obat"]; ?>
+                          <?php echo $in["per_obat"]; ?>
+                        </td>
+                        <td><?php echo $in["jenis_obat"]; ?> <?php echo $in["racik"]; ?></td>
+                        <td><?php echo $in["durasi_obat"]; ?> hari</td>
+                        <td>
+                          <a target="_blank"
+                            href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>"
+                            class="badge bg-warning text-dark" style="font-size: 12px;">
+                            <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
+                          </a>
+                        </td>
+                        <td><?= $in['petugas'] ?></td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
           <div class="col-md-12">
             <div class="card shadow p-2 mb-1">
               <label for="">Obat Injeksi </label>
               <div>
-                <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
-                  data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
-                  data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
+                <?php if ($_SESSION['admin']['level'] != 'dokter') { ?>
+                  <!-- <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                    data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button> -->
+                <?php } ?>
+                <!-- <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
+                  data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
                 <?php if ($id['apoteker_check_at'] == null) { ?>
                 <?php } ?>
               </div>
@@ -574,13 +857,13 @@ if (isset($_POST['addRetur'])) {
                 $getLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC");
                 foreach ($getLpo as $lpop) {
                 ?>
-                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span> <i onclick="document.location.href='?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>&copyObat'" class="bi bi-copy"></i></span>
+                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span></span>
                 <?php } ?>
               </div>
               <div class="table-responsive">
                 <table class="table table-hover table-striped" style="font-size: 12px;">
                   <thead>
-                    <tr>
+                      <tr>
                       <th>No</th>
                       <th>Obat</th>
                       <th>Kode Obat</th>
@@ -639,10 +922,10 @@ if (isset($_POST['addRetur'])) {
                         <td><?= $in['petugas'] ?></td>
                         <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $in["idobat"]; ?>">Edit</button></td> -->
                         <td>
-                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'dokter') { ?>
-                            <button class="btn btn-sm btn-warning" onclick="upData('<?= $in['idobat'] ?>','<?= $in['nama_obat'] ?>','<?= $in['kode_obat'] ?>','<?= $in['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
+                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
+                            <!-- <button class="btn btn-sm btn-warning" onclick="upData('<?= $in['idobat'] ?>','<?= $in['nama_obat'] ?>','<?= $in['kode_obat'] ?>','<?= $in['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
                             <a href="<?= $urlBase ?>&idObat=<?= $in['idobat'] ?>" class="btn btn-sm btn-danger"><i
-                                class="bi bi-trash"></i></a>
+                                class="bi bi-trash"></i></a> -->
                           <?php } else { ?>
                             <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
                           <?php } ?>
@@ -659,11 +942,11 @@ if (isset($_POST['addRetur'])) {
             <div class="card shadow p-2 mb-1">
               <label for="">Obat Oral</label>
               <div align="left">
-                <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
-                  data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
-                <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
-                  data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button>
-                <?php if ($id['apoteker_check_at'] == null) { ?>
+                <?php if ($_SESSION['admin']['level'] != 'dokter') { ?>
+                  <!-- <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                    data-bs-toggle="modal" data-bs-target="#exampleModal45">Add Jadi</button>
+                  <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
+                    data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
                 <?php } ?>
               </div>
               <div>
@@ -671,7 +954,7 @@ if (isset($_POST['addRetur'])) {
                 $getLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC");
                 foreach ($getLpo as $lpop) {
                 ?>
-                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span> <i onclick="document.location.href='?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>&copyObat'" class="bi bi-copy"></i></span>
+                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span></span>
                 <?php } ?>
               </div>
               <div class="table-responsive">
@@ -739,10 +1022,10 @@ if (isset($_POST['addRetur'])) {
                         </td>
                         <!-- <td> <button type="button" class="btn btn-primary text-right" data-bs-toggle="modal" data-bs-target="#exampleModalEdit<?php echo $or["idobat"]; ?>">Edit</button></td> -->
                         <td>
-                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'dokter') { ?>
-                            <button class="btn btn-sm btn-warning" onclick="upData('<?= $or['idobat'] ?>','<?= $or['nama_obat'] ?>','<?= $or['kode_obat'] ?>','<?= $or['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
+                          <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
+                            <!-- <button class="btn btn-sm btn-warning" onclick="upData('<?= $or['idobat'] ?>','<?= $or['nama_obat'] ?>','<?= $or['kode_obat'] ?>','<?= $or['jenis_obat'] ?>', '<?= number_format($harga, 0, 0, '') ?>')" data-bs-toggle="modal" data-bs-target="#AddRetur"><i class="bi bi-capsule-pill"></i></button>
                             <a href="<?= $urlBase ?>&idObat=<?= $or['idobat'] ?>" class="btn btn-sm btn-danger"><i
-                                class="bi bi-trash"></i></a>
+                                class="bi bi-trash"></i></a> -->
                           <?php } else { ?>
                             <span style="font-size: 6.5px;">Kesalahan Silahkan Lapor Wadir</span>
                           <?php } ?>
@@ -859,755 +1142,14 @@ if (isset($_POST['addRetur'])) {
                 di-Input Semua dan Pasien Boleh Pulang</a>
             </div>
           </div> -->
-          <div class="col-md-12 <?= isset($_GET['bulan']) ? 'd-none' : '' ?>">
-            <div class="card mb-1" style="margin-top:0px">
-              <div class="card-body col-md-12">
-                <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SAAT INI</h5>
-                <!-- Modal Tag Teman Perawat -->
-                <!-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag Teman Perawat</button> -->
-                <div class="modal fade" id="tagTeman" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Tag Teman Perawat</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <form method="post">
-                        <div class="modal-body">
-                          <input type="text" name="id" id="id_id" hidden>
-                          <label for="selectTemanPerawatCtt">Pilih Teman Perawat</label>
-                          <select name="temanPerawat[]" class="form-control form-control-sm" id="selectTemanPerawatCtt" multiple="multiple" style="width: 100%;" required>
-                            <?php
-                            $getPerawat = $koneksi->query("SELECT * FROM admin WHERE level IN ('perawat', 'inap', 'igd') ORDER BY namalengkap ASC");
-                            foreach ($getPerawat as $perawat) :
-                            ?>
-                              <option value="<?= $perawat['idadmin'] ?>"><?= $perawat['namalengkap'] ?> (<?= $perawat['level'] ?>)</option>
-                            <?php endforeach; ?>
-                          </select>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="submit" name="tagTeman" class="btn btn-sm btn-primary">Tag Teman Perawat</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-                <script>
-                  function upDataId(id) {
-                    document.getElementById('id_id').value = id;
-                  }
-                </script>
-                <br>
-                <!-- End Modal Tag Teman Perawat -->
-                <div class="table-responsive">
-                  <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
-                    <thead>
-                      <tr>
-                        <th>No</th>
-                        <th>Tgl&Jam</th>
-                        <th>Subjek</th>
-                        <th>Objek</th>
-                        <th>Alergi</th>
-                        <th>Assesment</th>
-                        <th>Plan</th>
-                        <th>Intruksi</th>
-                        <th>Edukasi</th>
-                        <th>Petugas</th>
-                        <th>Dokter</th>
-                        <th>Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php
-                      $getPulangTerakhir = $koneksi->query("SELECT * FROM pulang WHERE norm='$_GET[id]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
-
-                      $no = 1;
-                      $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' GROUP BY tgl order by id DESC");
-                      ?>
-                      <?php foreach ($riw as $pecah) : ?>
-                        <tr>
-                          <td><?php echo $no; ?></td>
-                          <td>
-                            <?php echo $pecah["tgl"]; ?>
-                            <?php
-                            $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
-                            foreach ($getTagCount as $tag) {
-                              echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
-                            }
-                            ?>
-                          </td>
-                          <td><?php echo $pecah["ctt_tedis"]; ?> </td>
-                          <td><?php echo $pecah["object"]; ?> </td>
-                          <td><?php echo $pecah["alergi"]; ?> </td>
-                          <td><?php echo $pecah["assesment"]; ?> </td>
-                          <td><?php echo $pecah["plan"]; ?> </td>
-                          <td><?php echo $pecah["intruksi"]; ?> </td>
-                          <td><?php echo $pecah["edukasi"]; ?> </td>
-                          <td><?php echo $pecah["petugas"]; ?></td>
-                          <td><?php echo $pecah["dokter"]; ?></td>
-                          <td>
-                            <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
-                            <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
-                              <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
-                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
-                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
-                            <?php } ?>
-                          </td>
-                        </tr>
-                        <?php $no += 1 ?>
-                      <?php endforeach ?>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="card shadow p-2 mb-1">
-              <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SEBELUMNYA <?= isset($_GET['bulan']) ? $_GET['bulan'] : 'ALL' ?></h5>
-              <div class="table-responsive">
-                <?php if (!isset($_GET['bulan'])) { ?>
-                  <table class="table-hover table table-sm table-striped" style="font-size: 12px;">
-                    <thead>
-                      <tr>
-                        <th>Bulan</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php
-                      $no = 1;
-                      $getBulanLalu = $koneksi->query("SELECT DATE_FORMAT(tgl, '%Y-%m') as bulan FROM ctt_penyakit_inap WHERE norm='$_GET[id]' GROUP BY DATE_FORMAT(tgl, '%Y-%m') ORDER BY tgl DESC");
-                      foreach ($getBulanLalu as $bulanLalu):
-                      ?>
-                        <tr>
-                          <td><?= $bulanLalu['bulan'] ?></td>
-                          <td><a href="index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&bulan=<?= $bulanLalu['bulan'] ?>" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
-                        </tr>
-                      <?php endforeach; ?>
-                    </tbody>
-                  </table>
-                <?php } else { ?>
-                  <table id="myTable" class="table table-striped" style="width:100%; font-size: 12px;">
-                    <thead>
-                      <tr>
-                        <th>No</th>
-                        <th>Tgl&Jam</th>
-                        <th>Subjek</th>
-                        <th>Objek</th>
-                        <th>Alergi</th>
-                        <th>Assesment</th>
-                        <th>Plan</th>
-                        <th>Intruksi</th>
-                        <th>Edukasi</th>
-                        <th>Petugas</th>
-                        <th>Dokter</th>
-                        <th>Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php
-                      $getPulangTerakhir['tgl'] = date('Y-m-d', strtotime($_GET['bulan'] . '-01')); // Set tanggal pulang terakhir ke kemarin agar semua data muncul
-                      $no = 1;
-                      $riw = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . $getPulangTerakhir['tgl'] . "' GROUP BY tgl order by id DESC");
-                      ?>
-                      <?php foreach ($riw as $pecah) : ?>
-                        <tr>
-                          <td><?php echo $no; ?></td>
-                          <td>
-                            <?php echo $pecah["tgl"]; ?>
-                            <?php
-                            $getTagCount = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm='$_GET[id]' AND tgl='$pecah[tgl]'");
-                            foreach ($getTagCount as $tag) {
-                              echo "<br><span class='badge bg-primary' style='font-size: 10px;'>@" . $tag['petugas'] . "</span>";
-                            }
-                            ?>
-                          </td>
-                          <td><?php echo $pecah["ctt_tedis"]; ?> </td>
-                          <td><?php echo $pecah["object"]; ?> </td>
-                          <td><?php echo $pecah["alergi"]; ?> </td>
-                          <td><?php echo $pecah["assesment"]; ?> </td>
-                          <td><?php echo $pecah["plan"]; ?> </td>
-                          <td><?php echo $pecah["intruksi"]; ?> </td>
-                          <td><?php echo $pecah["edukasi"]; ?> </td>
-                          <td><?php echo $pecah["petugas"]; ?></td>
-                          <td><?php echo $pecah["dokter"]; ?></td>
-                          <td>
-                            <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
-                            <?php if ($pecah['petugas'] === $petugas || $_SESSION['admin']['level'] == 'dokter' || $_SESSION['admin']['level'] == 'sup') { ?>
-                              <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
-                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
-                              <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
-                            <?php } ?>
-                          </td>
-                        </tr>
-                        <?php $no += 1 ?>
-                      <?php endforeach ?>
-                    </tbody>
-                  </table>
-                <?php } ?>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="card shadow p-2">
-              <h5 class="card-title">CATATAN FARMASI</h5>
-              <?php
-              $riwayat_catatan = $koneksi->query("SELECT * FROM catatan_farmasi WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' ORDER BY created_at DESC");
-              ?>
-              <div class="table-responsive">
-                <table class="table table-hover table-striped table-sm" style="font-size: 12px;">
-                  <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Nama Pasien</th>
-                      <th>Catatan</th>
-                      <th>No RM</th>
-                      <th>Jadwal</th>
-                      <th>Dibuat Oleh</th>
-                      <th>Dibuat Pada</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    if ($riwayat_catatan->num_rows > 0) {
-                      $no = 1;
-                      while ($row = $riwayat_catatan->fetch_assoc()) {
-                    ?>
-                        <tr>
-                          <td><?= $no++ ?></td>
-                          <td><?= htmlspecialchars($row['nama_pasien']) ?></td>
-                          <td><?= htmlspecialchars($row['catatan']) ?></td>
-                          <td><?= htmlspecialchars($row['no_rm']) ?></td>
-                          <td><?= date('d-m-Y H:i', strtotime($row['jadwal'])) ?></td>
-                          <td><?= htmlspecialchars($row['created_by']) ?></td>
-                          <td><?= date('d-m-Y H:i:s', strtotime($row['created_at'])) ?></td>
-                        </tr>
-                      <?php
-                      }
-                    } else {
-                      ?>
-                      <tr>
-                        <td colspan="7" class="text-center text-muted">
-                          <i class="bi bi-inbox"></i> Belum ada catatan farmasi untuk pasien ini
-                        </td>
-                      </tr>
-                    <?php } ?>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
         </div>
       <?php } else { ?>
-        <div class="card shadow-sm mb-2 p-2">
-          <h5><b>Entri Obat Jadi</b></h5>
-          <form method="post">
-            <div class="row g-1">
-              <div class="col-md-2">
-                <label>Nama Obat</label>
-                <select name="nama_obat" class="obat-select form-control form-control-sm mb-2 w-100"
-                  style="width:100%;" id="selectObatJadiEntriObat" aria-label="Default select example">
-                  <option value="">Pilih</option>
-                </select>
-              </div>
-              <div class="col-md-1">
-                <label for="">Jenis</label>
-                <select name="jenis_obat_2" class="form-control form-control-sm" id="">
-                  <option value="Oral">Oral</option>
-                  <option value="Injeksi">Injeksi</option>
-                </select>
-              </div>
-              <div class="col-md-2">
-                <label for="">Dosis</label>
-                <div class="input-group input-group-sm ">
-                  <input type="text" class="form-control form-control-sm mb-2" id="dosis1_obat" name="dosis1_obat">
-                  <span type="text" style="text-align: center;" class="form-control form-control-sm mb-2"
-                    placeholder="X" disabled>X</span>
-                  <input type="text" class="form-control form-control-sm mb-2" id="dosis2_obat" name="dosis2_obat">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <label for="">Per</label>
-                <select id="inputState" name="per_obat" class=" form-control form-control-sm">
-                  <option>Per Hari</option>
-                  <option>Per Jam</option>
-                </select>
-              </div>
-              <div class="col-md-2">
-                <label for="">Jumlah</label>
-                <input type="number" name="jml_dokter" class="form-control form-control-sm mb-2" id="inputName5"
-                  placeholder="Jumlah Obat">
-              </div>
-              <div class="col-md-2">
-                <label for="inputName5" class="">Petunjuk</label>
-                <input type="text" name="petunjuk_obat" class="form-control form-control-sm mb-2" id="inputName5"
-                  placeholder=" Petunjuk Pemakaian">
-                <input type="text" name="catatan_obat" value="-" hidden class="form-control form-control-sm mb-2"
-                  id="inputName5" placeholder="Masukkan Jumlah">
-                <select name="jenis_obat" hidden class=" form-control form-control-sm mb-2">
-                  <option value="Jadi">Jadi</option>
-                </select>
-              </div>
-              <div class="col-md-1">
-                <label for="inputCity" class="">Durasi</label>
-                <div class="input-group mb-3">
-                  <input type="text" name="durasi_obat" class="form-control form-control-sm" placeholder="Durasi"
-                    aria-describedby="basic-addon2">
-                </div>
-              </div>
-              <div class="col-md-12 text-end">
-                <button class="btn btn-sm btn-primary" name="addToSession">Tambah [+]</button>
-              </div>
-            </div>
-          </form>
-          <?php
-          // Proses tambah ke session
-          if (isset($_POST['addToSession'])) {
-            // Inisialisasi session jika belum ada
-            if (!isset($_SESSION['temp_obat'])) {
-              $_SESSION['temp_obat'] = array();
-            }
 
-            // Ambil data obat dari database untuk mendapatkan nama obat
-            $id_obat = $_POST['nama_obat'];
-            $query = $koneksi->query("SELECT * FROM apotek WHERE id_obat = '$id_obat'");
-            $data_obat = $query->fetch_assoc();
-
-            // Tambahkan data ke session
-            $_SESSION['temp_obat'][] = array(
-              'id_obat' => $id_obat,
-              'nama_obat' => $data_obat['nama_obat'],
-              'dosis1_obat' => $_POST['dosis1_obat'],
-              'dosis2_obat' => $_POST['dosis2_obat'],
-              'per' => $_POST['per_obat'],
-              'jumlah' => $_POST['jml_dokter'],
-              'petunjuk' => $_POST['petunjuk_obat'],
-              'catatan' => $_POST['catatan_obat'],
-              'jenis' => $_POST['jenis_obat'],
-              'jenis2' => $_POST['jenis_obat_2'],
-              'durasi' => $_POST['durasi_obat']
-            );
-          }
-
-          // Proses hapus dari session
-          if (isset($_GET['hapusObatSession'])) {
-            $index = $_GET['hapusObatSession'];
-            unset($_SESSION['temp_obat'][$index]);
-          }
-
-          if (isset($_GET['clear_session'])) {
-            unset($_SESSION['temp_obat']);
-            echo "<script>window.location.href = 'index.php?halaman=cttpenyakit&id=" . htmlspecialchars($_GET['id']) . "&tgl=" . htmlspecialchars($_GET['tgl']) . "&entriObat=" . htmlspecialchars($_GET['entriObat']) . "';</script>";
-          }
-
-          if (isset($_GET['saveToDatabase'])) {
-            if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0) {
-              foreach ($_SESSION['temp_obat'] as $obatSave) {
-
-                // $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '', kode_obat = '', nama_obat = '', jml_dokter = '', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
-
-                $uniqueId = getUniqeIdObat($koneksi);
-
-                $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$id[no_rm]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
-
-                $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $obatSave['id_obat'] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
-
-                $stokAkhir = $ObatKode['jml_obat'] - $obatSave['jumlah'];
-                $m = $ObatKode['margininap'];
-                if ($m < 100) {
-                  $margin = 1.30;
-                } else {
-                  $margin = $m / 100;
-                }
-                $subtotal = 0;
-                $harga = $ObatKode['harga_beli'] * $margin * $obatSave['jumlah'];
-                $subtotal += $harga;
-                date_default_timezone_set('Asia/Jakarta');
-                $tanggal = date('Y-m-d');
-                $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-                $id = $id['idrawat'];
-                $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
-
-                $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$id', '$tanggal', '$biaya', '$harga', '$resep', '" . $_SESSION['admin']['namalengkap'] . "') ");
-
-                // $koneksi->query("INSERT INTO rmedis_obat (id_rm, id_obat, dosis1_obat, dosis2_obat, per_obat, jumlah_obat, petunjuk_obat, catatan_obat, jenis_obat, durasi_obat) VALUES ('" . htmlspecialchars($_GET['id']) . "', '" . $obat['id_obat'] . "', '" . $obat['dosis1_obat'] . "', '" . $obat['dosis2_obat'] . "', '" . $obat['per'] . "', '" . $obat['jumlah'] . "', '" . $obat['petunjuk'] . "', '" . $obat['catatan'] . "', '" . $obat['jenis'] . "', '" . $obat['durasi'] . "')");
-              }
-              unset($_SESSION['temp_obat']);
-              echo "<script>alert('Data berhasil disimpan ke database.'); window.location.href = 'index.php?halaman=cttpenyakit&id=" . htmlspecialchars($_GET['id']) . "&inap&tgl=" . htmlspecialchars($_GET['tgl']) . "';</script>";
-            } else {
-              echo "<script>alert('Tidak ada data obat untuk disimpan.');</script>";
-            }
-          }
-          ?>
-          <br>
-          <div class="table-responsive">
-            <div class="table-responsive">
-              <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
-                <thead>
-                  <tr>
-                    <th>Obat</th>
-                    <th>Kode</th>
-                    <th>Dosis</th>
-                    <th>Per</th>
-                    <th>Jumlah</th>
-                    <th>Petunjuk</th>
-                    <th>Catatan</th>
-                    <th>Durasi</th>
-                    <th>JenisObat</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0): ?>
-                    <?php foreach ($_SESSION['temp_obat'] as $index => $obat): ?>
-                      <tr>
-                        <td><?= $obat['nama_obat'] ?></td>
-                        <td><?= $obat['id_obat'] ?></td>
-                        <td><?= $obat['dosis1_obat'] ?> X <?= $obat['dosis2_obat'] ?></td>
-                        <td><?= $obat['per'] ?></td>
-                        <td><?= $obat['jumlah'] ?></td>
-                        <td><?= $obat['petunjuk'] ?></td>
-                        <td><?= $obat['catatan'] ?></td>
-                        <td><?= $obat['durasi'] ?></td>
-                        <td><?= $obat['jenis2'] ?></td>
-                        <td>
-                          <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&hapusObatSession=<?= $index ?>"
-                            class="btn btn-danger btn-sm">Hapus</a>
-                        </td>
-                      </tr>
-                    <?php endforeach; ?>
-                  <?php else: ?>
-                    <tr>
-                      <td colspan="10" class="text-center">Tidak ada data obat</td>
-                    </tr>
-                  <?php endif; ?>
-                </tbody>
-              </table>
-              <?php if (isset($_SESSION['temp_obat']) && count($_SESSION['temp_obat']) > 0): ?>
-                <div class="text-end mt-3">
-                  <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&saveToDatabase"
-                    class="btn btn-sm btn-success">Simpan ke Database</a>
-                  <a href="<?= getFullUrl() ?>&entriObat=<?= htmlspecialchars($_GET['entriObat']) ?>&clear_session=true"
-                    class="btn btn-sm btn-danger">Bersihkan Session</a>
-                </div>
-              <?php endif; ?>
-            </div>
-          </div>
-          <script>
-            $(document).ready(function() {
-              $('#selectObatJadiEntriObat').select2();
-            });
-          </script>
-        </div>
       <?php } ?>
     </div>
   </main>
 
-  <!-- Add Data Modal Obat  Jadi -->
-  <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Obat <sup class="badge bg-primary text-light"><a
-                href="<?= getFullUrl() ?>&entriObat=Jadi" class="text-light">NewTab</a></sup></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <form method="post" enctype="multipart/form-data">
-              <div class="control-group">
-                <!-- <div class="modal-body"> -->
-                <div class="row">
-                  <div class="col-md-12">
-                    <label for="inputName5" class="form-label">Nama Obat</label><br>
-                    <input type="text" name="jenis" id="jenis3" hidden>
-                    <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                    <select name="nama_obat[]" class="obat-select form-select mb-2 w-100" style="width:100%;"
-                      id="selObat1" aria-label="Default select example">
-                      <option value="">Pilih</option>
-                    </select>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="inputName5">Dosis</label>
-                    <div class="input-group">
-                      <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                      <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X"
-                        disabled>X</span>
-                      <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    Per
-                    <select id="inputState" name="per_obat[]" class="form-select">
-                      <option>Per Hari</option>
-                      <option>Per Jam</option>
-                    </select>
-                  </div>
-                  <div class="col-md-12">
-                    <label for="">Jumlah Obat</label>
-                    <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
-                      placeholder="Jumlah Obat">
-                  </div>
-                  <div class="col-md-12">
-                    <label for="inputName5" class="">Petunjuk Pemakaian</label>
-                    <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
-                      placeholder="Masukkan Petunjuk Pemakaian">
-                  </div>
-                  <div class="col-md-12">
-                    <!-- <label for="inputName5" class="">Catatan Interaksi Obat</label> -->
-                    <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
-                      id="inputName5" placeholder="Masukkan Jumlah">
-                  </div>
-                  <div class="col-md-12">
-                    <label for="inputName5" class="">Jenis Obat</label>
-                    <select name="jenis_obat[]" class="form-select mb-2">
-                      <option value="Jadi">Jadi</option>
-                      <!-- <option value="Jadi">Jadi</option> -->
-                    </select>
-                  </div>
-                  <div class="col-md-12">
-                    <label for="inputCity" class="">Durasi</label>
-                    <div class="input-group mb-3">
-                      <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
-                        aria-describedby="basic-addon2">
-                      <span class="input-group-text" id="basic-addon2">Hari</span>
-                    </div>
-                  </div>
-                </div>
-                <hr>
-              </div>
-              <button class="btn btn-warning add-more2" type="button">
-                <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-              </button>
-              <hr>
-              <div class="after-add-more2"></div>
-              <div class="copy2 invisible" style="display: none;">
-                <br>
-                <div class="control-group2">
-                  <label for="inputName5" class="form-label">Nama Obat</label>
-                  <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                  <select name="nama_obat[]" class="obat-select form-select mb-2" id="selObat1"
-                    aria-label="Default select example">
-                    <option value="">Pilih</option>
-                  </select>
 
-                  <div class="row">
-                    <div class="col-md-6">
-                      <label for="inputName5" class="">Dosis</label>
-                      <div class="input-group">
-                        <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                        <span type="text" style="text-align: center;" class="form-control mb-2"
-                          placeholder="X">X</span>
-                        <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="inputName5" class="">Per</label>
-                      <select id="inputState" name="per_obat[]" class="form-select">
-                        <option>Per Hari</option>
-                        <option>Per Jam</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-md-12">
-                    <label for="">Jumlah Obat</label>
-                    <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
-                      placeholder="jumlah obat">
-                  </div>
-                  <div class="col-md-12">
-                    <label for="inputName5">Petunjuk Pemakaian</label>
-                    <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
-                      placeholder="Masukkan Petunjuk Pemakaian">
-                  </div>
-                  <div class="col-md-12">
-                    <!-- <label for="inputName5">Catatan Interaksi Obat</label> -->
-                    <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
-                      id="inputName5" placeholder="Masukkan Jumlah">
-                  </div>
-                  <div class="col-md-12">
-                    <label for="inputName5">Jenis Obat</label>
-                    <select name="jenis_obat[]" class="form-select mb-2">
-                      <option value="Jadi">Jadi</option>
-                      <!-- <option value="Jadi">Jadi</option> -->
-                    </select>
-                  </div>
-
-                  <div class="col-md-12">
-                    <label for="inputCity">Durasi</label>
-                    <div class="input-group mb-3">
-                      <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi"
-                        aria-describedby="basic-addon2">
-                      <span class="input-group-text" id="basic-addon2">Hari</span>
-                    </div>
-                  </div>
-                  <button class="btn btn-danger remove2" type="button"><i
-                      class="glyphicon glyphicon-remove"></i> Batal</button>
-                  <button class="btn btn-warning"
-                    onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
-                    <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                  </button>
-                  <hr>
-                </div>
-              </div>
-
-              <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
-              <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-              <input type="hidden" class="form-control" id="inputName5" name="id"
-                value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <input type="submit" class="btn btn-primary" name="saveobnew" value="Save changes">
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script type="text/javascript">
-    $(document).ready(function() {
-      $(".add-more2").click(function() {
-        var html = $(".copy2").html();
-        $(".after-add-more2").after(html);
-      });
-
-      // saat tombol remove dklik control group akan dihapus 
-      $("body").on("click", ".remove2", function() {
-        $(this).parents(".control-group2").remove();
-      });
-    });
-  </script>
-  <!-- end -->
-
-  <!-- Add Data Modal Obat Racik -->
-  <div class="modal  fade" role="dialog" id="exampleModal2" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <form method="post" enctype="multipart/form-data">
-              <div class="control-group after-add-more">
-                <!-- <div class="modal-body"> -->
-                <div class="row">
-                  <div class="col-md-12">
-                    <input hidden type="text" id="jenis2" name="jenis" class="form-control">
-                    <label for="inputName5" class="form-label">Nama Obat</label><br>
-                    <select name="nama_obat[]" class="obat-select form-control w-100" style="width:100%;"
-                      id="selObat1" aria-label="Default select example">
-                      <option value="">Pilih</option>
-                    </select>
-                  </div>
-
-                  <script></script>
-                  <div class="col-md-12" style="margin-top:20px">
-                    <label for="">Jumlah Obat</label>
-                    <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
-                      placeholder="jumlah obat">
-                  </div>
-                </div>
-              </div>
-              <button class="btn btn-warning add-more" type="button">
-                <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-              </button>
-              <hr>
-              <div class="copy invisible" style="display: none;">
-                <br>
-                <div class="control-group">
-                  <label for="inputName5" class="form-label">Nama Obat</label>
-                  <select name="nama_obat[]" class="obat-select form-control " id="selObat1"
-                    aria-label="Default select example">
-                    <option value="">Pilih</option>
-                  </select>
-                  <div class="col-md-12" style="margin-top:20px">
-                    <label for="">Jumlah Obat</label>
-                    <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
-                      placeholder="jumlah obat">
-                  </div>
-                  <br>
-                  <button class="btn btn-danger remove" type="button"><i
-                      class="glyphicon glyphicon-remove"></i> Batal</button>
-                  <hr>
-                </div>
-              </div>
-              <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
-                <input type="text" name="catatan_obat[]" class="form-control" id="inputName5"
-                  placeholder="Masukkan Jumlah">
-              </div>
-              <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
-                <label for="inputName5" class="form-label">Jenis Obat</label>
-                <select name="jenis_obat[]" class="form-control">
-                  <option value="Racik">Racik</option>
-                  <!-- <option value="Jadi">Jadi</option> -->
-                </select>
-              </div>
-              <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                <label for="inputName5" class="form-label">Racik Ke - </label>
-                <input type="number" name="racik[]" class="form-control" id="inputName5"
-                  placeholder="Masukkan racik">
-              </div>
-              <label for="inputName5" class="form-label">Dosis</label>
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="input-group mb-6">
-                    <input type="text" class="form-control" id="dosis1_obat[]" name="dosis1_obat">
-                    <input type="text" style="text-align: center;" class="form-control" placeholder="X">
-                    <input type="text" class="form-control" id="dosis2_obat[]" name="dosis2_obat">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <select id="inputState" name="per_obat[]" class="form-control">
-                    <option>Per Hari</option>
-                    <option>Per Jam</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-12" style="margin-top:20px">
-                <label for="inputCity" class="form-label">Durasi</label>
-                <div class="input-group mb-3">
-                  <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
-                    aria-describedby="basic-addon2">
-                  <span class="input-group-text" id="basic-addon2">Hari</span>
-                </div>
-              </div>
-              <div class="col-md-12" style="margin-top:10px">
-                <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
-                <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5"
-                  placeholder="Masukkan Petunjuk Pemakaian">
-              </div>
-              <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script type="text/javascript">
-    $(document).ready(function() {
-      $(".add-more").click(function() {
-        var html = $(".copy").html();
-        $(".after-add-more").after(html);
-      });
-      // saat tombol remove dklik control group akan dihapus 
-      $("body").on("click", ".remove", function() {
-        $(this).parents(".control-group").remove();
-      });
-    });
-  </script>
-  <!-- end -->
   <!-- End #main -->
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 </body>
@@ -1748,6 +1290,27 @@ if (isset($_POST['addRetur'])) {
         toolbar: [
           'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
         ]
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    ClassicEditor
+      .create(document.querySelector('#request_obat'), {
+        ckfinder: {
+          uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
+        },
+        toolbar: [
+          'bulletedList', 'numberedList', '|', 'bold', 'italic', '|', 'undo', 'redo'
+        ]
+      })
+      .then(editor => {
+        // Auto focus pada editor saat modal dibuka
+        const modal = document.getElementById('ajukanObat');
+        if (modal) {
+          modal.addEventListener('shown.bs.modal', function() {
+            editor.focus();
+          });
+        }
       })
       .catch(error => {
         console.error(error);
