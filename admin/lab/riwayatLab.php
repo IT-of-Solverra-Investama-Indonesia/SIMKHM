@@ -27,10 +27,21 @@
                             <td><?= $riwayat['tgl_inap'] ?></td>
                             <td><?= $riwayat['tgl_hasil'] ?></td>
                             <td>
+                                <?php if ($riwayat['id_inap'] != '0') { ?>
+                                    <a href="../lab/printlabinap.php?id=<?= $riwayat['id_inap'] ?>&tgl=<?= date('Y-m-d', strtotime($riwayat['tgl_inap'])) ?>" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
 
-                                <a href="../lab/printlabinap.php?id=<?= $riwayat['id_inap'] ?>&tgl=<?= date('Y-m-d', strtotime($riwayat['tgl_inap'])) ?>" target="_blank" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+
+                                <?php } else if ($riwayat['id_lab_h'] != '0') { ?>
+                                    <a href="../lab/printlab.php?id=<?= $riwayat['id_lab_h'] ?>" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                <?php } else { ?>
+                                    <a href="../lab/printlabigd.php?id=<?= $riwayat['id_igd'] ?>&tgl=<?= date('Y-m-d', strtotime($riwayat['tgl_hasil'])) ?>" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                <?php } ?>
                             </td>
                             <!-- <td><?= $riwayat['pasien'] ?></td> -->
                         </tr>
