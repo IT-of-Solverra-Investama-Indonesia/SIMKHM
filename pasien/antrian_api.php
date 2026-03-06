@@ -601,8 +601,8 @@ if (!isset($_POST['jenis'])) {
         } elseif ($_SESSION['shift'] == 'Malam') {
             $sif = 'malam';
         }
-
-        $whereShiftCondition = "AND tgltab.shift='$sif'";
+    
+        $whereShiftCondition = " AND tgltab.shift='$sif'";
     }
     $query = "SELECT kode, urut, ket FROM tgltab WHERE NOT EXISTS(SELECT antrian FROM registrasi_rawat 
     WHERE registrasi_rawat.kode = tgltab.kode) 
