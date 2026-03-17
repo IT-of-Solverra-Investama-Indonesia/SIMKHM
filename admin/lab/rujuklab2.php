@@ -296,9 +296,30 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_ass
         $biaya = $_POST['biaya'];
 
 
+        $getIgdCheck = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE igd_id = '$_GET[id]' ")->fetch_assoc();
+        $updateIdLab = "";
+        if ($getIgdCheck['jum'] != 0) {
+          $updateIdLab .= "id_lab = '$getIgdCheck[registrasi_id]',";
+          $getRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$getIgdCheck[registrasi_id]'")->fetch_assoc();
+          $getBiayaRawat = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis='$getRegistrasi[idrawat]'")->fetch_assoc();
+
+          $plusBiaya = 0;
+          $plusLab = "";
+          for ($j = 0; $j < count($_POST['tipe_lab']); $j++) {
+            $plusBiaya += $biaya[$j];
+            $plusLab .= $tipe_lab[$j] . ', ';
+          }
+
+          $biaya_lab = intval($getBiayaRawat['biaya_lab']) + intval($plusBiaya);
+          $periksa_lab = $getBiayaRawat['periksa_lab'] . $plusLab;
+
+          $koneksi->query("UPDATE biaya_rawat SET biaya_lab = '$biaya_lab', periksa_lab = '$periksa_lab' WHERE idregis = '$getRegistrasi[idrawat]'");
+        }
+
+
 
         $jumlahFile = count($_POST['tipe_lab']);
-
+        $sum = 0;
         for ($i = 0; $i < $jumlahFile; $i++) {
 
           foreach ($_POST['pasienlab'] as $value3) {
@@ -308,11 +329,12 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_ass
                 // foreach ($_POST['register_lab'] as $value6){
                 // foreach ($_POST['alamat_lab'] as $value7){
                 // foreach ($_POST['dokter_lab'] as $value8){
-
-                $koneksi->query("INSERT INTO lab SET
+                $sum += $biaya[$i];
+                $koneksi->query(query: "INSERT INTO lab SET
               tipe_lab    = '$tipe_lab[$i]',
               pasienlab   = '$value3',
               normlab   = '$value4',
+              $updateIdLab
               id_lab_igd   = '$value5',
               -- umur_lab   = '$value9',
               -- register_lab   = '$value6',
@@ -325,6 +347,17 @@ $p = $koneksi->query("SELECT * FROM pasien WHERE no_rm='$_GET[rm]';")->fetch_ass
             }
           }
         }
+
+        $periksa = implode(" + ", $tipe_lab);
+        $koneksi->query("INSERT igddetail SET 
+          id='$_GET[id]',
+          tgl='" . date('Y-m-d') . "',
+          biaya='" . $periksa . "',
+          besaran='$sum',
+          ket='Lab IGD',
+          petugas='" . $_SESSION['admin']['namalengkap'] . "',
+          shiftinap = '" . $_SESSION['shift'] . "'
+        ");
         echo "<div class='alert alert-success'>Data Tersimpan</div>";
         echo "<meta http-equiv='refresh' content='1;url=index.php?halaman=daftarlabigd'>";
       }
