@@ -1,6 +1,23 @@
 <?php
 error_reporting(0);
 
+// Mode API - Return JSON untuk API
+if (isset($_GET['api']) && $_GET['api'] === 'get_icd') {
+  header('Content-Type: application/json');
+  include '../dist/function.php';
+  $getICD = $koneksi->query("SELECT code, name_id FROM icds ORDER BY code ASC");
+  $data = [];
+  foreach ($getICD as $icd) {
+    $data[] = [
+      'code' => $icd['code'],
+      'name' => $icd['name_id'],
+      'full' => $icd['code'] . ' ' . $icd['name_id']
+    ];
+  }
+  echo json_encode($data);
+  exit;
+}
+
 $username = $_SESSION['admin']['username'];
 $level = $_SESSION['admin']['level'];
 $shift = $_SESSION['shift'];
@@ -23,18 +40,50 @@ $pecah = $pasien->fetch_assoc();
   <style>
     .hidden {
       display: hidden;
-      max-height: 1px;
+      max-height: 0.1px;
       overflow: hidden;
     }
+
+    .diagnosis-item {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+
+    .diagnosis-item:hover {
+      background-color: #e9ecef;
+    }
+
+    /* Select2 custom styling */
+    .select2-container--default .select2-selection--single {
+      height: 38px;
+      padding: 6px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 24px;
+      padding-left: 0;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 36px;
+    }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-  <script rel="javascript" type="text/javascript" href="js/jquery-1.11.3.min.js"></script>
+
+  <!-- jQuery (Load only once) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   <!-- Select2 JS -->
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
 </head>
 
@@ -118,7 +167,7 @@ $pecah = $pasien->fetch_assoc();
                 </div>
                 <div class="col-md-6" style="margin-top:10px;">
                   <label for="inputName5" class="form-label">Jam Masuk</label>
-                  <input type="time" class="form-control" name="jam_masuk" id="inputName5" value="<?php echo $igd['jam_masuk'] ?>" placeholder="Nama lengkap sesuai dengan kartu identitas">
+                  <input type="time" class="form-control" name="jam_masuk" id="inputName5" value="<?php echo $igd['jam_masuk'] == '00:00:00' ? date('H:i:s') : $igd['jam_masuk'] ?>" placeholder="Nama lengkap sesuai dengan kartu identitas">
                 </div>
                 <div class="col-4" style="margin-top:20px;">
                   <label for="inputName5" class="form-label">Kendaraan Kedatangan </label>
@@ -447,688 +496,660 @@ $pecah = $pasien->fetch_assoc();
                   <input type="text" name="perawat" readonly id="" class="form-control" value="<?= $username ?>">
                 </div>
 
-                <?php if ($level == 'dokter' or $level == 'sup') { ?>
-                  <div style="margin-bottom:2px; margin-top:30px">
-                    <hr>
-                    <h5 class="card-title">Asesmen Medis</h5>
-                  </div>
-                  <div class="col-12" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Subjektif</label>
-                    <textarea name="sub" id="" style="width:100%; height: 150px" class="form-control" value="<?php echo $igd['sub'] ?>"><?php echo $igd['sub'] ?></textarea>
-                  </div>
-                  <div class="col-12" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Objektif</label>
-                    <?php
-                    $getPemeriksaanFisik = $koneksi->query("SELECT *, COUNT(*) AS jumData FROM pemeriksaan_fisik_igd WHERE id_igd = '$_GET[id]' AND norm = '$igd[no_rm]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
-                    ?>
-                    <h5 class=""><b>Sistem Saraf</b></h5>
-                    <label for="" class="">GCS</label>
-                    <div class="row">
-                      <div class="col-4">
-                        <label>Eye</label>
-                        <input type="text" class="form-control" name="gcs_e" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['gcs_e'] : '4' ?>" placeholder="E">
-                      </div>
-                      <div class="col-4">
-                        <label>Verbal</label>
-                        <input type="text" class="form-control" name="gcs_v" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['gcs_v'] : '5' ?>" placeholder="V">
-                      </div>
-                      <div class="col-4">
-                        <label>Motorik</label>
-                        <input type="text" class="form-control" name="gcs_m" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['gcs_m'] : '6' ?>" placeholder="M">
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rangsangan_meninggal'] == '+' ? 'checked' : '') : '' ?> name="rangsangan_meninggal" id="">
-                          <label class="form-check-label" for="">
-                            Rangsangan Meninggal
-                          </label>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['refleks_fisiologis1'] == '+' ? 'checked' : '') : 'checked' ?> name="refleks_fisiologis1" id="">
-                          <label class="form-check-label" for="">
-                            Refleks Fisiologis 1
-                          </label>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['refleks_fisiologis2'] == '+' ? 'checked' : '') : 'checked' ?> name="refleks_fisiologis2" id="">
-                          <label class="form-check-label" for="">
-                            Refleks Fisiologis 2
-                          </label>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['refleks_patologis'] == '+' ? 'checked' : '') : '' ?> name="refleks_patologis" id="">
-                          <label class="form-check-label" for="">
-                            Refleks Patologis
-                          </label>
-                        </div>
-                      </div>
+                <div style="margin-bottom:2px; margin-top:30px">
+                  <hr>
+                  <h5 class="card-title">Asesmen Medis</h5>
+                </div>
+                <div class="col-12" style="margin-top:5px;">
+                  <label for="inputName5" class="form-label">Subjektif</label>
+                  <textarea name="sub" id="" style="width:100%; height: 150px" class="form-control" value="<?php echo $igd['sub'] ?>" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>><?php echo $igd['sub'] ?></textarea>
+                </div>
+                <div class="col-12" style="margin-top:5px;">
+                  <label for="inputName5" class="form-label">Objektif</label>
+                  <?php
+                  $getPemeriksaanFisik = $koneksi->query("SELECT *, COUNT(*) AS jumData FROM pemeriksaan_fisik_igd WHERE id_igd = '$_GET[id]' AND norm = '$igd[no_rm]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                  ?>
+                  <h5 class=""><b>Sistem Saraf</b></h5>
+                  <label for="" class="">GCS</label>
+                  <div class="row">
+                    <div class="col-4">
+                      <label>Eye</label>
+                      <input type="text" class="form-control" name="gcs_e" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['gcs_e'] : '4' ?>" placeholder="E" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
                     </div>
-                    <br>
-                    <h5 class=""><b>Sistem Pencernaan</b></h5>
-                    <div class="row">
-                      <div class="col-6">
-                        <label for="" class="">Flat</label>
-                        <select name="flat" id="" class="form-select">
-                          <option value="flat" selected>flat</option>
-                          <option value="cembung">cembung</option>
-                        </select>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="">H/L</label>
-                        <select name="hl" class="form-select">
-                          <option value="membesar" selected>membesar</option>
-                          <option value="tidak membesar">tidak membesar</option>
-                        </select>
-                      </div>
-                      <div class="col-4">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['assistos'] == '+' ? 'checked' : '') : '' ?> name="assistos" id="">
-                          <label class="form-check-label" for="">
-                            Ascites
-                          </label>
-                        </div>
-                      </div>
-                      <div class="col-4">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['thympani'] == '+' ? 'checked' : '') : 'checked' ?> name="thympani" id="">
-                          <label class="form-check-label" for="">
-                            Thympani
-                          </label>
-                        </div>
-                      </div>
-                      <div class="col-4">
-                        <div class="form-check mt-2">
-                          <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['soepel'] == '+' ? 'checked' : '') : 'checked' ?> name="soepel" id="">
-                          <label class="form-check-label" for="">
-                            Soefl
-                          </label>
-                        </div>
-                      </div>
-                      <div class="col-md-5">
-                        <label for="" class="">NTF</label>
-                        <table class="">
-                          <thead class="">
-                            <tr>
-                              <th></th>
-                              <th></th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody class="">
-                            <tr>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_atas_kiri'] == '+' ? 'checked' : '') : '' ?> name="ntf_atas_kiri">
-                                  Atas kiri
-                                </label>
-                              </td>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_atas'] == '+' ? 'checked' : '') : '' ?> name="ntf_atas">
-                                  Atas
-                                </label>
-                              </td>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_atas_kanan'] == '+' ? 'checked' : '') : '' ?> name="ntf_atas_kanan">
-                                  Atas kanan
-                                </label>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_tengah_kiri'] == '+' ? 'checked' : '') : '' ?> name="ntf_tengah_kiri">
-                                  Tengah kiri
-                                </label>
-                              </td>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_tengah'] == '+' ? 'checked' : '') : '' ?> name="ntf_tengah">
-                                  Tengah
-                                </label>
-                              </td>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_tengah_kanan'] == '+' ? 'checked' : '') : '' ?> name="ntf_tengah_kanan">
-                                  Tengah kanan
-                                </label>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_bawah_kiri'] == '+' ? 'checked' : '') : '' ?> name="ntf_bawah_kiri">
-                                  Bawah kiri
-                                </label>
-                              </td>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_bawah'] == '+' ? 'checked' : '') : '' ?> name="ntf_bawah">
-                                  Bawah
-                                </label>
-                              </td>
-                              <td>
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_bawah_kanan'] == '+' ? 'checked' : '') : '' ?> name="ntf_bawah_kanan">
-                                  Bawah kanan
-                                </label>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="col-md-7">
-                        <br>
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['bu'] == '+' ? 'checked' : '') : 'checked' ?> name="bu">
-                          BU
-                        </label>
-                        <input type="text" class="form-control" name="bu_komen" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['bu_komen'] : '' ?>" placeholder="BU Keterangan">
-                      </div>
-
+                    <div class="col-4">
+                      <label>Verbal</label>
+                      <input type="text" class="form-control" name="gcs_v" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['gcs_v'] : '5' ?>" placeholder="V" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
                     </div>
-                    <br>
-                    <h5 class=""><b>Sistem Penglihatan</b></h5>
-                    <div class="row">
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['anemis_kiri'] == '+' ? 'checked' : '') : '' ?> name="anemis_kiri">
-                          Konjungtiva Anemis Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['anemis_kanan'] == '+' ? 'checked' : '') : '' ?> name="anemis_kanan">
-                          Konjungtiva Anemis Kanan
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ikterik_kiri'] == '+' ? 'checked' : '') : '' ?> name="ikterik_kiri">
-                          Sklera Ikterik Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ikterik_kanan'] == '+' ? 'checked' : '') : '' ?> name="ikterik_kanan">
-                          Sklera Ikterik Kanan
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rcl_kiri'] == '+' ? 'checked' : '') : 'checked' ?> name="rcl_kiri">
-                          RCL Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rcl_kanan'] == '+' ? 'checked' : '') : 'checked' ?> name="rcl_kanan">
-                          RCL Kanan
-                        </label>
-                      </div>
-                      <div class="col-12">
-                        <label for="" class="mt-2">Diameter Pupil</label>
-                        <div class="row">
-                          <div class="col-6">
-                            <input type="text" class="form-control" name="pupil_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['pupil_kiri'] : '' ?>" placeholder="Pupil Kiri">
-                          </div>
-                          <div class="col-6">
-                            <input type="text" class="form-control" name="pupil_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['pupil_kanan'] : '' ?>" placeholder="Pupil Kanan">
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-12">
-                        <label for="" class="mt-2">Visus</label>
-                        <div class="row">
-                          <div class="col-6">
-                            <input type="text" class="form-control" name="visus_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['visus_kiri'] : '6/6' ?>" placeholder="Visus Kiri">
-                          </div>
-                          <div class="col-6">
-                            <input type="text" class="form-control" name="visus_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['visus_kanan'] : '6/6' ?>" placeholder="Visus Kanan">
-                          </div>
-                        </div>
-                      </div>
+                    <div class="col-4">
+                      <label>Motorik</label>
+                      <input type="text" class="form-control" name="gcs_m" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['gcs_m'] : '6' ?>" placeholder="M" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
                     </div>
-                    <br>
-                    <h5 class=""><b>Sistem Pernafasan</b></h5>
-                    <div class="row">
-                      <div class="col-6">
-                        <label for="" class="">Torax</label>
-                        <select name="torax" id="" class="form-select">
-                          <option value="Simetris" selected>Simetris</option>
-                          <option value="Tidak Simetris">Tidak Simetris</option>
-                        </select>
-                      </div>
-                      <div class="col-6">
-                        <br>
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['retraksi'] == '+' ? 'checked' : '') : '' ?> name="retraksi">
-                          Retraksi
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['vesikuler_kiri'] == '+' ? 'checked' : '') : '' ?> name="vesikuler_kiri">
-                          Vesikuler Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['vesikuler_kanan'] == '+' ? 'checked' : '') : '' ?> name="vesikuler_kanan">
-                          Vesikuler Kanan
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['wheezing_kiri'] == '+' ? 'checked' : '') : '' ?> name="wheezing_kiri">
-                          Wheezing Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['wheezing_kanan'] == '+' ? 'checked' : '') : '' ?> name="wheezing_kanan">
-                          Wheezing Kanan
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rongki_kiri'] == '+' ? 'checked' : '') : '' ?> name="rongki_kiri">
-                          Rongki Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rongki_kanan'] == '+' ? 'checked' : '') : '' ?> name="rongki_kanan">
-                          Rongki Kanan
+                    <div class="col-md-3">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rangsangan_meninggal'] == '+' ? 'checked' : '') : '' ?> name="rangsangan_meninggal" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Rangsangan Meninggal
                         </label>
                       </div>
                     </div>
-                    <br>
-                    <h5 class=""><b>Sistem Jantung</b></h5>
-                    <div class="row">
-                      <div class="col-md-12">
-                        <label for="" class="">S1 S2 Tunggal</label>
-                        <select name="s1s2" id="" class="form-select">
-                          <option value="reguler" selected>reguler</option>
-                          <option value="ireguler">ireguler</option>
-                        </select>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['murmur'] == '+' ? 'checked' : '') : '' ?> name="murmur">
-                          Murmur
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['golop'] == '+' ? 'checked' : '') : '' ?> name="golop">
-                          Gallop
+                    <div class="col-md-3">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['refleks_fisiologis1'] == '+' ? 'checked' : '') : 'checked' ?> name="refleks_fisiologis1" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Refleks Fisiologis 1
                         </label>
                       </div>
                     </div>
-                    <br>
-                    <h5 class=""><b>THT</b></h5>
-                    <div class="row">
-                      <h6 class=""><b class="">Hidung</b></h6>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['nch_kiri'] == '+' ? 'checked' : '') : '' ?> name="nch_kiri">
-                          NCH Kirim
+                    <div class="col-md-3">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['refleks_fisiologis2'] == '+' ? 'checked' : '') : 'checked' ?> name="refleks_fisiologis2" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Refleks Fisiologis 2
                         </label>
                       </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['nch_kanan'] == '+' ? 'checked' : '') : '' ?> name="nch_kanan">
-                          NCH Kanan
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['refleks_patologis'] == '+' ? 'checked' : '') : '' ?> name="refleks_patologis" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Refleks Patologis
                         </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['polip_kiri'] == '+' ? 'checked' : '') : '' ?> name="polip_kiri">
-                          Polip Kirim
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['polip_kanan'] == '+' ? 'checked' : '') : '' ?> name="polip_kanan">
-                          Polip Kanan
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['conca_kiri'] == '+' ? 'checked' : '') : '' ?> name="conca_kiri">
-                          Conca Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['conca_kanan'] == '+' ? 'checked' : '') : '' ?> name="conca_kanan">
-                          Conca Kanan
-                        </label>
-                      </div>
-                      <h6 class="mt-2"><b class="">Tenggorokan</b></h6>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['faring_hipertermis'] == '+' ? 'checked' : '') : '' ?> name="faring_hipertermis">
-                          Faring Hiperemis
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['halitosis'] == '+' ? 'checked' : '') : '' ?> name="halitosis">
-                          Halitosis
-                        </label>
-                      </div>
-                      <div class="col-md-12">
-                        <label for="" class="">Pembesaran Tonsil</label>
-                        <select name="pembesaran_tonsil" id="" class="form-select">
-                          <option value="T0" class="">T0</option>
-                          <option value="T1" selected class="">T1</option>
-                          <option value="T2" class="">T2</option>
-                          <option value="T3" class="">T3</option>
-                          <option value="T4" class="">T4</option>
-                        </select>
-                      </div>
-                      <h6 class=" mt-2"><b class="">Telinga</b></h6>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['serumin_kiri'] == '+' ? 'checked' : '') : '' ?> name="serumin_kiri">
-                          Serumen Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['serumin_kanan'] == '+' ? 'checked' : '') : '' ?> name="serumin_kanan">
-                          Serumen Kanan
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" checked class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['typani_intak_kiri'] == '+' ? 'checked' : '') : '' ?> name="typani_intak_kiri">
-                          Tympani Intak Kiri
-                        </label>
-                      </div>
-                      <div class="col-6">
-                        <label for="" class="form-check">
-                          <input type="checkbox" checked class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['typani_intak_kanan'] == '+' ? 'checked' : '') : '' ?> name="typani_intak_kanan">
-                          Tympani Intak Kanan
-                        </label>
-                      </div>
-                      <h6 class=" mt-2"><b class="">Lain Lain</b></h6>
-                      <div class="col-md-12">
-                        <label for="" class="">Pembesaran Kelenjar Getah Bening</label>
-                        <input type="text" name="pembesaran_getah_bening" class="form-control">
-                      </div>
-                      <h6 class=" mt-2"><b class="">Ekstermitas</b></h6>
-                      <div class="col-md-6">
-                        <table class="table-bordered mb-3">
-                          <thead class="">
-                            <tr class="">
-                              <th class=""></th>
-                              <th class=""></th>
-                            </tr>
-                          </thead>
-                          <tbody class="">
-                            <tr class="">
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_atas_kiri'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_atas_kiri">
-                                  Akral Hangat Atas Kiri
-                                </label>
-                              </td>
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_atas_kanan'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_atas_kanan">
-                                  Akral Hangat Atas Kanan
-                                </label>
-                              </td>
-                            </tr>
-                            <tr class="">
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_bawah_kiri'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_bawah_kiri">
-                                  Akral Hangat Bawah Kiri
-                                </label>
-                              </td>
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_bawah_kanan'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_bawah_kanan">
-                                  Akral Hangat Bawah Kanan
-                                </label>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="col-md-6">
-                        <table class="table-bordered w-100">
-                          <thead class="">
-                            <tr class="">
-                              <th class=""></th>
-                              <th class=""></th>
-                            </tr>
-                          </thead>
-                          <tbody class="">
-                            <tr class="">
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_atas_kiri'] == '+' ? 'checked' : '') : '' ?> name="oe_atas_kiri">
-                                  OE Atas Kiri
-                                </label>
-                              </td>
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_atas_kanan'] == '+' ? 'checked' : '') : '' ?> name="oe_atas_kanan">
-                                  OE Atas Kanan
-                                </label>
-                              </td>
-                            </tr>
-                            <tr class="">
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_bawah_kiri'] == '+' ? 'checked' : '') : '' ?> name="oe_bawah_kiri">
-                                  OE Bawah Kiri
-                                </label>
-                              </td>
-                              <td class="">
-                                <label for="" class="form-check">
-                                  <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_bawah_kanan'] == '+' ? 'checked' : '') : '' ?> name="oe_bawah_kanan">
-                                  OE Bawah Kanan
-                                </label>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="col-12">
-                        <label for="" class="mt-3">CRT</label>
-                        <input type="text" class="form-control" value="<= 2" name="crt">
-                      </div>
-                      <div class="col-md-12">
-                        <label for="" class="mt-3">MOTORIK</label>
-                        <table class="table-bordered">
-                          <thead class="">
-                            <tr class="">
-                              <th class=""></th>
-                              <th class=""></th>
-                            </tr>
-                          </thead>
-                          <tbody class="">
-                            <tr class="">
-                              <td class="">
-                                <input type="text" class="form-control" name="motorik_atas_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_atas_kiri'] : '5' ?>" style="max-width: 80%;">
-                              </td>
-                              <td class="">
-                                <input type="text" class="form-control" name="motorik_atas_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_atas_kanan'] : '5' ?>" style="max-width: 80%;">
-                              </td>
-                            </tr>
-                            <tr class="">
-                              <td class="">
-                                <input type="text" class="form-control" name="motorik_bawah_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_bawah_kiri'] : '5' ?>" style="max-width: 80%;">
-                              </td>
-                              <td class="">
-                                <input type="text" class="form-control" name="motorik_bawah_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_bawah_kanan'] : '5' ?>" style="max-width: 80%;">
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
                       </div>
                     </div>
                   </div>
+                  <br>
+                  <h5 class=""><b>Sistem Penglihatan</b></h5>
+                  <div class="row">
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['anemis_kiri'] == '+' ? 'checked' : '') : '' ?> name="anemis_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Konjungtiva Anemis Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['anemis_kanan'] == '+' ? 'checked' : '') : '' ?> name="anemis_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Konjungtiva Anemis Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ikterik_kiri'] == '+' ? 'checked' : '') : '' ?> name="ikterik_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Sklera Ikterik Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ikterik_kanan'] == '+' ? 'checked' : '') : '' ?> name="ikterik_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Sklera Ikterik Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rcl_kiri'] == '+' ? 'checked' : '') : 'checked' ?> name="rcl_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        RCL Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rcl_kanan'] == '+' ? 'checked' : '') : 'checked' ?> name="rcl_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        RCL Kanan
+                      </label>
+                    </div>
+                    <div class="col-12">
+                      <label for="" class="mt-2">Diameter Pupil</label>
+                      <div class="row">
+                        <div class="col-6">
+                          <input type="text" class="form-control" name="pupil_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['pupil_kiri'] : '' ?>" placeholder="Pupil Kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                        </div>
+                        <div class="col-6">
+                          <input type="text" class="form-control" name="pupil_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['pupil_kanan'] : '' ?>" placeholder="Pupil Kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <label for="" class="mt-2">Visus</label>
+                      <div class="row">
+                        <div class="col-6">
+                          <input type="text" class="form-control" name="visus_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['visus_kiri'] : '6/6' ?>" placeholder="Visus Kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                        </div>
+                        <div class="col-6">
+                          <input type="text" class="form-control" name="visus_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['visus_kanan'] : '6/6' ?>" placeholder="Visus Kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <br>
+                  <h5 class=""><b>THT</b></h5>
+                  <div class="row">
+                    <h6 class=""><b class="">Hidung</b></h6>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['nch_kiri'] == '+' ? 'checked' : '') : '' ?> name="nch_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        NCH Kirim
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['nch_kanan'] == '+' ? 'checked' : '') : '' ?> name="nch_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        NCH Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['polip_kiri'] == '+' ? 'checked' : '') : '' ?> name="polip_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Polip Kirim
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['polip_kanan'] == '+' ? 'checked' : '') : '' ?> name="polip_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Polip Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['conca_kiri'] == '+' ? 'checked' : '') : '' ?> name="conca_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Conca Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['conca_kanan'] == '+' ? 'checked' : '') : '' ?> name="conca_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Conca Kanan
+                      </label>
+                    </div>
+                    <h6 class="mt-2"><b class="">Tenggorokan</b></h6>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['faring_hipertermis'] == '+' ? 'checked' : '') : '' ?> name="faring_hipertermis" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Faring Hiperemis
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['halitosis'] == '+' ? 'checked' : '') : '' ?> name="halitosis" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Halitosis
+                      </label>
+                    </div>
+                    <div class="col-md-12">
+                      <label for="" class="">Pembesaran Tonsil</label>
+                      <select name="pembesaran_tonsil" id="" class="form-select" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <option value="T0" class="">T0</option>
+                        <option value="T1" selected class="">T1</option>
+                        <option value="T2" class="">T2</option>
+                        <option value="T3" class="">T3</option>
+                        <option value="T4" class="">T4</option>
+                      </select>
+                    </div>
+                    <h6 class=" mt-2"><b class="">Telinga</b></h6>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['serumin_kiri'] == '+' ? 'checked' : '') : '' ?> name="serumin_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Serumen Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['serumin_kanan'] == '+' ? 'checked' : '') : '' ?> name="serumin_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Serumen Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" checked class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['typani_intak_kiri'] == '+' ? 'checked' : '') : '' ?> name="typani_intak_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Tympani Intak Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" checked class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['typani_intak_kanan'] == '+' ? 'checked' : '') : '' ?> name="typani_intak_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Tympani Intak Kanan
+                      </label>
+                    </div>
+                    <h6 class=" mt-2"><b class="">Lain Lain</b></h6>
+                    <div class="col-md-12">
+                      <label for="" class="">Pembesaran Kelenjar Getah Bening</label>
+                      <input type="text" name="pembesaran_getah_bening" class="form-control" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                    </div>
+                  </div>
+                  <br>
+                  <h5 class=""><b>Sistem Pernafasan</b></h5>
+                  <div class="row">
+                    <div class="col-6">
+                      <label for="" class="">Torax</label>
+                      <select name="torax" id="" class="form-select" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <option value="Simetris" selected>Simetris</option>
+                        <option value="Tidak Simetris">Tidak Simetris</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <br>
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['retraksi'] == '+' ? 'checked' : '') : '' ?> name="retraksi" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Retraksi
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['vesikuler_kiri'] == '+' ? 'checked' : '') : '' ?> name="vesikuler_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Vesikuler Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['vesikuler_kanan'] == '+' ? 'checked' : '') : '' ?> name="vesikuler_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Vesikuler Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['wheezing_kiri'] == '+' ? 'checked' : '') : '' ?> name="wheezing_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Wheezing Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['wheezing_kanan'] == '+' ? 'checked' : '') : '' ?> name="wheezing_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Wheezing Kanan
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rongki_kiri'] == '+' ? 'checked' : '') : '' ?> name="rongki_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Rongki Kiri
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['rongki_kanan'] == '+' ? 'checked' : '') : '' ?> name="rongki_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Rongki Kanan
+                      </label>
+                    </div>
+                  </div>
+                  <br>
+                  <h5 class=""><b>Sistem Jantung</b></h5>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <label for="" class="">S1 S2 Tunggal</label>
+                      <select name="s1s2" id="" class="form-select" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <option value="reguler" selected>reguler</option>
+                        <option value="ireguler">ireguler</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['murmur'] == '+' ? 'checked' : '') : '' ?> name="murmur" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Murmur
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['golop'] == '+' ? 'checked' : '') : '' ?> name="golop" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        Gallop
+                      </label>
+                    </div>
+                  </div>
+                  <br>
+                  <h5 class=""><b>Sistem Pencernaan</b></h5>
+                  <div class="row">
+                    <div class="col-6">
+                      <label for="" class="">Flat</label>
+                      <select name="flat" id="" class="form-select" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <option value="flat" selected>flat</option>
+                        <option value="cembung">cembung</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <label for="" class="">H/L</label>
+                      <select name="hl" class="form-select" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <option value="membesar">membesar</option>
+                        <option value="tidak membesar" selected>tidak membesar</option>
+                      </select>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['assistos'] == '+' ? 'checked' : '') : '' ?> name="assistos" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Ascites
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['thympani'] == '+' ? 'checked' : '') : 'checked' ?> name="thympani" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Thympani
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['soepel'] == '+' ? 'checked' : '') : 'checked' ?> name="soepel" id="" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="">
+                          Soefl
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-md-5">
+                      <label for="" class="">NTA</label>
+                      <table class="">
+                        <thead class="">
+                          <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody class="">
+                          <tr>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_atas_kiri'] == '+' ? 'checked' : '') : '' ?> name="ntf_atas_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Atas kiri
+                              </label>
+                            </td>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_atas'] == '+' ? 'checked' : '') : '' ?> name="ntf_atas" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Atas
+                              </label>
+                            </td>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_atas_kanan'] == '+' ? 'checked' : '') : '' ?> name="ntf_atas_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Atas kanan
+                              </label>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_tengah_kiri'] == '+' ? 'checked' : '') : '' ?> name="ntf_tengah_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Tengah kiri
+                              </label>
+                            </td>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_tengah'] == '+' ? 'checked' : '') : '' ?> name="ntf_tengah" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Tengah
+                              </label>
+                            </td>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_tengah_kanan'] == '+' ? 'checked' : '') : '' ?> name="ntf_tengah_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Tengah kanan
+                              </label>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_bawah_kiri'] == '+' ? 'checked' : '') : '' ?> name="ntf_bawah_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Bawah kiri
+                              </label>
+                            </td>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_bawah'] == '+' ? 'checked' : '') : '' ?> name="ntf_bawah" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Bawah
+                              </label>
+                            </td>
+                            <td>
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['ntf_bawah_kanan'] == '+' ? 'checked' : '') : '' ?> name="ntf_bawah_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Bawah kanan
+                              </label>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col-md-7">
+                      <br>
+                      <label for="" class="form-check">
+                        <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['bu'] == '+' ? 'checked' : '') : 'checked' ?> name="bu" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                        BU
+                      </label>
+                      <input type="text" class="form-control" name="bu_komen" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['bu_komen'] : '' ?>" placeholder="BU Keterangan" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                    </div>
+                    <h6 class=" mt-2"><b class="">Ekstermitas</b></h6>
+                    <div class="col-md-6">
+                      <table class="table-bordered mb-3">
+                        <thead class="">
+                          <tr class="">
+                            <th class=""></th>
+                            <th class=""></th>
+                          </tr>
+                        </thead>
+                        <tbody class="">
+                          <tr class="">
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_atas_kiri'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_atas_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Akral Hangat Atas Kiri
+                              </label>
+                            </td>
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_atas_kanan'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_atas_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Akral Hangat Atas Kanan
+                              </label>
+                            </td>
+                          </tr>
+                          <tr class="">
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_bawah_kiri'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_bawah_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Akral Hangat Bawah Kiri
+                              </label>
+                            </td>
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['akral_hangat_bawah_kanan'] == '+' ? 'checked' : '') : 'checked' ?> name="akral_hangat_bawah_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                Akral Hangat Bawah Kanan
+                              </label>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col-md-6">
+                      <table class="table-bordered w-100">
+                        <thead class="">
+                          <tr class="">
+                            <th class=""></th>
+                            <th class=""></th>
+                          </tr>
+                        </thead>
+                        <tbody class="">
+                          <tr class="">
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_atas_kiri'] == '+' ? 'checked' : '') : '' ?> name="oe_atas_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                OE Atas Kiri
+                              </label>
+                            </td>
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_atas_kanan'] == '+' ? 'checked' : '') : '' ?> name="oe_atas_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                OE Atas Kanan
+                              </label>
+                            </td>
+                          </tr>
+                          <tr class="">
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_bawah_kiri'] == '+' ? 'checked' : '') : '' ?> name="oe_bawah_kiri" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                OE Bawah Kiri
+                              </label>
+                            </td>
+                            <td class="">
+                              <label for="" class="form-check">
+                                <input type="checkbox" class="form-check-input" value="+" <?= $getPemeriksaanFisik['jumData'] == 1 ? ($getPemeriksaanFisik['oe_bawah_kanan'] == '+' ? 'checked' : '') : '' ?> name="oe_bawah_kanan" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                                OE Bawah Kanan
+                              </label>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col-12">
+                      <label for="" class="mt-3">CRT</label>
+                      <input type="text" class="form-control" value="<= 2" name="crt" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                    </div>
+                    <div class="col-md-12">
+                      <label for="" class="mt-3">MOTORIK</label>
+                      <table class="table-bordered">
+                        <thead class="">
+                          <tr class="">
+                            <th class=""></th>
+                            <th class=""></th>
+                          </tr>
+                        </thead>
+                        <tbody class="">
+                          <tr class="">
+                            <td class="">
+                              <input type="text" class="form-control" name="motorik_atas_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_atas_kiri'] : '5' ?>" style="max-width: 80%;" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                            </td>
+                            <td class="">
+                              <input type="text" class="form-control" name="motorik_atas_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_atas_kanan'] : '5' ?>" style="max-width: 80%;" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                            </td>
+                          </tr>
+                          <tr class="">
+                            <td class="">
+                              <input type="text" class="form-control" name="motorik_bawah_kiri" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_bawah_kiri'] : '5' ?>" style="max-width: 80%;" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                            </td>
+                            <td class="">
+                              <input type="text" class="form-control" name="motorik_bawah_kanan" value="<?= $getPemeriksaanFisik['jumData'] == 1 ? $getPemeriksaanFisik['motorik_bawah_kanan'] : '5' ?>" style="max-width: 80%;" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
 
-                  <div class="col-md-12" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Pemeriksaan Penunjang (Foto)</label>
-                    <input type="file" name="penunjang_foto[]" id="penunjang_foto" class="form-control" accept="image/*" capture="environment" multiple>
-                    <small class="text-muted">Klik untuk membuka kamera atau pilih file. Bisa pilih multiple foto.</small>
+                <div class="col-md-12" style="margin-top:5px;">
+                  <label class="form-label">Pemeriksaan Penunjang (Foto) <span class="badge bg-primary" data-bs-toggle="modal" data-bs-target="#AjukanLab">Ajukan Lab</span></label>
+                  <!-- Modal -->
+                  <div class="modal fade" id="AjukanLab" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <iframe src="index.php?halaman=rujuklab2&id=<?= $igd['idigd'] ?>&rm=<?= $igd['no_rm'] ?>&igd&tgl=<?= $igd['tgl_masuk'] ?>" frameborder="0" width="100%" height="500px"></iframe>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="file" name="penunjang_foto[]" id="penunjang_foto" class="form-control" accept="image/*" capture="environment" multiple <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                  <small class="text-muted">Klik untuk membuka kamera atau pilih file. Bisa pilih multiple foto.</small>
 
-                    <?php
-                    // Tampilkan foto yang sudah ada
-                    if (!empty($igd['penunjang'])) {
-                      $foto_list = json_decode($igd['penunjang'], true);
-                      if (is_array($foto_list) && count($foto_list) > 0) {
-                        echo '<div class="mt-2"><label>Foto yang sudah ada:</label><div class="row">';
-                        foreach ($foto_list as $foto) {
-                          if (file_exists('../igd/pemeriksaan_penunjang/' . $foto)) {
-                            echo '<div class="col-md-3 mb-2">';
-                            echo '<img src="../igd/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-thumbnail" style="max-height: 150px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')"><br>';
-                            echo '<small>' . htmlspecialchars($foto) . '</small>';
-                            echo '<br><a href="?halaman=ubahigd&id=' . $_GET['id'] . '&hapus_foto=' . urlencode($foto) . '" class="btn btn-sm btn-danger mt-1" onclick="return confirm(\'Hapus foto ini?\')">Hapus</a>';
-                            echo '</div>';
-                          }
+                  <?php
+                  // Tampilkan foto yang sudah ada
+                  if (!empty($igd['penunjang'])) {
+                    $foto_list = json_decode($igd['penunjang'], true);
+                    if (is_array($foto_list) && count($foto_list) > 0) {
+                      echo '<div class="mt-2"><label>Foto yang sudah ada:</label><div class="row">';
+                      foreach ($foto_list as $foto) {
+                        if (file_exists('../igd/pemeriksaan_penunjang/' . $foto)) {
+                          echo '<div class="col-md-3 mb-2">';
+                          echo '<img src="../igd/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-thumbnail" style="max-height: 150px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')"><br>';
+                          echo '<small>' . htmlspecialchars($foto) . '</small>';
+                          echo '<br><a href="?halaman=ubahigd&id=' . $_GET['id'] . '&hapus_foto=' . urlencode($foto) . '" class="btn btn-sm btn-danger mt-1" onclick="return confirm(\'Hapus foto ini?\')">Hapus</a>';
+                          echo '</div>';
                         }
-                        echo '</div></div>';
                       }
+                      echo '</div></div>';
                     }
-                    ?>
-                  </div>
+                  }
+                  ?>
+                </div>
 
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Diagnosa Kerja </label>
-                    <input type="text" name="dkerja" id="" class="form-control" value="<?php echo $igd['dkerja'] ?>">
-                  </div>
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Diagnosa Banding </label>
-                    <input type="text" name="dbanding" id="" class="form-control" value="<?php echo $igd['dbanding'] ?>">
-                  </div>
-                  <div class="col-6" style="margin-top:5px; margin-bottom:10px">
-                    <label for="inputName5" class="form-label">Tanggal dan Jam </label>
-                    <input type="datetime-local" name="tgl" id="" class="form-control" value="<?php echo date('Y-m-d H:i:s', strtotime($igd['tgl_masuk'] . date('H:i:s'))) ?>">
-                  </div>
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Dokter Jaga </label>
-                    <input type="text" name="dokter" id="" class="form-control" value="<?= $_SESSION['dokter_rawat'] ?>">
-                  </div>
-                  <div class="col-md-12">
-                    <label for="inputName5" class="form-label">Planning (Selain Obat) </label>
-                    <textarea name="rencana_rawat" id="editor" class="form-control"><?php echo $igd['rencana_rawat'] ?></textarea>
-                  </div>
-                  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-                  <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
-                  <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                      ClassicEditor
-                        .create(document.querySelector('#editor'), {
-                          ckfinder: {
-                            uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
-                          },
-                          toolbar: [
-                            'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
-                          ]
-                        })
-                        .catch(error => {
-                          console.error(error);
-                        });
-                      });    
-                  </script>
-                <?php } else { ?>
-                  <!-- <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Subjektif</label>
-                    <textarea name="sub" id="" style="width:100%; height: 150px" class="form-control" value="<?php echo $igd['sub'] ?>" readonly><?php echo $igd['sub'] ?></textarea>
-                  </div>
-
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Objektif</label>
-                    <textarea name="ob" id="" style="width:100%; height: 150px" class="form-control" value="<?php echo $igd['ob'] ?>" readonly><?php echo $igd['ob'] ?></textarea>
-                  </div>
-
-                  <div class="col-md-12" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Pemeriksaan Penunjang (Foto)</label>
+                <div class="col-12" style="margin-top:5px;">
+                  <label for="inputName5" class="form-label">Diagnosa Kerja </label>
+                  <div id="diagnosisContainer">
                     <?php
-                    // Tampilkan foto di mode readonly
-                    if (!empty($igd['penunjang'])) {
-                      $foto_list = json_decode($igd['penunjang'], true);
-                      if (is_array($foto_list) && count($foto_list) > 0) {
-                        echo '<div class="row">';
-                        foreach ($foto_list as $foto) {
-                          if (file_exists('../igd/pemeriksaan_penunjang/' . $foto)) {
-                            echo '<div class="col-md-3 mb-2">';
-                            echo '<img src="../igd/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-thumbnail" style="max-height: 200px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')"><br>';
-                            echo '<small>' . htmlspecialchars($foto) . '</small>';
-                            echo '</div>';
-                          }
-                        }
-                        echo '</div>';
-                      } else {
-                        echo '<p class="text-muted">Tidak ada foto</p>';
-                      }
-                    } else {
-                      echo '<p class="text-muted">Tidak ada foto</p>';
-                    }
+                    // Split diagnosa kerja by " + " separator jika ada
+                    $dkerja_list = !empty($igd['dkerja']) ? explode(' + ', $igd['dkerja']) : [''];
+                    $icd10_list = !empty($igd['icd10']) ? explode(' + ', $igd['icd10']) : [''];
+
+                    foreach ($dkerja_list as $index => $dkerja_item) :
+                      $icd10_item = isset($icd10_list[$index]) ? $icd10_list[$index] : '';
                     ?>
+                      <div class="diagnosis-item mb-2">
+                        <div class="row g-2">
+                          <div class="col-md-5">
+                            <input type="text" name="dkerja[]" class="form-control" value="<?php echo htmlspecialchars(trim($dkerja_item)) ?>" placeholder="Masukkan diagnosa kerja" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                          </div>
+                          <div class="col-md-6">
+                            <select name="icd_dkerja[]" class="form-select icd-diagnosis-select" data-selected="<?= htmlspecialchars(trim($icd10_item)) ?>" <?= $_SESSION['admin']['level'] == 'igd' ? 'disabled' : '' ?>>
+                              <option value="">Loading...</option>
+                            </select>
+                          </div>
+                          <div class="col-md-1">
+                            <?php if ($_SESSION['admin']['level'] != 'igd') : ?>
+                              <button type="button" class="btn btn-danger btn-remove-diagnosis" onclick="removeDiagnosis(this)">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            <?php endif; ?>
+                          </div>
+                        </div>
+                      </div>
+                    <?php endforeach; ?>
                   </div>
+                  <?php if ($_SESSION['admin']['level'] != 'igd') : ?>
+                    <button type="button" class="btn btn-success btn-sm mt-2" onclick="addDiagnosis()">
+                      <i class="bi bi-plus-circle"></i> Tambah Diagnosa Kerja
+                    </button>
+                  <?php endif; ?>
+                </div>
 
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Diagnosa Kerja </label>
-                    <input type="text" name="dkerja" id="" class="form-control" value="<?php echo $igd['dkerja'] ?>" readonly>
-                  </div>
+                <div class="col-6" style="margin-top:5px;">
+                  <label for="inputName5" class="form-label">Diagnosa Banding </label>
+                  <input type="text" name="dbanding" id="" class="form-control" value="<?php echo $igd['dbanding'] ?>" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                </div>
 
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Diagnosa Banding </label>
-                    <input type="text" name="dbanding" id="" class="form-control" value="<?php echo $igd['dbanding'] ?>" readonly>
-                  </div>
+                <div class="col-6" style="margin-top:5px; margin-bottom:10px">
+                  <label for="inputName5" class="form-label">Tanggal dan Jam </label>
+                  <input type="datetime-local" name="tgl" id="" class="form-control" value="<?php echo date('Y-m-d H:i:s', strtotime($igd['tgl_masuk'] . date('H:i:s'))) ?>" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                </div>
 
-                  <div class="col-md-12" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Planning </label>
-                    <input type="text" name="rencana_rawat" id="" class="form-control" value="<?php echo $igd['rencana_rawat'] ?>" readonly>
-                  </div>
+                <div class="col-6" style="margin-top:5px;">
+                  <label for="inputName5" class="form-label">Dokter Jaga </label>
+                  <input type="text" name="dokter" id="" class="form-control" value="<?= $_SESSION['dokter_rawat'] ?>" <?= $_SESSION['admin']['level'] == 'igd' ? 'readonly' : '' ?>>
+                </div>
 
-                  <div class="col-6" style="margin-top:5px; margin-bottom:10px">
-                    <label for="inputName5" class="form-label">Tanggal dan Jam </label>
-                    <input type="datetime-local" name="tgl" id="" class="form-control" value="<?php echo $igd['tgl'] ?>" readonly>
-                  </div>
+                <div class="col-md-12">
+                  <label for="inputName5" class="form-label">All Planning</label>
+                  <textarea name="rencana_rawat" id="editor" class="form-control"><?php echo !empty($igd['rencana_rawat']) ? $igd['rencana_rawat'] : '<ol><li>&nbsp;</li></ol>' ?></textarea>
+                </div>
 
-                  <div class="col-6" style="margin-top:5px;">
-                    <label for="inputName5" class="form-label">Dokter Jaga </label>
-                    <input type="text" name="dokter" id="" class="form-control" value="<?= $_SESSION['dokter_rawat'] ?>" readonly>
-                  </div> -->
-                <?php } ?>
+                <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+                <script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    ClassicEditor
+                      .create(document.querySelector('#editor'), {
+                        ckfinder: {
+                          uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
+                        },
+                        toolbar: [
+                          'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
+                        ]
+                      })
+                      .catch(error => {
+                        console.error(error);
+                      });
+                  });
+                </script>
 
-                <!-- <div class="col-md-12" style="margin-top:20px;">
-                    <label for="inputName5" class="form-label">Rencana Pemulangan Pasien</label>
-                    <select id="inputState" name="rencana_pemulangan" class="form-select">
-                      <option value="">Pilih</option>
-                      <option value="Pasien lansia">1.Pasien lansia</option>
-                      <option value="Gangguan anggota gerak">2. Gangguan anggota gerak</option>
-                      <option value="Pasien dengan perawatan berkelanjutan atau panjang">3.Pasien dengan perawatan berkelanjutan atau panjang</option>
-                      <option value="Memerlukan bantuan dalam aktivitas sehari-hari">4.Memerlukan bantuan dalam aktivitas sehari-hari</option>
-                      <option value="Tidak masuk kriteria">5.Tidak masuk kriteria</option>
-                    </select>
-                  </div> -->
-                <!-- <div class="col-md-12" style="margin-top:20px;">
-                    <label for="inputName5" class="form-label">Rencana Rawat</label>
-                    <input type="text" class="form-control" id="inputName5" name="rencana_rawat" value="" placeholder="Rencana Perawatan">
-                  </div>
-                  <div class="col-md-12" style="margin-top:20px;">
-                    <label for="inputName5" class="form-label">Instruksi Medik dan Keperawatan</label>
-                    <input type="text" class="form-control" id="inputName5" name="intruksi_medik" value="" placeholder="Intruksi Medis">
-                  </div> -->
                 <script>
                   document.getElementById('pilRujuk').addEventListener('change', function() {
                     var formLain = document.getElementById('rjk');
@@ -1144,12 +1165,103 @@ $pecah = $pasien->fetch_assoc();
                       formLain2.classList.add('hidden');
                     }
                   });
+
+                  // Load ICD10 data dari API
+                  let icdDataGlobal = [];
+
+                  $(document).ready(async function() {
+                    try {
+                      const response = await fetch('../igd/ubahigd.php?api=get_icd');
+                      icdDataGlobal = await response.json();
+
+                      // Initialize semua ICD Diagnosa yang sudah ada
+                      $('.icd-diagnosis-select').each(function() {
+                        const selectedValue = $(this).data('selected');
+                        initializeIcdSelect(this, selectedValue);
+                      });
+
+                    } catch (error) {
+                      console.error('Error loading ICD data:', error);
+                    }
+                  });
+
+                  // Fungsi untuk initialize select ICD dengan Select2
+                  function initializeIcdSelect(selector, selectedValue = '') {
+                    const $select = $(selector);
+
+                    // Clear dan populate
+                    $select.empty();
+                    $select.append('<option value="">Pilih ICD10</option>');
+
+                    icdDataGlobal.forEach(icd => {
+                      const displayText = `${icd.code} - ${icd.name}`;
+                      const option = new Option(displayText, icd.code, false, false);
+                      if (selectedValue && selectedValue === icd.code) {
+                        option.selected = true;
+                      }
+                      $select.append(option);
+                    });
+
+                    // Initialize Select2
+                    $select.select2({
+                      placeholder: 'Pilih ICD10',
+                      allowClear: true,
+                      width: '100%'
+                    });
+
+                    // Set value if exists
+                    if (selectedValue) {
+                      $select.val(selectedValue).trigger('change');
+                    }
+                  }
+
+                  // Function to add new diagnosis input
+                  function addDiagnosis() {
+                    var container = document.getElementById('diagnosisContainer');
+                    var newDiagnosis = document.createElement('div');
+                    newDiagnosis.className = 'diagnosis-item mb-2';
+                    newDiagnosis.innerHTML = `
+                      <div class="row g-2">
+                        <div class="col-md-5">
+                          <input type="text" name="dkerja[]" class="form-control" placeholder="Masukkan diagnosa kerja">
+                        </div>
+                        <div class="col-md-6">
+                          <select name="icd_dkerja[]" class="form-select icd-diagnosis-select">
+                            <option value="">Pilih ICD10</option>
+                          </select>
+                        </div>
+                        <div class="col-md-1">
+                          <button type="button" class="btn btn-danger btn-remove-diagnosis" onclick="removeDiagnosis(this)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                    container.appendChild(newDiagnosis);
+
+                    // Initialize Select2 untuk row baru
+                    const $newSelect = $(container).find('.diagnosis-item:last-child .icd-diagnosis-select');
+                    initializeIcdSelect($newSelect, '');
+                  }
+
+                  // Function to remove diagnosis input
+                  function removeDiagnosis(button) {
+                    var container = document.getElementById('diagnosisContainer');
+                    var diagnosisItems = container.getElementsByClassName('diagnosis-item');
+
+                    // Prevent removing if only one item remains
+                    if (diagnosisItems.length > 1) {
+                      button.closest('.diagnosis-item').remove();
+                    } else {
+                      alert('Minimal harus ada 1 diagnosa kerja');
+                    }
+                  }
                 </script>
 
 
                 <div class="text-center" style="margin-top: 50px; margin-bottom: 80px;">
                   <button type="submit" name="save" class="btn btn-primary">Simpan Dulu</button>
-                  <a href="?halaman=lpo&igd&id=<?= $igd['no_rm'] ?>&idigd=<?= $_GET['id'] ?>&tgl=<?= $igd['tgl_masuk'] ?>&insertObatDokterIgd" class="btn btn-success">Planning(Obat)</a>
+                  <!-- <a href="?halaman=lpo&igd&id=<?= $igd['no_rm'] ?>&idigd=<?= $_GET['id'] ?>&tgl=<?= $igd['tgl_masuk'] ?>&insertObatDokterIgd" class="btn btn-success">Planning(Obat)</a> -->
                 </div>
               </div>
             </div>
@@ -1160,10 +1272,6 @@ $pecah = $pasien->fetch_assoc();
       </div>
     </form><!-- End Multi Columns Form -->
   </main><!-- End #main -->
-
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-
 </body>
 
 </html>
@@ -1305,92 +1413,152 @@ if (isset($_POST['save'])) {
     }
   }
 
-  if ($level == "igd" or $level == "perawat" or $level == "sup") {
-    $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]', tindak_rujuk_keterangan = '$_POST[tindak_rujuk_keterangan]', penunjang='" . mysqli_real_escape_string($koneksi, $penunjang_json) . "', sat_oksigen = '$_POST[sat_oksigen]' WHERE idigd='$_GET[id]' ");
-  } elseif ($level == "dokter") {
-    $koneksi->query("UPDATE igd SET penunjang='" . mysqli_real_escape_string($koneksi, $penunjang_json) . "',dkerja='$_POST[dkerja]', dbanding='$_POST[dbanding]', tgl='$_POST[tgl]', sub='$_POST[sub]', ob='$_POST[ob]', dokter='$_POST[dokter]', rencana_rawat='". $koneksi->real_escape_string($_POST['rencana_rawat'])."' WHERE idigd='$_GET[id]' ");
-
-    // PemeriksaanFisik
-    $gcs_e = htmlspecialchars(isset($_POST['gcs_e']) ? $_POST['gcs_e'] : '');
-    $gcs_v = htmlspecialchars(isset($_POST['gcs_v']) ? $_POST['gcs_v'] : '');
-    $gcs_m = htmlspecialchars(isset($_POST['gcs_m']) ? $_POST['gcs_m'] : '');
-    $rangsangan_meninggal = htmlspecialchars(isset($_POST['rangsangan_meninggal']) ? $_POST['rangsangan_meninggal'] : '-');
-    $refleks_fisiologis1 = htmlspecialchars(isset($_POST['refleks_fisiologis1']) ? $_POST['refleks_fisiologis1'] : '-');
-    $refleks_fisiologis2 = htmlspecialchars(isset($_POST['refleks_fisiologis2']) ? $_POST['refleks_fisiologis2'] : '-');
-    $refleks_patologis = htmlspecialchars(isset($_POST['refleks_patologis']) ? $_POST['refleks_patologis'] : '-');
-    $flat = htmlspecialchars(isset($_POST['flat']) ? $_POST['flat'] : '');
-    $hl = htmlspecialchars(isset($_POST['hl']) ? $_POST['hl'] : '');
-    $assistos = htmlspecialchars(isset($_POST['assistos']) ? $_POST['assistos'] : '-');
-    $thympani = htmlspecialchars(isset($_POST['thympani']) ? $_POST['thympani'] : '-');
-    $soepel = htmlspecialchars(isset($_POST['soepel']) ? $_POST['soepel'] : '-');
-    $ntf_atas_kiri = htmlspecialchars(isset($_POST['ntf_atas_kiri']) ? $_POST['ntf_atas_kiri'] : '-');
-    $ntf_atas = htmlspecialchars(isset($_POST['ntf_atas']) ? $_POST['ntf_atas'] : '-');
-    $ntf_atas_kanan = htmlspecialchars(isset($_POST['ntf_atas_kanan']) ? $_POST['ntf_atas_kanan'] : '-');
-    $ntf_tengah_kiri = htmlspecialchars(isset($_POST['ntf_tengah_kiri']) ? $_POST['ntf_tengah_kiri'] : '-');
-    $ntf_tengah = htmlspecialchars(isset($_POST['ntf_tengah']) ? $_POST['ntf_tengah'] : '-');
-    $ntf_tengah_kanan = htmlspecialchars(isset($_POST['ntf_tengah_kanan']) ? $_POST['ntf_tengah_kanan'] : '-');
-    $ntf_bawah_kiri = htmlspecialchars(isset($_POST['ntf_bawah_kiri']) ? $_POST['ntf_bawah_kiri'] : '-');
-    $ntf_bawah = htmlspecialchars(isset($_POST['ntf_bawah']) ? $_POST['ntf_bawah'] : '-');
-    $ntf_bawah_kanan = htmlspecialchars(isset($_POST['ntf_bawah_kanan']) ? $_POST['ntf_bawah_kanan'] : '-');
-    $bu = htmlspecialchars(isset($_POST['bu']) ? $_POST['bu'] : '-');
-    $bu_komen = htmlspecialchars(isset($_POST['bu_komen']) ? $_POST['bu_komen'] : '');
-    $anemis_kiri = htmlspecialchars(isset($_POST['anemis_kiri']) ? $_POST['anemis_kiri'] : '-');
-    $anemis_kanan = htmlspecialchars(isset($_POST['anemis_kanan']) ? $_POST['anemis_kanan'] : '-');
-    $ikterik_kiri = htmlspecialchars(isset($_POST['ikterik_kiri']) ? $_POST['ikterik_kiri'] : '-');
-    $ikterik_kanan = htmlspecialchars(isset($_POST['ikterik_kanan']) ? $_POST['ikterik_kanan'] : '-');
-    $rcl_kiri = htmlspecialchars(isset($_POST['rcl_kiri']) ? $_POST['rcl_kiri'] : '-');
-    $rcl_kanan = htmlspecialchars(isset($_POST['rcl_kanan']) ? $_POST['rcl_kanan'] : '-');
-    $pupil_kiri = htmlspecialchars(isset($_POST['pupil_kiri']) ? $_POST['pupil_kiri'] : '');
-    $pupil_kanan = htmlspecialchars(isset($_POST['pupil_kanan']) ? $_POST['pupil_kanan'] : '');
-    $visus_kiri = htmlspecialchars(isset($_POST['visus_kiri']) ? $_POST['visus_kiri'] : '');
-    $visus_kanan = htmlspecialchars(isset($_POST['visus_kanan']) ? $_POST['visus_kanan'] : '');
-    $torax = htmlspecialchars(isset($_POST['torax']) ? $_POST['torax'] : '');
-    $retraksi = htmlspecialchars(isset($_POST['retraksi']) ? $_POST['retraksi'] : '');
-    $vesikuler_kiri = htmlspecialchars(isset($_POST['vesikuler_kiri']) ? $_POST['vesikuler_kiri'] : '-');
-    $vesikuler_kanan = htmlspecialchars(isset($_POST['vesikuler_kanan']) ? $_POST['vesikuler_kanan'] : '-');
-    $wheezing_kiri = htmlspecialchars(isset($_POST['wheezing_kiri']) ? $_POST['wheezing_kiri'] : '-');
-    $wheezing_kanan = htmlspecialchars(isset($_POST['wheezing_kanan']) ? $_POST['wheezing_kanan'] : '-');
-    $rongki_kiri = htmlspecialchars(isset($_POST['rongki_kiri']) ? $_POST['rongki_kiri'] : '-');
-    $rongki_kanan = htmlspecialchars(isset($_POST['rongki_kanan']) ? $_POST['rongki_kanan'] : '-');
-    $s1s2 = htmlspecialchars(isset($_POST['s1s2']) ? $_POST['s1s2'] : '');
-    $murmur = htmlspecialchars(isset($_POST['murmur']) ? $_POST['murmur'] : '-');
-    $golop = htmlspecialchars(isset($_POST['golop']) ? $_POST['golop'] : '-');
-    $nch_kiri = htmlspecialchars(isset($_POST['nch_kiri']) ? $_POST['nch_kiri'] : '-');
-    $nch_kanan = htmlspecialchars(isset($_POST['nch_kanan']) ? $_POST['nch_kanan'] : '-');
-    $polip_kiri = htmlspecialchars(isset($_POST['polip_kiri']) ? $_POST['polip_kiri'] : '-');
-    $polip_kanan = htmlspecialchars(isset($_POST['polip_kanan']) ? $_POST['polip_kanan'] : '-');
-    $conca_kiri = htmlspecialchars(isset($_POST['conca_kiri']) ? $_POST['conca_kiri'] : '-');
-    $conca_kanan = htmlspecialchars(isset($_POST['conca_kanan']) ? $_POST['conca_kanan'] : '-');
-    $faring_hipertermis = htmlspecialchars(isset($_POST['faring_hipertermis']) ? $_POST['faring_hipertermis'] : '-');
-    $halitosis = htmlspecialchars(isset($_POST['halitosis']) ? $_POST['halitosis'] : '-');
-    $pembesaran_tonsil = htmlspecialchars(isset($_POST['pembesaran_tonsil']) ? $_POST['pembesaran_tonsil'] : '');
-    $serumin_kiri = htmlspecialchars(isset($_POST['serumin_kiri']) ? $_POST['serumin_kiri'] : '-');
-    $serumin_kanan = htmlspecialchars(isset($_POST['serumin_kanan']) ? $_POST['serumin_kanan'] : '-');
-    $typani_intak_kiri = htmlspecialchars(isset($_POST['typani_intak_kiri']) ? $_POST['typani_intak_kiri'] : '-');
-    $typani_intak_kanan = htmlspecialchars(isset($_POST['typani_intak_kanan']) ? $_POST['typani_intak_kanan'] : '-');
-    $pembesaran_getah_bening = htmlspecialchars(isset($_POST['pembesaran_getah_bening']) ? $_POST['pembesaran_getah_bening'] : '');
-    $akral_hangat_atas_kiri = htmlspecialchars(isset($_POST['akral_hangat_atas_kiri']) ? $_POST['akral_hangat_atas_kiri'] : '-');
-    $akral_hangat_atas_kanan = htmlspecialchars(isset($_POST['akral_hangat_atas_kanan']) ? $_POST['akral_hangat_atas_kanan'] : '-');
-    $akral_hangat_bawah_kiri = htmlspecialchars(isset($_POST['akral_hangat_bawah_kiri']) ? $_POST['akral_hangat_bawah_kiri'] : '-');
-    $akral_hangat_bawah_kanan = htmlspecialchars(isset($_POST['akral_hangat_bawah_kanan']) ? $_POST['akral_hangat_bawah_kanan'] : '-');
-    $oe_atas_kiri = htmlspecialchars(isset($_POST['oe_atas_kiri']) ? $_POST['oe_atas_kiri'] : '-');
-    $oe_atas_kanan = htmlspecialchars(isset($_POST['oe_atas_kanan']) ? $_POST['oe_atas_kanan'] : '-');
-    $oe_bawah_kiri = htmlspecialchars(isset($_POST['oe_bawah_kiri']) ? $_POST['oe_bawah_kiri'] : '-');
-    $oe_bawah_kanan = htmlspecialchars(isset($_POST['oe_bawah_kanan']) ? $_POST['oe_bawah_kanan'] : '-');
-    $crt = htmlspecialchars(isset($_POST['crt']) ? $_POST['crt'] : '');
-    $motorik_atas_kiri = htmlspecialchars(isset($_POST['motorik_atas_kiri']) ? $_POST['motorik_atas_kiri'] : '');
-    $motorik_atas_kanan = htmlspecialchars(isset($_POST['motorik_atas_kanan']) ? $_POST['motorik_atas_kanan'] : '');
-    $motorik_bawah_kiri = htmlspecialchars(isset($_POST['motorik_bawah_kiri']) ? $_POST['motorik_bawah_kiri'] : '');
-    $motorik_bawah_kanan = htmlspecialchars(isset($_POST['motorik_bawah_kanan']) ? $_POST['motorik_bawah_kanan'] : '');
-    $kognitif = htmlspecialchars(isset($_POST['kognitif']) ? $_POST['kognitif'] : '');
-    // End PemeriksaanFisik
-
-    if ($getPemeriksaanFisik['jumData'] == 1) {
-      $koneksi->query("UPDATE pemeriksaan_fisik_igd SET gcs_e='$gcs_e', gcs_v='$gcs_v', gcs_m='$gcs_m', rangsangan_meninggal='$rangsangan_meninggal', refleks_fisiologis1='$refleks_fisiologis1', refleks_fisiologis2='$refleks_fisiologis2', refleks_patologis='$refleks_patologis', flat='$flat', hl='$hl', assistos='$assistos', thympani='$thympani', soepel='$soepel', ntf_atas_kiri='$ntf_atas_kiri', ntf_atas='$ntf_atas', ntf_atas_kanan='$ntf_atas_kanan', ntf_tengah_kiri='$ntf_tengah_kiri', ntf_tengah='$ntf_tengah', ntf_tengah_kanan='$ntf_tengah_kanan', ntf_bawah_kiri='$ntf_bawah_kiri', ntf_bawah='$ntf_bawah', ntf_bawah_kanan='$ntf_bawah_kanan', bu='$bu', bu_komen='$bu_komen', anemis_kiri='$anemis_kiri', anemis_kanan='$anemis_kanan', ikterik_kiri='$ikterik_kiri', ikterik_kanan='$ikterik_kanan', rcl_kiri='$rcl_kiri', rcl_kanan='$rcl_kanan', pupil_kiri='$pupil_kiri', pupil_kanan='$pupil_kanan', visus_kiri='$visus_kiri', visus_kanan='$visus_kanan', torax='$torax', retraksi='$retraksi', vesikuler_kiri='$vesikuler_kiri', vesikuler_kanan='$vesikuler_kanan', wheezing_kiri='$wheezing_kiri', wheezing_kanan='$wheezing_kanan', rongki_kiri='$rongki_kiri', rongki_kanan='$rongki_kanan', s1s2='$s1s2', murmur='$murmur', golop='$golop', nch_kiri='$nch_kiri', nch_kanan='$nch_kanan', polip_kiri='$polip_kiri', polip_kanan='$polip_kanan', conca_kiri='$conca_kiri', conca_kanan='$conca_kanan', faring_hipertermis='$faring_hipertermis', halitosis='$halitosis', pembesaran_tonsil='$pembesaran_tonsil', serumin_kiri='$serumin_kiri', serumin_kanan='$serumin_kanan', typani_intak_kiri='$typani_intak_kiri', typani_intak_kanan='$typani_intak_kanan', pembesaran_getah_bening='$pembesaran_getah_bening', akral_hangat_atas_kiri='$akral_hangat_atas_kiri', akral_hangat_atas_kanan='$akral_hangat_atas_kanan', akral_hangat_bawah_kiri='$akral_hangat_bawah_kiri', akral_hangat_bawah_kanan='$akral_hangat_bawah_kanan', oe_atas_kiri='$oe_atas_kiri', oe_atas_kanan='$oe_atas_kanan', oe_bawah_kiri='$oe_bawah_kiri', oe_bawah_kanan='$oe_bawah_kanan', crt='$crt', motorik_atas_kiri='$motorik_atas_kiri', motorik_atas_kanan='$motorik_atas_kanan', motorik_bawah_kiri='$motorik_bawah_kiri', motorik_bawah_kanan='$motorik_bawah_kanan', kognitif='$kognitif' WHERE id_igd='$_GET[id]'");
-    } else {
-      $koneksi->query("INSERT INTO pemeriksaan_fisik_igd (id_igd, norm, gcs_e, gcs_v, gcs_m, rangsangan_meninggal, refleks_fisiologis1, refleks_fisiologis2, refleks_patologis, flat, hl, assistos, thympani, soepel, ntf_atas_kiri, ntf_atas, ntf_atas_kanan, ntf_tengah_kiri, ntf_tengah, ntf_tengah_kanan, ntf_bawah_kiri, ntf_bawah, ntf_bawah_kanan, bu, bu_komen, anemis_kiri, anemis_kanan, ikterik_kiri, ikterik_kanan, rcl_kiri, rcl_kanan, pupil_kiri, pupil_kanan, visus_kiri, visus_kanan, torax, retraksi, vesikuler_kiri, vesikuler_kanan, wheezing_kiri, wheezing_kanan, rongki_kiri, rongki_kanan, s1s2, murmur, golop, nch_kiri, nch_kanan, polip_kiri, polip_kanan, conca_kiri, conca_kanan, faring_hipertermis, halitosis, pembesaran_tonsil, serumin_kiri, serumin_kanan, typani_intak_kiri, typani_intak_kanan, pembesaran_getah_bening, akral_hangat_atas_kiri, akral_hangat_atas_kanan, akral_hangat_bawah_kiri, akral_hangat_bawah_kanan, oe_atas_kiri, oe_atas_kanan, oe_bawah_kiri, oe_bawah_kanan, crt, motorik_atas_kiri, motorik_atas_kanan, motorik_bawah_kiri, motorik_bawah_kanan, kognitif) VALUES ('$_GET[id]', '$igd[no_rm]', '$gcs_e', '$gcs_v', '$gcs_m', '$rangsangan_meninggal', '$refleks_fisiologis1', '$refleks_fisiologis2', '$refleks_patologis', '$flat', '$hl', '$assistos', '$thympani', '$soepel', '$ntf_atas_kiri', '$ntf_atas', '$ntf_atas_kanan', '$ntf_tengah_kiri', '$ntf_tengah', '$ntf_tengah_kanan', '$ntf_bawah_kiri', '$ntf_bawah', '$ntf_bawah_kanan', '$bu', '$bu_komen', '$anemis_kiri', '$anemis_kanan', '$ikterik_kiri', '$ikterik_kanan', '$rcl_kiri', '$rcl_kanan', '$pupil_kiri', '$pupil_kanan', '$visus_kiri', '$visus_kanan', '$torax', '$retraksi', '$vesikuler_kiri', '$vesikuler_kanan', '$wheezing_kiri', '$wheezing_kanan', '$rongki_kiri', '$rongki_kanan', '$s1s2', '$murmur' ,'$golop','$nch_kiri','$nch_kanan','$polip_kiri','$polip_kanan','$conca_kiri','$conca_kanan','$faring_hipertermis','$halitosis','$pembesaran_tonsil','$serumin_kiri','$serumin_kanan','$typani_intak_kiri','$typani_intak_kanan','$pembesaran_getah_bening','$akral_hangat_atas_kiri','$akral_hangat_atas_kanan','$akral_hangat_bawah_kiri','$akral_hangat_bawah_kanan','$oe_atas_kiri','$oe_atas_kanan','$oe_bawah_kiri','$oe_bawah_kanan','$crt','$motorik_atas_kiri','$motorik_atas_kanan','$motorik_bawah_kiri','$motorik_bawah_kanan','$kognitif')");
-    }
+  // Gabungkan semua diagnosa kerja dengan separator "+"
+  $dkerja_gabungan = '';
+  if (isset($_POST['dkerja']) && is_array($_POST['dkerja'])) {
+    $dkerja_array = array_filter($_POST['dkerja'], function ($val) {
+      return trim($val) != '';
+    });
+    $dkerja_gabungan = implode(' + ', $dkerja_array);
   }
+
+  // Gabungkan semua ICD10 diagnosa kerja dengan separator "+"
+  $icd10_gabungan = '';
+  if (isset($_POST['icd_dkerja']) && is_array($_POST['icd_dkerja'])) {
+    $icd10_array = array_filter($_POST['icd_dkerja'], function ($val) {
+      return trim($val) != '';
+    });
+    $icd10_gabungan = implode(' + ', $icd10_array);
+  }
+
+  $koneksi->query("UPDATE igd SET 
+    no_rm='$no_rm', 
+    nama_pasien='$nama_pasien', 
+    tgl_masuk='$tgl_masuk', 
+    jam_masuk='$jam_masuk', 
+    transportasi='$transportasi', 
+    surat_pengantar='$surat_pengantar', 
+    kondisi_tiba='$kondisi_tiba', 
+    nama_pengantar='$nama_pengantar', 
+    notelp_pengantar='$notelp_pengantar', 
+    asesmen_nyeri='$asesmen_nyeri', 
+    resiko_decubitus='$resiko_decubitus',
+    penurunan_bb='$penurunan_bb',
+    penurunan_asupan='$penurunan_asupan',
+    gejala_gastro='$gejala_gastro',
+    faktor_pemberat='$faktor_pemberat',
+    penurunan_fungsional='$penurunan_fungsional',
+    psiko='$_POST[psiko]',
+    sosial='$_POST[sosial]',
+    bantuan='$_POST[bantuan]',
+    skala_nyeri='$_POST[skala_nyeri]',
+    tindak_rujuk='$_POST[tindak_rujuk]',
+    keluhan='$_POST[keluhan]',
+    riw_penyakit='$_POST[riw_penyakit]',
+    riw_alergi='$_POST[riw_alergi]',
+    perawat='$_POST[perawat]', 
+    e='$_POST[e]', 
+    v='$_POST[v]', 
+    m='$_POST[m]', 
+    td='$_POST[td]', 
+    rr='$_POST[rr]', 
+    n='$_POST[n]', 
+    s='$_POST[s]', 
+    gda='$_POST[gda]', 
+    bb='$_POST[bb]', 
+    tb='$_POST[tb]', 
+    tindak_rujuk_keterangan='$_POST[tindak_rujuk_keterangan]', 
+    sat_oksigen='$_POST[sat_oksigen]',
+    penunjang='" . mysqli_real_escape_string($koneksi, $penunjang_json) . "',
+    dkerja='$dkerja_gabungan', 
+    icd10='$icd10_gabungan',
+    dbanding='$_POST[dbanding]', 
+    tgl='$_POST[tgl]', 
+    sub='$_POST[sub]', 
+    ob='$_POST[ob]', 
+    dokter='$_POST[dokter]', 
+    rencana_rawat='" . $koneksi->real_escape_string($_POST['rencana_rawat']) . "' 
+    WHERE idigd='$_GET[id]'");
+
+  // PemeriksaanFisik
+  $gcs_e = htmlspecialchars(isset($_POST['gcs_e']) ? $_POST['gcs_e'] : '');
+  $gcs_v = htmlspecialchars(isset($_POST['gcs_v']) ? $_POST['gcs_v'] : '');
+  $gcs_m = htmlspecialchars(isset($_POST['gcs_m']) ? $_POST['gcs_m'] : '');
+  $rangsangan_meninggal = htmlspecialchars(isset($_POST['rangsangan_meninggal']) ? $_POST['rangsangan_meninggal'] : '-');
+  $refleks_fisiologis1 = htmlspecialchars(isset($_POST['refleks_fisiologis1']) ? $_POST['refleks_fisiologis1'] : '-');
+  $refleks_fisiologis2 = htmlspecialchars(isset($_POST['refleks_fisiologis2']) ? $_POST['refleks_fisiologis2'] : '-');
+  $refleks_patologis = htmlspecialchars(isset($_POST['refleks_patologis']) ? $_POST['refleks_patologis'] : '-');
+  $flat = htmlspecialchars(isset($_POST['flat']) ? $_POST['flat'] : '');
+  $hl = htmlspecialchars(isset($_POST['hl']) ? $_POST['hl'] : '');
+  $assistos = htmlspecialchars(isset($_POST['assistos']) ? $_POST['assistos'] : '-');
+  $thympani = htmlspecialchars(isset($_POST['thympani']) ? $_POST['thympani'] : '-');
+  $soepel = htmlspecialchars(isset($_POST['soepel']) ? $_POST['soepel'] : '-');
+  $ntf_atas_kiri = htmlspecialchars(isset($_POST['ntf_atas_kiri']) ? $_POST['ntf_atas_kiri'] : '-');
+  $ntf_atas = htmlspecialchars(isset($_POST['ntf_atas']) ? $_POST['ntf_atas'] : '-');
+  $ntf_atas_kanan = htmlspecialchars(isset($_POST['ntf_atas_kanan']) ? $_POST['ntf_atas_kanan'] : '-');
+  $ntf_tengah_kiri = htmlspecialchars(isset($_POST['ntf_tengah_kiri']) ? $_POST['ntf_tengah_kiri'] : '-');
+  $ntf_tengah = htmlspecialchars(isset($_POST['ntf_tengah']) ? $_POST['ntf_tengah'] : '-');
+  $ntf_tengah_kanan = htmlspecialchars(isset($_POST['ntf_tengah_kanan']) ? $_POST['ntf_tengah_kanan'] : '-');
+  $ntf_bawah_kiri = htmlspecialchars(isset($_POST['ntf_bawah_kiri']) ? $_POST['ntf_bawah_kiri'] : '-');
+  $ntf_bawah = htmlspecialchars(isset($_POST['ntf_bawah']) ? $_POST['ntf_bawah'] : '-');
+  $ntf_bawah_kanan = htmlspecialchars(isset($_POST['ntf_bawah_kanan']) ? $_POST['ntf_bawah_kanan'] : '-');
+  $bu = htmlspecialchars(isset($_POST['bu']) ? $_POST['bu'] : '-');
+  $bu_komen = htmlspecialchars(isset($_POST['bu_komen']) ? $_POST['bu_komen'] : '');
+  $anemis_kiri = htmlspecialchars(isset($_POST['anemis_kiri']) ? $_POST['anemis_kiri'] : '-');
+  $anemis_kanan = htmlspecialchars(isset($_POST['anemis_kanan']) ? $_POST['anemis_kanan'] : '-');
+  $ikterik_kiri = htmlspecialchars(isset($_POST['ikterik_kiri']) ? $_POST['ikterik_kiri'] : '-');
+  $ikterik_kanan = htmlspecialchars(isset($_POST['ikterik_kanan']) ? $_POST['ikterik_kanan'] : '-');
+  $rcl_kiri = htmlspecialchars(isset($_POST['rcl_kiri']) ? $_POST['rcl_kiri'] : '-');
+  $rcl_kanan = htmlspecialchars(isset($_POST['rcl_kanan']) ? $_POST['rcl_kanan'] : '-');
+  $pupil_kiri = htmlspecialchars(isset($_POST['pupil_kiri']) ? $_POST['pupil_kiri'] : '');
+  $pupil_kanan = htmlspecialchars(isset($_POST['pupil_kanan']) ? $_POST['pupil_kanan'] : '');
+  $visus_kiri = htmlspecialchars(isset($_POST['visus_kiri']) ? $_POST['visus_kiri'] : '');
+  $visus_kanan = htmlspecialchars(isset($_POST['visus_kanan']) ? $_POST['visus_kanan'] : '');
+  $torax = htmlspecialchars(isset($_POST['torax']) ? $_POST['torax'] : '');
+  $retraksi = htmlspecialchars(isset($_POST['retraksi']) ? $_POST['retraksi'] : '');
+  $vesikuler_kiri = htmlspecialchars(isset($_POST['vesikuler_kiri']) ? $_POST['vesikuler_kiri'] : '-');
+  $vesikuler_kanan = htmlspecialchars(isset($_POST['vesikuler_kanan']) ? $_POST['vesikuler_kanan'] : '-');
+  $wheezing_kiri = htmlspecialchars(isset($_POST['wheezing_kiri']) ? $_POST['wheezing_kiri'] : '-');
+  $wheezing_kanan = htmlspecialchars(isset($_POST['wheezing_kanan']) ? $_POST['wheezing_kanan'] : '-');
+  $rongki_kiri = htmlspecialchars(isset($_POST['rongki_kiri']) ? $_POST['rongki_kiri'] : '-');
+  $rongki_kanan = htmlspecialchars(isset($_POST['rongki_kanan']) ? $_POST['rongki_kanan'] : '-');
+  $s1s2 = htmlspecialchars(isset($_POST['s1s2']) ? $_POST['s1s2'] : '');
+  $murmur = htmlspecialchars(isset($_POST['murmur']) ? $_POST['murmur'] : '-');
+  $golop = htmlspecialchars(isset($_POST['golop']) ? $_POST['golop'] : '-');
+  $nch_kiri = htmlspecialchars(isset($_POST['nch_kiri']) ? $_POST['nch_kiri'] : '-');
+  $nch_kanan = htmlspecialchars(isset($_POST['nch_kanan']) ? $_POST['nch_kanan'] : '-');
+  $polip_kiri = htmlspecialchars(isset($_POST['polip_kiri']) ? $_POST['polip_kiri'] : '-');
+  $polip_kanan = htmlspecialchars(isset($_POST['polip_kanan']) ? $_POST['polip_kanan'] : '-');
+  $conca_kiri = htmlspecialchars(isset($_POST['conca_kiri']) ? $_POST['conca_kiri'] : '-');
+  $conca_kanan = htmlspecialchars(isset($_POST['conca_kanan']) ? $_POST['conca_kanan'] : '-');
+  $faring_hipertermis = htmlspecialchars(isset($_POST['faring_hipertermis']) ? $_POST['faring_hipertermis'] : '-');
+  $halitosis = htmlspecialchars(isset($_POST['halitosis']) ? $_POST['halitosis'] : '-');
+  $pembesaran_tonsil = htmlspecialchars(isset($_POST['pembesaran_tonsil']) ? $_POST['pembesaran_tonsil'] : '');
+  $serumin_kiri = htmlspecialchars(isset($_POST['serumin_kiri']) ? $_POST['serumin_kiri'] : '-');
+  $serumin_kanan = htmlspecialchars(isset($_POST['serumin_kanan']) ? $_POST['serumin_kanan'] : '-');
+  $typani_intak_kiri = htmlspecialchars(isset($_POST['typani_intak_kiri']) ? $_POST['typani_intak_kiri'] : '-');
+  $typani_intak_kanan = htmlspecialchars(isset($_POST['typani_intak_kanan']) ? $_POST['typani_intak_kanan'] : '-');
+  $pembesaran_getah_bening = htmlspecialchars(isset($_POST['pembesaran_getah_bening']) ? $_POST['pembesaran_getah_bening'] : '');
+  $akral_hangat_atas_kiri = htmlspecialchars(isset($_POST['akral_hangat_atas_kiri']) ? $_POST['akral_hangat_atas_kiri'] : '-');
+  $akral_hangat_atas_kanan = htmlspecialchars(isset($_POST['akral_hangat_atas_kanan']) ? $_POST['akral_hangat_atas_kanan'] : '-');
+  $akral_hangat_bawah_kiri = htmlspecialchars(isset($_POST['akral_hangat_bawah_kiri']) ? $_POST['akral_hangat_bawah_kiri'] : '-');
+  $akral_hangat_bawah_kanan = htmlspecialchars(isset($_POST['akral_hangat_bawah_kanan']) ? $_POST['akral_hangat_bawah_kanan'] : '-');
+  $oe_atas_kiri = htmlspecialchars(isset($_POST['oe_atas_kiri']) ? $_POST['oe_atas_kiri'] : '-');
+  $oe_atas_kanan = htmlspecialchars(isset($_POST['oe_atas_kanan']) ? $_POST['oe_atas_kanan'] : '-');
+  $oe_bawah_kiri = htmlspecialchars(isset($_POST['oe_bawah_kiri']) ? $_POST['oe_bawah_kiri'] : '-');
+  $oe_bawah_kanan = htmlspecialchars(isset($_POST['oe_bawah_kanan']) ? $_POST['oe_bawah_kanan'] : '-');
+  $crt = htmlspecialchars(isset($_POST['crt']) ? $_POST['crt'] : '');
+  $motorik_atas_kiri = htmlspecialchars(isset($_POST['motorik_atas_kiri']) ? $_POST['motorik_atas_kiri'] : '');
+  $motorik_atas_kanan = htmlspecialchars(isset($_POST['motorik_atas_kanan']) ? $_POST['motorik_atas_kanan'] : '');
+  $motorik_bawah_kiri = htmlspecialchars(isset($_POST['motorik_bawah_kiri']) ? $_POST['motorik_bawah_kiri'] : '');
+  $motorik_bawah_kanan = htmlspecialchars(isset($_POST['motorik_bawah_kanan']) ? $_POST['motorik_bawah_kanan'] : '');
+  $kognitif = htmlspecialchars(isset($_POST['kognitif']) ? $_POST['kognitif'] : '');
+  if ($getPemeriksaanFisik['jumData'] == 1) {
+    $koneksi->query("UPDATE pemeriksaan_fisik_igd SET gcs_e='$gcs_e', gcs_v='$gcs_v', gcs_m='$gcs_m', rangsangan_meninggal='$rangsangan_meninggal', refleks_fisiologis1='$refleks_fisiologis1', refleks_fisiologis2='$refleks_fisiologis2', refleks_patologis='$refleks_patologis', flat='$flat', hl='$hl', assistos='$assistos', thympani='$thympani', soepel='$soepel', ntf_atas_kiri='$ntf_atas_kiri', ntf_atas='$ntf_atas', ntf_atas_kanan='$ntf_atas_kanan', ntf_tengah_kiri='$ntf_tengah_kiri', ntf_tengah='$ntf_tengah', ntf_tengah_kanan='$ntf_tengah_kanan', ntf_bawah_kiri='$ntf_bawah_kiri', ntf_bawah='$ntf_bawah', ntf_bawah_kanan='$ntf_bawah_kanan', bu='$bu', bu_komen='$bu_komen', anemis_kiri='$anemis_kiri', anemis_kanan='$anemis_kanan', ikterik_kiri='$ikterik_kiri', ikterik_kanan='$ikterik_kanan', rcl_kiri='$rcl_kiri', rcl_kanan='$rcl_kanan', pupil_kiri='$pupil_kiri', pupil_kanan='$pupil_kanan', visus_kiri='$visus_kiri', visus_kanan='$visus_kanan', torax='$torax', retraksi='$retraksi', vesikuler_kiri='$vesikuler_kiri', vesikuler_kanan='$vesikuler_kanan', wheezing_kiri='$wheezing_kiri', wheezing_kanan='$wheezing_kanan', rongki_kiri='$rongki_kiri', rongki_kanan='$rongki_kanan', s1s2='$s1s2', murmur='$murmur', golop='$golop', nch_kiri='$nch_kiri', nch_kanan='$nch_kanan', polip_kiri='$polip_kiri', polip_kanan='$polip_kanan', conca_kiri='$conca_kiri', conca_kanan='$conca_kanan', faring_hipertermis='$faring_hipertermis', halitosis='$halitosis', pembesaran_tonsil='$pembesaran_tonsil', serumin_kiri='$serumin_kiri', serumin_kanan='$serumin_kanan', typani_intak_kiri='$typani_intak_kiri', typani_intak_kanan='$typani_intak_kanan', pembesaran_getah_bening='$pembesaran_getah_bening', akral_hangat_atas_kiri='$akral_hangat_atas_kiri', akral_hangat_atas_kanan='$akral_hangat_atas_kanan', akral_hangat_bawah_kiri='$akral_hangat_bawah_kiri', akral_hangat_bawah_kanan='$akral_hangat_bawah_kanan', oe_atas_kiri='$oe_atas_kiri', oe_atas_kanan='$oe_atas_kanan', oe_bawah_kiri='$oe_bawah_kiri', oe_bawah_kanan='$oe_bawah_kanan', crt='$crt', motorik_atas_kiri='$motorik_atas_kiri', motorik_atas_kanan='$motorik_atas_kanan', motorik_bawah_kiri='$motorik_bawah_kiri', motorik_bawah_kanan='$motorik_bawah_kanan', kognitif='$kognitif' WHERE id_igd='$_GET[id]'");
+  } else {
+    $koneksi->query("INSERT INTO pemeriksaan_fisik_igd (id_igd, norm, gcs_e, gcs_v, gcs_m, rangsangan_meninggal, refleks_fisiologis1, refleks_fisiologis2, refleks_patologis, flat, hl, assistos, thympani, soepel, ntf_atas_kiri, ntf_atas, ntf_atas_kanan, ntf_tengah_kiri, ntf_tengah, ntf_tengah_kanan, ntf_bawah_kiri, ntf_bawah, ntf_bawah_kanan, bu, bu_komen, anemis_kiri, anemis_kanan, ikterik_kiri, ikterik_kanan, rcl_kiri, rcl_kanan, pupil_kiri, pupil_kanan, visus_kiri, visus_kanan, torax, retraksi, vesikuler_kiri, vesikuler_kanan, wheezing_kiri, wheezing_kanan, rongki_kiri, rongki_kanan, s1s2, murmur, golop, nch_kiri, nch_kanan, polip_kiri, polip_kanan, conca_kiri, conca_kanan, faring_hipertermis, halitosis, pembesaran_tonsil, serumin_kiri, serumin_kanan, typani_intak_kiri, typani_intak_kanan, pembesaran_getah_bening, akral_hangat_atas_kiri, akral_hangat_atas_kanan, akral_hangat_bawah_kiri, akral_hangat_bawah_kanan, oe_atas_kiri, oe_atas_kanan, oe_bawah_kiri, oe_bawah_kanan, crt, motorik_atas_kiri, motorik_atas_kanan, motorik_bawah_kiri, motorik_bawah_kanan, kognitif) VALUES ('$_GET[id]', '$igd[no_rm]', '$gcs_e', '$gcs_v', '$gcs_m', '$rangsangan_meninggal', '$refleks_fisiologis1', '$refleks_fisiologis2', '$refleks_patologis', '$flat', '$hl', '$assistos', '$thympani', '$soepel', '$ntf_atas_kiri', '$ntf_atas', '$ntf_atas_kanan', '$ntf_tengah_kiri', '$ntf_tengah', '$ntf_tengah_kanan', '$ntf_bawah_kiri', '$ntf_bawah', '$ntf_bawah_kanan', '$bu', '$bu_komen', '$anemis_kiri', '$anemis_kanan', '$ikterik_kiri', '$ikterik_kanan', '$rcl_kiri', '$rcl_kanan', '$pupil_kiri', '$pupil_kanan', '$visus_kiri', '$visus_kanan', '$torax', '$retraksi', '$vesikuler_kiri', '$vesikuler_kanan', '$wheezing_kiri', '$wheezing_kanan', '$rongki_kiri', '$rongki_kanan', '$s1s2', '$murmur' ,'$golop','$nch_kiri','$nch_kanan','$polip_kiri','$polip_kanan','$conca_kiri','$conca_kanan','$faring_hipertermis','$halitosis','$pembesaran_tonsil','$serumin_kiri','$serumin_kanan','$typani_intak_kiri','$typani_intak_kanan','$pembesaran_getah_bening','$akral_hangat_atas_kiri','$akral_hangat_atas_kanan','$akral_hangat_bawah_kiri','$akral_hangat_bawah_kanan','$oe_atas_kiri','$oe_atas_kanan','$oe_bawah_kiri','$oe_bawah_kanan','$crt','$motorik_atas_kiri','$motorik_atas_kanan','$motorik_bawah_kiri','$motorik_bawah_kanan','$kognitif')");
+  }
+  // End PemeriksaanFisik
 
   $countigd = $koneksi->query("SELECT *, COUNT(perawat) as jumlah FROM igd WHERE idigd = '$_GET[id]' LIMIT 1")->fetch_assoc();
 
