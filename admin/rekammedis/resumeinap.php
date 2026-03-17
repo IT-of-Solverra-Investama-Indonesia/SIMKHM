@@ -755,8 +755,8 @@ date_default_timezone_set("asia/jakarta");
                   <!-- <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#tagTeman">@ Tag</button> -->
                   <br>
                   <?php
-                    $getTag = $koneksi->query("SELECT * FROM kajian_awal_inap_tag WHERE idrawat = '$_GET[id]'");
-                    foreach ($getTag as $tag) {
+                  $getTag = $koneksi->query("SELECT * FROM kajian_awal_inap_tag WHERE idrawat = '$_GET[id]'");
+                  foreach ($getTag as $tag) {
                   ?>
                     <span class="badge bg-success">@<?= $tag['petugas'] ?></span>
                   <?php } ?>
@@ -827,7 +827,7 @@ date_default_timezone_set("asia/jakarta");
         </div>
         <div class="modal-body">
           <form method="post">
-            
+
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="submit" name="tag_teman" class="btn btn-primary">Simpan Tag</button>
