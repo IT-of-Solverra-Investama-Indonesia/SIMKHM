@@ -1,7 +1,26 @@
 <?php
 $user = $_SESSION['admin']['username'];
 $level = $_SESSION['admin']['level'];
-$pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=idrawat GROUP BY id_lab ORDER BY tgl DESC;");
+// $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=idrawat GROUP BY id_lab ORDER BY tgl DESC;");
+
+$limit = 30;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+if (isset($_GET['cari'])) {
+  $cari = $_GET['cari'];
+  $query_total = $koneksi->query("SELECT COUNT(DISTINCT lab.id_lab) AS total FROM lab JOIN registrasi_rawat WHERE id_lab = idrawat AND (normlab LIKE '%" . $cari . "%' OR pasienlab LIKE '%" . $cari . "%')");
+  $total_data = $query_total->fetch_assoc()['total'];
+
+  $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab = idrawat AND (normlab LIKE '%" . $cari . "%' OR pasienlab LIKE '%" . $cari . "%') GROUP BY id_lab ORDER BY tgl DESC LIMIT $offset, $limit");
+} else {
+  $query_total = $koneksi->query("SELECT COUNT(DISTINCT lab.id_lab) AS total FROM lab JOIN registrasi_rawat ON lab.id_lab = registrasi_rawat.idrawat");
+  $total_data = $query_total->fetch_assoc()['total'];
+
+  $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab = idrawat GROUP BY id_lab ORDER BY tgl DESC LIMIT $offset, $limit");
+}
+
+$total_pages = ceil($total_data / $limit);
 ?>
 
 
@@ -18,17 +37,17 @@ $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=
   <!-- DATATABLES -->
   <!-- !-- DataTables  -->
 
-  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
-  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  <link src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
-  <link src="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
+  <!-- <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css"> -->
+  <!-- <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <link src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css"> -->
+  <!-- <link src="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap5.min.css">
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script> -->
+  <!-- <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script> -->
+  <!-- <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script> -->
 
 
 </head>
@@ -36,6 +55,7 @@ $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=
 
 <body>
   <main>
+
     <div class="container">
       <div class="pagetitle">
         <h1>Daftar Rujukan Lab</h1>
@@ -48,16 +68,28 @@ $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=
 
       <section class="section  py-4">
         <div class="container">
-
-
           <div class="row">
             <div class="col-lg-12 col-md-12">
-
               <div class="card">
                 <div class="card-body">
-
                   <h5 class="card-title">Data Rujukan</h5>
-
+                  <form method="GET" action="">
+                    <div class="input-group mb-3">
+                      <input type="hidden" name="halaman" value="daftarlab">
+                      <input
+                        type="text"
+                        id="cari_input"
+                        name="cari"
+                        class="form-control"
+                        placeholder="Cari Nama / No RM"
+                        value="<?php echo htmlspecialchars($_GET['cari'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                        aria-label="Cari Obat"
+                        aria-describedby="button-search">
+                      <button class="btn btn-primary" type="submit" id="button-search">
+                        <i class="bi bi-search"></i>
+                      </button>
+                    </div>
+                  </form>
                   <!-- Multi Columns Form -->
                   <div class="table-responsive">
                     <table id="myTable" class="table table-striped" style="width:100%">
@@ -108,18 +140,54 @@ $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=
 
                       </tbody>
                     </table>
-
                   </div>
+                  <?php if ($total_pages > 1): ?>
+                    <nav aria-label="Page navigation" class="mt-3">
+                      <ul class="pagination justify-content-center">
+                        <?php
+                        $cari_param = isset($_GET['cari']) ? "&cari=" . urlencode($_GET['cari']) : "";
+                        ?>
+
+                        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                          <a class="page-link" href="?halaman=daftarlab<?= $cari_param ?>&page=<?= $page - 1 ?>">Prev</a>
+                        </li>
+
+                        <?php
+                        $start_page = max(1, $page - 2);
+                        $end_page = min($total_pages, $page + 2);
+
+                        if ($start_page > 1) {
+                          echo '<li class="page-item"><a class="page-link" href="?halaman=daftarlab' . $cari_param . '&page=1">1</a></li>';
+                          if ($start_page > 2) {
+                            echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+                          }
+                        }
+
+                        for ($i = $start_page; $i <= $end_page; $i++) {
+                          $active = ($i == $page) ? 'active' : '';
+                          echo '<li class="page-item ' . $active . '"><a class="page-link" href="?halaman=daftarlab' . $cari_param . '&page=' . $i . '">' . $i . '</a></li>';
+                        }
+
+                        if ($end_page < $total_pages) {
+                          if ($end_page < $total_pages - 1) {
+                            echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+                          }
+                          echo '<li class="page-item"><a class="page-link" href="?halaman=daftarlab' . $cari_param . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
+                        }
+                        ?>
+
+                        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                          <a class="page-link" href="?halaman=daftarlab<?= $cari_param ?>&page=<?= $page + 1 ?>">Next</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  <?php endif; ?>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
-    </div>
-
-    </section>
-
+      </section>
     </div>
   </main><!-- End #main -->
 
@@ -130,11 +198,11 @@ $pasien = $koneksi->query("SELECT * FROM lab JOIN registrasi_rawat WHERE id_lab=
 
 </html>
 
-<script>
+<!-- <script>
   $(document).ready(function() {
     $('#myTable').DataTable({
       search: true,
       pagination: true
     });
   });
-</script>
+</script> -->
