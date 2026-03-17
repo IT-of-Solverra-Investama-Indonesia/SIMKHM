@@ -221,6 +221,8 @@ if (isset($_GET['confirm'])) {
                         <option hidden>Pilih</option>
                         <option selected value="Rawat Jalan">Rawat Jalan</option>
                         <option value="Rawat Inap">Rawat Inap</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="ODC">ODC</option>
                       </select>
                     </div>
                     <div class="col-md-6">
@@ -241,7 +243,7 @@ if (isset($_GET['confirm'])) {
                       document.getElementById('pilihan').addEventListener('change', function() {
                         var formAn = document.getElementById('ant');
                         var formRjk = document.getElementById('rjkk');
-                        if (this.value === 'Rawat Inap') {
+                        if (this.value === 'Rawat Inap' || this.value === 'Emergency' || this.value === 'ODC') {
                           formAn.style.display = 'none';
                           formRjk.style.display = 'block';
                         } else {
@@ -555,7 +557,7 @@ if (isset($_POST['save'])) {
   $tgl = date('Ymd') + 0;
   $kode = $tgl . "+" . $antrian;
 
-  if ($perawatan == "Rawat Inap") { 
+  if ($perawatan == "Rawat Inap" || $perawatan == "Emergency" || $perawatan == "ODC") { 
     $perujuk = isset($_POST['perujuk']) ? htmlspecialchars($_POST['perujuk']) : '';
     if ($perujuk == 'Baru') {
       $perujuk = isset($_POST['perujuk_baru']) ? htmlspecialchars($_POST['perujuk_baru']) : '';
