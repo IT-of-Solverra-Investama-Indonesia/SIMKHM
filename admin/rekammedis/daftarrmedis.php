@@ -5,7 +5,6 @@ $date = date("Y-m-d");
 // $pasien=$koneksi->query("SELECT * FROM rekam_medis JOIN pasien WHERE nama_lengkap = nama_pasien;"); 
 $queryKey = '';
 $searchKey = '';
-
 // Handle search from both POST and GET
 if (isset($_POST['src']) && !empty($_POST['key'])) {
   // Redirect POST to GET to maintain search in pagination
@@ -628,6 +627,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                           </div>
                         </div>
                       </div>
+                      <!-- End Modal LIhat Kamar -->
                     <?php } ?>
                   <?php } else { ?>
                     <p style="margin-top: -20px; font-size: 12px; text-transform: capitalize;">data yang di tampilkan adalah data seluruh pasien dari semua waktu</p>
@@ -732,17 +732,49 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <br>
                                   <span style="font-size: 9px;" class="btn btn-sm btn-warning" <?php if ($_SESSION['admin']['level'] == 'sup') { ?> data-bs-toggle="modal" data-bs-target="#updateKamar" onclick="upDataKamar('<?= $pecah['idrawat'] ?>', '<?= $pecah['kamar'] ?>')" <?php } ?>><?= $pecah['kamar'] ?></span>
                                 <?php } ?>
-                                <?php if ($_SESSION['admin']['level'] == 'racik' or $_SESSION['admin']['level'] == 'apoteker') { ?>
+                                <?php
+                                $getBiaya = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$pecah[idrawat]'")->fetch_assoc();
+                                if (strpos(($getBiaya['biaya_lain'] ?? ''), 'ODC') !== false) {
+                                ?>
+                                  <br>
+                                  <span class="badge bg-info" style="font-size: 9px;">ODC</span>
                                   <?php
-                                  $getBiaya = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$pecah[idrawat]'")->fetch_assoc();
-                                  if (strpos(($getBiaya['biaya_lain'] ?? ''), 'ODC') !== false) {
+                                  $cekIgdPickRm = $koneksi->query("SELECT *, COUNT(*) AS Jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
+                                  if ($cekIgdPickRm['Jum'] > 0) {
+                                    $cekIgd = $koneksi->query("SELECT * FROM igd WHERE idigd = '$cekIgdPickRm[igd_id]'")->fetch_assoc();
+                                    if ($cekIgd['tindak'] == 'ODC') {
+                                      echo "
+                                          <br>
+                                          <span class='badge bg-" . ($cekIgd['tindak_at'] == null ? 'danger' : 'success') . "'>" . ($cekIgd['tindak_at'] == null ? 'Belum Selesai' : 'Selesai ' . $cekIgd['tindak_at']) . "</span> <br>
+                                          <span class='badge bg-" . ($cekIgd['rencana_rawat_at'] == null ? 'danger' : 'success') . "'>Obat Resep</span> <br>
+                                          <span class='badge bg-" . ($cekIgd['rencana_rawat_at_poli'] == null ? 'danger' : 'success') . "'>Obat Poli</span>
+                                        ";
+                                    }
+                                  }
                                   ?>
-                                    <br>
-                                    <span class="badge bg-info" style="font-size: 9px;">ODC</span>
-                                  <?php } ?>
                                 <?php } ?>
                               </td>
-                              <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
+                              <td style="margin-top:10px;">
+                                <?php echo $pecah["dokter_rawat"]; ?>
+                                <?php if ($pecah["perawatan"] == "Rawat Inap") { ?>
+                                  <br>
+                                  <?php
+                                  $getNextRegis = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm = '$pecah[no_rm]' AND jadwal > '" . $pecah['jadwal'] . "' ORDER BY jadwal ASC LIMIT 1")->fetch_assoc();
+
+                                  $whereTglNext = "";
+                                  if($getNextRegis){
+                                    $whereTglNext .= " AND tgl < '" . $getNextRegis['jadwal'] . "'";
+                                  }
+
+                                  $getCppt = $koneksi->query("SELECT *, COUNT(*) as JUM FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' " . $whereTglNext . " AND plan_at IS NULL ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                  if ($getCppt['JUM'] > 0) {
+                                    echo "
+                                        <span class='badge bg-danger' style='font-size: 10px;'>" . $getCppt['JUM'] . " Plan Belum</span>
+                                      ";
+                                  }
+                                  ?>
+                                <?php } ?>
+                              </td>
                               <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                               <!-- <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
@@ -808,6 +840,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                         <i data-bs-toggle="dropdown" style="color: white; font-weight: bold;" class="btn btn-sm btn-primary bi bi-three-dots-vertical"></i>
                                         <ul class="dropdown-menu">
                                           <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                          <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
                                           <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                             <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
                                             <li><a href="index.php?halaman=catatanfarmasi&idrawat=<?php echo $pecah["idrawat"] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-capsule-pill" style="color: khaki;"></i> Catatan Farmasi</a></li>
@@ -830,6 +863,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                               // $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
                                               ?>
                                               <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
+                                              <!-- <li><a href="index.php?halaman=daftarrmedis&changeToOdc=<?= $pecah['idrawat'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> ODC (Masuk IGD)</a></li> -->
                                               <?php if ($getLastRM['jumm'] == 0 or $level == "dokter" or  $level == "sup") { ?>
 
                                               <?php } else { ?>
@@ -905,7 +939,23 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                     <span style="font-size: 9px;" class="btn btn-sm btn-warning" <?php if ($_SESSION['admin']['level'] == 'sup') { ?> data-bs-toggle="modal" data-bs-target="#updateKamar" onclick="upDataKamar('<?= $pecah['idrawat'] ?>', '<?= $pecah['kamar'] ?>')" <?php } ?>><?= $pecah['kamar'] ?></span>
                                   <?php } ?>
                                 </td>
-                                <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
+                                <td style="margin-top:10px;">
+                                  <?php echo $pecah["dokter_rawat"]; ?>
+                                  <?php 
+                                    $cekIgdPickRm = $koneksi->query("SELECT *, COUNT(*) AS Jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
+                                    if($cekIgdPickRm['Jum'] > 0 ){
+                                      $cekIgd = $koneksi->query("SELECT * FROM igd WHERE idigd = '$cekIgdPickRm[igd_id]'")->fetch_assoc();
+                                      if($cekIgd['tindak'] == 'ODC'){
+                                        echo "
+                                          <span class='badge bg-info'>ODC</span> <br>
+                                          <span class='badge bg-".($cekIgd['tindak_at'] == null ? 'danger' : 'success')."'>".($cekIgd['tindak_at'] == null ? 'Belum Selesai' : 'Selesai '. $cekIgd['tindak_at'])."</span> <br>
+                                          <span class='badge bg-".($cekIgd['rencana_rawat_at'] == null ? 'danger' : 'success' )."'>Obat Resep</span> <br>
+                                          <span class='badge bg-".($cekIgd['rencana_rawat_at_poli'] == null ? 'danger' : 'success' )."'>Obat Poli</span>
+                                        ";
+                                      }
+                                    }
+                                  ?>
+                                </td>
                                 <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                                 <!-- <td style="margin-top:10px;"><?php echo $pecah["jadwal"]; ?></td> -->
                                 <td style="margin-top:10px;"><?php echo $pecah["antrian"]; ?></td>
@@ -942,6 +992,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                       <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                       <ul class="dropdown-menu">
                                         <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                        <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
                                         <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                           <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
                                           <li><a href="index.php?halaman=lpo&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Observasi Perawat</a></li>
