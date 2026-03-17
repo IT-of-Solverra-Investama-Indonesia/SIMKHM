@@ -12,7 +12,11 @@ if (!isset($_GET['igd'])) {
 
 ?>
 <?php
-$getPetugasSingle = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND DATE_FORMAT(created_at, '%Y-%m-%d') = '$_GET[tglObat]' AND obat_igd = '$_GET[jenis]' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+$tglObatCondition = "";
+if ($_GET['tglObat'] != 'All') {
+    $tglObatCondition = " AND DATE_FORMAT(created_at, '%Y-%m-%d') = '$_GET[tglObat]' AND obat_igd = '$_GET[jenis]'";
+}
+$getPetugasSingle = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' $tglObatCondition ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
 ?>
 <style>
     body {
@@ -34,7 +38,7 @@ $getPetugasSingle = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[
 <div style="max-width: 58mm; padding: 2mm;">
     <center>
         <img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px; margin-bottom: 0px;" alt="">
-        <h5>Obat Inap <?= $getPetugasSingle['obat_igd'] ?> Tanggal <?= $tglObat = htmlspecialchars($_GET['tglObat']) ?></h5>
+        <h5>Obat Inap <?= $tglObatCondition == "" ? "All" : $getPetugasSingle['obat_igd'] ?> Tanggal <?= $tglObat = htmlspecialchars($_GET['tglObat']) ?></h5>
     </center>
     <table>
         <thead>
@@ -63,7 +67,7 @@ $getPetugasSingle = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[
         <div style="font-size: 12px; margin-bottom: 10px;">
             <?php
             $total = 0;
-            $getData = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND DATE_FORMAT(created_at, '%Y-%m-%d') = '$_GET[tglObat]' AND obat_igd = '$_GET[jenis]'");
+        $getData = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' $tglObatCondition ");
             foreach ($getData as $data) {
             ?>
                 <?php
