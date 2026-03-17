@@ -193,6 +193,15 @@ $pecah = $ambil->fetch_assoc();
 
             $jumlahFile = count($_POST['hasil_periksa']);
 
+            $getIgdCheck = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE igd_id = '$_GET[id]' ")->fetch_assoc();
+            $updateIdLab = "";
+            if ($getIgdCheck['jum'] != 0) {
+                $updateIdLab .= "id_lab_h = '$getIgdCheck[registrasi_id]',";
+            }
+
+            $getLabIGD = $koneksi->query("SELECT * FROM lab WHERE id_lab_igd='$_GET[id]'")->fetch_assoc();
+
+
             for ($i = 0; $i < $jumlahFile; $i++) {
 
                 foreach ($_POST['pasien'] as $value3) {
@@ -206,7 +215,9 @@ $pecah = $ambil->fetch_assoc();
             nama_periksa   = '$nama_periksa[$i]',
             pasien   = '$value3',
             norm   = '$value4',
-            id_igd  = '$value6',
+            $updateIdLab
+            id_igd  = '$getLabIGD[id_lab_igd]',
+            id_inap = '$gtLabIGD[id_lab_inap]',
             petugas   = '$value5',
             tgl_hasil   = '$value7'
           
@@ -223,17 +234,17 @@ $pecah = $ambil->fetch_assoc();
             $periksa = implode(" + ", $periksa_lab);
 
 
-            $koneksi->query("INSERT igddetail SET 
+    //         $koneksi->query("INSERT igddetail SET 
   
-    id='$id',
-    tgl='$tanggal',
-    biaya='" . $periksa . "',
-    besaran='$sum',
-    ket='Lab IGD',
-    petugas='".$_SESSION['admin']['namalengkap']."',
-    shiftinap = '".$_SESSION['shift']."'
+    // id='$id',
+    // tgl='$tanggal',
+    // biaya='" . $periksa . "',
+    // besaran='$sum',
+    // ket='Lab IGD',
+    // petugas='".$_SESSION['admin']['namalengkap']."',
+    // shiftinap = '".$_SESSION['shift']."'
 
-    ");
+    // ");
 
             // print_r($_POST['hasil_periksa']);
 
