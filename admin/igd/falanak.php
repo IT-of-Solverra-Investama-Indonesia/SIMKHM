@@ -223,6 +223,7 @@ $fal = $koneksi->query("SELECT * FROM humpty_igd WHERE no_rm='$_GET[id]' AND tip
                         <input type="checkbox" name="obat[]" value="Anti hipertensi"> Anti hipertensi</input><br>
                         <input type="checkbox" name="obat[]" value="Kardiovaskular"> Kardiovaskular</input><br>
                         <input type="checkbox" name="obat[]" value="Anti parkinson"> Anti parkinson</input><br>
+                        <input type="checkbox" name="obat[]" value="Tidak ada"> Tidak ada</input><br>
                       </div>
                     </div>
                     <br>
