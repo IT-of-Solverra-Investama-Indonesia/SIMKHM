@@ -62,7 +62,7 @@ $pasien=$pasien->fetch_assoc();
 <div style="margin-left: 140px; margin-top: 0.1px;">
 <large style="font-weight: bold; font-size:23px;">LABORATORIUM KLINIK</large><br><large style="font-weight: bold; color: steelblue; font-size:23px;">HUSADA MULIA</large><br>
 <small><?= $alamat; ?> Telp. <?= $nomor; ?></small><br>
-<small>PENANGGUNG JAWAB: dr. AINUL INDRA JAYA</small><br>
+<!-- <small>PENANGGUNG JAWAB: dr. AINUL INDRA JAYA</small><br> -->
 </div>
 </span>
 
