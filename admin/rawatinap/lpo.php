@@ -489,6 +489,7 @@ if (isset($_POST['savePenggunaan'])) {
                         <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="21:00"> 21:00
                         <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="24:00"> 24:00
                         <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="05:00"> 05:00
+                        <input type="time" name="digunakan[]" class="h-100" id="">
                         <button class="btn btn-primary btn-sm text-right" type="submit" name="savePenggunaan">Simpan Penggunaan</button>
                       </div>
                     </div>
@@ -603,6 +604,7 @@ if (isset($_POST['savePenggunaan'])) {
                         <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="21:00"> 21:00
                         <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="24:00"> 24:00
                         <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="05:00"> 05:00
+                        <input type="time" name="digunakan[]" class="h-100" id="">
                         <button class="btn btn-primary btn-sm text-right" type="submit" name="savePenggunaan">Simpan Penggunaan</button>
                       </div>
                     </div>
@@ -1332,13 +1334,13 @@ if (isset($_POST['savePenggunaan'])) {
     if (isset($_GET['igd'])) {
       echo "
               <script>
-                document.location.href='".getFullUrl()."';
+                document.location.href='" . getFullUrl() . "';
               </script>
             ";
     } else {
       echo "
               <script>
-                document.location.href='". getFullUrl()."';
+                document.location.href='" . getFullUrl() . "';
               </script>
             ";
     }
@@ -1389,13 +1391,13 @@ if (isset($_POST['savePenggunaan'])) {
     if (isset($_GET['igd'])) {
       echo "
           <script>
-            document.location.href='".getFullUrl()."';
+            document.location.href='" . getFullUrl() . "';
           </script>
         ";
     } else {
       echo "
           <script>
-            document.location.href='". getFullUrl()."';
+            document.location.href='" . getFullUrl() . "';
           </script>
         ";
     }
