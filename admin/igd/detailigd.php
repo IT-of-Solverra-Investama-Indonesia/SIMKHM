@@ -1,19 +1,17 @@
-
-<?php 
-
+<?php
 error_reporting(0);
-$username=$_SESSION['admin']['username'];
-$level=$_SESSION['admin']['level'];
-$shift=$_SESSION['shift'];
-$ambil=$koneksi->query("SELECT * FROM admin  WHERE username='$username';");
-$igd=$koneksi->query("SELECT * FROM igd WHERE idigd='$_GET[id]';");
-$igd=$igd->fetch_assoc();
-$pasien=$koneksi->query("SELECT * FROM pasien INNER JOIN kajian_awal WHERE idpasien='$_GET[id]' AND no_rm = norm;");
-$pecah=$pasien->fetch_assoc();
+$username = $_SESSION['admin']['username'];
+$level = $_SESSION['admin']['level'];
+$shift = $_SESSION['shift'];
 
+// Query data IGD
+$igd = $koneksi->query("SELECT * FROM igd WHERE idigd='" . htmlspecialchars($_GET['id']) . "'");
+$igd = $igd->fetch_assoc();
 
- ?>
-
+// Query data pemeriksaan fisik
+$pemeriksaanFisik = $koneksi->query("SELECT * FROM pemeriksaan_fisik_igd WHERE id_igd='" . htmlspecialchars($_GET['id']) . "'");
+$pf = $pemeriksaanFisik->fetch_assoc();
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,695 +19,784 @@ $pecah=$pasien->fetch_assoc();
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-  <title>KHM WONOREJO</title>
+  <title>Detail IGD - KHM WONOREJO</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
   <style>
-    .hidden{
-      display: hidden;
-      max-height: 1px;
-      overflow: hidden;
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      .card {
+        page-break-inside: avoid;
+      }
+    }
+
+    .section-title {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sub-section-title {
+      background: #f8f9fa;
+      padding: 10px 15px;
+      border-left: 4px solid #667eea;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 5px;
+    }
+
+    .form-control:disabled,
+    .form-control[readonly] {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+    }
+
+    .card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: none;
+      border-radius: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    @media (max-width: 768px) {
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-print:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-  <script rel="javascript" type="text/javascript" href="js/jquery-1.11.3.min.js"></script>
 </head>
+
 <body>
+  <main>
+    <div class="">
+      <div class="pagetitle no-print">
+        <h1>Detail IGD</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php?halaman=daftarigd" style="color:blue;">IGD</a></li>
+            <li class="breadcrumb-item active">Detail Pasien</li>
+          </ol>
+        </nav>
+      </div><!-- End Page Title -->
 
- 
-
-   <main>
-    <div class="container">
-      <div class="pagetitle">
-      <h1>IGD</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item active"><a href="index.php?halaman=daftarterapi" style="color:blue;">IGD</a></li>
-          <li class="breadcrumb-item">Buat IGD</li>
-        </ol>
-      </nav>
-    </div><!-- End Page Title -->
-
- <form class="row g-3" method="post" enctype="multipart/form-data">
-   <div class="container">
-          <div class="row">
-            <div class="col-md-12">
-
-            <div class="card" style="margin-top:10px">
-            <div class="card-body col-md-12">
-              <h5 class="card-title">Data Pasien</h5>
-              <!-- Multi Columns Form -->
-                <div class="col-md-12">
-                  <label for="inputName5" class="form-label">Nama Pasien</label>
-                  <input readonly  type="text" class="form-control" name="nama_pasien" id="inputName5" value="<?php echo $igd['nama_pasien']?>" placeholder="Masukkan Nama Pasien">
-                </div>
-                <div class="col-md-12">
-                  <label for="inputName5" style="margin-top: 10px;" class="form-label">NO RM Pasien</label>
-                  <input readonly  type="text" class="form-control" name="no_rm" id="inputName5" value="<?php echo $igd['no_rm']?>" placeholder="Masukkan No RM Pasien">
-                </div>
-                <!-- <input readonly  type="hidden" class="form-control" id="inputName5" name="id_rm" value="<?php echo $pecah['id_rm']?>"> -->
-
-                <div class="col-md-12">
-                  <label for="inputState" class="form-label">Dokter</label>
-                  <input readonly  type="text" class="form-control" name="no_rm" id="inputName5" value="<?php echo $igd['dokter']?>" placeholder="Masukkan No RM Pasien">
-                </div>
-                <!-- <div class="col-md-12">
-                  <label for="inputState" class="form-label">Pembayaran</label>
-                  <select id="inputState" name="carabayar" class="form-select">
-                    <option hidden>Pilih Pembayaran</option>
-                    <option value="bpjs">bpjs</option>
-                    <option value="umum">umum</option>
-                  </select>
-                </div> -->
-              
-                </div>
-                </div>
-
-            <div class="card">
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Data Pasien -->
+          <div class="card mb-3">
             <div class="card-body">
-              <h6 class="card-title">Formulir Triase dan Gawat Darurat</h6>
+              <h5 class="section-title mb-3">Data Pasien</h5>
+              <div class="grid-2">
+                <div>
+                  <label class="form-label">Nama Pasien</label>
+                  <input type="text" class="form-control" value="<?= $igd['nama_pasien'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">NO RM Pasien</label>
+                  <input type="text" class="form-control" value="<?= $igd['no_rm'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Dokter</label>
+                  <input type="text" class="form-control" value="<?= $igd['dokter'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Pembayaran</label>
+                  <input type="text" class="form-control" value="<?= $igd['carabayar'] ?>" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
 
-             
-              
-              <hr>
-              <div style="margin-top:10px">
-              <h5 class="card-title">Asesmen Keperawatan</h5>
+          <!-- Asesmen Keperawatan -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="section-title">Asesmen Keperawatan</h5>
+
+              <div class="grid-2 mb-3">
+                <div>
+                  <label class="form-label">Tanggal Masuk</label>
+                  <input type="date" class="form-control" value="<?= $igd['tgl_masuk'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Jam Masuk</label>
+                  <input type="time" class="form-control" value="<?= $igd['jam_masuk'] ?>" readonly>
+                </div>
               </div>
 
-              <!-- Multi Columns Form -->
-              <div class="row">
-                <?php 
-                date_default_timezone_set('Asia/Jakarta');
+              <div class="mb-3">
+                <label class="form-label">Sarana Transportasi Kedatangan</label>
+                <input type="text" class="form-control" value="<?= $igd['transportasi'] ?>" readonly>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Surat Pengantar Rujukan</label>
+                <input type="text" class="form-control" value="<?= $igd['surat_pengantar'] ?>" readonly>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Kondisi Pasien Tiba</label>
+                <input type="text" class="form-control" value="<?= $igd['kondisi_tiba'] ?>" readonly>
+              </div>
+
+              <h6 class="sub-section-title">Identitas Pengantar Pasien</h6>
+              <div class="grid-2">
+                <div>
+                  <label class="form-label">Nama Pengantar</label>
+                  <input type="text" class="form-control" value="<?= $igd['nama_pengantar'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Nomor Telepon Seluler Penanggung Jawab</label>
+                  <input type="text" class="form-control" value="<?= $igd['notelp_pengantar'] ?>" readonly>
+                </div>
+              </div>
+
+              <h6 class="sub-section-title">Riwayat Medis</h6>
+              <div class="mb-3">
+                <label class="form-label">Keluhan</label>
+                <textarea class="form-control" rows="2" readonly><?= $igd['keluhan'] ?></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Riwayat Penyakit Sebelumnya</label>
+                <textarea class="form-control" rows="2" readonly><?= $igd['riw_penyakit'] ?></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Riwayat Alergi</label>
+                <textarea class="form-control" rows="2" readonly><?= $igd['riw_alergi'] ?></textarea>
+              </div>
+
+              <h6 class="sub-section-title">Tanda-Tanda Vital</h6>
+              <div class="grid-4 mb-3">
+                <div>
+                  <label class="form-label">E</label>
+                  <input type="text" class="form-control" value="<?= $igd['e'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">V</label>
+                  <input type="text" class="form-control" value="<?= $igd['v'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">M</label>
+                  <input type="text" class="form-control" value="<?= $igd['m'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Saturasi Oksigen (%)</label>
+                  <input type="text" class="form-control" value="<?= $igd['sat_oksigen'] ?>" readonly>
+                </div>
+              </div>
+
+              <div class="grid-2 mb-3">
+                <div>
+                  <label class="form-label">TD (mmHg)</label>
+                  <input type="text" class="form-control" value="<?= $igd['td'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">RR (kali/menit)</label>
+                  <input type="text" class="form-control" value="<?= $igd['rr'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Nadi (kali/menit)</label>
+                  <input type="text" class="form-control" value="<?= $igd['n'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Suhu Tubuh (°C)</label>
+                  <input type="text" class="form-control" value="<?= $igd['s'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">GDA (mg/dL)</label>
+                  <input type="text" class="form-control" value="<?= $igd['gda'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Berat Badan (kg)</label>
+                  <input type="text" class="form-control" value="<?= $igd['bb'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Tinggi Badan (cm)</label>
+                  <input type="text" class="form-control" value="<?= $igd['tb'] ?>" readonly>
+                </div>
+              </div>
+
+              <h6 class="sub-section-title">Asesmen Nyeri</h6>
+              <div class="grid-2 mb-3">
+                <div>
+                  <label class="form-label">Status Nyeri</label>
+                  <input type="text" class="form-control" value="<?= $igd['asesmen_nyeri'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Skala Nyeri</label>
+                  <input type="text" class="form-control" value="<?= $igd['skala_nyeri'] ?>" readonly>
+                </div>
+              </div>
+
+              <h6 class="sub-section-title">Skrining Status Gizi</h6>
+              <div class="grid-2 mb-3">
+                <div>
+                  <label class="form-label">Risiko Luka Decubitus</label>
+                  <input type="text" class="form-control" value="<?= $igd['resiko_decubitus'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Penurunan BB (6 bulan terakhir)</label>
+                  <input type="text" class="form-control" value="<?= $igd['penurunan_bb'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Penurunan Asupan Makanan</label>
+                  <input type="text" class="form-control" value="<?= $igd['penurunan_asupan'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Gejala Gastrointestinal</label>
+                  <input type="text" class="form-control" value="<?= $igd['gejala_gastro'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Faktor Pemberat (Komorbid)</label>
+                  <input type="text" class="form-control" value="<?= $igd['faktor_pemberat'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Penurunan Kapasitas Fungsional</label>
+                  <input type="text" class="form-control" value="<?= $igd['penurunan_fungsional'] ?>" readonly>
+                </div>
+              </div>
+
+              <h6 class="sub-section-title">Pengkajian Psikososial</h6>
+              <div class="grid-3 mb-3">
+                <div>
+                  <label class="form-label">Pengkajian Psikologis</label>
+                  <input type="text" class="form-control" value="<?= $igd['psiko'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Pengkajian Sosial</label>
+                  <input type="text" class="form-control" value="<?= $igd['sosial'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Bantuan Yang Dibutuhkan</label>
+                  <input type="text" class="form-control" value="<?= $igd['bantuan'] ?>" readonly>
+                </div>
+              </div>
+
+              <div class="grid-2 mb-3">
+                <div>
+                  <label class="form-label">Tindak Lanjut</label>
+                  <input type="text" class="form-control" value="<?= $igd['tindak'] ?>" readonly>
+                </div>
+                <div>
+                  <label class="form-label">Keterangan Rujukan</label>
+                  <input type="text" class="form-control" value="<?= $igd['tindak_rujuk_keterangan'] ?>" readonly>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Perawat Yang Mengkaji</label>
+                <input type="text" class="form-control" value="<?= $igd['perawat'] ?>" readonly>
+              </div>
+            </div>
+          </div>
+
+          <!-- Asesmen Medis -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="section-title">Asesmen Medis</h5>
+
+              <div class="mb-3">
+                <label class="form-label">Tanggal dan Jam</label>
+                <input type="datetime-local" class="form-control" value="<?= $igd['tgl'] ?>" readonly>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Subjektif</label>
+                <textarea class="form-control" rows="4" readonly><?= $igd['sub'] ?></textarea>
+              </div>
+
+              <!-- <div class="mb-3">
+                <label class="form-label">Objektif</label>
+                <textarea class="form-control" rows="4" readonly><?= $igd['ob'] ?></textarea>
+              </div> -->
+
+              <div class="mb-3">
+                <label class="form-label">Pemeriksaan Penunjang</label>
+                <?php
+                $penunjang_data = json_decode($igd['penunjang'], true);
+                if (is_array($penunjang_data) && !empty($penunjang_data)) {
+                  echo '<div class="row g-2">';
+                  foreach ($penunjang_data as $foto) {
+                    echo '<div class="col-md-3">';
+                    echo '<img src="../igd/pemeriksaan_penunjang/' . htmlspecialchars($foto) . '" class="img-fluid rounded" style="max-height: 200px; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, \'_blank\')">';
+                    echo '</div>';
+                  }
+                  echo '</div>';
+                } else {
+                  echo '<p class="text-muted">Tidak ada foto pemeriksaan penunjang</p>';
+                }
                 ?>
-                 <div class="col-md-6" style="margin-top:10px;">
-                  <label for="inputName5" class="form-label">Tanggal Masuk</label>
-                  <input readonly  type="date" class="form-control" name="tgl_masuk"  id="inputName5" placeholder="Sesuai dengan ICD 9 CM dan standar lainnya" value="<?php echo $igd['tgl_masuk']?>">
-                </div>
-                <div class="col-md-6" style="margin-top:10px;">
-                  <label for="inputName5" class="form-label">Jam Masuk</label>
-                  <input readonly  type="time" class="form-control" name="jam_masuk" id="inputName5" value="<?php echo $igd['jam_masuk']?>" placeholder="Nama lengkap sesuai dengan kartu identitas">
-                </div>
-                 <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Sarana Transportasi Kedatangan </label>
-                  <select id="inputState" name="transportasi" class="form-select">
-                    <option value="<?php echo $igd['transportasi']?>" hidden><?php echo $igd['transportasi']?></option>
-                    <option value="Ambulans">1. Ambulans</option>
-                    <option value="Mobil">2. Mobil</option>
-                    <option value="Motor">3. Motor</option>
-                    <option value="Lain-lain">4. Lain-lain</option>
-                  </select>
-                </div>    
-                 <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Surat Pengantar Rujukan </label>
-                  <select id="inputState" name="surat_pengantar" class="form-select">
-                    <option value="<?php echo $igd['surat_pengantar']?>" hidden><?php echo $igd['surat_pengantar']?></option>
-                    <option value="Ada">Ada</option>
-                    <option value="Tidak Ada">Tidak Ada</option>
-                  </select>
-                </div>  
-                <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Kondisi Pasien Tiba </label>
-                  <select id="inputState" name="kondisi_tiba" class="form-select">
-                    <option value="<?php echo $igd['kondisi_tiba']?>" hidden><?php echo $igd['kondisi_tiba']?></option>
-                    <!-- <option value="1">Resusitasi</option> -->
-                    <option value="2">Emergency</option>
-                    <option value="3">Urgent</option>
-                    <!-- <option value="4">Less Urgent</option> -->
-                    <option value="5">Non Urgent</option>
-                    <option value="6">Death on Arrival</option>
-                  </select>
-                </div>  
-
-              <div style="margin-bottom:2px; margin-top:30px">
-              <hr>
-              <h6 class="card-title">Identitas Pengantar Pasien</h6>
               </div>
 
-              <!-- Multi Columns Form -->
-              <div class="row">
-               <div class="col-md-6">
-                  <label for="inputName5" class="form-label">Nama Pengantar</label>
-                  <input readonly  type="text" class="form-control" name="nama_pengantar" id="inputName5" value="<?php echo $igd['nama_pengantar']?>" placeholder="Masukkan Nama Pengantar">
-                </div>
-                <div class="col-md-6">
-                  <label for="inputName5" class="form-label">Nomor Telepon Seluler Penanggung Jawab</label>
-                  <input readonly  type="text" class="form-control" id="inputName5" value="<?php echo $igd['notelp_pengantar']?>" name="notelp_pengantar" placeholder="Masukkan No Telepon">
-                </div>
-             
+              <div class="mb-3">
+                <label class="form-label">Diagnosa Kerja & ICD10</label>
+                <?php
+                $dkerja_list = !empty($igd['dkerja']) ? explode(' + ', $igd['dkerja']) : [];
+                $icd10_list = !empty($igd['icd10']) ? explode(' + ', $igd['icd10']) : [];
 
-              <!-- Multi Columns Form -->
-              <div class="row">
-                
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Keluhan </label>
-                 <input readonly  type="text" class="form-control" name="keluhan" value="<?php echo $igd['keluhan']?>">
-                </div>  
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Riwayat Penyakit Sebelumnya </label>
-                 <input readonly  type="text" class="form-control" name="riw_penyakit" value="<?php echo $igd['riw_penyakit']?>">
-                </div>  
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Riw Alergi </label>
-                 <input readonly  type="text" class="form-control" name="riw_alergi" value="<?php echo $igd['riw_alergi']?>">
-                </div>  
-
-                <div>
-                      <h5 class="card-title">Tanda-Tanda Vital</h5>
-                    </div>
-    
-                    <div class="col-md-4">
-                    <label for="inputCity" class="form-label">E</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="E" name="e" aria-describedby="basic-addon2" value="<?php echo $igd['e']?>">
-                          <!-- <span class="input-group-text" id="basic-addon2">celcius</span> -->
-                    </div>
-                    </div>
-    
-                    <div class="col-md-4">
-                    <label for="inputCity" class="form-label">V</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="V" name="v" aria-describedby="basic-addon2" value="<?php echo $igd['v']?>">
-                          <!-- <span class="input-group-text" id="basic-addon2">%</span> -->
-                    </div>
-                    </div>
-    
-                    <div class="col-md-4">
-    
-                    <label for="inputCity" class="form-label">M</label>
-                     <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="M" name="m" aria-describedby="basic-addon2" value="<?php echo $igd['m']?>">
-                          <!-- <span class="input-group-text" id="basic-addon2">mmHg</span> -->
-                    </div>
-                    </div>
-    
-                    <div class="col-md-6" >
-                    <label for="inputCity" class="form-label" style="margin-top:10px;">Td</label>
-                     <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="Tekanan Darah" name="td" aria-describedby="basic-addon2" value="<?php echo $igd['td']?>">
-                          <span class="input-group-text" id="basic-addon2">mmHg</span>
-                    </div>
-                    </div>
-                    <div class="col-md-6">
-                   <label for="inputCity" class="form-label" style="margin-top:10px;">Rr</label>
-                   <div class="input-group mb-10">
-                         <input readonly  type="text" class="form-control" placeholder="Rr" name="rr" aria-describedby="basic-addon2" value="<?php echo $igd['rr']?>">
-                         <span class="input-group-text" id="basic-addon2">kali/menit</span>
-                   </div>
-                   </div>
-                   
-                    <div class="col-md-6">
-                    <label for="inputCity" class="form-label" style="margin-top:10px;">Nadi</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="Denyut Nadi" name="n" aria-describedby="basic-addon2" value="<?php echo $igd['n']?>">
-                          <span class="input-group-text" id="basic-addon2">kali/menit</span>
-                    </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                    <label for="inputCity" class="form-label" style="margin-top:10px;">Suhu Tubuh</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="Suhu Tubuh" name="s" aria-describedby="basic-addon2" value="<?php echo $igd['s']?>">
-                          <span class="input-group-text" id="basic-addon2">celcius</span>
-                    </div>
-                    </div>
-                    <div class="col-md-12">
-                    <label for="inputCity" class="form-label" style="margin-top:10px;">GDA</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="GDA" name="gda" aria-describedby="basic-addon2" value="<?php echo $igd['gda']?>">
-                          <!-- <span class="input-group-text" id="basic-addon2">celcius</span> -->
-                    </div>
-                    </div>
-                    <div class="col-md-6">
-                    <label for="inputCity" class="form-label" style="margin-top:10px;">BB</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="BB" name="bb" aria-describedby="basic-addon2" value="<?php echo $igd['bb']?>">
-                          <span class="input-group-text" id="basic-addon2">Kg</span>
-                    </div>
-                    </div>
-                    <div class="col-md-6">
-                    <label for="inputCity" class="form-label" style="margin-top:10px;">TB</label>
-                    <div class="input-group mb-10">
-                          <input readonly  type="text" class="form-control" placeholder="TB" name="tb" aria-describedby="basic-addon2" value="<?php echo $igd['tb']?>">
-                          <span class="input-group-text" id="basic-addon2">Cm</span>
-                    </div>
-                    </div>
-                    <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label" style="margin-top:10px;">Asesmen Nyeri </label>
-                  <select id="pilihan" name="asesmen_nyeri" class="form-select">
-                    <option value="<?php echo $igd['asesmen_nyeri']?>"><?php echo $igd['asesmen_nyeri']?></option>
-                    <option value="Ada">Ada</option>
-                    <option value="Tidak Ada">Tidak Ada</option>
-                  </select>
-                </div>  
-
-                <div class="hidden" id="nyr">
-                  <div class="row">
-                    <div class="col-md-12 mt-3">
-                      <label for="" class="form-label">Skala Nyeri (dari 1 -10)</label>
-                      <input readonly  type="number" class="form-control" value="<?php echo $igd['skala_nyeri']?>" name="skala_nyeri" id="" max="10">
-                    </div>
-                    <!-- <div class="col-md-6" style="margin-top:20px;">
-                      <label for="inputName5" class="form-label">Lokasi Nyeri</label>
-                      <input readonly  type="text" class="form-control" id="inputName5" value="" name="lokasi_nyeri" placeholder="Lokasi Nyeri">
-                    </div>
-                     <div class="col-md-6" style="margin-top:20px;">
-                      <label for="inputName5" class="form-label">Penyebab Nyeri</label>
-                      <input readonly  type="text" class="form-control" id="inputName5" name="penyebab_nyeri" value="" placeholder="Penyebab Nyeri">
-                    </div>
-                     <div class="col-md-6" style="margin-top:20px;">
-                      <label for="inputName5" class="form-label">Durasi Nyeri</label>
-                      <input readonly  type="text" class="form-control" id="inputName5" name="durasi_nyeri" value="" placeholder="Durasi Nyeri">
-                    </div>
-                    <div class="col-md-6" style="margin-top:20px;">
-                      <label for="inputName5" class="form-label">Frekuensi Nyeri</label>
-                      <input readonly  type="number" class="form-control" id="inputName5" name="frekuensi_nyeri" value="" placeholder="Frekuensi Nyeri">
-                    </div> -->
-                  </div>
-                </div>
-                <script>
-                  document.getElementById('pilihan').addEventListener('change', function() {
-                    var formLain = document.getElementById('nyr');
-                    if (this.value === 'Ada') {
-                      formLain.classList.remove('hidden');
-                    } else {
-                      formLain.classList.add('hidden');
+                if (!empty($dkerja_list) && $dkerja_list[0] != '') {
+                  echo '<div class="border rounded p-3" style="background: #f8f9fa;">';
+                  foreach ($dkerja_list as $index => $dkerja_item) {
+                    $icd10_item = isset($icd10_list[$index]) ? trim($icd10_list[$index]) : '-';
+                    echo '<div class="mb-2 pb-2' . ($index < count($dkerja_list) - 1 ? ' border-bottom' : '') . '">';
+                    echo '<strong>' . ($index + 1) . '. ' . htmlspecialchars(trim($dkerja_item)) . '</strong>';
+                    if ($icd10_item != '-' && $icd10_item != '') {
+                      echo '<br><small class="text-muted">ICD10: ' . htmlspecialchars($icd10_item) . '</small>';
                     }
-                  });
-                </script>
-
-                <!-- <div class="col-md-12 mt-2">
-                    <label for="">Resiko Jatuh</label>
-                    <input readonly  type="number" class="form-control" id="inputName5" name="resiko_jatuh" value="" placeholder="Kajian resiko Jatuh">
-                </div>
-                <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Gambar anatomi tubuh</label>
-                  <input readonly  type="file" class="form-control" id="inputName5" name="gambar_anatomi" value="" placeholder="Frekuensi Nyeri">
-                </div>
-                <div class="col-md-6" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Risiko Luka Decubitus</label>
-                  <select id="inputState" name="resiko_decubitus" class="form-select">
-                    <option hidden>Pilih</option>
-                    <option value="Ada">Ya</option>
-                    <option value="Tidak">Tidak</option>
-                  </select>
-                </div>
-                <div class="col-md-6" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Penurunan BB dalam waktu 6 bulan terakhir</label>
-                  <select id="inputState" name="penurunan_bb" class="form-select">
-                    <option hidden>Pilih</option>
-                    <option value="Ada">Ya</option>
-                    <option value="Tidak">Tidak</option>
-                  </select>
-                </div>
-                <div class="col-md-6" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Penurunan asupan makanan</label>
-                  <select id="inputState" name="penurunan_asupan" class="form-select">
-                    <option hidden>Pilih</option>
-                    <option value="Ada">Ya</option>
-                    <option value="Tidak">Tidak</option>
-                  </select>
-                </div>
-                <div class="col-md-6" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Gejala gastrointestinal (mual, muntah, diare, anorexia)</label>
-                  <select id="inputState" name="gejala_gastro" class="form-select">
-                    <option hidden>Pilih</option>
-                    <option value="Ada">Ya</option>
-                    <option value="Tidak">Tidak</option>
-                  </select>
-                </div>
-                <div class="col-md-6" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Faktor pemberat (komorbid)</label>
-                  <select id="inputState" name="faktor_pemberat" class="form-select">
-                    <option hidden>Pilih</option>
-                    <option value="Ada">Ya</option>
-                    <option value="Tidak">Tidak</option>
-                  </select>
-                </div>
-                <div class="col-md-6" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Penurunan kapasitas fungsional</label>
-                  <select id="inputState" name="penurunan_fungsional" class="form-select">
-                    <option hidden>Pilih</option>
-                    <option value="Ada">Ya</option>
-                    <option value="Tidak">Tidak</option>
-                  </select>
-                </div> -->
-
-                <div class="col-md-12">
-                <div>
-                      <h5 class="card-title">Skrining Status Gizi</h5>
-                    </div>
-                      <p style="color:blue">Ya = 1 , Tidak = 0</p>
-                      <div class="row">
-                        <div class="col-md-4">
-                            <p>1. Apakah pasien terlihat kurus ?</p>
-                            <input readonly  type="number" oninput="hitungGizi()" name="resiko_decubitus" id="no1" class="form-control" value="<?php echo $igd['resiko_decubitus']?>">
-                          </div>
-                        <div class="col-md-4">
-                          <p>2. Apakah pakaian anda terasa longgar ?</p>
-                          <input readonly  type="number" oninput="hitungGizi()" name="penurunan_bb" id="no2" class="form-control" value="<?php echo $igd['penurunan_bb']?>">
-                        </div>
-                        <div class="col-md-4">
-                          <p>3. Apakah akhir-akhir ini anda kehilangan berat badan yang tidak sengaja ?</p>
-                          <input readonly  type="number" oninput="hitungGizi()" name="penurunan_asupan" id="no3" class="form-control" value="<?php echo $igd['penurunan_asupan']?>">
-                        </div>
-                        <div class="col-md-4">
-                          <p>4. Apakah anda mengalami penurunan berat badan selama 1 minggu terakhir ?</p>
-                          <input readonly  type="number" oninput="hitungGizi()" name="gejala_gastro" id="no4" class="form-control" value="<?php echo $igd['gejala_gastro']?>">
-                        </div>
-                        <div class="col-md-4">
-                          <p>5. Apakah anda menderita suatu penyakit yang menyebabkan adanya perubahan jumlah jenis makanan yang anda makan ?</p>
-                          <input readonly  type="number" oninput="hitungGizi()" name="faktor_pemberat" id="no5" class="form-control" value="<?php echo $igd['faktor_pemberat']?>">
-                        </div>
-                        <div class="col-md-4">
-                          <p>6. Apakah anda merasa lemah, loyo dan tidak bertenaga ?</p>
-                          <input readonly  type="number" oninput="hitungGizi()" name="penurunan_fungsional" id="no6" class="form-control" value="<?php echo $igd['penurunan_fungsional']?>">
-                        </div>
-                      </div>
-                      <h5 class="mb-0"><b>Jumlah : <span id="totalGizi"></span> (<span id="interpretasiGizi"></span>)</b></h5>
-                      
-                    </div>
-
-                    <script>
-                      // function hitungIMT(){
-                      //   var tinggi_b =document.getElementById("tb").value;
-                      //   var berat_b =document.getElementById("bb").value;
-                      //   var imtt = berat_b/(tinggi_b*tinggi_b);
-                      //   document.getElementById("imt").value = imtt.toFixed(2);
-                      // }
-                      function hitungGizi() {
-                        var n1 = document.getElementById("no1").value;
-                        var n2 = document.getElementById("no2").value;
-                        var n3 = document.getElementById("no3").value;
-                        var n4 = document.getElementById("no4").value;
-                        var n5 = document.getElementById("no5").value;
-                        var n6 = document.getElementById("no6").value;
-                        var ttlGizi = Number(n1)+Number(n2)+Number(n3)+Number(n4)+Number(n5)+Number(n6);
-                        if(ttlGizi <= 2){
-                          document.getElementById('interpretasiGizi').innerHTML = 'Tidak beresiko Malnutrisi';
-                        }else{
-                          document.getElementById('interpretasiGizi').innerHTML = 'Beresiko Malnutrisi';
-                        }
-                        document.getElementById("totalGizi").innerHTML = ttlGizi;
-                      }
-                    </script>
-
-
-                <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Pengkajian Psikologis </label>
-                 <select name="psiko" id="" class="form-control">
-                  <option value="<?= $igd['psiko'] ?>"><?= $igd['psiko'] ?></option>
-                  <option value="Tenang">Tenang</option>
-                  <option value="Cemas">Cemas</option>
-                  <option value="Sedih">Sedih</option>
-                  <option value="Takut thd lingkungan">Takut thd lingkungan</option>
-                  <option value="Marah">Marah</option>
-                 </select>
-                </div>  
-
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Pengkajian Sosial </label>
-                 <select name="sosial" id="" class="form-control">
-                  <option value="<?= $igd['sosial'] ?>"><?= $igd['sosial'] ?></option>
-                  <option value="Sendiri">Sendiri</option>
-                  <option value="Kontrak">Kontrak</option>
-                  <option value="Rumah Ortu">Rumah Ortu</option>
-                  <option value="Lainnya">Lainnya</option>
-                 </select>
-                </div>  
-
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Bantuan Yang Dibutuhkan Pasien Dirumah </label>
-                 <select name="bantuan" id="" class="form-control">
-                  <option value="<?php echo $igd['bantuan']?>"><?php echo $igd['bantuan']?></option>
-                  <option value="Makan/Minum">Makan/Minum</option>
-                  <option value="BAB">BAB</option>
-                  <option value="BAK">BAK</option>
-                  <option value="Perawatan Luka">Perawatan Luka</option>
-                  <option value="Pemberian Obat">Pemberian Obat</option>
-                  <option value="Mobilisasi">Mobilisasi</option>
-                  <option value="Lainnya">Lainnya</option>
-                 </select>
-                </div>  
-
-                <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Tindak Lanjut</label>
-                  <select id="pilRujuk"  name="tindak" class="form-select">
-                    <option value="<?php echo $igd['tindak']?>" hidden><?php echo $igd['tindak']?></option>
-                    <option value="Pulang">1.Pulang</option>
-                    <option value="Pulang Paksa">2. Pulang Paksa</option>
-                    <option value="Rawat">3.Rawat</option>
-                    <option value="Meninggal">4.Meninggal</option>
-                    <option value="Rujuk">5.Rujuk</option>
-                  </select>
-                </div>
-                <div class="hidden mt-2" id="rjk">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <input type="text" placeholder="Tujuan Rujukan" class="form-control" name="tindak_rujuk" value="<?php echo $igd['tindak_rujuk']?>">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Perawat Yang Mengkaji </label>
-                <input readonly  type="text" name="perawat" id="" class="form-control" value="<?php echo $igd['perawat']?>">
-                </div>  
-
-            
-              
-              <div style="margin-bottom:2px; margin-top:30px">
-              <hr>
-              <h5 class="card-title">Asesmen Medis</h5>
+                    echo '</div>';
+                  }
+                  echo '</div>';
+                } else {
+                  echo '<input type="text" class="form-control" value="-" readonly>';
+                }
+                ?>
               </div>
-              
-                <div class="col-md-4" style="margin-top:5px; margin-bottom:10px">
-                  <label for="inputName5" class="form-label">Tanggal dan Jam </label>
-                <input readonly  type="datetime-local" name="tgl" id="" class="form-control" value="<?php echo $igd['tgl']?>">
-                </div> 
 
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Subjektif</label>
-                  <textarea name="sub" id="" style="width:100%; height: 150px" class="form-control" value="<?php echo $igd['sub']?>"><?php echo $igd['sub']?></textarea>
-                </div>  
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Objektif</label>
-                  <textarea name="ob" id="" style="width:100%; height: 150px" class="form-control" value="<?php echo $igd['ob']?>"><?php echo $igd['ob']?></textarea>
-                </div>  
+              <div>
+                <label class="form-label">Diagnosa Banding</label>
+                <input type="text" class="form-control" value="<?= $igd['dbanding'] ?>" readonly>
+              </div>
 
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Pemeriksaan Penunjang </label>
-                <input readonly  type="text" name="penunjang" id="" value="<?php echo $igd['penunjang']?>" class="form-control">
-                </div>  
-
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Diagnosa Kerja </label>
-                <input readonly  type="text" name="dkerja" id="" class="form-control" value="<?php echo $igd['dkerja']?>">
-                </div>  
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Diagnosa Banding </label>
-                <input readonly  type="text" name="dbanding" id="" class="form-control" value="<?php echo $igd['dbanding']?>">
-                </div>  
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Planning </label>
-                <input readonly  type="text" name="dbanding" id="" class="form-control" value="<?php echo $igd['dbanding']?>">
-                </div>  
-
-                <div class="col-md-12" style="margin-top:5px;">
-                  <label for="inputName5" class="form-label">Dokter Jaga </label>
-                <input readonly  type="text" name="dokter" id="" class="form-control" value="<?php echo $igd['dokter']?>">
-                </div>  
-                
-                 <!-- <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Rencana Pemulangan Pasien</label>
-                  <select id="inputState" name="rencana_pemulangan" class="form-select">
-                    <option value="">Pilih</option>
-                    <option value="Pasien lansia">1.Pasien lansia</option>
-                    <option value="Gangguan anggota gerak">2. Gangguan anggota gerak</option>
-                    <option value="Pasien dengan perawatan berkelanjutan atau panjang">3.Pasien dengan perawatan berkelanjutan atau panjang</option>
-                    <option value="Memerlukan bantuan dalam aktivitas sehari-hari">4.Memerlukan bantuan dalam aktivitas sehari-hari</option>
-                    <option value="Tidak masuk kriteria">5.Tidak masuk kriteria</option>
-                  </select>
-                </div> -->
-                 <!-- <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Rencana Rawat</label>
-                  <input readonly  type="text" class="form-control" id="inputName5" name="rencana_rawat" value="" placeholder="Rencana Perawatan">
+              <div class="mb-3">
+                <label class="form-label">Planning/Rencana Rawat</label>
+                <div class="border rounded p-3" style="background: #f8f9fa; min-height: 100px;">
+                  <?= $igd['rencana_rawat'] ?>
                 </div>
-                 <div class="col-md-12" style="margin-top:20px;">
-                  <label for="inputName5" class="form-label">Instruksi Medik dan Keperawatan</label>
-                  <input readonly  type="text" class="form-control" id="inputName5" name="intruksi_medik" value="" placeholder="Intruksi Medis">
-                </div> -->
+              </div>
 
+              <div class="mb-3">
+                <label class="form-label">Dokter Jaga</label>
+                <input type="text" class="form-control" value="<?= $igd['dokter'] ?>" readonly>
+              </div>
+            </div>
+          </div>
 
-               <div class="hidden mt-2" id="kamar">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <label for="inputState" class="form-label">Kamar / Ruangan</label>
-                      <!-- <input readonly  type="text" class="form-control" value="" name="kamar"> -->
-                    <select name="kamar" class="form-select" id="">
-                        <option hidden>Pilih Kamar</option>
-                        <?php
-                          $getKamar = $koneksi->query("SELECT * FROM kamar LIMIT 10");
-                          foreach($getKamar as $kamar){
-                        ?>
-                          <?php $cekKamar = $koneksi->query("SELECT COUNT(*) as jumlah FROM registrasi_rawat WHERE kamar = '$kamar[namakamar]' and status_antri != 'Pulang'")->fetch_assoc();?>
-                          <?php if($cekKamar['jumlah'] == 0){?>
-                            <option value="<?= $kamar['namakamar']?>"><?= $kamar['namakamar']?></option>
-                          <?php }else{?>
-                          <?php }?>
-                        <?php }?>
-                      </select>
+          <!-- Pemeriksaan Fisik Detail -->
+          <?php if ($pf) { ?>
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5 class="section-title">Pemeriksaan Fisik Detail</h5>
+
+                <h6 class="sub-section-title">Sistem Saraf</h6>
+                <div class="grid-4 mb-3">
+                  <div>
+                    <label class="form-label">GCS E</label>
+                    <input type="text" class="form-control" value="<?= $pf['gcs_e'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">GCS V</label>
+                    <input type="text" class="form-control" value="<?= $pf['gcs_v'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">GCS M</label>
+                    <input type="text" class="form-control" value="<?= $pf['gcs_m'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Kognitif</label>
+                    <input type="text" class="form-control" value="<?= $pf['kognitif'] ?>" readonly>
+                  </div>
+                </div>
+
+                <div class="grid-4 mb-3">
+                  <div>
+                    <label class="form-label">Rangsangan Meninggal</label>
+                    <input type="text" class="form-control" value="<?= $pf['rangsangan_meninggal'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Refleks Fisiologis 1</label>
+                    <input type="text" class="form-control" value="<?= $pf['refleks_fisiologis1'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Refleks Fisiologis 2</label>
+                    <input type="text" class="form-control" value="<?= $pf['refleks_fisiologis2'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Refleks Patologis</label>
+                    <input type="text" class="form-control" value="<?= $pf['refleks_patologis'] ?>" readonly>
+                  </div>
+                </div>
+
+                <h6 class="sub-section-title">Sistem Penglihatan</h6>
+                <div class="grid-4 mb-3">
+                  <div>
+                    <label class="form-label">Anemis Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['anemis_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Anemis Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['anemis_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Ikterik Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['ikterik_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Ikterik Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['ikterik_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">RCL Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['rcl_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">RCL Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['rcl_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Pupil Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['pupil_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Pupil Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['pupil_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Visus Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['visus_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Visus Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['visus_kanan'] ?>" readonly>
+                  </div>
+                </div>
+
+                <h6 class="sub-section-title">THT</h6>
+                <div class="grid-4 mb-3">
+                  <div>
+                    <label class="form-label">NCH Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['nch_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">NCH Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['nch_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Polip Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['polip_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Polip Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['polip_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Conca Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['conca_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Conca Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['conca_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Faring Hipertermis</label>
+                    <input type="text" class="form-control" value="<?= $pf['faring_hipertermis'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Halitosis</label>
+                    <input type="text" class="form-control" value="<?= $pf['halitosis'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Pembesaran Tonsil</label>
+                    <input type="text" class="form-control" value="<?= $pf['pembesaran_tonsil'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Serumin Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['serumin_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Serumin Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['serumin_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Tympani Intak Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['typani_intak_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Tympani Intak Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['typani_intak_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Pembesaran Getah Bening</label>
+                    <input type="text" class="form-control" value="<?= $pf['pembesaran_getah_bening'] ?>" readonly>
+                  </div>
+                </div>
+
+                <h6 class="sub-section-title">Sistem Pernafasan</h6>
+                <div class="grid-3 mb-3">
+                  <div>
+                    <label class="form-label">Torax</label>
+                    <input type="text" class="form-control" value="<?= $pf['torax'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Retraksi</label>
+                    <input type="text" class="form-control" value="<?= $pf['retraksi'] ?>" readonly>
+                  </div>
+                </div>
+
+                <div class="grid-2 mb-3">
+                  <div>
+                    <label class="form-label">Vesikuler Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['vesikuler_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Vesikuler Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['vesikuler_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Wheezing Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['wheezing_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Wheezing Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['wheezing_kanan'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Rongki Kiri</label>
+                    <input type="text" class="form-control" value="<?= $pf['rongki_kiri'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Rongki Kanan</label>
+                    <input type="text" class="form-control" value="<?= $pf['rongki_kanan'] ?>" readonly>
+                  </div>
+                </div>
+
+                <h6 class="sub-section-title">Sistem Jantung</h6>
+                <div class="grid-3 mb-3">
+                  <div>
+                    <label class="form-label">S1 S2</label>
+                    <input type="text" class="form-control" value="<?= $pf['s1s2'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Murmur</label>
+                    <input type="text" class="form-control" value="<?= $pf['murmur'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Gallop</label>
+                    <input type="text" class="form-control" value="<?= $pf['golop'] ?>" readonly>
+                  </div>
+                </div>
+
+                <h6 class="sub-section-title">Sistem Pencernaan</h6>
+                <div class="grid-4 mb-3">
+                  <div>
+                    <label class="form-label">Flat</label>
+                    <input type="text" class="form-control" value="<?= $pf['flat'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Hepar & Lien</label>
+                    <input type="text" class="form-control" value="<?= $pf['hl'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Assistos</label>
+                    <input type="text" class="form-control" value="<?= $pf['assistos'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Thympani</label>
+                    <input type="text" class="form-control" value="<?= $pf['thympani'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Soepel</label>
+                    <input type="text" class="form-control" value="<?= $pf['soepel'] ?>" readonly>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label"><strong>Nyeri Tekan Fossa (NTF)</strong></label>
+                  <div class="grid-3">
+                    <div>
+                      <label class="form-label small">NTF Atas Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_atas_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Atas</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_atas'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Atas Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_atas_kanan'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Tengah Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_tengah_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Tengah</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_tengah'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Tengah Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_tengah_kanan'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Bawah Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_bawah_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Bawah</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_bawah'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">NTF Bawah Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['ntf_bawah_kanan'] ?>" readonly>
                     </div>
                   </div>
-                </div> 
-               
+                </div>
 
-                <script>
-                  document.getElementById('pilRujuk').addEventListener('change', function() {
-                    var formLain = document.getElementById('rjk');
-                    var formLain2 = document.getElementById('kamar');
-                    if (this.value === 'Rujuk') {
-                      formLain.classList.remove('hidden');
-                    }else if (this.value === 'Rawat') {
-                      formLain2.classList.remove('hidden');
-                    }else if (this.value != 'Rujuk'){
-                      formLain.classList.add('hidden');
-                    }else if (this.value != 'Rawat'){
-                      formLain2.classList.add('hidden');
-                    }
-                  });
-                </script>
+                <div class="grid-3 mb-3">
+                  <div>
+                    <label class="form-label">Bising Usus (BU)</label>
+                    <input type="text" class="form-control" value="<?= $pf['bu'] ?>" readonly>
+                  </div>
+                  <div>
+                    <label class="form-label">Komentar BU</label>
+                    <input type="text" class="form-control" value="<?= $pf['bu_komen'] ?>" readonly>
+                  </div>
+                </div>
 
+                <h6 class="sub-section-title">Ekstremitas</h6>
+                <div class="mb-3">
+                  <label class="form-label"><strong>Akral Hangat</strong></label>
+                  <div class="grid-4">
+                    <div>
+                      <label class="form-label small">Atas Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['akral_hangat_atas_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Atas Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['akral_hangat_atas_kanan'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Bawah Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['akral_hangat_bawah_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Bawah Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['akral_hangat_bawah_kanan'] ?>" readonly>
+                    </div>
+                  </div>
+                </div>
 
-                <!-- <div class="text-center" style="margin-top: 50px; margin-bottom: 80px;">
-                  <button type="submit" name="save" class="btn btn-primary">Simpan</button>
-                </div> -->
-              </form><!-- End Multi Columns Form -->
+                <div class="mb-3">
+                  <label class="form-label"><strong>Oedema (OE)</strong></label>
+                  <div class="grid-4">
+                    <div>
+                      <label class="form-label small">Atas Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['oe_atas_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Atas Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['oe_atas_kanan'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Bawah Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['oe_bawah_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Bawah Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['oe_bawah_kanan'] ?>" readonly>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label"><strong>Kekuatan Motorik</strong></label>
+                  <div class="grid-4">
+                    <div>
+                      <label class="form-label small">Atas Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['motorik_atas_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Atas Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['motorik_atas_kanan'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Bawah Kiri</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['motorik_bawah_kiri'] ?>" readonly>
+                    </div>
+                    <div>
+                      <label class="form-label small">Bawah Kanan</label>
+                      <input type="text" class="form-control form-control-sm" value="<?= $pf['motorik_bawah_kanan'] ?>" readonly>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">CRT (Capillary Refill Time)</label>
+                  <input type="text" class="form-control" value="<?= $pf['crt'] ?>" readonly>
+                </div>
+              </div>
+            </div>
+          <?php } ?>
+
+          <!-- Tombol Aksi -->
+          <div class="card p-2">
+            <div>
+              <center>
+                <a href="index.php?halaman=ubahigd&id=<?= $_GET['id'] ?>" class="btn btn-sm btn-primary me-2">
+                  <i class="bi bi-pencil-square"></i> Edit Data
+                </a>
+                <a href="index.php?halaman=daftarigd" class="btn btn-sm btn-secondary">
+                  <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+              </center>
             </div>
           </div>
         </div>
-        </div>
-    
       </div>
-     </div>
     </div>
-  </main><!-- End #main -->
+  </main>
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center no-print"><i class="bi bi-arrow-up-short"></i></a>
 
 </body>
 
 </html>
-
-
-<?php  
-if (isset ($_POST['save'])) {
-
-    $no_rm=$_POST['no_rm'];
-    $nama_pasien=$_POST['nama_pasien'];
-    $tgl_masuk=$_POST['tgl_masuk'];
-    $jam_masuk=$_POST['jam_masuk'];
-    $transportasi=$_POST['transportasi'];
-    $surat_pengantar=$_POST['surat_pengantar'];
-    $kondisi_tiba=$_POST['kondisi_tiba'];
-    $nama_pengantar=$_POST['nama_pengantar'];
-    $notelp_pengantar=$_POST['notelp_pengantar'];
-    $asesmen_nyeri=$_POST['asesmen_nyeri'];
-    // $skala_nyeri=$_POST['skala_nyeri'];
-    // $lokasi_nyeri=$_POST['lokasi_nyeri'];
-    // $penyebab_nyeri=$_POST['penyebab_nyeri'];
-    // $durasi_nyeri=$_POST['durasi_nyeri'];
-    // $frekuensi_nyeri=$_POST['frekuensi_nyeri'];
-    // $kajian_jatuh=$_POST['kajian_jatuh'];
-    // $gambar_anatomi=$_POST['gambar_anatomi'];
-    // $tingkat_kesadaran=$_POST['tingkat_kesadaran'];
-    $resiko_decubitus=$_POST['resiko_decubitus'];
-    $penurunan_bb=$_POST['penurunan_bb'];
-    $penurunan_asupan=$_POST['penurunan_asupan'];
-    $gejala_gastro=$_POST['gejala_gastro'];
-    $faktor_pemberat=$_POST['faktor_pemberat'];
-    $penurunan_fungsional=$_POST['penurunan_fungsional'];
-    // $rencana_pemulangan=$_POST['rencana_pemulangan'];
-    // $rencana_rawat=$_POST['rencana_rawat'];
-    // $intruksi_medik=$_POST['intruksi_medik'];
-    // $idrm=$_POST['idrm'];
-
-  //   $gambar_anatomi=$_FILES['gambar_anatomi']['name'];
-
-  //   $lokasi=$_FILES['gambar_anatomi']['tmp_name'];
-
-  //   move_uploaded_file($lokasi, '../igd/foto/'.$gambar_anatomi);
-
-   
-  //  if (!empty($lokasi))
-
-  //  {
-
-  // move_uploaded_file($lokasi, '../igd/foto/'.$gambar_anatomi);
-
-   $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',psiko='$_POST[psiko]',sosial='$_POST[sosial]',bantuan='$_POST[bantuan]',penunjang='$_POST[penunjang]',dkerja='$_POST[dkerja]',dbanding='$_POST[dbanding]',tindak='$_POST[tindak]',skala_nyeri='$_POST[skala_nyeri]',tindak_rujuk='$_POST[tindak_rujuk]',keluhan='$_POST[keluhan]',riw_penyakit='$_POST[riw_penyakit]',riw_alergi='$_POST[riw_alergi]',perawat='$_POST[perawat]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]', tgl='$_POST[tgl]', sub='$_POST[sub]', ob='$_POST[ob]', dokter='$_POST[dokter]' WHERE idigd='$_GET[id]' ");
-
-   $countigd = $koneksi->query("SELECT *, COUNT(perawat) as jumlah FROM igd WHERE idigd = '$_GET[id]' LIMIT 1")->fetch_assoc();
-
-  if($countigd["jumlah"] == 0){
-   if($_POST['tindak'] == "Rawat"){
-   $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift) VALUES ('$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift')");
-   }
-  }
-
-
-  echo "
-  <script>
-  alert('Data berhasil ditambah');
-  document.location.href='index.php?halaman=daftarregistrasiinap';
-  </script>
-
-  ";
-
-
-  }
-
-  // else {
-
-  //    $koneksi->query("UPDATE igd SET no_rm='$no_rm', nama_pasien='$nama_pasien', tgl_masuk='$tgl_masuk', jam_masuk='$jam_masuk', transportasi='$transportasi', surat_pengantar='$surat_pengantar', kondisi_tiba='$kondisi_tiba', nama_pengantar='$nama_pengantar', notelp_pengantar='$notelp_pengantar', asesmen_nyeri='$asesmen_nyeri', lokasi_nyeri='$lokasi_nyeri', penyebab_nyeri='$penyebab_nyeri', durasi_nyeri='$durasi_nyeri', frekuensi_nyeri='$frekuensi_nyeri', resiko_decubitus='$resiko_decubitus',penurunan_bb='$penurunan_bb',penurunan_asupan='$penurunan_asupan',gejala_gastro='$gejala_gastro',faktor_pemberat='$faktor_pemberat',penurunan_fungsional='$penurunan_fungsional',rencana_pemulangan='$rencana_pemulangan',psiko='$psiko',sosial='$sosial',bantuan='$bantuan',penunjang='$penunjang',dkerja='$dkerja',dbanding='$dbanding',tindak='$tindak',skala_nyeri='$skala_nyeri',tindak_rujuk='$tindak_rujuk',keluhan='$keluhan',riw_penyakit='$riw_penyakit',riw_alergi='$riw_alergi',perawat='$_SESSION[admin][nama_lengkap]', e='$_POST[e]', v='$_POST[v]', m='$_POST[m]', td='$_POST[td]', rr='$_POST[rr]', n='$_POST[n]', s='$_POST[s]', gda='$_POST[gda]', bb='$_POST[bb]', tb='$_POST[tb]' WHERE idigd='$_GET[id]' ");
-
-  //    if($_POST['tindak'] == "Rawat"){
-  //     $koneksi->query("INSERT INTO registrasi_rawat (nama_pasien, dokter_rawat, perawatan, kamar, jenis_kunjungan, id_pasien, no_rm, jadwal, antrian, status_antri, carabayar, shift) VALUES ('$nama_pasien', '$_POST[dokter_rawat]', 'Rawat Inap', '$_POST[kamar]', 'Kunjungan Sakit', '', '$no_rm', '$tgl_masuk', '', 'Belum Datang', '$_POST[carabayar]', '$shift')");
-  //     }
-
-
-  //   }
-
-   
-
-
-  // if (mysqli_affected_rows($koneksi)>0) {
- 
-
-// } else {
-
-//   echo "
-//   <script>
-//   alert('GAGAL MENGHAPUS DATA');
-//   document.location.href='index.php?halaman=daftarigd;
-//   </script>
-
-//   ";
-
-// }
-
-
-
-
-//   // $koneksi->query("INSERT INTO log_user 
-
-//   //   (status_log, username_admin, idadmin)
-
-//   //   VALUES ('$status_log', '$username_admin', '$idadmin')
-
-//   //   ");
-
-// }
-
-?>
