@@ -262,7 +262,29 @@ date_default_timezone_set('Asia/Jakarta');
                               <td><?php echo $no; ?></td>
                               <!-- <td><?php echo $pecah['idrawat']; ?></td> -->
                               <td style="margin-top:10px;"><?php echo $pecah["nama_pasien"]; ?></td>
-                              <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?><br><span style="font-size: 10px; font-weight: bold;"><?= $pecah['status_antri'] ?></span></td>
+                              <td style="margin-top:10px;">
+                                <?php echo $pecah["perawatan"]; ?><br>
+                                <span style="font-size: 10px; font-weight: bold;"><?= $pecah['status_antri'] ?></span><br>
+                                <?php
+                                $getLayananODC = $koneksi->query("SELECT COUNT(*) AS Jum FROM layanan WHERE idrm = '$pecah[no_rm]' AND tgl_layanan = '$pecah[jadwal]' AND layanan = 'ODC'")->fetch_assoc();
+                                if ($getLayananODC['Jum'] != 0) {
+                                  $getIGDRMCheck = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
+                                  if ($getIGDRMCheck['jum'] != 0) {
+                                    $getDataIGDOdc = $koneksi->query("SELECT * FROM igd WHERE idigd = '$getIGDRMCheck[igd_id]'")->fetch_assoc();
+                                    echo "<span class='badge bg-" . ($getDataIGDOdc['rencana_rawat_at'] == null ? "danger" : "success") . "' style='font-size: 9px;'>Obat ODC Resep</span>";
+                                    echo "<span class='badge bg-" . ($getDataIGDOdc['rencana_rawat_at_poli'] == null ? "danger" : "success") . "' style='font-size: 9px;'>Obat ODC Poli</span>";
+                                  }
+                                }
+
+                                $getEmergencyPasien = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
+                                if($getEmergencyPasien['jum'] != 0){
+                                  $getIgdEmergency = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd WHERE idigd = '$getEmergencyPasien[igd_id]' AND tindak != 'Rawat' AND tindak != 'ODC'")->fetch_assoc();
+                                  if($getIgdEmergency['jum'] != 0){
+                                      echo "<span class='badge bg-" . ($getIgdEmergency['rencana_rawat_at'] == null ? "danger" : "success") . "' style='font-size: 9px;'>Obat Resep</span>";
+                                  }
+                                }
+                                ?>
+                              </td>
                               <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
                               <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                               <?php
