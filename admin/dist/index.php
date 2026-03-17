@@ -351,6 +351,29 @@ $level = $_SESSION['admin']['level'];
         </a>
       </li>
       <!-- End Dashboard Nav -->
+      <?php
+      $notifKajianAwal = 0;
+
+      if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') {
+
+        $getKajianAwal = $koneksi->query("SELECT COUNT(*) AS total FROM registrasi_rawat rr JOIN biaya_rawat br ON rr.idrawat = br.idregis WHERE br.biaya_lain LIKE '%ODC%' AND rr.perawat_at IS NULL;")->fetch_assoc();
+        $dataKajianAwalBaru = (int) $getKajianAwal['total'];
+
+        $dataKajianAwalLama = $_SESSION['notif_kajian_awal'] ?? 0;
+
+        if ($dataKajianAwalBaru > 0 && $dataKajianAwalBaru != $dataKajianAwalLama) {
+          echo "
+              <audio autoplay>
+                <source src='https://public-assets.content-platform.envatousercontent.com/bb57cbaa-7c56-447b-a9ae-a6d964b90750/ae7d06ae-d4c7-485c-96e6-edc50ecd062e/preview.m4a' type='audio/mpeg'>
+              </audio>
+            ";
+        }
+
+        $_SESSION['notif_kajian_awal'] = $dataKajianAwalBaru;
+
+        $notifKajianAwal = $dataKajianAwalBaru;
+      }
+      ?>
 
       <?php if ($level == 'perawat' or $level == 'ceo' or $level == 'rekam medis' or $level == 'sup' or $level == 'inap' or $level == 'gizi' or $level == 'apoteker') { ?>
 
@@ -363,7 +386,11 @@ $level = $_SESSION['admin']['level'];
           <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
             <li>
               <a href="index.php?halaman=daftarregistrasi&day">
-                <i class="bi bi-circle"></i><span>Kajian Awal</span>
+                <i class="bi bi-circle"></i><span>Kajian Awal
+                  <?php if ($notifKajianAwal > 0) { ?>
+                    <?php echo "<span class='badge bg-danger'>($notifKajianAwal)</span>"; ?>
+                  <?php } ?>
+                </span>
               </a>
             </li>
             <li>
@@ -705,22 +732,32 @@ $level = $_SESSION['admin']['level'];
 
       <?php
       $notifRanap = 0;
-      if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') {
-        $getRegistrasiInap = $koneksi->query("SELECT * FROM registrasi_rawat WHERE perawatan = 'Rawat Inap' AND status_antri != 'Pulang' ORDER BY idrawat DESC");
-        foreach ($getRegistrasiInap as $ranapNotif) {
-          $getObatInapUnSee = $koneksi->query("SELECT * FROM obat_rm_request  WHERE idrm = '$ranapNotif[no_rm]' AND tgl_pasien='" . date('Y-m-d', strtotime($ranapNotif['jadwal'])) . "' AND see_apotek_at IS NULL")->num_rows;
-          if ($getObatInapUnSee > 0) {
-            $notifRanap += $getObatInapUnSee;
-          }
-        }
+      $notifPenjualanObat = 0;
 
-        if ($notifRanap > 0) {
+
+      if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') {
+        $getRegistrasiInap = $koneksi->query("SELECT COUNT(*) as total FROM `ctt_penyakit_inap` WHERE plan_at IS NULL")->fetch_assoc();
+        $dataRegisBaru = (int) $getRegistrasiInap['total'];
+
+        $getPenjualanObat = $koneksi->query("SELECT COUNT(*) as total FROM `igd` WHERE rencana_rawat_at IS NULL AND tindak != 'Rawat' AND tindak != '';")->fetch_assoc();
+        $dataJualObatBaru = (int) $getPenjualanObat['total'];
+
+        $dataJualObatLama = $_SESSION['notif_jual_obat'] ?? 0;
+        $dataRegisLama = $_SESSION['notif_ranap'] ?? 0;
+
+        if ($dataRegisBaru > 0 && $dataRegisBaru != $dataRegisLama || $dataJualObatBaru > 0 && $dataJualObatBaru != $dataJualObatLama) {
           echo "
               <audio autoplay>
                 <source src='https://public-assets.content-platform.envatousercontent.com/bb57cbaa-7c56-447b-a9ae-a6d964b90750/ae7d06ae-d4c7-485c-96e6-edc50ecd062e/preview.m4a' type='audio/mpeg'>
               </audio>
             ";
         }
+
+        $_SESSION['notif_ranap'] = $dataRegisBaru;
+        $_SESSION['notif_jual_obat'] = $dataJualObatBaru;
+
+        $notifPenjualanObat = $dataJualObatBaru;
+        $notifRanap = $dataRegisBaru;
       }
       ?>
 
@@ -793,7 +830,13 @@ $level = $_SESSION['admin']['level'];
           </a> -->
           <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_resep">
             <i class="bi bi-cart-check-fill"></i>
-            <span>Penjualan Obat Resep</span>
+            <span>Penjualan Obat Resep
+              <?php if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
+                <?php if ($notifPenjualanObat > 0) { ?>
+                  <?php echo "<span class='badge bg-danger'>($notifPenjualanObat)</span>"; ?>
+                <?php } ?>
+              <?php } ?>
+            </span>
           </a>
           <!-- <a class="nav-link collapsed" href="index.php?halaman=penjualan_obat_resep_riwayat">
             <i class="bi bi-bar-chart-fill"></i>
@@ -827,12 +870,40 @@ $level = $_SESSION['admin']['level'];
         </li><!-- End Profile Page Nav -->
       <?php } ?>
 
+      <?php
+      $notifRacikObat = 0;
+
+      if ($level == 'racik') {
+
+        $getRacikObat = $koneksi->query("SELECT COUNT(*) as total FROM `igd` WHERE rencana_rawat_at_poli IS NULL AND tindak = 'ODC';")->fetch_assoc();
+        $dataRacikObatBaru = (int) $getRacikObat['total'];
+
+        $dataRacikObatLama = $_SESSION['notif_jual_obat_poli'] ?? 0;
+
+        if ($dataRacikObatBaru > 0 && $dataRacikObatBaru != $dataRacikObatLama) {
+          echo "
+              <audio autoplay>
+                <source src='https://public-assets.content-platform.envatousercontent.com/bb57cbaa-7c56-447b-a9ae-a6d964b90750/ae7d06ae-d4c7-485c-96e6-edc50ecd062e/preview.m4a' type='audio/mpeg'>
+              </audio>
+            ";
+        }
+
+        $_SESSION['notif_jual_obat_poli'] = $dataRacikObatBaru;
+
+        $notifRacikObat = $dataRacikObatBaru;
+      }
+      ?>
+
       <?php if ($level == 'racik') { ?>
         <li class="nav-heading">Petugas Racik</li>
         <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&racik">
             <i class="bi bi-capsule"></i>
-            <span>Racik Obat</span>
+            <span>Racik Obat
+              <?php if ($notifRacikObat > 0) { ?>
+                <?php echo "<span class='badge bg-danger'>($notifRacikObat)</span>"; ?>
+              <?php } ?>
+            </span>
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=apotek_terima">
             <i class="bi bi-capsule"></i>
@@ -840,9 +911,9 @@ $level = $_SESSION['admin']['level'];
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=daftarrmedis&inap">
             <i class="bi bi-capsule"></i>
-            <span>Rawat Inap <span>Rawat Inap <?php if ($notifRanap > 0) {
-                                                echo "<span class='badge bg-danger'>($notifRanap)</span>";
-                                              } ?></span></span>
+            <span>Rawat Inap <?php if ($notifRanap > 0) {
+                                echo "<span class='badge bg-danger'>($notifRanap)</span>";
+                              } ?></span>
           </a>
           <!-- <a class="nav-link collapsed" href="index.php?halaman=entri_obat_inap">
             <i class="bi bi-capsule"></i>
@@ -883,8 +954,88 @@ $level = $_SESSION['admin']['level'];
         </li><!-- End Profile Page Nav -->
       <?php } ?>
 
+      <?php
+      $notifLabPoli = 0;
+      $notifLabInap = 0;
+      $notifLabIgd = 0;
+
+      if ($level == 'lab') {
+
+        $querySql = "
+        SELECT
+            -- Kategori IGD
+            SUM(CASE 
+                WHEN (l.id_lab_igd IS NOT NULL AND l.id_lab_igd != '') AND lh_igd.idhasil IS NULL 
+                THEN 1 ELSE 0 
+            END) as total_igd,
+
+            -- Kategori Poli
+            SUM(CASE 
+                WHEN (l.id_lab IS NOT NULL AND l.id_lab != '') 
+                     AND (l.id_lab_inap IS NULL OR l.id_lab_inap = '') 
+                     AND (l.id_lab_igd IS NULL OR l.id_lab_igd = '')
+                     AND lh_poli.idhasil IS NULL 
+                THEN 1 ELSE 0 
+            END) as total_poli,
+
+            -- Kategori Inap
+            SUM(CASE 
+                WHEN (l.id_lab_inap IS NOT NULL AND l.id_lab_inap != '') 
+                     AND (l.id_lab IS NULL OR l.id_lab = '') 
+                     AND (l.id_lab_igd IS NULL OR l.id_lab_igd = '')
+                     AND lh_inap.idhasil IS NULL 
+                THEN 1 ELSE 0 
+            END) as total_inap
+        FROM `lab` l
+        
+        -- Menggabungkan tabel secara langsung (Jauh lebih cepat dari subquery)
+        LEFT JOIN `lab_hasil` lh_igd  ON l.id_lab_igd = lh_igd.id_igd AND l.id_lab_igd != ''
+        LEFT JOIN `lab_hasil` lh_poli ON l.id_lab = lh_poli.id_lab_h  AND l.id_lab != ''
+        LEFT JOIN `lab_hasil` lh_inap ON l.id_lab_inap = lh_inap.id_inap AND l.id_lab_inap != ''
+        
+        WHERE l.tgl >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ";
+
+        $counts = $koneksi->query($querySql)->fetch_assoc();
+
+        // 2. Ambil jumlah baru dari hasil query
+        $dataLabIgdBaru  = (int) ($counts['total_igd'] ?? 0);
+        $dataLabPoliBaru = (int) ($counts['total_poli'] ?? 0);
+        $dataLabInapBaru = (int) ($counts['total_inap'] ?? 0);
+
+        // 3. Ambil jumlah lama dari session
+        $dataLabIgdLama  = $_SESSION['notif_lab_igd'] ?? null;
+        $dataLabPoliLama = $_SESSION['notif_lab_poli'] ?? null;
+        $dataLabInapLama = $_SESSION['notif_lab_inap'] ?? null;
+
+        // 4. Bandingkan jumlah untuk memicu notifikasi suara
+        $playNotif = false;
+        if ($dataLabIgdBaru > 0 && $dataLabIgdBaru !== $dataLabIgdLama) $playNotif = true;
+        if (!$playNotif && $dataLabPoliBaru > 0 && $dataLabPoliBaru !== $dataLabPoliLama) $playNotif = true;
+        if (!$playNotif && $dataLabInapBaru > 0 && $dataLabInapBaru !== $dataLabInapLama) $playNotif = true;
+
+        if ($playNotif) {
+          echo "
+          <audio autoplay>
+            <source src='https://public-assets.content-platform.envatousercontent.com/bb57cbaa-7c56-447b-a9ae-a6d964b90750/ae7d06ae-d4c7-485c-96e6-edc50ecd062e/preview.m4a' type='audio/mpeg'>
+          </audio>
+        ";
+        }
+
+        // 5. Update session dengan jumlah yang baru
+        $_SESSION['notif_lab_igd']  = $dataLabIgdBaru;
+        $_SESSION['notif_lab_poli'] = $dataLabPoliBaru;
+        $_SESSION['notif_lab_inap'] = $dataLabInapBaru;
+
+        // 6. Update variabel untuk ditampilkan di UI
+        $notifLabIgd  = $dataLabIgdBaru;
+        $notifLabPoli = $dataLabPoliBaru;
+        $notifLabInap = $dataLabInapBaru;
+      }
+      ?>
 
       <?php if ($level == 'lab' or $level == 'ceo'  or $level == 'sup' or $level == 'lab') { ?>
+
         <li class="nav-heading">Rujukan Laboratorium</li>
         <li class="nav-item">
           <a class="nav-link collapsed" href="index.php?halaman=daftarlabdata">
@@ -893,15 +1044,33 @@ $level = $_SESSION['admin']['level'];
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=daftarlab">
             <i class="bi bi-clipboard2-pulse"></i>
-            <span>Lab (Poli)</span>
+            <span>Lab (Poli)
+              <?php if ($level == 'lab' or $level == 'ceo'  or $level == 'sup' or $level == 'lab') { ?>
+                <?php if ($notifLabPoli > 0) { ?>
+                  <?php echo "<span class='badge bg-danger'>($notifLabPoli)</span>"; ?>
+                <?php } ?>
+              <?php } ?>
+            </span>
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=daftarlabinap">
             <i class="bi bi-clipboard2-pulse"></i>
-            <span>Lab (Inap)</span>
+            <span>Lab (Inap)
+              <?php if ($level == 'lab' or $level == 'ceo'  or $level == 'sup' or $level == 'lab') { ?>
+                <?php if ($notifLabInap > 0) { ?>
+                  <?php echo "<span class='badge bg-danger'>($notifLabInap)</span>"; ?>
+                <?php } ?>
+              <?php } ?>
+            </span>
           </a>
           <a class="nav-link collapsed" href="index.php?halaman=daftarlabigd">
             <i class="bi bi-clipboard2-pulse"></i>
-            <span>Lab (IGD)</span>
+            <span>Lab (IGD)
+              <?php if ($level == 'lab' or $level == 'ceo'  or $level == 'sup' or $level == 'lab') { ?>
+                <?php if ($notifLabIgd > 0) { ?>
+                  <?php echo "<span class='badge bg-danger'>($notifLabIgd)</span>"; ?>
+                <?php } ?>
+              <?php } ?>
+            </span>
           </a>
         </li><!-- End Profile Page Nav -->
       <?php } ?>
