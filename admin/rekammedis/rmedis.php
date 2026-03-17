@@ -3,6 +3,20 @@
 $date = date("Y-m-d");
 date_default_timezone_set('Asia/Jakarta');
 
+if (isset($_GET['tandaiSelesaiIsiIGD'])) {
+  $koneksi->query("UPDATE igd SET rencana_rawat_at_poli = '" . date('Y-m-d H:i:s') . "' WHERE idigd = '$_GET[tandaiSelesaiIsiIGD]'");
+  $getPickRm = $koneksi->query("SELECT * FROM igd_pick_rm WHERE igd_id = '$_GET[tandaiSelesaiIsiIGD]'")->fetch_assoc();
+  
+  $koneksi->query("UPDATE registrasi_rawat SET status_antri = 'Pembayaran' WHERE idrawat = '$getPickRm[registrasi_id]'");
+  echo "
+    <script>
+      alert('Berhasil diTandai Sebagai Selesai');
+      window.close();
+    </script>
+  ";
+  exit();
+}
+
 $username = $_SESSION['admin']['username'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 
@@ -50,15 +64,15 @@ if (isset($_POST['save'])) {
   $getRegistrasiRawat = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
   $checkPickIgd = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE registrasi_id='$getRegistrasiRawat[idrawat]'")->fetch_assoc();
 
-  if($checkPickIgd['jum'] > 0){
+  if ($checkPickIgd['jum'] > 0) {
     $newId = $checkPickIgd['rekam_medis_id'];
-  }else{
+  } else {
     $getLastRekamMedis = $koneksi->query("SELECT * FROM rekam_medis ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
     $newId = $getLastRekamMedis['id_rm'] + 1;
 
     $checkDoublePick = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE rekam_medis_id='$newId'")->fetch_assoc();
 
-    if($checkDoublePick['jum'] > 0){
+    if ($checkDoublePick['jum'] > 0) {
       $newId = $newId + 1;
     }
   }
@@ -70,6 +84,44 @@ if (isset($_POST['save'])) {
   $koneksi->query("UPDATE registrasi_rawat SET status_antri='Pembayaran', dokter_at = '" . date('Y-m-d H:i:s') . "' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]'");
 
   $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
+
+  if ($status_pulang == 'ODC') {
+    // Collect All Data 
+    $idrawat = $getRegistrasiRawat['idrawat'];
+    $getRawatRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$idrawat'")->fetch_assoc();
+    $getRekamMedis = $koneksi->query("SELECT * FROM rekam_medis WHERE jadwal = '$getRawatRegistrasi[jadwal]' AND norm = '$getRawatRegistrasi[no_rm]'")->fetch_assoc();
+    $getPemeriksaanFisik = $koneksi->query("SELECT * FROM pemeriksaan_fisik WHERE id_regis = '$idrawat'")->fetch_assoc();
+    $getLastIdIGD = $koneksi->query("SELECT idigd FROM igd ORDER BY idigd DESC LIMIT 1")->fetch_assoc();
+    $getKajianAwal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm = '$getRekamMedis[norm]' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+    // End Collect All Data 
+
+    $idigd = $getLastIdIGD['idigd'] + 1;
+    $tgl_masuk = date('Y-m-d', strtotime($getRawatRegistrasi['jadwal']));
+    $jam_masuk = date('H:i:s', strtotime($getRawatRegistrasi['jadwal']));
+
+    // INSERT TO PEMERIKSAAN FISIK IGD
+    $koneksi->query("INSERT INTO `pemeriksaan_fisik_igd`(`id_igd`, `norm`, `gcs_e`, `gcs_v`, `gcs_m`, `rangsangan_meninggal`, `refleks_fisiologis1`, `refleks_fisiologis2`, `refleks_patologis`, `flat`, `hl`, `assistos`, `thympani`, `soepel`, `ntf_atas_kiri`, `ntf_atas`, `ntf_atas_kanan`, `ntf_tengah_kiri`, `ntf_tengah`, `ntf_tengah_kanan`, `ntf_bawah_kiri`, `ntf_bawah`, `ntf_bawah_kanan`, `bu`, `bu_komen`, `anemis_kiri`, `anemis_kanan`, `ikterik_kiri`, `ikterik_kanan`, `rcl_kiri`, `rcl_kanan`, `pupil_kiri`, `pupil_kanan`, `visus_kiri`, `visus_kanan`, `torax`, `retraksi`, `vesikuler_kiri`, `vesikuler_kanan`, `wheezing_kiri`, `wheezing_kanan`, `rongki_kiri`, `rongki_kanan`, `s1s2`, `murmur`, `golop`, `nch_kiri`, `nch_kanan`, `polip_kiri`, `polip_kanan`, `conca_kiri`, `conca_kanan`, `faring_hipertermis`, `halitosis`, `pembesaran_tonsil`, `serumin_kiri`, `serumin_kanan`, `typani_intak_kiri`, `typani_intak_kanan`, `pembesaran_getah_bening`, `akral_hangat_atas_kiri`, `akral_hangat_atas_kanan`, `akral_hangat_bawah_kiri`, `akral_hangat_bawah_kanan`, `oe_atas_kiri`, `oe_atas_kanan`, `oe_bawah_kiri`, `oe_bawah_kanan`, `crt`, `motorik_atas_kiri`, `motorik_atas_kanan`, `motorik_bawah_kiri`, `motorik_bawah_kanan`, `kognitif`, `created_at`) VALUES ('$idigd','$getPemeriksaanFisik[norm]','$getPemeriksaanFisik[gcs_e]','$getPemeriksaanFisik[gcs_v]','$getPemeriksaanFisik[gcs_m]','$getPemeriksaanFisik[rangsangan_meninggal]','$getPemeriksaanFisik[refleks_fisiologis1]','$getPemeriksaanFisik[refleks_fisiologis2]','$getPemeriksaanFisik[refleks_patologis]','$getPemeriksaanFisik[flat]','$getPemeriksaanFisik[hl]','$getPemeriksaanFisik[assistos]','$getPemeriksaanFisik[thympani]','$getPemeriksaanFisik[soepel]','$getPemeriksaanFisik[ntf_atas_kiri]','$getPemeriksaanFisik[ntf_atas]','$getPemeriksaanFisik[ntf_atas_kanan]','$getPemeriksaanFisik[ntf_tengah_kiri]','$getPemeriksaanFisik[ntf_tengah]','$getPemeriksaanFisik[ntf_tengah_kanan]','$getPemeriksaanFisik[ntf_bawah_kiri]','$getPemeriksaanFisik[ntf_bawah]','$getPemeriksaanFisik[ntf_bawah_kanan]','$getPemeriksaanFisik[bu]','$getPemeriksaanFisik[bu_komen]','$getPemeriksaanFisik[anemis_kiri]','$getPemeriksaanFisik[anemis_kanan]','$getPemeriksaanFisik[ikterik_kiri]','$getPemeriksaanFisik[ikterik_kanan]','$getPemeriksaanFisik[rcl_kiri]','$getPemeriksaanFisik[rcl_kanan]','$getPemeriksaanFisik[pupil_kiri]','$getPemeriksaanFisik[pupil_kanan]','$getPemeriksaanFisik[visus_kiri]','$getPemeriksaanFisik[visus_kanan]','$getPemeriksaanFisik[torax]','$getPemeriksaanFisik[retraksi]','$getPemeriksaanFisik[vesikuler_kiri]','$getPemeriksaanFisik[vesikuler_kanan]','$getPemeriksaanFisik[wheezing_kiri]','$getPemeriksaanFisik[wheezing_kanan]','$getPemeriksaanFisik[rongki_kiri]','$getPemeriksaanFisik[rongki_kanan]','$getPemeriksaanFisik[s1s2]','$getPemeriksaanFisik[murmur]','$getPemeriksaanFisik[golop]','$getPemeriksaanFisik[nch_kiri]','$getPemeriksaanFisik[nch_kanan]','$getPemeriksaanFisik[polip_kiri]','$getPemeriksaanFisik[polip_kanan]','$getPemeriksaanFisik[conca_kiri]','$getPemeriksaanFisik[conca_kanan]','$getPemeriksaanFisik[faring_hipertermis]','$getPemeriksaanFisik[halitosis]','$getPemeriksaanFisik[pembesaran_tonsil]','$getPemeriksaanFisik[serumin_kiri]','$getPemeriksaanFisik[serumin_kanan]','$getPemeriksaanFisik[typani_intak_kiri]','$getPemeriksaanFisik[typani_intak_kanan]','$getPemeriksaanFisik[pembesaran_getah_bening]','$getPemeriksaanFisik[akral_hangat_atas_kiri]','$getPemeriksaanFisik[akral_hangat_atas_kanan]','$getPemeriksaanFisik[akral_hangat_bawah_kiri]','$getPemeriksaanFisik[akral_hangat_bawah_kanan]','$getPemeriksaanFisik[oe_atas_kiri]','$getPemeriksaanFisik[oe_atas_kanan]','$getPemeriksaanFisik[oe_bawah_kiri]','$getPemeriksaanFisik[oe_bawah_kanan]','$getPemeriksaanFisik[crt]','$getPemeriksaanFisik[motorik_atas_kiri]','$getPemeriksaanFisik[motorik_atas_kanan]','$getPemeriksaanFisik[motorik_bawah_kiri]','$getPemeriksaanFisik[motorik_bawah_kanan]','$getPemeriksaanFisik[kognitif]','$getPemeriksaanFisik[created_at]')");
+
+    $koneksi->query("INSERT INTO igd (idigd, tgl_masuk, no_rm, nama_pasien, jam_masuk, keluhan, riw_penyakit, riw_alergi, dkerja, icd10, tindak, psiko, bb, tb, sat_oksigen, tgl, carabayar) VALUES ('$idigd', '$tgl_masuk', '$getRekamMedis[norm]', '$getRekamMedis[nama_pasien]', '$jam_masuk', '$getKajianAwal[keluhan_utama]', '$getKajianAwal[riwayat_penyakit]', '$getKajianAwal[riwayat_alergi]', '$getRekamMedis[diagnosis]', '$getRekamMedis[icd]', 'ODC', '$getKajianAwal[psiko]', '$getKajianAwal[bb]', '$getKajianAwal[tb]', '$getKajianAwal[oksigen]', '$getRawatRegistrasi[jadwal]', '$getRawatRegistrasi[carabayar]');");
+
+    $getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$getRekamMedis[norm]'")->fetch_assoc();
+
+    $layanan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = 'ODC'")->fetch_assoc();
+    $koneksi->query("INSERT INTO `layanan`(`layanan`, `kode_layanan`, `harga`, `jumlah_layanan`, `id_pasien`, `idrm`, `tgl_layanan`) VALUES ('$layanan[nama_layanan]', '$layanan[id]', '$layanan[harga]', '1', '$getPasien[idpasien]', '$getRekamMedis[norm]', '$getRawatRegistrasi[jadwal]')");
+
+    $getBiayaRawat = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$idrawat'")->fetch_assoc();
+    $biayaLayanan = $getBiayaRawat['biaya_lain'] . '+' . $layanan['nama_layanan'];
+    $totalLain =  intval($getBiayaRawat['total_lain']) + intval($layanan['harga']);
+    $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$biayaLayanan', total_lain = '$totalLain' WHERE idregis = '$idrawat'");
+
+    $koneksi->query("INSERT INTO igddetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$idigd', '" . date('Y-m-d') . "', 'Layanan $layanan[nama_layanan]', '$layanan[harga]', 'Layanan $layanan[nama_layanan]', '" . $_SESSION['admin']['namalengkap'] . "', '" . $_SESSION['shift'] . "')");
+
+    $koneksi->query("INSERT INTO igd_pick_rm (rekam_medis_id, registrasi_id, igd_id) VALUES ('$getRekamMedis[id_rm]', '$idrawat', '$idigd')");
+    // END INSERT TO PEMERIKSAAN FISIK IGD
+
+    $redirect = "index.php?halaman=daftarigd";
+  }
+
   echo "<script>alert('Successfully to add data'); document.location.href='$redirect';</script>";
   exit;
 }
@@ -110,7 +162,7 @@ if (isset($_GET['hapus'])) {
   $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE nama_obat= '$getObatById[nama_obat]'")->fetch_assoc();
   $stokAkhir = $ObatKode['jml_obat'] + $getObatById['jml_dokter'];
   $koneksi->query("DELETE FROM obat_rm WHERE idobat = '$_GET[id]'");
-  
+
   $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[rm]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[rm]&tgl=$_GET[tgl]";
   echo "<script>document.location.href='$redirect';</script>";
   exit;
@@ -119,7 +171,7 @@ if (isset($_GET['hapus'])) {
 // Action: Save Obat Racik
 if (isset($_POST['saveob'])) {
   $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
-  
+
   $catatan_obat = $_POST['catatan_obat'];
   $nama = $_POST['nama_obat'];
   $jml_dokter = $_POST['jml_dokter'];
@@ -167,7 +219,7 @@ if (isset($_POST['saveob'])) {
                   }
 
                   if ($nama[$i] != '') {
-                    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '". ($jml_dokter[$i] == "" ? 0 : $jml_dokter[$i])."', dosis1_obat = '$value2', dosis2_obat = '$value3', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idrm = '$_GET[id]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', racik = '$_POST[racik]';");
+                    $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '" . ($jml_dokter[$i] == "" ? 0 : $jml_dokter[$i]) . "', dosis1_obat = '$value2', dosis2_obat = '$value3', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idrm = '$_GET[id]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', racik = '$_POST[racik]';");
                   }
                 }
               }
@@ -186,7 +238,7 @@ if (isset($_POST['saveob'])) {
 // Action: Save Obat Jadi Baru
 if (isset($_POST['saveobnew'])) {
   $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
-  
+
   $catatan_obat = $_POST['catatan_obat'];
   $nama = $_POST['nama_obat'];
   $jml_dokter = $_POST['jml_dokter'];
@@ -226,7 +278,7 @@ if (isset($_POST['saveobnew'])) {
         $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $nama[$i] . "'")->fetch_assoc();
       }
 
-      $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat[$i]', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '".($jml_dokter[$i] == "" ? 0 : $jml_dokter[$i])."', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
+      $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat[$i]', kode_obat = '$nama[$i]', nama_obat = '$ObatKode[nama_obat]', jml_dokter = '" . ($jml_dokter[$i] == "" ? 0 : $jml_dokter[$i]) . "', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
     }
   }
 
@@ -238,7 +290,7 @@ if (isset($_POST['saveobnew'])) {
 // Action: Save Obat Paket Jadi
 if (isset($_POST['saveobpaketjadi'])) {
   $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
-  
+
   $getPaketObat = $koneksimaster->query("SELECT puyerjadi_detail.* FROM puyerjadi_detail WHERE puyer_id = '" . htmlspecialchars($_POST['paket']) . "'");
 
   $cekPemOb = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' limit 1")->fetch_assoc();
@@ -295,7 +347,7 @@ if (isset($_POST['edt'])) {
   $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, nama_obat FROM apotek WHERE id_obat= '" . $nama . "'")->fetch_assoc();
   $stokAkhir = intval($ObatKode['jml_obat']) - intval($jml_dokter);
 
-  $koneksi->query("UPDATE obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '". ($jml_dokter == "" ? 0 : $jml_dokter)."', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$_POST[jenis_obat]', idrm = '$idrm' WHERE idobat = '$_POST[id]'");
+  $koneksi->query("UPDATE obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$ObatKode[id_obat]', jml_dokter = '" . ($jml_dokter == "" ? 0 : $jml_dokter) . "', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$_POST[jenis_obat]', idrm = '$idrm' WHERE idobat = '$_POST[id]'");
 
   $redirect = isset($_GET['inap']) ? "index.php?halaman=rmedis&inap&id=$_GET[id]&tgl=$_GET[tgl]" : "index.php?halaman=rmedis&id=$_GET[id]&tgl=$_GET[tgl]";
   echo "<script>document.location.href='$redirect';</script>";
@@ -305,7 +357,7 @@ if (isset($_POST['edt'])) {
 // Action: Copy Rekam Medis
 if (isset($_POST['copy'])) {
   $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
-  
+
   $copy_rm = $koneksi->query("SELECT * FROM rekam_medis WHERE norm = '$_GET[id]' AND jadwal = '$_POST[jadwalSumber]'")->fetch_assoc();
   $copy_labpoli = $koneksi->query("SELECT * FROM lab_poli WHERE nama_pasien='$copy_rm[nama_pasien]' AND jadwal = '$_POST[jadwalSumber]' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
 
@@ -365,7 +417,7 @@ if (isset($_POST['copy'])) {
     $ttlBiyLain = intval($getBiyLain['total_lain']) + intval($_POST['harga_layanan']);
     $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$biyLain', total_lain = '$ttlBiyLain' WHERE idregis='$cekPemLay[idrawat]'");
   }
-  
+
   $end = date("H:i:s");
   $koneksi->query("UPDATE registrasi_rawat SET end='$end', kasir='$username' WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]';");
 
@@ -395,7 +447,7 @@ if (isset($_POST['copy'])) {
 
     $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '$catatan_obat', nama_obat = '$nama', kode_obat = '$ObatKode[id_obat]', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$dataOb[jenis_obat]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
   }
-  
+
   echo "<script>alert('Data berhasil diubah'); document.location.href='index.php?halaman=daftarrmedis';</script>";
   exit;
 }
@@ -845,24 +897,20 @@ if ($pas['jenis_kelamin'] == '1') {
                             </div>
                           </div>
                         </div>
-                        <h6 class="mt-3 mb-0"><b>Assessment</b></h6>
-                        <div class="form-group">
-                          <label class="mb-0">Diagnosis</label>
-                          <select name="diagnosis" id="diagnosis_id" class="form-control form-control-sm">
-                            <option value="<?= htmlspecialchars($rm['diagnosis']) ?>"><?= htmlspecialchars($rm['diagnosis']) ?></option>
-                            <option value="">Pilih Diagnosis</option>
-                            <option value="Diagnosis Baru">Diagnosis Baru</option>
-                            <?php
-                            $getAllDiagnosis = $koneksi->query("SELECT DISTINCT diagnosis FROM rekam_medis ORDER BY diagnosis ASC");
-                            while ($allDiagnosis = $getAllDiagnosis->fetch_assoc()) {
-                            ?>
-                              <option value="<?= htmlspecialchars($allDiagnosis['diagnosis']) ?>">
-                                <?= htmlspecialchars($allDiagnosis['diagnosis']) ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                          <textarea type="text" name="diagnosis_new" id="diagnosis_new_id" class="form-control form-control-sm mt-2" style="height: 100px;" value="<?php echo $rm['diagnosis'] ?>" placeholder="Diagnosis"><?php echo $rm['diagnosis'] ?></textarea>
+                        <h6 class="mt-3 mb-0">
+                          <b>Assessment</b>
+                          <button type="button" class="btn btn-sm btn-success" id="btnTambahDiagnosis">+ Tambah Diagnosis</button>
+                        </h6>
+
+                        <!-- Container untuk multiple diagnosis dan ICD -->
+                        <div id="diagnosisContainer">
+                          <!-- Diagnosis pertama akan ditambahkan oleh JavaScript -->
                         </div>
+
+                        <!-- Hidden inputs untuk menyimpan data gabungan -->
+                        <input type="hidden" name="diagnosis" id="finalDiagnosisInput">
+                        <input type="hidden" name="icd" id="finalIcdInput">
+
                         <div class="form-group">
                           <label class="mt-2 mb-0">Prognosis</label>
                           <select name="prognosa" class="form-select form-control-sm form-select-sm">
@@ -875,115 +923,215 @@ if ($pas['jenis_kelamin'] == '1') {
                             <?php } ?>
                           </select>
                         </div>
-                        <div class="form-group">
-                          <div class="col-md-12">
-                            <label class="mt-2 mb-0">ICD 10</label>
-                            <select class="form-select" id="selUser" aria-label="Default select example" name="icd">
-                              <option value="<?= htmlspecialchars($rm['icd']) ?>"><?= htmlspecialchars($rm['icd']) ?></option>
-                            </select>
-                          </div>
-                        </div>
                       </div>
-                      <script>
-                        function handleSelectChange(selectElement) {
-                          const selectedOption = selectElement.options[selectElement.selectedIndex];
-                          const diagnosis = selectedOption.getAttribute('data-diagnosis');
-                          const icd10 = selectedOption.getAttribute('data-icd10');
-                          const icdName = selectedOption.getAttribute('data-icd-name') || '';
-                          const keluhanUtama = selectedOption.getAttribute('data-keluhan-utama');
-                          const keluhanTambahan = selectedOption.getAttribute('data-keluhan-tambahan');
-                          const objective = selectedOption.getAttribute('data-objective');
 
-                          // 1. Update diagnosis select
-                          $('#diagnosis_id').val(diagnosis).trigger('change.select2');
-                          const $diagnosisSelect = $('#diagnosis_id');
-
-                          // Cek apakah diagnosis sudah ada di dropdown
-                          if ($diagnosisSelect.find('option[value="' + diagnosis + '"]').length === 0) {
-                            // Jika tidak ada, tambahkan sebagai option baru
-                            $diagnosisSelect.append(new Option(diagnosis, diagnosis, true, true));
-                          }
-                          // $diagnosisSelect.val(diagnosis).trigger('change');
-
-                          // 2. Handle ICD select dengan cara yang benar
-                          const $icdSelect = $('#selUser');
-
-                          if (icd10) {
-                            // Cek apakah option sudah ada
-                            if ($icdSelect.find('option[value="' + icd10 + '"]').length === 0) {
-                              // Jika belum ada, tambahkan option baru
-                              const displayText = icd10 + (icdName ? ' - ' + icdName : '');
-                              const newOption = new Option(displayText, icd10, true, true);
-                              $icdSelect.append(newOption).trigger('change');
-                            }
-
-                            // Set nilai dan trigger change dengan timeout kecil
-                            setTimeout(() => {
-                              $icdSelect.val(icd10).trigger('change.select2');
-                            }, 50);
-                          }
-
-                          // 3. Update field lainnya
-                          $('#keluhanUtama').val(keluhanUtama || '');
-                          // $('#keluhanTambahan').val(keluhanTambahan || '');
-                          $('#objective').val(objective || '');
-
-                          // 4. Tutup modal jika perlu
-                          $('#getMasterClose').trigger('click');
+                      <!-- CSS untuk styling multiple diagnosis -->
+                      <style>
+                        .diagnosis-item {
+                          background: #f8f9fa;
+                          border: 1px solid #dee2e6;
+                          border-radius: 8px;
+                          transition: all 0.3s ease;
+                          position: relative;
                         }
 
-                        // Inisialisasi Select2 dan event handlers
-                        $(document).ready(function() {
-                          $('#diagnosis_new_id').hide();
-                          $('#selUser').select2();
-                          $('#diagnosis_id').select2();
+                        .diagnosis-item:hover {
+                          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                          border-color: #0d6efd;
+                        }
 
-                          $('#diagnosis_id').on('select2:select', function(e) {
-                            const selectedDiagnosis = $(this).val();
-                            const $icdSelect = $('#selUser');
+                        .diagnosis-item label {
+                          color: #0d6efd;
+                          font-weight: 600;
+                        }
 
-                            // Jika diagnosis tidak ada di master tapi dipilih langsung
-                            if (selectedDiagnosis && selectedDiagnosis !== 'Diagnosis Baru' && $icdSelect.find('option[value]').length <= 1) {
-                              $.ajax({
-                                url: '../rekammedis/get_icd_api.php',
-                                type: 'POST',
-                                data: {
-                                  diagnosis: selectedDiagnosis
-                                },
-                                success: function(response) {
-                                  $icdSelect.empty().append('<option value="">Pilih ICD</option>');
+                        .btn-remove-diagnosis {
+                          position: relative;
+                          padding: 0.25rem 0.5rem;
+                        }
 
-                                  if (response.length > 0) {
-                                    response.forEach(function(icd) {
-                                      $icdSelect.append(
-                                        $('<option></option>').val(icd.icd).text(icd.icd + ' - ' + icd.name_en)
-                                      );
-                                    });
-                                  } else {
-                                    // Jika tidak ditemukan ICD, buat opsi kosong
-                                    $icdSelect.append(
-                                      $('<option></option>').val('').text('ICD tidak ditemukan')
-                                    );
-                                  }
+                        .btn-remove-diagnosis:hover {
+                          transform: scale(1.1);
+                        }
 
-                                  $icdSelect.trigger('change');
-                                }
-                              });
-                            }
-                          });
+                        #btnTambahDiagnosis {
+                          font-size: 0.875rem;
+                          padding: 0.25rem 0.75rem;
+                        }
 
+                        #diagnosisContainer {
+                          max-height: 600px;
+                          overflow-y: auto;
+                          padding: 2px;
+                        }
 
-                          // Event handler untuk perubahan diagnosis
-                          $('#diagnosis_id').on('change', function() {
-                            const diagnosis = $(this).val();
-                            const $icdDropdown = $('#selUser');
+                        /* Custom scrollbar */
+                        #diagnosisContainer::-webkit-scrollbar {
+                          width: 6px;
+                        }
 
-                            if (diagnosis === 'Diagnosis Baru') {
-                              $('#diagnosis_new_id').show();
-                              $icdDropdown.empty().append('<option value="">Pilih ICD</option>');
+                        #diagnosisContainer::-webkit-scrollbar-track {
+                          background: #f1f1f1;
+                          border-radius: 10px;
+                        }
 
-                              // Setup Select2 dengan AJAX
-                              $icdDropdown.select2({
+                        #diagnosisContainer::-webkit-scrollbar-thumb {
+                          background: #888;
+                          border-radius: 10px;
+                        }
+
+                        #diagnosisContainer::-webkit-scrollbar-thumb:hover {
+                          background: #555;
+                        }
+
+                        .diagnosis-new-textarea {
+                          animation: slideDown 0.3s ease;
+                        }
+
+                        @keyframes slideDown {
+                          from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                          }
+
+                          to {
+                            opacity: 1;
+                            transform: translateY(0);
+                          }
+                        }
+
+                        .diagnosis-item.removing {
+                          animation: slideOut 0.3s ease;
+                        }
+
+                        @keyframes slideOut {
+                          to {
+                            opacity: 0;
+                            transform: translateX(20px);
+                          }
+                        }
+                      </style>
+
+                      <script>
+                        // Data diagnosis dari PHP untuk dropdown
+                        const diagnosisOptions = <?php
+                                                  $getAllDiagnosis = $koneksi->query("SELECT DISTINCT diagnosis, icd FROM rekam_medis WHERE diagnosis IS NOT NULL AND diagnosis != '' ORDER BY diagnosis ASC");
+                                                  $diagList = [];
+                                                  
+                                                  while ($allDiagnosis = $getAllDiagnosis->fetch_assoc()) {
+                                                    // Trim dulu untuk handle whitespace
+                                                    $diagnosisStr = trim($allDiagnosis['diagnosis']);
+                                                    $icdStr = trim($allDiagnosis['icd']);
+                                                    
+                                                    // Hapus trailing '+' jika ada
+                                                    $diagnosisStr = rtrim($diagnosisStr, '+');
+                                                    $icdStr = rtrim($icdStr, '+');
+                                                    
+                                                    // Split diagnosis dan ICD berdasarkan separator '+'
+                                                    $diagnosisArray = array_filter(array_map('trim', explode('+', $diagnosisStr)), function($val) {
+                                                      return !empty($val);
+                                                    });
+                                                    
+                                                    $icdArray = array_filter(array_map('trim', explode('+', $icdStr)), function($val) {
+                                                      return !empty($val);
+                                                    });
+                                                    
+                                                    // Re-index array setelah filter
+                                                    $diagnosisArray = array_values($diagnosisArray);
+                                                    $icdArray = array_values($icdArray);
+                                                    
+                                                    // Loop setiap diagnosis
+                                                    foreach ($diagnosisArray as $index => $diagTrimmed) {
+                                                      // Cek apakah ada ICD untuk index ini
+                                                      $icdTrimmed = isset($icdArray[$index]) ? $icdArray[$index] : '';
+                                                      
+                                                      // Hanya tambahkan jika diagnosis tidak kosong DAN memiliki ICD yang tidak kosong
+                                                      if (!empty($diagTrimmed) && !empty($icdTrimmed) && $icdTrimmed !== '') {
+                                                        // Cek duplikasi sebelum menambahkan
+                                                        if (!in_array($diagTrimmed, $diagList)) {
+                                                          $diagList[] = htmlspecialchars($diagTrimmed);
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                  
+                                                  // Sort array agar alfabetis
+                                                  sort($diagList);
+                                                  
+                                                  echo json_encode($diagList);
+                                                  ?>;
+
+                        // Counter untuk ID unik
+                        let diagnosisCounter = 0;
+
+                        // Load existing data dari PHP
+                        const existingDiagnosis = "<?= htmlspecialchars($rm['diagnosis'] ?? '') ?>";
+                        const existingIcd = "<?= htmlspecialchars($rm['icd'] ?? '') ?>";
+
+                        // Function untuk menambah diagnosis baru
+                        function addDiagnosisField(diagnosisValue = '', icdValue = '') {
+                          diagnosisCounter++;
+                          const container = $('#diagnosisContainer');
+
+                          const html = `
+                            <div class="diagnosis-item border p-2 mb-2" data-index="${diagnosisCounter}">
+                              <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="mb-0"><b>Diagnosis ${diagnosisCounter}</b></label>
+                                ${diagnosisCounter > 1 ? '<button type="button" class="btn btn-sm btn-danger btn-remove-diagnosis"><i class="bi bi-trash"></i></button>' : ''}
+                              </div>
+                              
+                              <div class="form-group mb-2">
+                                <select class="form-control form-control-sm diagnosis-select" data-index="${diagnosisCounter}">
+                                  <option value="">Pilih Diagnosis</option>
+                                  <option value="Diagnosis Baru">Diagnosis Baru</option>
+                                  ${diagnosisOptions.map(d => `<option value="${d}" ${d === diagnosisValue ? 'selected' : ''}>${d}</option>`).join('')}
+                                </select>
+                              </div>
+                              
+                              <div class="form-group mb-2 diagnosis-new-textarea" style="display: none;">
+                                <textarea class="form-control form-control-sm diagnosis-new-input" style="height: 80px;" placeholder="Masukkan diagnosis baru...">${diagnosisValue}</textarea>
+                              </div>
+                              
+                              <div class="form-group mb-0">
+                                <label class="mb-0">ICD 10</label>
+                                <select class="form-select form-control-sm icd-select" data-index="${diagnosisCounter}">
+                                  <option value="">Pilih ICD</option>
+                                </select>
+                              </div>
+                            </div>
+                          `;
+
+                          container.append(html);
+
+                          // Get reference ke item yang baru ditambahkan
+                          const $item = $(`.diagnosis-item[data-index="${diagnosisCounter}"]`);
+
+                          // Initialize Select2
+                          const $diagSelect = $item.find('.diagnosis-select');
+                          const $icdSelect = $item.find('.icd-select');
+
+                          $diagSelect.select2();
+                          $icdSelect.select2();
+
+                          // Set ICD value jika ada
+                          if (icdValue) {
+                            $icdSelect.append(new Option(icdValue, icdValue, true, true)).trigger('change');
+                          }
+
+                          // Event handler untuk diagnosis select
+                          $diagSelect.on('change', function() {
+                            const val = $(this).val();
+                            const index = $(this).data('index');
+                            const $item = $(`.diagnosis-item[data-index="${index}"]`);
+                            const $newTextarea = $item.find('.diagnosis-new-textarea');
+                            const $icd = $item.find('.icd-select');
+
+                            if (val === 'Diagnosis Baru') {
+                              $newTextarea.show();
+                              $icd.empty().append('<option value="">Pilih ICD</option>');
+
+                              // Setup Select2 dengan AJAX untuk search
+                              $icd.select2({
                                 placeholder: 'Cari ICD...',
                                 allowClear: true,
                                 ajax: {
@@ -994,7 +1142,7 @@ if ($pas['jenis_kelamin'] == '1') {
                                   data: function(params) {
                                     return {
                                       search: params.term,
-                                      diagnosis: diagnosis
+                                      diagnosis: val
                                     };
                                   },
                                   processResults: function(data) {
@@ -1011,36 +1159,134 @@ if ($pas['jenis_kelamin'] == '1') {
                                 }
                               });
                             } else {
-                              $('#diagnosis_new_id').hide();
+                              $newTextarea.hide();
 
-                              // Jika diagnosis dipilih (bukan baru), ambil ICD terkait
-                              if (diagnosis) {
+                              if (val) {
+                                // Load ICD untuk diagnosis yang dipilih
                                 $.ajax({
                                   url: '../rekammedis/get_icd_api.php',
                                   type: 'POST',
                                   data: {
-                                    diagnosis: diagnosis
+                                    diagnosis: val
                                   },
                                   dataType: 'json',
                                   success: function(data) {
-                                    $icdDropdown.empty().append('<option value="">Pilih ICD</option>');
-
+                                    $icd.empty().append('<option value="">Pilih ICD</option>');
                                     data.forEach(function(item) {
-                                      $icdDropdown.append(
-                                        $('<option selected></option>').val(item.icd).text(item.icd + ' - ' + item.name_en)
-                                      );
+                                      $icd.append(new Option(item.icd + ' - ' + item.name_en, item.icd, true, true));
                                     });
-
-                                    $icdDropdown.trigger('change');
-                                  },
-                                  error: function(error) {
-                                    console.error('Error fetching ICD data:', error);
+                                    $icd.trigger('change');
                                   }
                                 });
                               } else {
-                                $icdDropdown.empty().append('<option value="">Pilih ICD</option>').trigger('change');
+                                $icd.empty().append('<option value="">Pilih ICD</option>').trigger('change');
                               }
                             }
+                          });
+
+                          // Event handler untuk remove dengan animasi
+                          $item.find('.btn-remove-diagnosis').on('click', function() {
+                            const $diagnItem = $(this).closest('.diagnosis-item');
+                            $diagnItem.addClass('removing');
+
+                            // Tunggu animasi selesai baru remove
+                            setTimeout(function() {
+                              $diagnItem.remove();
+                              updateFinalInputs();
+                              renumberDiagnosisItems();
+                            }, 300);
+                          });
+
+                          // Event handler untuk update saat ada perubahan
+                          $diagSelect.on('change', updateFinalInputs);
+                          $icdSelect.on('change', updateFinalInputs);
+                          $item.find('.diagnosis-new-input').on('input', updateFinalInputs);
+                        }
+
+                        // Function untuk update hidden inputs
+                        function updateFinalInputs() {
+                          const diagnosisValues = [];
+                          const icdValues = [];
+
+                          $('.diagnosis-item').each(function() {
+                            const $item = $(this);
+                            const $select = $item.find('.diagnosis-select');
+                            const $newInput = $item.find('.diagnosis-new-input');
+                            const $icd = $item.find('.icd-select');
+
+                            let diagValue = '';
+                            if ($select.val() === 'Diagnosis Baru') {
+                              diagValue = $newInput.val().trim();
+                            } else {
+                              diagValue = $select.val();
+                            }
+
+                            const icdValue = $icd.val();
+
+                            if (diagValue) {
+                              diagnosisValues.push(diagValue);
+                              icdValues.push(icdValue || '');
+                            }
+                          });
+
+                          $('#finalDiagnosisInput').val(diagnosisValues.join('+'));
+                          $('#finalIcdInput').val(icdValues.join('+'));
+                        }
+
+                        // Function untuk renumber label diagnosis setelah ada yang dihapus
+                        function renumberDiagnosisItems() {
+                          $('.diagnosis-item').each(function(index) {
+                            $(this).find('label b').text('Diagnosis ' + (index + 1));
+                          });
+                        }
+
+                        // Function untuk copy data dari master
+                        function handleSelectChange(selectElement) {
+                          const selectedOption = selectElement.options[selectElement.selectedIndex];
+                          const diagnosis = selectedOption.getAttribute('data-diagnosis');
+                          const icd10 = selectedOption.getAttribute('data-icd10');
+                          const icdName = selectedOption.getAttribute('data-icd-name') || '';
+                          const keluhanUtama = selectedOption.getAttribute('data-keluhan-utama');
+                          const keluhanTambahan = selectedOption.getAttribute('data-keluhan-tambahan');
+                          const objective = selectedOption.getAttribute('data-objective');
+
+                          // Update keluhan dan objective
+                          $('#keluhanUtama').val(keluhanUtama || '');
+                          $('#objective').val(objective || '');
+
+                          // Tambah diagnosis baru dengan data dari master
+                          if (diagnosis && icd10) {
+                            addDiagnosisField(diagnosis, icd10);
+                            updateFinalInputs();
+                          }
+
+                          // Tutup modal
+                          $('#getMasterClose').trigger('click');
+                        }
+
+                        // Initialize saat document ready
+                        $(document).ready(function() {
+                          // Load existing data atau buat field pertama
+                          if (existingDiagnosis) {
+                            const diagList = existingDiagnosis.split('+');
+                            const icdList = existingIcd.split('+');
+
+                            diagList.forEach((diag, index) => {
+                              const icd = icdList[index] || '';
+                              addDiagnosisField(diag.trim(), icd.trim());
+                            });
+                          } else {
+                            addDiagnosisField();
+                          }
+
+                          // Event handler untuk tombol tambah
+                          $('#btnTambahDiagnosis').on('click', function() {
+                            addDiagnosisField();
+                          });
+
+                          // Update saat form submit
+                          $('form').on('submit', function() {
+                            updateFinalInputs();
                           });
                         });
                       </script>
@@ -1051,8 +1297,9 @@ if ($pas['jenis_kelamin'] == '1') {
                         <label for="inputState" class="form-label mt-2 mb-0">Status Pulang</label>
                         <select id="inputState" name="status_pulang" class="form-select form-control-sm form-select-sm">
                           <option selected>Berobat Jalan</option>
-                          <option>Berobat Jalan</option>
-                          <option>Rawat Inap</option>
+                          <option value="Berobat Jalan">Berobat Jalan</option>
+                          <option value="Rawat Inap">Rawat Inap</option>
+                          <option value="ODC">ODC</option>
                         </select>
                       </div>
                       <?php
@@ -1179,10 +1426,10 @@ if ($pas['jenis_kelamin'] == '1') {
                                   <!-- <td style="margin-top:10px;"><?php echo $obat["jenis_obat"]; ?> <?= $obat['racik'] ?></td> -->
                                   <!-- <td style="margin-top:10px;"><?php echo $obat["durasi_obat"]; ?> hari</td> -->
                                   <?php if ($obat["status_obat"] != "selesai") { ?>
-                                    <td style="margin-top:10px;"> 
-                                      <button type="button" 
-                                              class="btn btn-sm btn-primary text-right" 
-                                              onclick="openUpdateObat(
+                                    <td style="margin-top:10px;">
+                                      <button type="button"
+                                        class="btn btn-sm btn-primary text-right"
+                                        onclick="openUpdateObat(
                                                 '<?php echo $obat["idobat"]; ?>',
                                                 '<?php echo $obat["kode_obat"]; ?>',
                                                 '<?php echo addslashes($obat["nama_obat"]); ?>',
@@ -1362,6 +1609,52 @@ if ($pas['jenis_kelamin'] == '1') {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <?php
+            $getPickIGD = $koneksi->query("SELECT *, COUNT(*) AS JUM FROM igd_pick_rm WHERE rekam_medis_id = '$getLastRM[id_rm]'")->fetch_assoc();
+
+            if ($getPickIGD['JUM'] > 0) {
+              $getIGD = $koneksi->query("SELECT * FROM igd WHERE idigd = '$getPickIGD[igd_id]'")->fetch_assoc();
+            ?>
+              <textarea name="plan" id="plan" readonly class="form-control-sm form-control"><?= $getIGD['rencana_rawat'] ?></textarea>
+              <p class="my-0 mt-1" align="right">
+                <a href="index.php?halaman=rmedis&id=<?= htmlspecialchars($_GET['id']) ?>&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tandaiSelesaiIsiIGD=<?= $getIGD['idigd'] ?>" target="_blank" class="btn btn-sm btn-primary">Selesai</a>
+              </p>
+              <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+              <script>
+                let planEditor; // Variable global untuk menyimpan instance CKEditor
+
+                document.addEventListener('DOMContentLoaded', function() {
+                  ClassicEditor
+                    .create(document.querySelector('#plan'), {
+                      ckfinder: {
+                        uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
+                      },
+                      toolbar: [
+                        'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
+                      ]
+                    })
+                    .then(editor => {
+                      planEditor = editor; // Simpan instance untuk digunakan nanti
+                      editor.enableReadOnlyMode('planReadOnly'); // Set editor menjadi readonly
+                    })
+                    .catch(error => {
+                      console.error(error);
+                    });
+                });
+
+                // Function untuk load data pasien ke form
+                function loadPlanData(idigd, namaPasien, rencanaRawat) {
+                  document.getElementById('idigd').value = idigd;
+                  document.getElementById('nama_pasien').value = namaPasien;
+                  document.getElementById('check').parentElement.classList.remove('d-none'); // Tampilkan tombol tandai selesai
+
+                  // Set data ke CKEditor menggunakan setData()
+                  if (planEditor) {
+                    planEditor.setData(rencanaRawat || '');
+                  }
+                }
+              </script>
+            <?php } ?>
             <div class="row">
               <form method="post" enctype="multipart/form-data">
                 <div class="control-group after-add-more">
@@ -1685,6 +1978,51 @@ if ($pas['jenis_kelamin'] == '1') {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <?php
+            $getPickIGD = $koneksi->query("SELECT *, COUNT(*) AS JUM FROM igd_pick_rm WHERE rekam_medis_id = '$getLastRM[id_rm]'")->fetch_assoc();
+
+            if ($getPickIGD['JUM'] > 0) {
+              $getIGD = $koneksi->query("SELECT * FROM igd WHERE idigd = '$getPickIGD[igd_id]'")->fetch_assoc();
+            ?>
+              <textarea name="plan" id="plan2" readonly class="form-control-sm form-control"><?= $getIGD['rencana_rawat'] ?></textarea>
+              <p class="my-0 mt-1" align="right">
+                <a href="index.php?halaman=rmedis&id=<?= htmlspecialchars($_GET['id']) ?>&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tandaiSelesaiIsiIGD=<?= $getIGD['idigd'] ?>" target="_blank" class="btn btn-sm btn-primary">Selesai</a>
+              </p>
+              <script>
+                let planEditor2; // Variable global untuk menyimpan instance CKEditor
+
+                document.addEventListener('DOMContentLoaded', function() {
+                  ClassicEditor
+                    .create(document.querySelector('#plan2'), {
+                      ckfinder: {
+                        uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
+                      },
+                      toolbar: [
+                        'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
+                      ]
+                    })
+                    .then(editor => {
+                      planEditor2 = editor; // Simpan instance untuk digunakan nanti
+                      editor.enableReadOnlyMode('planReadOnly'); // Set editor menjadi readonly
+                    })
+                    .catch(error => {
+                      console.error(error);
+                    });
+                });
+
+                // Function untuk load data pasien ke form
+                function loadPlanData(idigd, namaPasien, rencanaRawat) {
+                  document.getElementById('idigd').value = idigd;
+                  document.getElementById('nama_pasien').value = namaPasien;
+                  document.getElementById('check').parentElement.classList.remove('d-none'); // Tampilkan tombol tandai selesai
+
+                  // Set data ke CKEditor menggunakan setData()
+                  if (planEditor2) {
+                    planEditor2.setData(rencanaRawat || '');
+                  }
+                }
+              </script>
+            <?php } ?>
             <span class="" style="font-size: 9px;">Akan langsung memunculkan 5 Form Obat Untuk Memudahkan Searching Obat</span>
             <div class="row">
               <form method="post" enctype="multipart/form-data">
@@ -2031,7 +2369,7 @@ if ($pas['jenis_kelamin'] == '1') {
     $('#idObat_edit_id').val(idobat);
     $('#id_obat_sebelum_edit_id').val(idobat);
     $('#jml_obat_sebelum_edit_id').val(jumlah);
-    
+
     // Set Select2 untuk nama obat
     // Cek apakah option sudah ada
     if ($('#namaObat_edit_id option[value="' + kodeObat + '"]').length === 0) {
@@ -2042,7 +2380,7 @@ if ($pas['jenis_kelamin'] == '1') {
       // Pilih option yang sudah ada
       $('#namaObat_edit_id').val(kodeObat).trigger('change');
     }
-    
+
     $('#catatan_edit_id').val(catatanObat);
     $('#jenisObat_edit_id').val(jenisObat);
     $('#dosis1_obat_edit_id').val(dosis1);
@@ -2051,7 +2389,7 @@ if ($pas['jenis_kelamin'] == '1') {
     $('#jml_obat_edit_id').val(jumlah);
     $('#durasiObat_edit_id').val(durasi);
     $('#petunjuk_edit_id').val(petunjuk);
-    
+
     // Buka modal
     var modalEditObat = new bootstrap.Modal(document.getElementById('modalEditObat'));
     modalEditObat.show();
