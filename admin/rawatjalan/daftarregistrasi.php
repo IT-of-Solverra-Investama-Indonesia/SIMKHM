@@ -608,7 +608,24 @@ if (isset($_GET['detail'])) {
                             <?php if (isset($_GET['all'])) { ?>
                               <td style="margin-top:10px;"><?php echo $pecah["diagnosis"]; ?></td>
                             <?php } ?>
-                            <td style="margin-top:10px;"><?php echo $pecah["perawatan"]; ?></td>
+                            <td style="margin-top:10px;">
+                              <?php echo $pecah["perawatan"]; ?>
+                              <?php
+                                  $cekIgdPickRm = $koneksi->query("SELECT *, COUNT(*) AS Jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
+                                  if ($cekIgdPickRm['Jum'] > 0) {
+                                    $cekIgd = $koneksi->query("SELECT * FROM igd WHERE idigd = '$cekIgdPickRm[igd_id]'")->fetch_assoc();
+                                    if ($cekIgd['tindak'] == 'ODC') {
+                                      echo "
+                                        <br>
+                                        <span class='badge bg-info'>ODC</span> <br>
+                                        <span class='badge bg-" . ($cekIgd['tindak_at'] == null ? 'danger' : 'success') . "'>" . ($cekIgd['tindak_at'] == null ? 'Belum Selesai' : 'Selesai ' . $cekIgd['tindak_at']) . "</span> <br>
+                                        <span class='badge bg-" . ($cekIgd['rencana_rawat_at'] == null ? 'danger' : 'success') . "'>Obat Resep</span> <br>
+                                        <span class='badge bg-" . ($cekIgd['rencana_rawat_at_poli'] == null ? 'danger' : 'success') . "'>Obat Poli</span>
+                                      ";
+                                    }
+                                  }
+                              ?>
+                            </td>
                             <td style="margin-top:10px;"><?php echo $pecah["dokter_rawat"]; ?></td>
                             <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
                             <?php
