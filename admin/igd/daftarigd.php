@@ -213,7 +213,7 @@ if (isset($_POST['saveLay'])) {
   $id_pasien = $getPasien['idpasien'];
   $tgl_layanan = date('Y-m-d H:i:s');
 
-  $getIgdCheck = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE igd_id = '$_POST[idigd]' ")->fetch_assoc();
+  $getIgdCheck = $koneksi->query("SELECT *, COUNT(*) AS jum FROM igd_pick_rm WHERE igd_id = '$_POST[idigd]' ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
   $updateIdLab = "";
   if ($getIgdCheck['jum'] != 0) {
     $getRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$getIgdCheck[registrasi_id]'")->fetch_assoc();
