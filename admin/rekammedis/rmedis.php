@@ -91,11 +91,23 @@ if (isset($_POST['save'])) {
     $getRawatRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$idrawat'")->fetch_assoc();
     $getRekamMedis = $koneksi->query("SELECT * FROM rekam_medis WHERE jadwal = '$getRawatRegistrasi[jadwal]' AND norm = '$getRawatRegistrasi[no_rm]'")->fetch_assoc();
     $getPemeriksaanFisik = $koneksi->query("SELECT * FROM pemeriksaan_fisik WHERE id_regis = '$idrawat'")->fetch_assoc();
-    $getLastIdIGD = $koneksi->query("SELECT idigd FROM igd ORDER BY idigd DESC LIMIT 1")->fetch_assoc();
     $getKajianAwal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm = '$getRekamMedis[norm]' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
-    // End Collect All Data 
 
-    $idigd = $getLastIdIGD['idigd'] + 1;
+    $getLastIdIGD = $koneksi->query("SELECT idigd FROM igd ORDER BY idigd DESC LIMIT 1")->fetch_assoc();
+
+    // End Collect All Data
+
+    $lastIgdId = isset($getLastIdIGD['idigd']) ? intval($getLastIdIGD['idigd']) : 0;
+    $idigd = $lastIgdId + 1;
+
+    // Cari idigd yang benar-benar belum terpakai di igd_pick_rm
+    do {
+      $checkDoubleIGD = $koneksi->query("SELECT COUNT(*) AS jum FROM igd_pick_rm WHERE igd_id='$idigd'")->fetch_assoc();
+      if (intval($checkDoubleIGD['jum']) > 0) {
+        $idigd++;
+      }
+    } while (intval($checkDoubleIGD['jum']) > 0);
+
     $tgl_masuk = date('Y-m-d', strtotime($getRawatRegistrasi['jadwal']));
     $jam_masuk = date('H:i:s', strtotime($getRawatRegistrasi['jadwal']));
 
