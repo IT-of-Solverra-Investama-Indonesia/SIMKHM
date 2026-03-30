@@ -444,13 +444,15 @@ if (!empty($_SESSION['keranjang_obat_resep'])) {
             }
         </style>
         <div class="card shadow-sm h-100 p-2">
-            <h6 class=""><b>Planing IGD</b></h6>
+            <h6 class=""><b>Planing IGD</b>
+                <button type="button" class="btn btn-sm btn-outline-danger float-end" onclick="clearPlan()" title="Clear Planing">✕</button>
+            </h6>
             <form method="post">
                 <input type="text" name="idigd" id="idigd" hidden>
                 <input type="text" name="nama_pasien" class="form-control-sm form-control mb-1" readonly id="nama_pasien">
                 <textarea name="plan" id="plan" readonly class="form-control-sm form-control"></textarea>
                 <p class="my-0 mt-1 d-none" align="right">
-                    <button type="submit" name="tandaiSelesaiIsi" id="check" class="btn btn-sm btn-primary"><i class="bi bi-check-circle-fill"></i></button>
+                    <button type="submit" name="tandaiSelesaiIsi" id="check" class="btn btn-sm btn-primary" onclick="clearPlanOnSubmit()"><i class="bi bi-check-circle-fill"></i></button>
                 </p>
             </form>
             <br>
@@ -488,6 +490,40 @@ if (!empty($_SESSION['keranjang_obat_resep'])) {
                     if (planEditor) {
                         planEditor.setData(rencanaRawat || '');
                     }
+
+                    // Simpan ke localStorage agar tetap tersimpan saat halaman reload
+                    localStorage.setItem('selectedPlan', JSON.stringify({
+                        idigd: idigd,
+                        namaPasien: namaPasien,
+                        rencanaRawat: rencanaRawat
+                    }));
+                }
+
+                // Restore data planing dari localStorage saat halaman dimuat
+                window.addEventListener('load', function() {
+                    const savedPlan = localStorage.getItem('selectedPlan');
+                    if (savedPlan) {
+                        const planData = JSON.parse(savedPlan);
+                        loadPlanData(planData.idigd, planData.namaPasien, planData.rencanaRawat);
+                    }
+                });
+
+                // Function untuk clear localStorage
+                function clearPlan() {
+                    if (confirm('Clear planing IGD ini?')) {
+                        localStorage.removeItem('selectedPlan');
+                        document.getElementById('idigd').value = '';
+                        document.getElementById('nama_pasien').value = '';
+                        document.getElementById('check').parentElement.classList.add('d-none');
+                        if (planEditor) {
+                            planEditor.setData('');
+                        }
+                    }
+                }
+
+                // Function untuk clear pada saat tandai selesai
+                function clearPlanOnSubmit() {
+                    localStorage.removeItem('selectedPlan');
                 }
             </script>
             <?php $getDataIGD = $koneksi->query("SELECT * FROM igd WHERE tindak != 'Rawat' AND tindak_at IS NOT NULL AND rencana_rawat_at IS NULL ORDER BY rencana_rawat_at DESC"); ?>
