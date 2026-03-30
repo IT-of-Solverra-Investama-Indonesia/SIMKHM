@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Jakarta');
 if (isset($_GET['tandaiSelesaiIsiIGD'])) {
   $koneksi->query("UPDATE igd SET rencana_rawat_at_poli = '" . date('Y-m-d H:i:s') . "' WHERE idigd = '$_GET[tandaiSelesaiIsiIGD]'");
   $getPickRm = $koneksi->query("SELECT * FROM igd_pick_rm WHERE igd_id = '$_GET[tandaiSelesaiIsiIGD]'")->fetch_assoc();
-  
+
   $koneksi->query("UPDATE registrasi_rawat SET status_antri = 'Pembayaran' WHERE idrawat = '$getPickRm[registrasi_id]'");
   echo "
     <script>
@@ -30,6 +30,65 @@ if (isset($_POST['selesai'])) {
   $koneksi->query("UPDATE obat_rm SET status_obat='selesai' WHERE rekam_medis_id='$getLastRM[id_rm]'");
   echo "<script>alert('Status berhasil diubah menjadi selesai'); document.location.href='index.php?halaman=daftarrmedis';</script>";
   exit;
+}
+
+if(isset($_GET['masukODC'])) {
+  // Collect All Data 
+  $getRekamMedis = $koneksi->query("SELECT * FROM rekam_medis WHERE id_rm = '$_GET[rekamMedisId]'")->fetch_assoc();
+  $getRawatRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm = '$getRekamMedis[norm]' AND jadwal = '$getRekamMedis[jadwal]' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+
+  $idrawat = $getRawatRegistrasi['idrawat'];
+  // $getRawatRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$idrawat'")->fetch_assoc();
+  // $getRekamMedis = $koneksi->query("SELECT * FROM rekam_medis WHERE jadwal = '$getRawatRegistrasi[jadwal]' AND norm = '$getRawatRegistrasi[no_rm]'")->fetch_assoc();
+  $getPemeriksaanFisik = $koneksi->query("SELECT * FROM pemeriksaan_fisik WHERE id_regis = '$idrawat'")->fetch_assoc();
+  $getKajianAwal = $koneksi->query("SELECT * FROM kajian_awal WHERE norm = '$getRekamMedis[norm]' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
+
+  $getLastIdIGD = $koneksi->query("SELECT idigd FROM igd ORDER BY idigd DESC LIMIT 1")->fetch_assoc();
+
+  // End Collect All Data
+
+  $lastIgdId = isset($getLastIdIGD['idigd']) ? intval($getLastIdIGD['idigd']) : 0;
+  $idigd = $lastIgdId + 1;
+
+  // Cari idigd yang benar-benar belum terpakai di igd_pick_rm
+  do {
+    $checkDoubleIGD = $koneksi->query("SELECT COUNT(*) AS jum FROM igd_pick_rm WHERE igd_id='$idigd'")->fetch_assoc();
+    if (intval($checkDoubleIGD['jum']) > 0) {
+      $idigd++;
+    }
+  } while (intval($checkDoubleIGD['jum']) > 0);
+
+  $tgl_masuk = date('Y-m-d', strtotime($getRawatRegistrasi['jadwal']));
+  $jam_masuk = date('H:i:s', strtotime($getRawatRegistrasi['jadwal']));
+
+  // INSERT TO PEMERIKSAAN FISIK IGD
+  $koneksi->query("INSERT INTO `pemeriksaan_fisik_igd`(`id_igd`, `norm`, `gcs_e`, `gcs_v`, `gcs_m`, `rangsangan_meninggal`, `refleks_fisiologis1`, `refleks_fisiologis2`, `refleks_patologis`, `flat`, `hl`, `assistos`, `thympani`, `soepel`, `ntf_atas_kiri`, `ntf_atas`, `ntf_atas_kanan`, `ntf_tengah_kiri`, `ntf_tengah`, `ntf_tengah_kanan`, `ntf_bawah_kiri`, `ntf_bawah`, `ntf_bawah_kanan`, `bu`, `bu_komen`, `anemis_kiri`, `anemis_kanan`, `ikterik_kiri`, `ikterik_kanan`, `rcl_kiri`, `rcl_kanan`, `pupil_kiri`, `pupil_kanan`, `visus_kiri`, `visus_kanan`, `torax`, `retraksi`, `vesikuler_kiri`, `vesikuler_kanan`, `wheezing_kiri`, `wheezing_kanan`, `rongki_kiri`, `rongki_kanan`, `s1s2`, `murmur`, `golop`, `nch_kiri`, `nch_kanan`, `polip_kiri`, `polip_kanan`, `conca_kiri`, `conca_kanan`, `faring_hipertermis`, `halitosis`, `pembesaran_tonsil`, `serumin_kiri`, `serumin_kanan`, `typani_intak_kiri`, `typani_intak_kanan`, `pembesaran_getah_bening`, `akral_hangat_atas_kiri`, `akral_hangat_atas_kanan`, `akral_hangat_bawah_kiri`, `akral_hangat_bawah_kanan`, `oe_atas_kiri`, `oe_atas_kanan`, `oe_bawah_kiri`, `oe_bawah_kanan`, `crt`, `motorik_atas_kiri`, `motorik_atas_kanan`, `motorik_bawah_kiri`, `motorik_bawah_kanan`, `kognitif`, `created_at`) VALUES ('$idigd','$getPemeriksaanFisik[norm]','$getPemeriksaanFisik[gcs_e]','$getPemeriksaanFisik[gcs_v]','$getPemeriksaanFisik[gcs_m]','$getPemeriksaanFisik[rangsangan_meninggal]','$getPemeriksaanFisik[refleks_fisiologis1]','$getPemeriksaanFisik[refleks_fisiologis2]','$getPemeriksaanFisik[refleks_patologis]','$getPemeriksaanFisik[flat]','$getPemeriksaanFisik[hl]','$getPemeriksaanFisik[assistos]','$getPemeriksaanFisik[thympani]','$getPemeriksaanFisik[soepel]','$getPemeriksaanFisik[ntf_atas_kiri]','$getPemeriksaanFisik[ntf_atas]','$getPemeriksaanFisik[ntf_atas_kanan]','$getPemeriksaanFisik[ntf_tengah_kiri]','$getPemeriksaanFisik[ntf_tengah]','$getPemeriksaanFisik[ntf_tengah_kanan]','$getPemeriksaanFisik[ntf_bawah_kiri]','$getPemeriksaanFisik[ntf_bawah]','$getPemeriksaanFisik[ntf_bawah_kanan]','$getPemeriksaanFisik[bu]','$getPemeriksaanFisik[bu_komen]','$getPemeriksaanFisik[anemis_kiri]','$getPemeriksaanFisik[anemis_kanan]','$getPemeriksaanFisik[ikterik_kiri]','$getPemeriksaanFisik[ikterik_kanan]','$getPemeriksaanFisik[rcl_kiri]','$getPemeriksaanFisik[rcl_kanan]','$getPemeriksaanFisik[pupil_kiri]','$getPemeriksaanFisik[pupil_kanan]','$getPemeriksaanFisik[visus_kiri]','$getPemeriksaanFisik[visus_kanan]','$getPemeriksaanFisik[torax]','$getPemeriksaanFisik[retraksi]','$getPemeriksaanFisik[vesikuler_kiri]','$getPemeriksaanFisik[vesikuler_kanan]','$getPemeriksaanFisik[wheezing_kiri]','$getPemeriksaanFisik[wheezing_kanan]','$getPemeriksaanFisik[rongki_kiri]','$getPemeriksaanFisik[rongki_kanan]','$getPemeriksaanFisik[s1s2]','$getPemeriksaanFisik[murmur]','$getPemeriksaanFisik[golop]','$getPemeriksaanFisik[nch_kiri]','$getPemeriksaanFisik[nch_kanan]','$getPemeriksaanFisik[polip_kiri]','$getPemeriksaanFisik[polip_kanan]','$getPemeriksaanFisik[conca_kiri]','$getPemeriksaanFisik[conca_kanan]','$getPemeriksaanFisik[faring_hipertermis]','$getPemeriksaanFisik[halitosis]','$getPemeriksaanFisik[pembesaran_tonsil]','$getPemeriksaanFisik[serumin_kiri]','$getPemeriksaanFisik[serumin_kanan]','$getPemeriksaanFisik[typani_intak_kiri]','$getPemeriksaanFisik[typani_intak_kanan]','$getPemeriksaanFisik[pembesaran_getah_bening]','$getPemeriksaanFisik[akral_hangat_atas_kiri]','$getPemeriksaanFisik[akral_hangat_atas_kanan]','$getPemeriksaanFisik[akral_hangat_bawah_kiri]','$getPemeriksaanFisik[akral_hangat_bawah_kanan]','$getPemeriksaanFisik[oe_atas_kiri]','$getPemeriksaanFisik[oe_atas_kanan]','$getPemeriksaanFisik[oe_bawah_kiri]','$getPemeriksaanFisik[oe_bawah_kanan]','$getPemeriksaanFisik[crt]','$getPemeriksaanFisik[motorik_atas_kiri]','$getPemeriksaanFisik[motorik_atas_kanan]','$getPemeriksaanFisik[motorik_bawah_kiri]','$getPemeriksaanFisik[motorik_bawah_kanan]','$getPemeriksaanFisik[kognitif]','$getPemeriksaanFisik[created_at]')");
+
+  $koneksi->query("INSERT INTO igd (idigd, tgl_masuk, no_rm, nama_pasien, jam_masuk, keluhan, riw_penyakit, riw_alergi, dkerja, icd10, tindak, psiko, bb, tb, sat_oksigen, tgl, carabayar) VALUES ('$idigd', '$tgl_masuk', '$getRekamMedis[norm]', '$getRekamMedis[nama_pasien]', '$jam_masuk', '$getKajianAwal[keluhan_utama]', '$getKajianAwal[riwayat_penyakit]', '$getKajianAwal[riwayat_alergi]', '$getRekamMedis[diagnosis]', '$getRekamMedis[icd]', 'ODC', '$getKajianAwal[psiko]', '$getKajianAwal[bb]', '$getKajianAwal[tb]', '$getKajianAwal[oksigen]', '$getRawatRegistrasi[jadwal]', '$getRawatRegistrasi[carabayar]');");
+
+  $getPasien = $koneksi->query("SELECT * FROM pasien WHERE no_rm = '$getRekamMedis[norm]'")->fetch_assoc();
+
+  $layanan = $koneksimaster->query("SELECT * FROM master_layanan WHERE nama_layanan = 'ODC'")->fetch_assoc();
+  $koneksi->query("INSERT INTO `layanan`(`layanan`, `kode_layanan`, `harga`, `jumlah_layanan`, `id_pasien`, `idrm`, `tgl_layanan`) VALUES ('$layanan[nama_layanan]', '$layanan[id]', '$layanan[harga]', '1', '$getPasien[idpasien]', '$getRekamMedis[norm]', '$getRawatRegistrasi[jadwal]')");
+
+  $getBiayaRawat = $koneksi->query("SELECT * FROM biaya_rawat WHERE idregis = '$idrawat'")->fetch_assoc();
+  $biayaLayanan = $getBiayaRawat['biaya_lain'] . '+' . $layanan['nama_layanan'];
+  $totalLain =  intval($getBiayaRawat['total_lain']) + intval($layanan['harga']);
+  $koneksi->query("UPDATE biaya_rawat SET biaya_lain = '$biayaLayanan', total_lain = '$totalLain' WHERE idregis = '$idrawat'");
+
+  $koneksi->query("INSERT INTO igddetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$idigd', '" . date('Y-m-d') . "', 'Layanan $layanan[nama_layanan]', '$layanan[harga]', 'Layanan $layanan[nama_layanan]', '" . $_SESSION['admin']['namalengkap'] . "', '" . $_SESSION['shift'] . "')");
+
+  $koneksi->query("INSERT INTO igd_pick_rm (rekam_medis_id, registrasi_id, igd_id) VALUES ('$getRekamMedis[id_rm]', '$idrawat', '$idigd')");
+  // END INSERT TO PEMERIKSAAN FISIK IGD
+
+  $redirect = "index.php?halaman=daftarigd";
+  echo "
+    <script>
+      alert('Pasien berhasil dimasukkan ke ODC');
+      window.location.href='$redirect';
+    </script>
+  ";
+  exit();
 }
 
 // Action: Save Rekam Medis
@@ -1029,34 +1088,34 @@ if ($pas['jenis_kelamin'] == '1') {
                         const diagnosisOptions = <?php
                                                   $getAllDiagnosis = $koneksi->query("SELECT DISTINCT diagnosis, icd FROM rekam_medis WHERE diagnosis IS NOT NULL AND diagnosis != '' ORDER BY diagnosis ASC");
                                                   $diagList = [];
-                                                  
+
                                                   while ($allDiagnosis = $getAllDiagnosis->fetch_assoc()) {
                                                     // Trim dulu untuk handle whitespace
                                                     $diagnosisStr = trim($allDiagnosis['diagnosis']);
                                                     $icdStr = trim($allDiagnosis['icd']);
-                                                    
+
                                                     // Hapus trailing '+' jika ada
                                                     $diagnosisStr = rtrim($diagnosisStr, '+');
                                                     $icdStr = rtrim($icdStr, '+');
-                                                    
+
                                                     // Split diagnosis dan ICD berdasarkan separator '+'
-                                                    $diagnosisArray = array_filter(array_map('trim', explode('+', $diagnosisStr)), function($val) {
+                                                    $diagnosisArray = array_filter(array_map('trim', explode('+', $diagnosisStr)), function ($val) {
                                                       return !empty($val);
                                                     });
-                                                    
-                                                    $icdArray = array_filter(array_map('trim', explode('+', $icdStr)), function($val) {
+
+                                                    $icdArray = array_filter(array_map('trim', explode('+', $icdStr)), function ($val) {
                                                       return !empty($val);
                                                     });
-                                                    
+
                                                     // Re-index array setelah filter
                                                     $diagnosisArray = array_values($diagnosisArray);
                                                     $icdArray = array_values($icdArray);
-                                                    
+
                                                     // Loop setiap diagnosis
                                                     foreach ($diagnosisArray as $index => $diagTrimmed) {
                                                       // Cek apakah ada ICD untuk index ini
                                                       $icdTrimmed = isset($icdArray[$index]) ? $icdArray[$index] : '';
-                                                      
+
                                                       // Hanya tambahkan jika diagnosis tidak kosong DAN memiliki ICD yang tidak kosong
                                                       if (!empty($diagTrimmed) && !empty($icdTrimmed) && $icdTrimmed !== '') {
                                                         // Cek duplikasi sebelum menambahkan
@@ -1066,10 +1125,10 @@ if ($pas['jenis_kelamin'] == '1') {
                                                       }
                                                     }
                                                   }
-                                                  
+
                                                   // Sort array agar alfabetis
                                                   sort($diagList);
-                                                  
+
                                                   echo json_encode($diagList);
                                                   ?>;
 
@@ -1369,6 +1428,21 @@ if ($pas['jenis_kelamin'] == '1') {
                     $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm, MAX(jadwal) as jadwall FROM rekam_medis WHERE norm = '" . htmlspecialchars($_GET['id']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') <= '" . date('Y-m-d', strtotime($_GET['tgl'])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                     $getLastRM['jumm'] > 0 ? $whereConditionObatRm = "AND rekam_medis_id = '$getLastRM[id_rm]'" : $whereConditionObatRm = "AND rekam_medis_id IS NULL";
                     $obat = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' " . $whereConditionObatRm . " ");
+
+                    $hasIgdPickRmForModal = false;
+                    $igdPlanRawatForModal = '';
+                    $igdIdForModal = '';
+                    if (!empty($getLastRM['id_rm'])) {
+                      $checkIgdPickForModal = $koneksi->query("SELECT * FROM igd_pick_rm WHERE rekam_medis_id = '$getLastRM[id_rm]' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                      if (!empty($checkIgdPickForModal['igd_id'])) {
+                        $getIgdForModal = $koneksi->query("SELECT idigd, rencana_rawat FROM igd WHERE idigd = '$checkIgdPickForModal[igd_id]' LIMIT 1")->fetch_assoc();
+                        if (!empty($getIgdForModal['idigd'])) {
+                          $hasIgdPickRmForModal = true;
+                          $igdPlanRawatForModal = $getIgdForModal['rencana_rawat'] ?? '';
+                          $igdIdForModal = $getIgdForModal['idigd'];
+                        }
+                      }
+                    }
                     ?>
                     <div>
                       <h6 class="mt-2 mb-0"><b>Tambah Obat Untuk Jadwal <?= $getLastRM['jadwall'] ?></b></h6>
@@ -1380,6 +1454,77 @@ if ($pas['jenis_kelamin'] == '1') {
                           <a type="button" class="btn btn-sm mb-2 btn-info text-right" href="index.php?halaman=tambahpuyer2&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>">Paket Racik</a>
                           <span type="button" class="btn btn-sm mb-2 btn-warning text-right" data-bs-toggle="modal" data-bs-target="#addPaketJadi">Paket Jadi</span>
                         </div>
+
+                        <?php if ($hasIgdPickRmForModal) { ?>
+                          <div class="position-fixed top-0 end-0 p-3" style="z-index: 1090; width: min(480px, 92vw); transform: translateX(20%);">
+                            <div id="toastIgdPickRmReminder" class="toast border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                              <div class="toast-header bg-warning-subtle">
+                                <strong class="me-auto">Rencana Rawat IGD</strong>
+                                <small>Acuan Obat</small>
+                              </div>
+                              <div class="toast-body">
+                                <textarea id="planToastIgd" readonly class="form-control form-control-sm" style="min-height: 140px; max-height: 42vh;"><?= htmlspecialchars($igdPlanRawatForModal) ?></textarea>
+                                <?php if (!empty($igdIdForModal)) { ?>
+                                  <p class="my-0 mt-2 text-end">
+                                    <a href="index.php?halaman=rmedis&id=<?= htmlspecialchars($_GET['id']) ?>&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tandaiSelesaiIsiIGD=<?= $igdIdForModal ?>" target="_blank" class="btn btn-sm btn-primary">Selesai</a>
+                                  </p>
+                                <?php } ?>
+                              </div>
+                            </div>
+                          </div>
+
+                          <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                              let planToastEditor;
+
+                              const toastEl = document.getElementById('toastIgdPickRmReminder');
+                              if (!toastEl || typeof bootstrap === 'undefined') return;
+
+                              const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
+                                autohide: false
+                              });
+
+                              function initPlanToastEditor() {
+                                if (planToastEditor || typeof ClassicEditor === 'undefined') return;
+                                const planToastTextarea = document.querySelector('#planToastIgd');
+                                if (!planToastTextarea) return;
+
+                                ClassicEditor
+                                  .create(planToastTextarea, {
+                                    toolbar: [
+                                      'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
+                                    ]
+                                  })
+                                  .then(editor => {
+                                    planToastEditor = editor;
+                                    editor.enableReadOnlyMode('planToastReadOnly');
+                                  })
+                                  .catch(error => {
+                                    console.error(error);
+                                  });
+                              }
+
+                              toastEl.addEventListener('shown.bs.toast', function() {
+                                initPlanToastEditor();
+                              });
+
+                              ['exampleModal2', 'exampleModal45'].forEach(function(modalId) {
+                                const modalEl = document.getElementById(modalId);
+                                if (!modalEl) return;
+
+                                modalEl.addEventListener('show.bs.modal', function() {
+                                  toast.show();
+                                  initPlanToastEditor();
+                                });
+
+                                modalEl.addEventListener('hidden.bs.modal', function() {
+                                  toast.hide();
+                                });
+                              });
+                            });
+                          </script>
+                          <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+                        <?php } ?>
                       <?php } ?>
                       <div class="table-responsive">
                         <?php $subtotal = 0; ?>
@@ -1621,52 +1766,6 @@ if ($pas['jenis_kelamin'] == '1') {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <?php
-            $getPickIGD = $koneksi->query("SELECT *, COUNT(*) AS JUM FROM igd_pick_rm WHERE rekam_medis_id = '$getLastRM[id_rm]'")->fetch_assoc();
-
-            if ($getPickIGD['JUM'] > 0) {
-              $getIGD = $koneksi->query("SELECT * FROM igd WHERE idigd = '$getPickIGD[igd_id]'")->fetch_assoc();
-            ?>
-              <textarea name="plan" id="plan" readonly class="form-control-sm form-control"><?= $getIGD['rencana_rawat'] ?></textarea>
-              <p class="my-0 mt-1" align="right">
-                <a href="index.php?halaman=rmedis&id=<?= htmlspecialchars($_GET['id']) ?>&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tandaiSelesaiIsiIGD=<?= $getIGD['idigd'] ?>" target="_blank" class="btn btn-sm btn-primary">Selesai</a>
-              </p>
-              <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
-              <script>
-                let planEditor; // Variable global untuk menyimpan instance CKEditor
-
-                document.addEventListener('DOMContentLoaded', function() {
-                  ClassicEditor
-                    .create(document.querySelector('#plan'), {
-                      ckfinder: {
-                        uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
-                      },
-                      toolbar: [
-                        'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
-                      ]
-                    })
-                    .then(editor => {
-                      planEditor = editor; // Simpan instance untuk digunakan nanti
-                      editor.enableReadOnlyMode('planReadOnly'); // Set editor menjadi readonly
-                    })
-                    .catch(error => {
-                      console.error(error);
-                    });
-                });
-
-                // Function untuk load data pasien ke form
-                function loadPlanData(idigd, namaPasien, rencanaRawat) {
-                  document.getElementById('idigd').value = idigd;
-                  document.getElementById('nama_pasien').value = namaPasien;
-                  document.getElementById('check').parentElement.classList.remove('d-none'); // Tampilkan tombol tandai selesai
-
-                  // Set data ke CKEditor menggunakan setData()
-                  if (planEditor) {
-                    planEditor.setData(rencanaRawat || '');
-                  }
-                }
-              </script>
-            <?php } ?>
             <div class="row">
               <form method="post" enctype="multipart/form-data">
                 <div class="control-group after-add-more">
@@ -1990,51 +2089,6 @@ if ($pas['jenis_kelamin'] == '1') {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <?php
-            $getPickIGD = $koneksi->query("SELECT *, COUNT(*) AS JUM FROM igd_pick_rm WHERE rekam_medis_id = '$getLastRM[id_rm]'")->fetch_assoc();
-
-            if ($getPickIGD['JUM'] > 0) {
-              $getIGD = $koneksi->query("SELECT * FROM igd WHERE idigd = '$getPickIGD[igd_id]'")->fetch_assoc();
-            ?>
-              <textarea name="plan" id="plan2" readonly class="form-control-sm form-control"><?= $getIGD['rencana_rawat'] ?></textarea>
-              <p class="my-0 mt-1" align="right">
-                <a href="index.php?halaman=rmedis&id=<?= htmlspecialchars($_GET['id']) ?>&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tandaiSelesaiIsiIGD=<?= $getIGD['idigd'] ?>" target="_blank" class="btn btn-sm btn-primary">Selesai</a>
-              </p>
-              <script>
-                let planEditor2; // Variable global untuk menyimpan instance CKEditor
-
-                document.addEventListener('DOMContentLoaded', function() {
-                  ClassicEditor
-                    .create(document.querySelector('#plan2'), {
-                      ckfinder: {
-                        uploadUrl: 'https://www.gkjwtunjungrejo.com/image-upload?_token=i99BxDXahocEmpYJ9vCLcLSTnfwaDPss37KbA71C',
-                      },
-                      toolbar: [
-                        'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'undo', 'redo'
-                      ]
-                    })
-                    .then(editor => {
-                      planEditor2 = editor; // Simpan instance untuk digunakan nanti
-                      editor.enableReadOnlyMode('planReadOnly'); // Set editor menjadi readonly
-                    })
-                    .catch(error => {
-                      console.error(error);
-                    });
-                });
-
-                // Function untuk load data pasien ke form
-                function loadPlanData(idigd, namaPasien, rencanaRawat) {
-                  document.getElementById('idigd').value = idigd;
-                  document.getElementById('nama_pasien').value = namaPasien;
-                  document.getElementById('check').parentElement.classList.remove('d-none'); // Tampilkan tombol tandai selesai
-
-                  // Set data ke CKEditor menggunakan setData()
-                  if (planEditor2) {
-                    planEditor2.setData(rencanaRawat || '');
-                  }
-                }
-              </script>
-            <?php } ?>
             <span class="" style="font-size: 9px;">Akan langsung memunculkan 5 Form Obat Untuk Memudahkan Searching Obat</span>
             <div class="row">
               <form method="post" enctype="multipart/form-data">
@@ -2318,6 +2372,7 @@ if ($pas['jenis_kelamin'] == '1') {
                   <input type="datetime-local" name="jadwalSumberYmd" value="<?= $item['tgl'] ?>" hidden>
                   <input type="text" name="idRmSumber" value="<?= $item['id_rm'] ?>" hidden>
                   <button name="copy" onclick="return confirm('Apakah anda yakin ingin menyamakan RM sekarang dengan RM pada tanggal tersebut ???')" class="btn btn-sm btn-warning">Copy</button>
+                  <a href="index.php?halaman=rmedis&id=<?= $_GET['id'] ?>&tgl=<?= $_GET['tgl'] ?>&rekamMedisId=<?= $item['id_rm'] ?>&masukODC" class="btn btn-sm btn-info">Masukan ODC</a>
                 </form>
               </td>
             </tr>
