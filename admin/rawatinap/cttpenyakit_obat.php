@@ -672,10 +672,13 @@ if (isset($_POST['savePenggunaan'])) {
                     </tbody>
                 </table>
                 <div>
+                    <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="06:00"> 06:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="09:00"> 09:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="12:00"> 12:00
+                    <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="13:00"> 13:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="15:00"> 15:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="18:00"> 18:00
+                    <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="20:00"> 20:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="21:00"> 21:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="24:00"> 24:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="05:00"> 05:00
@@ -783,10 +786,13 @@ if (isset($_POST['savePenggunaan'])) {
                     </tbody>
                 </table>
                 <div>
+                    <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="06:00"> 06:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="09:00"> 09:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="12:00"> 12:00
+                    <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="13:00"> 13:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="15:00"> 15:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="18:00"> 18:00
+                    <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="20:00"> 20:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="21:00"> 21:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="24:00"> 24:00
                     <input type="checkbox" class="ms-2" name="digunakan[]" id="" value="05:00"> 05:00
@@ -894,6 +900,60 @@ if (isset($_POST['savePenggunaan'])) {
     </div>
     <!-- End Add Retur Modal -->
 
+    <style>
+        #exampleModal45 .obat-split-modal-body,
+        #exampleModal2 .obat-split-modal-body {
+            overflow: hidden;
+        }
+
+        #exampleModal45 .obat-col2-scroll,
+        #exampleModal2 .obat-col2-scroll {
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 0.35rem;
+        }
+
+        #exampleModal45 .obat-col-left,
+        #exampleModal2 .obat-col-left {
+            overflow: hidden;
+        }
+
+        #exampleModal45 .obat-col-left .table-responsive,
+        #exampleModal2 .obat-col-left .table-responsive {
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        #exampleModal45 .obat-col-left table td:nth-child(3),
+        #exampleModal2 .obat-col-left table td:nth-child(3) {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        @media (max-width: 991.98px) {
+
+            #exampleModal45 .obat-split-modal-body,
+            #exampleModal2 .obat-split-modal-body {
+                overflow: auto;
+            }
+
+            #exampleModal45 .obat-col2-scroll,
+            #exampleModal2 .obat-col2-scroll {
+                max-height: none;
+                overflow: visible;
+                padding-right: 0;
+            }
+
+            #exampleModal45 .obat-col-left .table-responsive,
+            #exampleModal2 .obat-col-left .table-responsive {
+                max-height: none;
+                overflow-y: auto;
+            }
+        }
+    </style>
+
     <!-- Add Data Modal Obat  Jadi -->
     <div class="modal  fade" role="dialog" id="exampleModal45" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -904,9 +964,9 @@ if (isset($_POST['savePenggunaan'])) {
                                 href="<?= getFullUrl() ?>&entriObat=Jadi" class="text-light">NewTab</a></sup></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body obat-split-modal-body">
                     <div class="row g-1">
-                        <div class="col-6">
+                        <div class="col-12 col-lg-6 obat-col-left">
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
                                     <thead class="">
@@ -936,152 +996,154 @@ if (isset($_POST['savePenggunaan'])) {
                                 </table>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <form method="post" enctype="multipart/form-data">
-                                <div class="control-group">
-                                    <!-- <div class="modal-body"> -->
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <label for="inputName5" class="form-label">Nama Obat</label><br>
-                                            <input type="text" name="jenis" id="jenis3" hidden>
-                                            <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                            <select name="nama_obat[]" class="obat-select form-select mb-2 w-100" style="width:100%;"
-                                                id="selObat1" aria-label="Default select example">
-                                                <option value="">Pilih</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="inputName5">Dosis</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                                                <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X"
-                                                    disabled>X</span>
-                                                <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            Per
-                                            <select id="inputState" name="per_obat[]" class="form-select">
-                                                <option>Per Hari</option>
-                                                <option>Per Jam</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="">Jumlah Obat</label>
-                                            <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
-                                                placeholder="Jumlah Obat">
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="inputName5" class="">Petunjuk Pemakaian</label>
-                                            <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
-                                                placeholder="Masukkan Petunjuk Pemakaian">
-                                        </div>
-                                        <div class="col-md-12">
-                                            <!-- <label for="inputName5" class="">Catatan Interaksi Obat</label> -->
-                                            <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
-                                                id="inputName5" placeholder="Masukkan Jumlah">
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="inputName5" class="">Jenis Obat</label>
-                                            <select name="jenis_obat[]" class="form-select mb-2">
-                                                <option value="Jadi">Jadi</option>
-                                                <!-- <option value="Jadi">Jadi</option> -->
-                                            </select>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="inputCity" class="">Durasi</label>
-                                            <div class="input-group mb-3">
-                                                <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
-                                                    aria-describedby="basic-addon2">
-                                                <span class="input-group-text" id="basic-addon2">Hari</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                </div>
-                                <button class="btn btn-warning add-more2" type="button">
-                                    <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                                </button>
-                                <hr>
-                                <div class="after-add-more2"></div>
-                                <div class="copy2 invisible" style="display: none;">
-                                    <br>
-                                    <div class="control-group2">
-                                        <label for="inputName5" class="form-label">Nama Obat</label>
-                                        <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
-                                        <select name="nama_obat[]" class="obat-select form-select mb-2" id="selObat1"
-                                            aria-label="Default select example">
-                                            <option value="">Pilih</option>
-                                        </select>
-
+                        <div class="col-12 col-lg-6">
+                            <div class="obat-col2-scroll">
+                                <form method="post" enctype="multipart/form-data">
+                                    <div class="control-group">
+                                        <!-- <div class="modal-body"> -->
                                         <div class="row">
+                                            <div class="col-md-12">
+                                                <label for="inputName5" class="form-label">Nama Obat</label><br>
+                                                <input type="text" name="jenis" id="jenis3" hidden>
+                                                <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
+                                                <select name="nama_obat[]" class="obat-select form-select mb-2 w-100" style="width:100%;"
+                                                    id="selObat1" aria-label="Default select example">
+                                                    <option value="">Pilih</option>
+                                                </select>
+                                            </div>
                                             <div class="col-md-6">
-                                                <label for="inputName5" class="">Dosis</label>
+                                                <label for="inputName5">Dosis</label>
                                                 <div class="input-group">
                                                     <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
-                                                    <span type="text" style="text-align: center;" class="form-control mb-2"
-                                                        placeholder="X">X</span>
+                                                    <span type="text" style="text-align: center;" class="form-control mb-2" placeholder="X"
+                                                        disabled>X</span>
                                                     <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label for="inputName5" class="">Per</label>
+                                                Per
                                                 <select id="inputState" name="per_obat[]" class="form-select">
                                                     <option>Per Hari</option>
                                                     <option>Per Jam</option>
                                                 </select>
                                             </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="">Jumlah Obat</label>
-                                            <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
-                                                placeholder="jumlah obat">
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="inputName5">Petunjuk Pemakaian</label>
-                                            <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
-                                                placeholder="Masukkan Petunjuk Pemakaian">
-                                        </div>
-                                        <div class="col-md-12">
-                                            <!-- <label for="inputName5">Catatan Interaksi Obat</label> -->
-                                            <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
-                                                id="inputName5" placeholder="Masukkan Jumlah">
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="inputName5">Jenis Obat</label>
-                                            <select name="jenis_obat[]" class="form-select mb-2">
-                                                <option value="Jadi">Jadi</option>
-                                                <!-- <option value="Jadi">Jadi</option> -->
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-12">
-                                            <label for="inputCity">Durasi</label>
-                                            <div class="input-group mb-3">
-                                                <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi"
-                                                    aria-describedby="basic-addon2">
-                                                <span class="input-group-text" id="basic-addon2">Hari</span>
+                                            <div class="col-md-12">
+                                                <label for="">Jumlah Obat</label>
+                                                <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
+                                                    placeholder="Jumlah Obat">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="inputName5" class="">Petunjuk Pemakaian</label>
+                                                <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
+                                                    placeholder="Masukkan Petunjuk Pemakaian">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <!-- <label for="inputName5" class="">Catatan Interaksi Obat</label> -->
+                                                <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
+                                                    id="inputName5" placeholder="Masukkan Jumlah">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="inputName5" class="">Jenis Obat</label>
+                                                <select name="jenis_obat[]" class="form-select mb-2">
+                                                    <option value="Jadi">Jadi</option>
+                                                    <!-- <option value="Jadi">Jadi</option> -->
+                                                </select>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="inputCity" class="">Durasi</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
+                                                        aria-describedby="basic-addon2">
+                                                    <span class="input-group-text" id="basic-addon2">Hari</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <button class="btn btn-danger remove2" type="button"><i
-                                                class="glyphicon glyphicon-remove"></i> Batal</button>
-                                        <button class="btn btn-warning"
-                                            onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
-                                            <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                                        </button>
                                         <hr>
                                     </div>
-                                </div>
+                                    <button class="btn btn-warning add-more2" type="button">
+                                        <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                                    </button>
+                                    <hr>
+                                    <div class="after-add-more2"></div>
+                                    <div class="copy2 invisible" style="display: none;">
+                                        <br>
+                                        <div class="control-group2">
+                                            <label for="inputName5" class="form-label">Nama Obat</label>
+                                            <!-- <input type="text" name="nama_obat" class="form-control" id="inputName5" placeholder="Layanan/Tindakan"> -->
+                                            <select name="nama_obat[]" class="obat-select form-select mb-2" id="selObat1"
+                                                aria-label="Default select example">
+                                                <option value="">Pilih</option>
+                                            </select>
 
-                                <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
-                                <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-                                <input type="hidden" class="form-control" id="inputName5" name="id"
-                                    value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                    <input type="submit" class="btn btn-primary" name="saveobnew" value="Save changes">
-                                </div>
-                            </form>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="inputName5" class="">Dosis</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control mb-2" id="dosis1_obat" name="dosis1_obat[]">
+                                                        <span type="text" style="text-align: center;" class="form-control mb-2"
+                                                            placeholder="X">X</span>
+                                                        <input type="text" class="form-control mb-2" id="dosis2_obat" name="dosis2_obat[]">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="inputName5" class="">Per</label>
+                                                    <select id="inputState" name="per_obat[]" class="form-select">
+                                                        <option>Per Hari</option>
+                                                        <option>Per Jam</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="">Jumlah Obat</label>
+                                                <input type="number" name="jml_dokter[]" class="form-control mb-2" id="inputName5"
+                                                    placeholder="jumlah obat">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="inputName5">Petunjuk Pemakaian</label>
+                                                <input type="text" name="petunjuk_obat[]" class="form-control mb-2" id="inputName5"
+                                                    placeholder="Masukkan Petunjuk Pemakaian">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <!-- <label for="inputName5">Catatan Interaksi Obat</label> -->
+                                                <input type="text" name="catatan_obat[]" value="-" hidden class="form-control mb-2"
+                                                    id="inputName5" placeholder="Masukkan Jumlah">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label for="inputName5">Jenis Obat</label>
+                                                <select name="jenis_obat[]" class="form-select mb-2">
+                                                    <option value="Jadi">Jadi</option>
+                                                    <!-- <option value="Jadi">Jadi</option> -->
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <label for="inputCity">Durasi</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="text" name="durasi_obat[]" class="form-control mb-2" placeholder="Durasi"
+                                                        aria-describedby="basic-addon2">
+                                                    <span class="input-group-text" id="basic-addon2">Hari</span>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-danger remove2" type="button"><i
+                                                    class="glyphicon glyphicon-remove"></i> Batal</button>
+                                            <button class="btn btn-warning"
+                                                onclick="document.getElementsByClassName('add-more2')[0].click()" type="button">
+                                                <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                                            </button>
+                                            <hr>
+                                        </div>
+                                    </div>
+
+                                    <!-- <input type="hidden" name="id_pasien" value="<?php echo $pecah['idpasien'] ?>"> -->
+                                    <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
+                                    <input type="hidden" class="form-control" id="inputName5" name="id"
+                                        value="<?php echo $jadwal['idrawat'] ?>" placeholder="Masukkan Nama Pasien">
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <input type="submit" class="btn btn-primary" name="saveobnew" value="Save changes">
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1112,9 +1174,9 @@ if (isset($_POST['savePenggunaan'])) {
                     <h5 class="modal-title" id="exampleModalLabel">Obat</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body obat-split-modal-body">
                     <div class="row g-1">
-                        <div class="col-6">
+                        <div class="col-12 col-lg-6 obat-col-left">
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
                                     <thead class="">
@@ -1144,104 +1206,106 @@ if (isset($_POST['savePenggunaan'])) {
                                 </table>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <form method="post" enctype="multipart/form-data">
-                                <div class="control-group after-add-more">
-                                    <!-- <div class="modal-body"> -->
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <input hidden type="text" id="jenis2" name="jenis" class="form-control">
-                                            <label for="inputName5" class="form-label">Nama Obat</label><br>
-                                            <select name="nama_obat[]" class="obat-select form-control w-100" style="width:100%;"
-                                                id="selObat1" aria-label="Default select example">
+                        <div class="col-12 col-lg-6">
+                            <div class="obat-col2-scroll">
+                                <form method="post" enctype="multipart/form-data">
+                                    <div class="control-group after-add-more">
+                                        <!-- <div class="modal-body"> -->
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <input hidden type="text" id="jenis2" name="jenis" class="form-control">
+                                                <label for="inputName5" class="form-label">Nama Obat</label><br>
+                                                <select name="nama_obat[]" class="obat-select form-control w-100" style="width:100%;"
+                                                    id="selObat1" aria-label="Default select example">
+                                                    <option value="">Pilih</option>
+                                                </select>
+                                            </div>
+
+                                            <script></script>
+                                            <div class="col-md-12" style="margin-top:20px">
+                                                <label for="">Jumlah Obat</label>
+                                                <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
+                                                    placeholder="jumlah obat">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-warning add-more" type="button">
+                                        <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
+                                    </button>
+                                    <hr>
+                                    <div class="copy invisible" style="display: none;">
+                                        <br>
+                                        <div class="control-group">
+                                            <label for="inputName5" class="form-label">Nama Obat</label>
+                                            <select name="nama_obat[]" class="obat-select form-control " id="selObat1"
+                                                aria-label="Default select example">
                                                 <option value="">Pilih</option>
                                             </select>
-                                        </div>
-
-                                        <script></script>
-                                        <div class="col-md-12" style="margin-top:20px">
-                                            <label for="">Jumlah Obat</label>
-                                            <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
-                                                placeholder="jumlah obat">
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="btn btn-warning add-more" type="button">
-                                    <i class="glyphicon glyphicon-plus"></i> Tambah Lagi
-                                </button>
-                                <hr>
-                                <div class="copy invisible" style="display: none;">
-                                    <br>
-                                    <div class="control-group">
-                                        <label for="inputName5" class="form-label">Nama Obat</label>
-                                        <select name="nama_obat[]" class="obat-select form-control " id="selObat1"
-                                            aria-label="Default select example">
-                                            <option value="">Pilih</option>
-                                        </select>
-                                        <div class="col-md-12" style="margin-top:20px">
-                                            <label for="">Jumlah Obat</label>
-                                            <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
-                                                placeholder="jumlah obat">
-                                        </div>
-                                        <br>
-                                        <button class="btn btn-danger remove" type="button"><i
-                                                class="glyphicon glyphicon-remove"></i> Batal</button>
-                                        <hr>
-                                    </div>
-                                </div>
-                                <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                                    <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
-                                    <input type="text" name="catatan_obat[]" class="form-control" id="inputName5"
-                                        placeholder="Masukkan Jumlah">
-                                </div>
-                                <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
-                                    <label for="inputName5" class="form-label">Jenis Obat</label>
-                                    <select name="jenis_obat[]" class="form-control">
-                                        <option value="Racik">Racik</option>
-                                        <!-- <option value="Jadi">Jadi</option> -->
-                                    </select>
-                                </div>
-                                <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
-                                    <label for="inputName5" class="form-label">Racik Ke - </label>
-                                    <input type="number" name="racik[]" class="form-control" id="inputName5"
-                                        placeholder="Masukkan racik">
-                                </div>
-                                <label for="inputName5" class="form-label">Dosis</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group mb-6">
-                                            <input type="text" class="form-control" id="dosis1_obat[]" name="dosis1_obat">
-                                            <input type="text" style="text-align: center;" class="form-control" placeholder="X">
-                                            <input type="text" class="form-control" id="dosis2_obat[]" name="dosis2_obat">
+                                            <div class="col-md-12" style="margin-top:20px">
+                                                <label for="">Jumlah Obat</label>
+                                                <input type="number" name="jml_dokter[]" class="form-control" id="inputName5"
+                                                    placeholder="jumlah obat">
+                                            </div>
+                                            <br>
+                                            <button class="btn btn-danger remove" type="button"><i
+                                                    class="glyphicon glyphicon-remove"></i> Batal</button>
+                                            <hr>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <select id="inputState" name="per_obat[]" class="form-control">
-                                            <option>Per Hari</option>
-                                            <option>Per Jam</option>
+                                    <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                                        <label for="inputName5" class="form-label">Catatan Interaksi Obat</label>
+                                        <input type="text" name="catatan_obat[]" class="form-control" id="inputName5"
+                                            placeholder="Masukkan Jumlah">
+                                    </div>
+                                    <div class="col-md-12" style="margin-top:0px; margin-bottom:20px;">
+                                        <label for="inputName5" class="form-label">Jenis Obat</label>
+                                        <select name="jenis_obat[]" class="form-control">
+                                            <option value="Racik">Racik</option>
+                                            <!-- <option value="Jadi">Jadi</option> -->
                                         </select>
                                     </div>
-                                </div>
-
-                                <div class="col-md-12" style="margin-top:20px">
-                                    <label for="inputCity" class="form-label">Durasi</label>
-                                    <div class="input-group mb-3">
-                                        <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
-                                            aria-describedby="basic-addon2">
-                                        <span class="input-group-text" id="basic-addon2">Hari</span>
+                                    <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                                        <label for="inputName5" class="form-label">Racik Ke - </label>
+                                        <input type="number" name="racik[]" class="form-control" id="inputName5"
+                                            placeholder="Masukkan racik">
                                     </div>
-                                </div>
-                                <div class="col-md-12" style="margin-top:10px">
-                                    <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
-                                    <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5"
-                                        placeholder="Masukkan Petunjuk Pemakaian">
-                                </div>
-                                <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                    <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
-                                </div>
-                            </form>
+                                    <label for="inputName5" class="form-label">Dosis</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="input-group mb-6">
+                                                <input type="text" class="form-control" id="dosis1_obat[]" name="dosis1_obat">
+                                                <input type="text" style="text-align: center;" class="form-control" placeholder="X">
+                                                <input type="text" class="form-control" id="dosis2_obat[]" name="dosis2_obat">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <select id="inputState" name="per_obat[]" class="form-control">
+                                                <option>Per Hari</option>
+                                                <option>Per Jam</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12" style="margin-top:20px">
+                                        <label for="inputCity" class="form-label">Durasi</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" name="durasi_obat[]" class="form-control" placeholder="Durasi"
+                                                aria-describedby="basic-addon2">
+                                            <span class="input-group-text" id="basic-addon2">Hari</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12" style="margin-top:10px">
+                                        <label for="inputName5" class="form-label">Petunjuk Pemakaian</label>
+                                        <input type="text" name="petunjuk_obat[]" class="form-control" id="inputName5"
+                                            placeholder="Masukkan Petunjuk Pemakaian">
+                                    </div>
+                                    <input type="hidden" name="idrm" value="<?php echo $id['idrawat'] ?>">
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <input type="submit" class="btn btn-primary" name="saveob" value="Save changes">
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
