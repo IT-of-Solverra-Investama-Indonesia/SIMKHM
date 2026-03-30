@@ -9,7 +9,7 @@ if (isset($_GET['all'])) {
       OR DATE_FORMAT(jadwal, '%d-%m-%Y') LIKE '%$_POST[key]%')";
   }
   $pasiens = "SELECT *, (SELECT SUM(besaran) AS biayaObat FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat AND biaya LIKE '%obat%') AS biayaObat, (SELECT SUM(biaya) AS biayaLab FROM lab WHERE id_lab_inap = registrasi_rawat.idrawat) AS biayaLab, (SELECT SUM(besaran) AS biayaTotal FROM rawatinapdetail WHERE id = registrasi_rawat.idrawat) AS biayaTotal FROM registrasi_rawat JOIN pasien ON registrasi_rawat.no_rm = pasien.no_rm WHERE perawatan = 'Rawat Inap' " . $queryKey . " ORDER BY idrawat DESC";
-  $urlPage = 'index.php?halaman=daftarregis   trasiinap&all';
+  $urlPage = 'index.php?halaman=daftarregistrasiinap&all';
 } else {
   if (isset($_POST['src'])) {
     $queryKey .= " AND (registrasi_rawat.nama_pasien LIKE '%$_POST[key]%' OR perawatan LIKE '%$_POST[key]%' 
