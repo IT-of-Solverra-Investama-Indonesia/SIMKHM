@@ -556,6 +556,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                               <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                               <ul class="dropdown-menu">
                                                 <li><a href="index.php?halaman=detailrm&id=<?php echo $kamar["no_rm"]; ?>&tgl=<?php echo $kamar["jadwal"]; ?>&racik" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                                <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                                 <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $kamar["no_rm"] ?>&inap&tgl=<?php echo $kamar["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
                                                 <li><a href="index.php?halaman=lpo&id=<?php echo $kamar["no_rm"] ?>&inap&tgl=<?php echo $kamar["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-file-earmark-spreadsheet" style="color:orange;"></i>Observasi Perawat</a></li>
                                               <?php } else { ?>
@@ -563,6 +564,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                                 <ul class="dropdown-menu">
                                                   <?php if ($kamar['perawatan'] == 'Rawat Jalan') { ?>
                                                     <li><a href="index.php?halaman=detailrm&id=<?php echo $kamar["no_rm"]; ?>&tgl=<?php echo $kamar["tgl"]; ?>&rawat=<?php echo $kamar["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                                    <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $kamar['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
 
                                                     <?php
                                                     $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$kamar[nama_pasien]' AND jadwal = '$kamar[jadwal]';")->fetch_assoc();
@@ -575,6 +577,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                                     <?php } ?>
                                                   <?php } else { ?>
                                                     <li><a href="index.php?halaman=detailrm&inap&id=<?php echo $kamar["no_rm"]; ?>&tgl=<?php echo $kamar["jadwal"]; ?>&rawat=<?php echo $kamar["idrawat"]; ?>&&cekrm&idrekammedis=<?= $kamar['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                                    <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $kamar['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                                     <li><a href="index.php?halaman=rekapinap&id=<?php echo $kamar["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-cash-coin" style="color: red"></i> Rekap</a></li>
                                                     <?php
                                                     $cekKajian = $koneksi->query("SELECT COUNT(*) as jumlah FROM kajian_awal_inap WHERE norm = '$kamar[no_rm]'")->fetch_assoc();
@@ -840,6 +843,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                         <i data-bs-toggle="dropdown" style="color: white; font-weight: bold;" class="btn btn-sm btn-primary bi bi-three-dots-vertical"></i>
                                         <ul class="dropdown-menu">
                                           <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                          <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                           <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
                                           <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                             <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
@@ -859,6 +863,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                               // $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                                               ?>
                                               <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>&rawat=<?php echo $pecah["idrawat"]; ?>&cekrm&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                              <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                               <?php
                                               // $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
                                               ?>
@@ -874,6 +879,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                               // $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                                               ?>
                                               <li><a href="index.php?halaman=detailrm&inap&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&rawat=<?php echo $pecah["idrawat"]; ?>&cekrm&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                              <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                               <li><a href="index.php?halaman=rekapinap&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-cash-coin" style="color: red"></i> Rekap</a></li>
                                               <?php
                                               $cekKajian = $koneksi->query("SELECT COUNT(*) as jumlah FROM kajian_awal_inap WHERE norm = '$pecah[no_rm]'")->fetch_assoc();
@@ -992,6 +998,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                       <i data-bs-toggle="dropdown" style="color: blue; font-weight: bold; font-size: 20px;" class="bi bi-three-dots-vertical"></i>
                                       <ul class="dropdown-menu">
                                         <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&racik&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                        <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                         <li><a href="index.php?halaman=rmedis&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-card-list" style="color:orangered;"></i> Isi Rekam Medis</a></li>
                                         <?php if ($pecah['perawatan'] == 'Rawat Inap') { ?>
                                           <li><a href="index.php?halaman=cttpenyakit&id=<?php echo $pecah["no_rm"] ?>&inap&tgl=<?php echo $pecah["tgl"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clipboard2-pulse" style="color:green;"></i> Catatan Penyakit</a></li>
@@ -1007,6 +1014,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                             // $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                                             ?>
                                             <li><a href="index.php?halaman=detailrm&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["tgl"]; ?>&rawat=<?php echo $pecah["idrawat"]; ?>&cekrm&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                            <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
 
                                             <?php
                                             // $ubah = $koneksi->query("SELECT * FROM rekam_medis WHERE nama_pasien = '$pecah[nama_pasien]' AND jadwal = '$pecah[jadwal]';")->fetch_assoc();
@@ -1022,6 +1030,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                             // $getLastRM = $koneksi->query("SELECT  *, COUNT(*) AS jumm, MAX(id_rm) as id_rm FROM rekam_medis WHERE norm = '" . htmlspecialchars($pecah['no_rm']) . "' AND DATE_FORMAT(jadwal, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($pecah["tgl"])) . "' ORDER BY id_rm DESC LIMIT 1")->fetch_assoc();
                                             ?>
                                             <li><a href="index.php?halaman=detailrm&inap&id=<?php echo $pecah["no_rm"]; ?>&tgl=<?php echo $pecah["jadwal"]; ?>&rawat=<?php echo $pecah["idrawat"]; ?>&cekrm&idrekammedis=<?= $getLastRM['id_rm'] ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-eye-fill" style="color:darkblue;"></i> Detail</a></li>
+                                            <li><a href="?halaman=rekam_medis_riwayat&norm=<?= $pecah['no_rm'] ?? '' ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-clock-history" style="color:gray;"></i> Riwayat Rekam Medis</a></li>
                                             <li><a href="index.php?halaman=rekapinap&id=<?php echo $pecah["idrawat"]; ?>" class="dropdown-item" style="text-decoration: none; margin-left: 1px; font-weight: bold;"><i class="bi bi-cash-coin" style="color: red"></i> Rekap</a></li>
                                             <?php
                                             $cekKajian = $koneksi->query("SELECT COUNT(*) as jumlah FROM kajian_awal_inap WHERE norm = '$pecah[no_rm]'")->fetch_assoc();
