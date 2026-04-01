@@ -490,11 +490,11 @@ if (isset($_POST['requestObat'])) {
                         
                         SELECT
                           NULL as id,
-                          tgl_masuk as tgl,
+                          tgl as tgl,
                           keluhan as ctt_tedis,
                           '' as object,
                           riw_alergi as alergi,
-                          '' as assesment,
+                          dkerja as assesment,
                           rencana_rawat as plan,
                           '' as intruksi,
                           '' as edukasi,
