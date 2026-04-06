@@ -6,6 +6,7 @@ $petugas = $_SESSION['admin']['namalengkap'];
 $ambil = $koneksi->query("SELECT * FROM admin  WHERE username='$username';");
 $pasien = $koneksi->query("SELECT * FROM pasien  WHERE no_rm='$_GET[id]';")->fetch_assoc();
 $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ")->fetch_assoc();
+$IGD = $koneksi->query("SELECT * FROM igd WHERE no_rm = '$_GET[id]' AND date_format(tgl_masuk, '%Y-%m-%d') <= '$_GET[tgl]' ORDER BY idigd DESC LIMIT 1")->fetch_assoc();
 if (isset($_GET['statusPulang'])) {
   $koneksi->query("UPDATE registrasi_rawat SET status_antri = 'Pulang' WHERE idrawat = '$jadwal[idrawat]'");
   echo "
@@ -121,7 +122,7 @@ function konversiNomorHP($nomor)
                     <div class="row">
                       <div class="col-md-6">
                         <label for="inputName5" class="form-label">Tgl MRS</label>
-                        <input type="datetime" class="form-control" id="inputName5" name="tgl_mrs" value="<?= date("Y-m-d H:i:s") ?>">
+                        <input type="datetime" class="form-control" id="inputName5" name="tgl_mrs" value="<?= date("Y-m-d H:i:s", strtotime($cekJumRegist["jadwal"])) ?>">
                       </div>
                       <div class="col-md-6">
                         <label for="inputName5" class="form-label">Tgl KRS</label>
@@ -129,7 +130,7 @@ function konversiNomorHP($nomor)
                       </div>
                       <div class="col-md-6" style="margin-top:20px;">
                         <label for="inputName5" class="form-label">Diagnosa MRS</label>
-                        <input type="text" name="diag_mrs" class="form-control">
+                        <input type="text" name="diag_mrs" class="form-control" value="<?= $IGD['dkerja'] ?>">
                       </div>
                       <div class="col-md-6" style="margin-top:20px;">
                         <label for="inputName5" class="form-label">Diagnosa KRS</label>
@@ -141,7 +142,15 @@ function konversiNomorHP($nomor)
                       </div>
                       <div class="col-md-12" style="margin-top:20px;">
                         <label for="inputName5" class="form-label">Pengobatan yang dilanjutkan di rumah dan jumlahnya :</label>
-                        <textarea name="lanjut_rmh" id="" style="width:100%; height:150px"></textarea>
+                        <textarea name="lanjut_rmh" id="" style="width:100%; height:150px">
+                          <?php
+                          $getLastCppt = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[id]' ORDER BY id DESC")->fetch_assoc();
+                          $getDaftarObat = $koneksi->query("SELECT * FROM obat_rm WHERE idrm = '$_GET[id]' AND DATE_FORMAT(created_at, '%Y-%m-%d') = '" . date('Y-m-d', strtotime($getLastCppt['tgl'])) . "'");
+                          while ($obat = $getDaftarObat->fetch_assoc()) {
+                            echo $obat['nama_obat'] . " " . $obat['dosis1_obat'] . "x" . $obat['dosis2_obat'] . ", ";
+                          }
+                          ?>
+                        </textarea>
                       </div>
                       <div class="col-md-12" style="margin-top:20px;">
                         <label for="inputName5" class="form-label">Aturan Diet / Nutrisi </label>
@@ -444,7 +453,7 @@ if (isset($_POST['save'])) {
     'date' => $tglReminder,
     'time' => $waktuReminder,
     'timezone' => 'Asia/Jakarta',
-    'message' =>  $newMes = str_replace('rating.php', 'ratinginap.php', $mes). $selectRegistrasi['idrawat'],
+    'message' =>  $newMes = str_replace('rating.php', 'ratinginap.php', $mes) . $selectRegistrasi['idrawat'],
     'isGroup' => 'true',
   ];
   curl_setopt(
