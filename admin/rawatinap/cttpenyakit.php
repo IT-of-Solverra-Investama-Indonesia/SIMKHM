@@ -446,7 +446,7 @@ if (isset($_POST['requestObat'])) {
                           'Catatan Penyakit' as tipe_data
                         FROM ctt_penyakit_inap 
                         WHERE norm='$_GET[id]' 
-                          AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' GROUP BY tgl
+                          AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('2000-01-01'))) . "' GROUP BY tgl
                         
                         UNION ALL
                         
@@ -465,7 +465,7 @@ if (isset($_POST['requestObat'])) {
                           no_rm as norm,
                           'Catatan Farmasi' as tipe_data
                         FROM catatan_farmasi 
-                        WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' AND DATE_FORMAT(created_at, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' 
+                        WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' AND DATE_FORMAT(created_at, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('2000-01-01'))) . "' 
                         
                         UNION ALL
                               
@@ -484,7 +484,26 @@ if (isset($_POST['requestObat'])) {
                           no_rm as norm,
                           'Catatan Lab' as tipe_data
                         FROM catatan_lab
-                        WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' AND DATE_FORMAT(created_at, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "'
+                        WHERE idrawat_registrasi = '" . htmlspecialchars($id['idrawat']) . "' AND DATE_FORMAT(created_at, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('2000-01-01'))) . "'
+
+                        UNION ALL
+
+                        SELECT 
+                          NULL as id,
+                          tgl_waktu as tgl,
+                          keadaan_umum as ctt_tedis,
+                          keluhan_pasien as object,
+                          '' as alergi,
+                          diagnosa as assesment,
+                          tindakan as plan,
+                          '' as intruksi,
+                          '' as edukasi,
+                          perawat as petugas,
+                          '' as dokter,
+                          norm as norm,
+                          'Observasi Perawat' as tipe_data
+                        FROM lpo
+                        WHERE norm = '$_GET[id]' AND DATE_FORMAT(tgl_waktu, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('2000-01-01'))) . "'
 
                         UNION ALL
                         
@@ -518,6 +537,8 @@ if (isset($_POST['requestObat'])) {
                               <span class="badge bg-secondary text-light">Laboratorium</span>
                             <?php } else if ($pecah['tipe_data'] == 'Catatan IGD') { ?>
                               <span class="badge bg-warning text-dark">IGD</span>
+                            <?php } else if ($pecah['tipe_data'] == 'Observasi Perawat') { ?>
+                              <span class="badge bg-success text-light">Observasi Perawat</span>
                             <?php } else { ?>
                               <span class="badge bg-primary text-light">Penyakit</span>
                             <?php } ?>
