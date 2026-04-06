@@ -185,6 +185,12 @@ if (isset($_POST['src'])) {
                             <td>
                               <?php
                               $today = new DateTime(); // Tanggal hari ini
+                              $tglPulang = "";
+                              if($pecah['status_antri'] == 'Pulang'){
+                                $getPulangSingle = $koneksi->query("SELECT * FROM pulang WHERE norm = '$pecah[no_rm]' AND tgl >= '".date('Y-m-d', strtotime($pecah['jadwal']))."' ORDER BY tgl ASC LIMIT 1")->fetch_assoc();
+                                $today = new DateTime($getPulangSingle['tgl']); // Tanggal hari ini
+                                $tglPulang = $getPulangSingle['tgl'];
+                              }
                               $tanggalMasuk = date('Y-m-d', strtotime($pecah['jadwal']));
                               $pastDate = new DateTime($tanggalMasuk); // Tanggal masa lalu
                               $interval = $today->diff($pastDate);
@@ -199,6 +205,10 @@ if (isset($_POST['src'])) {
                                 <span style="color:green"><?php echo $pecah["status_antri"]; ?></span>
                               <?php } else { ?>
                                 <span style="color:red"><?php echo $pecah["status_antri"]; ?></span>
+                                <?php if($pecah['status_antri'] == 'Pulang'){?>
+                                  <br>
+                                  <small>(Pulang: <?= date('d-m-Y', strtotime($tglPulang)) ?>)</small>
+                                <?php }?>
                               <?php }  ?>
                             </td>
                             <td>
