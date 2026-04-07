@@ -765,11 +765,11 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   $getNextRegis = $koneksi->query("SELECT * FROM registrasi_rawat WHERE no_rm = '$pecah[no_rm]' AND jadwal > '" . $pecah['jadwal'] . "' ORDER BY jadwal ASC LIMIT 1")->fetch_assoc();
 
                                   $whereTglNext = "";
-                                  if($getNextRegis){
+                                  if ($getNextRegis) {
                                     $whereTglNext .= " AND tgl < '" . $getNextRegis['jadwal'] . "'";
                                   }
 
-                                  $getCppt = $koneksi->query("SELECT *, COUNT(*) as JUM FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' " . $whereTglNext . " AND plan_at IS NULL ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                  $getCppt = $koneksi->query("SELECT *, COUNT(*) as JUM FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' " . $whereTglNext . " AND plan_at IS NULL AND plan LIKE '%obat lanjut%' ORDER BY id DESC LIMIT 1")->fetch_assoc();
                                   if ($getCppt['JUM'] > 0) {
                                     echo "
                                         <span class='badge bg-danger' style='font-size: 10px;'>" . $getCppt['JUM'] . " Plan Belum</span>
@@ -799,6 +799,13 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   ?>
                                 </i>
                               </td>
+                              <?php
+                              $isPlanContainsPulang = false;
+                              if ($pecah['perawatan'] == 'Rawat Inap') {
+                                $getLastCPPT = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                $isPlanContainsPulang = stripos($getLastCPPT['plan'] ?? '', 'pulang') !== false;
+                              }
+                              ?>
                               <?php if (!isset($_GET['racik'])) { ?>
                                 <td style="margin-top:10px;">
                                   <?php if ($_SESSION['admin']['level'] == 'sup' or $_SESSION['admin']['level'] == 'kasir') { ?>
@@ -824,6 +831,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                       <?php } ?>
                                     <?php } ?>
                                   <?php } ?>
+                                  <?php if ($isPlanContainsPulang ) { ?>
+                                    <br><span class="badge bg-danger" style="font-size: 10px;">Plan Pulang</span>
+                                  <?php } ?>
                                 </td>
                               <?php } elseif (isset($_GET['racik']) or $_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') { ?>
                                 <td style="margin-top:10px;">
@@ -832,6 +842,9 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                   <?php } else {  ?>
                                     <h6 style="color:red">Belum</h6>
                                   <?php }  ?>
+                                  <?php if ($isPlanContainsPulang) { ?>
+                                    <br><span class="badge bg-danger" style="font-size: 10px;">Plan Pulang</span>
+                                  <?php } ?>
                                 </td>
                               <?php } ?>
                               <td>
@@ -947,19 +960,19 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                 </td>
                                 <td style="margin-top:10px;">
                                   <?php echo $pecah["dokter_rawat"]; ?>
-                                  <?php 
-                                    $cekIgdPickRm = $koneksi->query("SELECT *, COUNT(*) AS Jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
-                                    if($cekIgdPickRm['Jum'] > 0 ){
-                                      $cekIgd = $koneksi->query("SELECT * FROM igd WHERE idigd = '$cekIgdPickRm[igd_id]'")->fetch_assoc();
-                                      if($cekIgd['tindak'] == 'ODC'){
-                                        echo "
+                                  <?php
+                                  $cekIgdPickRm = $koneksi->query("SELECT *, COUNT(*) AS Jum FROM igd_pick_rm WHERE registrasi_id = '$pecah[idrawat]'")->fetch_assoc();
+                                  if ($cekIgdPickRm['Jum'] > 0) {
+                                    $cekIgd = $koneksi->query("SELECT * FROM igd WHERE idigd = '$cekIgdPickRm[igd_id]'")->fetch_assoc();
+                                    if ($cekIgd['tindak'] == 'ODC') {
+                                      echo "
                                           <span class='badge bg-info'>ODC</span> <br>
-                                          <span class='badge bg-".($cekIgd['tindak_at'] == null ? 'danger' : 'success')."'>".($cekIgd['tindak_at'] == null ? 'Belum Selesai' : 'Selesai '. $cekIgd['tindak_at'])."</span> <br>
-                                          <span class='badge bg-".($cekIgd['rencana_rawat_at'] == null ? 'danger' : 'success' )."'>Obat Resep</span> <br>
-                                          <span class='badge bg-".($cekIgd['rencana_rawat_at_poli'] == null ? 'danger' : 'success' )."'>Obat Poli</span>
+                                          <span class='badge bg-" . ($cekIgd['tindak_at'] == null ? 'danger' : 'success') . "'>" . ($cekIgd['tindak_at'] == null ? 'Belum Selesai' : 'Selesai ' . $cekIgd['tindak_at']) . "</span> <br>
+                                          <span class='badge bg-" . ($cekIgd['rencana_rawat_at'] == null ? 'danger' : 'success') . "'>Obat Resep</span> <br>
+                                          <span class='badge bg-" . ($cekIgd['rencana_rawat_at_poli'] == null ? 'danger' : 'success') . "'>Obat Poli</span>
                                         ";
-                                      }
                                     }
+                                  }
                                   ?>
                                 </td>
                                 <td style="margin-top:10px;"><?php echo $pecah["no_rm"]; ?></td>
