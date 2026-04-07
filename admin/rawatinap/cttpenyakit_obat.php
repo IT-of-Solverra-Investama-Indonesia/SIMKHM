@@ -10,6 +10,8 @@ $id = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' a
 
 $jadwal = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' AND date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' ")->fetch_assoc();
 
+$noResepObat = $_GET['id'] . date("ymdhis");
+
 function getFullUrl()
 {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ||
@@ -128,7 +130,7 @@ if (isset($_POST['saveob'])) {
                                 if ($_SESSION['admin']['level'] != 'dokter') {
                                     $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas', '" . $_SESSION['shift'] . "') ");
 
-                                    $koneksi->query("INSERT INTO obat_rm SET idobat = '$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$_GET[idigd]', tgl_pasien = '$_GET[tgl]', obat_igd = '$_POST[jenis]', racik = '$racik', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+                                    $koneksi->query("INSERT INTO obat_rm SET idobat = '$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$_GET[idigd]', tgl_pasien = '$_GET[tgl]', obat_igd = '$_POST[jenis]', racik = '$racik', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "', resep_nota = '$noResepObat'");
                                 } else {
                                     $koneksi->query("INSERT INTO obat_rm_request SET idobat = '$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$_GET[idigd]', tgl_pasien = '$_GET[tgl]', obat_igd = '$_POST[jenis]', racik = '$racik', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
                                 }
@@ -185,7 +187,7 @@ if (isset($_POST['saveobnew'])) {
 
         if ($_SESSION['admin']['level'] != 'dokter') {
             $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas, shiftinap ) VALUES ('$_POST[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas', '" . $_SESSION['shift'] . "') ");
-            $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+            $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "', resep_nota = '$noResepObat'");
         } else {
             $koneksi->query("INSERT INTO obat_rm_request SET idobat='$uniqueId', catatan_obat = '$catatan_obat[$i]', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama[$i]', jml_dokter = '$jml_dokter[$i]', dosis1_obat = '$dosis1_obat[$i]', dosis2_obat = '$dosis2_obat[$i]', per_obat = '$per_obat[$i]', durasi_obat = '$durasi_obat[$i]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat[$i]', jenis_obat = '$jenis_obat[$i]', idigd = '$_GET[idigd]', obat_igd = '$_POST[jenis]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
         }
@@ -287,7 +289,7 @@ if (isset($_GET['copyObat'])) {
         $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
         if ($_SESSION['admin']['level'] != 'dokter') {
             $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$row[idrm]', '$tanggal', '$biaya', '$harga', '$resep', '$petugas') ");
-            $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$row[idigd]', obat_igd = '$row[obat_igd]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+            $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$row[idigd]', obat_igd = '$row[obat_igd]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "', resep_nota = '$noResepObat'");
         } else {
             $koneksi->query("INSERT INTO obat_rm_request SET idobat='$uniqueId', catatan_obat = '$catatan_obat', nama_obat = '$ObatKode[nama_obat]', kode_obat = '$nama', jml_dokter = '$jml_dokter', dosis1_obat = '$dosis1_obat', dosis2_obat = '$dosis2_obat', per_obat = '$per_obat', durasi_obat = '$durasi_obat', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$petunjuk_obat', jenis_obat = '$jenis_obat', idigd = '$row[idigd]', obat_igd = '$row[obat_igd]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
         }
@@ -519,7 +521,7 @@ if (isset($_POST['savePenggunaan'])) {
                         norm,
                         'Catatan Penyakit' as tipe_data
                     FROM ctt_penyakit_inap 
-                    WHERE norm='$_GET[id]' AND plan_at IS NULL
+                    WHERE norm='$_GET[id]' AND plan LIKE '%obat lanjut%' AND plan_at IS NULL
                         AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' 
                         
                     UNION ALL
@@ -580,7 +582,7 @@ if (isset($_POST['savePenggunaan'])) {
                 <?php if ($_SESSION['admin']['level'] != 'dokter') { ?>
                     <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
                         data-bs-toggle="modal" data-bs-target="#exampleModal45"><?= $_SESSION['admin']['level'] == 'dokter' ? 'Request' : 'Add' ?> Jadi</button>
-                    <a class="btn btn-sm btn-warning" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=All&jenis=All" target="_blank">Print All</a>
+                    <a class="btn btn-sm btn-warning" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&resep_nota=All&jenis=All" target="_blank">Print All</a>
                 <?php } ?>
                 <!-- <button type="button" onclick="changeJenis('Injeksi')" class="btn btn-primary btn-sm text-right"
                       data-bs-toggle="modal" data-bs-target="#exampleModal2">Add Racik</button> -->
@@ -609,7 +611,7 @@ if (isset($_POST['savePenggunaan'])) {
                             <th>Dosis</th>
                             <th>Jenis</th>
                             <th>Durasi</th>
-                            <th>Tanggal</th>
+                            <th>Nota</th>
                             <th>Petugas</th>
                             <th>Act</th>
                         </tr>
@@ -651,9 +653,9 @@ if (isset($_POST['savePenggunaan'])) {
                                 <td><?php echo $in["durasi_obat"]; ?> hari</td>
                                 <td>
                                     <a target="_blank"
-                                        href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>"
+                                        href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&resep_nota=<?php echo $in['resep_nota'] ?>&jenis=<?= $in['obat_igd'] ?>"
                                         class="badge bg-warning text-dark" style="font-size: 12px;">
-                                        <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
+                                        <?php echo $in['resep_nota'] ?>
                                     </a>
                                 </td>
                                 <td><?= $in['petugas'] ?></td>
@@ -695,7 +697,7 @@ if (isset($_POST['savePenggunaan'])) {
                         data-bs-toggle="modal" data-bs-target="#exampleModal45"><?= $_SESSION['admin']['level'] == 'dokter' ? 'Request' : 'Add' ?> Jadi</button>
                     <button type="button" onclick="changeJenis('Oral')" class="btn btn-primary btn-sm text-right"
                         data-bs-toggle="modal" data-bs-target="#exampleModal2"><?= $_SESSION['admin']['level'] == 'dokter' ? 'Request' : 'Add' ?> Racik</button>
-                    <a class="btn btn-sm btn-warning" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=All&jenis=All">Print All</a>
+                    <a class="btn btn-sm btn-warning" href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&resep_nota=All&jenis=All">Print All</a>
                 <?php } ?>
             </div>
             <div>
@@ -720,7 +722,7 @@ if (isset($_POST['savePenggunaan'])) {
                             <th>Dosis</th>
                             <th>Jenis</th>
                             <th>Durasi</th>
-                            <th>Tanggal</th>
+                            <th>Nota</th>
                             <th>Petugas</th>
                             <th>Act</th>
                         </tr>
@@ -763,9 +765,9 @@ if (isset($_POST['savePenggunaan'])) {
                                 <td><?php echo $or["durasi_obat"]; ?> hari</td>
                                 <td>
                                     <a target="_blank"
-                                        href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>"
+                                        href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&resep_nota=<?php echo $or['resep_nota'] ?>&jenis=<?= $or['obat_igd'] ?>"
                                         class="badge bg-warning text-dark" style="font-size: 12px;">
-                                        <?php echo date('Y-m-d', strtotime($or["created_at"])) ?>
+                                        <?php echo $or['resep_nota'] ?>
                                     </a>
                                 </td>
                                 <td>
@@ -863,7 +865,7 @@ if (isset($_POST['savePenggunaan'])) {
 
     <!-- Add Retur Modal -->
     <div class="modal fade" id="AddRetur" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="staticBackdropLabel">Retur Obat</h1>
@@ -871,22 +873,56 @@ if (isset($_POST['savePenggunaan'])) {
                 </div>
                 <form method="post">
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-3">
-                                <input type="text" readonly name="nama_obat" id="nama_obat_id" class="form-control form-control-sm mb-1">
-                                <input type="text" readonly name="idobat" id="idobat_id" hidden class="form-control form-control-sm mb-1">
+                        <div class="row g-1">
+                            <div class="col-12 col-lg-6 obat-col-left">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover table-sm" style="font-size: 12px;">
+                                        <thead class="">
+                                            <tr>
+                                                <th>Waktu</th>
+                                                <th>Petugas</th>
+                                                <th>Plan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            foreach ($getDataCppt as $cppt) {
+                                            ?>
+                                                <tr>
+                                                    <td>
+                                                        <?= $cppt['tgl'] ?><br>
+                                                        <span class="badge bg-secondary"><?= $cppt['tipe_data'] ?></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-primary"><?= $cppt['dokter'] ?></span><br>
+                                                        <span class="badge bg-primary"><?= $cppt['petugas'] ?></span>
+                                                    </td>
+                                                    <td><?= $cppt['plan'] ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="col-3">
-                                <input type="text" readonly name="kode_obat" id="kode_obat_id" class="form-control form-control-sm mb-1">
-                            </div>
-                            <div class="col-3">
-                                <input type="text" readonly name="harga" id="harga_id" class="form-control form-control-sm mb-1">
-                            </div>
-                            <div class="col-3">
-                                <input type="text" readonly name="jenis_obat" id="jenis_obat_id" class="form-control form-control-sm mb-1">
-                            </div>
-                            <div class="col-12">
-                                <input type="number" autofocus name="jumlah_retur" id="jumlah_retur_id" placeholder="Jumlah Retur" class="form-control form-control-sm mb-1">
+                            <div class="col-12 col-lg-6 obat-col-left">
+                                <div class="row g-1">
+                                    <div class="col-3">
+                                        <input type="text" readonly name="nama_obat" id="nama_obat_id" class="form-control form-control-sm mb-1">
+                                        <input type="text" readonly name="idobat" id="idobat_id" hidden class="form-control form-control-sm mb-1">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="text" readonly name="kode_obat" id="kode_obat_id" class="form-control form-control-sm mb-1">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="text" readonly name="harga" id="harga_id" class="form-control form-control-sm mb-1">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="text" readonly name="jenis_obat" id="jenis_obat_id" class="form-control form-control-sm mb-1">
+                                    </div>
+                                    <div class="col-12">
+                                        <input type="number" autofocus name="jumlah_retur" id="jumlah_retur_id" placeholder="Jumlah Retur" class="form-control form-control-sm mb-1">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1326,6 +1362,9 @@ if (isset($_POST['savePenggunaan'])) {
     </script>
     <!-- End Add Data Modal Obat Racik -->
 <?php } else { ?>
+    <?php
+    $jadwalRegistrasi = $koneksi->query("SELECT * FROM registrasi_rawat  WHERE no_rm='$_GET[id]' and date_format(jadwal, '%Y-%m-%d') = '$_GET[tgl]' AND perawatan = 'Rawat Inap' ORDER BY idrawat DESC LIMIT 1")->fetch_assoc();
+    ?>
     <div class="card shadow-sm mb-2 p-2">
         <h5><b>Entri Obat Jadi</b></h5>
         <form method="post">
@@ -1433,13 +1472,13 @@ if (isset($_POST['savePenggunaan'])) {
 
                     // $koneksi->query("INSERT INTO obat_rm SET catatan_obat = '', kode_obat = '', nama_obat = '', jml_dokter = '', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', tgl_pasien = '$_GET[tgl]', rekam_medis_id = '$getLastRM[id_rm]', idrm = '$_GET[id]'");
 
-                    if ($_SESSION['admin']['level'] != 'dokter') {
-                        $uniqueId = getUniqeIdObat($koneksi);
-                        $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$id[no_rm]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
-                    } else {
-                        $uniqueId = getUniqeIdObatRequest($koneksi);
-                        $koneksi->query("INSERT INTO obat_rm_request SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$id[no_rm]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
-                    }
+                    $uniqueId = getUniqeIdObat($koneksi);
+                    $koneksi->query("INSERT INTO obat_rm SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$_GET[id]', petugas = '" . $_SESSION['admin']['namalengkap'] . "', resep_nota = '$noResepObat'");
+                    // if ($_SESSION['admin']['level'] != 'dokter') {
+                    // } else {
+                    //     $uniqueId = getUniqeIdObatRequest($koneksi);
+                    //     $koneksi->query("INSERT INTO obat_rm_request SET idobat='$uniqueId', catatan_obat = '$obatSave[catatan]', nama_obat = '$obatSave[nama_obat]', kode_obat = '$obatSave[id_obat]', jml_dokter = '$obatSave[jumlah]', dosis1_obat = '$obatSave[dosis1_obat]', dosis2_obat = '$obatSave[dosis2_obat]', per_obat = '$obatSave[per]', durasi_obat = '$obatSave[durasi]', tgl_pasien = '$_GET[tgl]', petunjuk_obat = '$obatSave[petunjuk]', jenis_obat = '$obatSave[jenis]', idigd = '" . (isset($_GET['idigd']) ? $_GET['idigd'] : '') . "', obat_igd = '$obatSave[jenis2]', idrm = '$id[no_rm]', petugas = '" . $_SESSION['admin']['namalengkap'] . "'");
+                    // }
 
                     $ObatKode = $koneksi->query("SELECT id_obat, jml_obat, margininap, harga_beli, nama_obat FROM apotek WHERE tipe != '' AND id_obat= '" . $obatSave['id_obat'] . "' ORDER BY idapotek DESC LIMIT 1")->fetch_assoc();
 
@@ -1456,12 +1495,12 @@ if (isset($_POST['savePenggunaan'])) {
                     date_default_timezone_set('Asia/Jakarta');
                     $tanggal = date('Y-m-d');
                     $biaya = isset($_GET['inap']) ? 'biayaobat inap' : 'biayaobat igd';
-                    $id = $id['idrawat'];
+                    $id = $jadwalRegistrasi['idrawat'];
                     $resep = 'Resep' . ' ' . $id . ' ' . $uniqueId;
 
-                    if ($_SESSION['admin']['level'] != 'dokter') {
-                        $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$id', '$tanggal', '$biaya', '$harga', '$resep', '" . $_SESSION['admin']['namalengkap'] . "') ");
-                    }
+                    $koneksi->query("INSERT INTO rawatinapdetail (id, tgl, biaya, besaran, ket, petugas ) VALUES ('$id', '$tanggal', '$biaya', '$harga', '$resep', '" . $_SESSION['admin']['namalengkap'] . "') ");
+                    // if ($_SESSION['admin']['level'] != 'dokter') {
+                    // }
 
                     // $koneksi->query("INSERT INTO rmedis_obat (id_rm, id_obat, dosis1_obat, dosis2_obat, per_obat, jumlah_obat, petunjuk_obat, catatan_obat, jenis_obat, durasi_obat) VALUES ('" . htmlspecialchars($_GET['id']) . "', '" . $obat['id_obat'] . "', '" . $obat['dosis1_obat'] . "', '" . $obat['dosis2_obat'] . "', '" . $obat['per'] . "', '" . $obat['jumlah'] . "', '" . $obat['petunjuk'] . "', '" . $obat['catatan'] . "', '" . $obat['jenis'] . "', '" . $obat['durasi'] . "')");
                 }
