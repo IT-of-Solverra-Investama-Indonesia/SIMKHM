@@ -593,7 +593,9 @@ if (isset($_POST['requestObat'])) {
                           <td>
                             <?php if ($pecah['tipe_data'] == 'Catatan Penyakit') { ?>
                               <span class="badge bg-primary my-1" style="font-size: 12px;" data-bs-toggle="modal" onclick="upDataId('<?= $pecah['id'] ?>')" data-bs-target="#tagTeman">@ Tag</span>
-                              <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                              <?php if ($pecah['petugas'] == $_SESSION['admin']['namalengkap']) { ?>
+                                <a href="<?= getFullUrl(); ?>&idcct=<?= $pecah['id'] ?>&ubah" class="badge bg-success my-1" style="font-size: 12px;">Edit</a>
+                              <?php } ?>
                               <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>#editorZone" class="badge bg-warning my-1" style="font-size: 12px;">Copy</a>
                               <a href="<?= getFullUrl(); ?>&ctt=<?= $pecah['id'] ?>&delete" onclick="return confirm('Teman teman yang anda tag pada catatan ini juga akan terhapus, apakah anda yakin ingin menghapus data ini ?')" class="badge bg-danger my-1" style="font-size: 12px;">Delete</a>
                             <?php } else { ?>
@@ -610,7 +612,7 @@ if (isset($_POST['requestObat'])) {
             </div>
           </div>
 
-          <div class="col-12">
+          <div class="col-12 d-none">
             <div class="card shadow p-2 mb-1">
               <h5 class="card-title">DATA CATATAN PERKEMBANGAN PENYAKIT TERINTEGRASI RAWAT INAP SEBELUMNYA <?= isset($_GET['bulan']) ? $_GET['bulan'] : 'ALL' ?></h5>
               <div class="table-responsive">
@@ -799,7 +801,7 @@ if (isset($_POST['requestObat'])) {
                   <tbody>
                     <?php
                     $norm = sani($_GET['id']);
-                    $getRiwayat = $koneksi->query("SELECT * FROM lab_hasil WHERE norm = '$norm' GROUP BY tgl_hasil ORDER BY tgl_inap DESC");
+                    $getRiwayat = $koneksi->query("SELECT * FROM lab_hasil WHERE norm = '$norm' AND tgl_hasil >= '$_GET[tgl]' GROUP BY tgl_hasil ORDER BY tgl_inap DESC");
                     foreach ($getRiwayat as $riwayat) {
 
                     ?>
@@ -914,7 +916,7 @@ if (isset($_POST['requestObat'])) {
                       <th>Dosis</th>
                       <th>Jenis</th>
                       <th>Durasi</th>
-                      <th>Tanggal</th>
+                      <th>Nota</th>
                       <th>Petugas</th>
                       <th>Act</th>
                     </tr>
@@ -955,9 +957,9 @@ if (isset($_POST['requestObat'])) {
                         <td><?php echo $in["durasi_obat"]; ?> hari</td>
                         <td>
                           <a target="_blank"
-                            href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($in["created_at"])) ?>&jenis=<?= $in['obat_igd'] ?>"
+                            href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&resep_nota=<?= $in['resep_nota'] ?>&jenis=<?= $in['obat_igd'] ?>"
                             class="badge bg-warning text-dark" style="font-size: 12px;">
-                            <?php echo date('Y-m-d', strtotime($in["created_at"])) ?>
+                            <?php echo $in['resep_nota'] ?>
                           </a>
                         </td>
                         <td><?= $in['petugas'] ?></td>
@@ -995,7 +997,7 @@ if (isset($_POST['requestObat'])) {
                 $getLpo = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' AND obat_igd = 'injeksi' GROUP BY date_format(created_at, '%Y-%m-%d') ORDER BY idobat DESC");
                 foreach ($getLpo as $lpop) {
                 ?>
-                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span></span>
+                  <span class="badge bg-warning" style="font-size"><span onclick="document.location.href='index.php?halaman=cttpenyakit&id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&&tglobat=<?= date('Y-m-d', strtotime($lpop['created_at'])) ?>&jenis=<?= $lpop['obat_igd'] ?>'"><?= date('Y-m-d', strtotime($lpop['created_at'])) ?></span></span>
                 <?php } ?>
               </div>
               <div class="table-responsive">
@@ -1011,7 +1013,7 @@ if (isset($_POST['requestObat'])) {
                       <th>Dosis</th>
                       <th>Jenis</th>
                       <th>Durasi</th>
-                      <th>Tanggal</th>
+                      <th>Nota</th>
                       <th>Petugas</th>
                       <th>Act</th>
                     </tr>
@@ -1053,9 +1055,9 @@ if (isset($_POST['requestObat'])) {
                         <td><?php echo $or["durasi_obat"]; ?> hari</td>
                         <td>
                           <a target="_blank"
-                            href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&tglObat=<?php echo date('Y-m-d', strtotime($or["created_at"])) ?>&jenis=<?= $or['obat_igd'] ?>"
+                            href="../apotek/lpo_print_obat.php?id=<?= htmlspecialchars($_GET['id']) ?>&inap&tgl=<?= htmlspecialchars($_GET['tgl']) ?>&resep_nota=<?= $or['resep_nota'] ?>&jenis=<?= $or['obat_igd'] ?>"
                             class="badge bg-warning text-dark" style="font-size: 12px;">
-                            <?php echo date('Y-m-d', strtotime($or["created_at"])) ?>
+                            <?php echo $or['resep_nota'] ?>
                           </a>
                         </td>
                         <td>
