@@ -13,8 +13,8 @@ if (!isset($_GET['igd'])) {
 ?>
 <?php
 $tglObatCondition = "";
-if ($_GET['tglObat'] != 'All') {
-    $tglObatCondition = " AND DATE_FORMAT(created_at, '%Y-%m-%d') = '$_GET[tglObat]' AND obat_igd = '$_GET[jenis]'";
+if ($_GET['resep_nota'] != 'All') {
+    $tglObatCondition = " AND resep_nota = '$_GET[resep_nota]' AND obat_igd = '$_GET[jenis]'";
 }
 $getPetugasSingle = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[id]' AND tgl_pasien='$_GET[tgl]' $tglObatCondition ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
 ?>
@@ -31,14 +31,14 @@ $getPetugasSingle = $koneksi->query("SELECT * FROM obat_rm  WHERE idrm = '$_GET[
     }
 </style>
 <div id="button">
-    <a href="lpo_print_obat.php?id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglObat=<?= $_GET['tglObat'] ?>&jenis=<?= $_GET['jenis'] ?>&eresep">E-Resep</a>
-    <a href="lpo_print_obat.php?id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglObat=<?= $_GET['tglObat'] ?>&jenis=<?= $_GET['jenis'] ?>&kasir">Kasir</a>
-    <a href="lpo_print_obat.php?id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&tglObat=<?= $_GET['tglObat'] ?>&jenis=<?= $_GET['jenis'] ?>">Default</a>
+    <a href="lpo_print_obat.php?id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&resep_nota=<?= $_GET['resep_nota'] ?>&jenis=<?= $_GET['jenis'] ?>&eresep">E-Resep</a>
+    <a href="lpo_print_obat.php?id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&resep_nota=<?= $_GET['resep_nota'] ?>&jenis=<?= $_GET['jenis'] ?>&kasir">Kasir</a>
+    <a href="lpo_print_obat.php?id=<?= $_GET['id'] ?>&inap&tgl=<?= $_GET['tgl'] ?>&resep_nota=<?= $_GET['resep_nota'] ?>&jenis=<?= $_GET['jenis'] ?>">Default</a>
 </div>
 <div style="max-width: 58mm; padding: 2mm;">
     <center>
         <img src="https://simkhm.id/wonorejo/admin/dist/assets/img/3.png" style="width: 25%; margin-bottom: 10px; margin-bottom: 0px;" alt="">
-        <h5>Obat Inap <?= $tglObatCondition == "" ? "All" : $getPetugasSingle['obat_igd'] ?> Tanggal <?= $tglObat = htmlspecialchars($_GET['tglObat']) ?></h5>
+        <h5>Obat Inap <?= $tglObatCondition == "" ? "All" : $getPetugasSingle['obat_igd'] ?> No.Resep <?= $tglObat = htmlspecialchars($_GET['resep_nota']) ?></h5>
     </center>
     <table>
         <thead>
