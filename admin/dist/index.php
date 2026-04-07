@@ -736,7 +736,7 @@ $level = $_SESSION['admin']['level'];
 
 
       if ($_SESSION['admin']['level'] == 'apoteker' or $_SESSION['admin']['level'] == 'racik') {
-        $getRegistrasiInap = $koneksi->query("SELECT COUNT(*) as total FROM `ctt_penyakit_inap` WHERE plan_at IS NULL")->fetch_assoc();
+        $getRegistrasiInap = $koneksi->query("SELECT COUNT(*) as total FROM `ctt_penyakit_inap` WHERE plan_at IS NULL AND plan LIKE '%obat lanjut%'")->fetch_assoc();
         $dataRegisBaru = (int) $getRegistrasiInap['total'];
 
         $getPenjualanObat = $koneksi->query("SELECT COUNT(*) as total FROM `igd` WHERE rencana_rawat_at IS NULL AND tindak != 'Rawat' AND tindak != '';")->fetch_assoc();
