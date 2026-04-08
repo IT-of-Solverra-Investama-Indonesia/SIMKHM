@@ -134,12 +134,13 @@
                         <th>No</th>
                         <th>Tanggal</th>
                         <th>Nama</th>
+                        <th>Petugas</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    $getCatatanPenyakit = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[norm]' ORDER BY id DESC");
+                    $getCatatanPenyakit = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[norm]' AND (plan IS NOT NULL OR plan != '') GROUP BY tgl ORDER BY id DESC");
                     $no = 1;
                     foreach ($getCatatanPenyakit as $cppt) {
                     ?>
@@ -147,6 +148,12 @@
                             <td><?php echo $no++; ?></td>
                             <td><?php echo $cppt['tgl']; ?></td>
                             <td><?php echo $cppt['pasien']; ?></td>
+                            <td>
+                                <?php
+                                $getPetugasCppt = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE tgl = '$cppt[tgl]' ORDER BY id DESC");
+                                ?>
+                                <?php foreach ($getPetugasCppt as $petugas) { echo $petugas['petugas'] . "<br>"; } ?>
+                            </td>
                             <td>
                                 <span class="badge bg-primary open-cppt-modal" style="cursor: pointer;"
                                     data-id="<?= htmlspecialchars($cppt['id'], ENT_QUOTES) ?>"
