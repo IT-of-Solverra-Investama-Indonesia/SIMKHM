@@ -312,7 +312,7 @@ if (isset($_POST['savePenggunaan'])) {
               <?php if (!isset($_GET['entriObat'])) { ?>
                 <?php if (!isset($_GET['insertObatDokterIgd'])) { ?>
                   <?php
-                  $dataGetCppt = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[id]'  ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                  $dataGetCppt = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$_GET[id]' AND petugas LIKE '%dr%'  ORDER BY id DESC LIMIT 1")->fetch_assoc();
                   ?>
                   <div class="card shadow p-3" id="observasiZone">
                     <h5 class="card-title">OBSERVASI PERAWAT</h5>
