@@ -769,7 +769,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                                     $whereTglNext .= " AND tgl < '" . $getNextRegis['jadwal'] . "'";
                                   }
 
-                                  $getCppt = $koneksi->query("SELECT *, COUNT(*) as JUM FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' " . $whereTglNext . " AND plan_at IS NULL AND plan LIKE '%obat lanjut%' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                  $getCppt = $koneksi->query("SELECT *, COUNT(*) as JUM FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' " . $whereTglNext . " AND plan_at IS NULL AND (plan LIKE '%obat lanjut%' OR plan LIKE '%pulang%') ORDER BY id DESC LIMIT 1")->fetch_assoc();
                                   if ($getCppt['JUM'] > 0) {
                                     echo "
                                         <span class='badge bg-danger' style='font-size: 10px;'>" . $getCppt['JUM'] . " Plan Belum</span>
@@ -802,7 +802,7 @@ if (isset($_GET['inap']) and !isset($_GET['detail'])) {
                               <?php
                               $isPlanContainsPulang = false;
                               if ($pecah['perawatan'] == 'Rawat Inap') {
-                                $getLastCPPT = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                $getLastCPPT = $koneksi->query("SELECT * FROM ctt_penyakit_inap WHERE norm = '$pecah[no_rm]' AND tgl >= '" . $pecah['jadwal'] . "' ORDER BY tgl DESC LIMIT 1")->fetch_assoc();
                                 $isPlanContainsPulang = stripos($getLastCPPT['plan'] ?? '', 'pulang') !== false;
                               }
                               ?>
