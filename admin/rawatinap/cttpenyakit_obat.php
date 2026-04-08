@@ -521,7 +521,7 @@ if (isset($_POST['savePenggunaan'])) {
                         norm,
                         'Catatan Penyakit' as tipe_data
                     FROM ctt_penyakit_inap 
-                    WHERE norm='$_GET[id]' AND plan LIKE '%obat lanjut%' AND plan_at IS NULL
+                    WHERE norm='$_GET[id]' AND (plan LIKE '%obat lanjut%' OR plan LIKE '%pulang%') AND plan_at IS NULL
                         AND DATE_FORMAT(tgl, '%Y-%m-%d') > '" . ($getPulangTerakhir['tgl'] ?? date('Y-m-d', strtotime('20000-01-01'))) . "' 
                         
                     UNION ALL
