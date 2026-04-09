@@ -834,7 +834,7 @@ if (isset($_GET['status'])) {
   $qiscus_secret_key = "1ac1eb8eb81ee5adda8fae7233733b4c";
   $qiscus_channel_id = "8307";
   $template_namespace = "fd4d98c9_14c0_4dc8_ba92_8dcdb8f73883";
-  $template_name      = "konfirmasi_layanan";
+  $template_name      = "konfirmasi_layanan2";
 
   // Ambil data kunjungan awal
   $getBPJS = $koneksi->query("SELECT * FROM registrasi_rawat WHERE idrawat = '$_GET[id]'")->fetch_assoc();

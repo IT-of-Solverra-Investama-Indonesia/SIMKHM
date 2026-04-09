@@ -1,5 +1,9 @@
 <?php
-include 'function.php';
+  if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+  }
+
+  include 'function.php';
 
 $qiscus_app_id      = "mmgpu-ibeqprelthdmxcb";
 $qiscus_secret_key  = "1ac1eb8eb81ee5adda8fae7233733b4c";
@@ -83,9 +87,6 @@ if ($result_check->num_rows > 0) {
     $koneksi->query("UPDATE registrasi_rawat SET wa_at = '$waktu_sekarang' WHERE idrawat = '{$row['idrawat']}'");
   }
 }
-
-
-session_start();
 $session_duration = 8 * 60 * 60;
 
 // Cek apakah session habis

@@ -23,21 +23,43 @@ if(strpos($currentURL, 'ermkhm') !== false){
         $koneksimaster = mysqli_connect("localhost", "ermkhmid_master", "5pa3D84p5kerQLVRjCR5", "ermkhmid_master");
     }
 }elseif(strpos($currentURL, 'simkhm') !== false){
+    // if (strpos($currentURL, 'wonorejo') !== false) {
+    //     $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_database");
+    //     $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+    // } elseif (strpos($currentURL, 'klakah') !== false) {
+    //     $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_klakah");
+    //     $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+    // } elseif (strpos($currentURL, 'tunjung') !== false) {
+    //     $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_tunjung");
+    //     $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+    // } elseif (strpos($currentURL, 'kunir') !== false) {
+    //     $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_kunir");
+    //     $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+    // }else{
+    //     $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_database");
+    //     $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+    //     if (!$koneksi) {
+    //         // Jika koneksi gagal, fallback ke database lokal klinik
+    //         $koneksi = mysqli_connect("localhost", "root", "", "klinik");
+    //         $koneksimaster = mysqli_connect("localhost", "root", "", "klinik_master");
+    //     }
+
+    // }
     if (strpos($currentURL, 'wonorejo') !== false) {
-        $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_database");
-        $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+        $koneksi = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_database");
+        $koneksimaster = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_master");
     } elseif (strpos($currentURL, 'klakah') !== false) {
-        $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_klakah");
-        $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+        $koneksi = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_klakah");
+        $koneksimaster = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_master");
     } elseif (strpos($currentURL, 'tunjung') !== false) {
-        $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_tunjung");
-        $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+        $koneksi = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_tunjung");
+        $koneksimaster = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_master");
     } elseif (strpos($currentURL, 'kunir') !== false) {
-        $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_kunir");
-        $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+        $koneksi = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_kunir");
+        $koneksimaster = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_master");
     }else{
-        $koneksi = mysqli_connect("103.28.12.123", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_database");
-        $koneksimaster = mysqli_connect("localhost", "simkhmid_simkhmuser", "Wijaya1702!", "simkhmid_master");
+        $koneksi = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_database");
+        $koneksimaster = mysqli_connect("localhost", "bumicode_simkhmBumicode", "simkhmBumicode", "bumicode_simkhm_master");
         if (!$koneksi) {
             // Jika koneksi gagal, fallback ke database lokal klinik
             $koneksi = mysqli_connect("localhost", "root", "", "klinik");
@@ -52,7 +74,6 @@ if(strpos($currentURL, 'ermkhm') !== false){
 
 function sani($data)
 {
-    return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');   
 }
-?>
 

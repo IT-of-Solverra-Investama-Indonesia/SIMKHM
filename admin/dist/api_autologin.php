@@ -1,5 +1,8 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $session_duration = 8 * 60 * 60;
 
 require 'function.php';
