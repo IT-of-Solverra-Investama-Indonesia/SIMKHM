@@ -1,0 +1,32 @@
+name: Deploy to aaPanel
+
+on:
+  push:
+    branches:
+      - main  # Ganti sesuai branch utama kamu
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /www/wwwroot/simkhm.id/wonorejo
+            git pull origin main
+            cd /www/wwwroot/simkhm.id/tunjung
+            git pull origin main
+            cd /www/wwwroot/simkhm.id/klakah
+            git pull origin main
+            cd /www/wwwroot/simkhm.id/kunir
+            git pull origin main
+            # Tambahkan perintah lain jika perlu, misal:
+            # composer install
+            # php artisan migrate
