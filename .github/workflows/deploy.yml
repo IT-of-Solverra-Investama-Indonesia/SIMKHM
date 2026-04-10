@@ -19,13 +19,13 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /www/wwwroot/simkhm/wonorejo
+            cd /www/wwwroot/simkhm.id/wonorejo
             git pull origin main
-            cd /www/wwwroot/simkhm/tunjung
+            cd /www/wwwroot/simkhm.id/tunjung
             git pull origin main
-            cd /www/wwwroot/simkhm/klakah
+            cd /www/wwwroot/simkhm.id/klakah
             git pull origin main
-            cd /www/wwwroot/simkhm/kunir
+            cd /www/wwwroot/simkhm.id/kunir
             git pull origin main
             # Tambahkan perintah lain jika perlu, misal:
             # composer install
