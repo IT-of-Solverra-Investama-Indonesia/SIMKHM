@@ -11,4 +11,4 @@ while (time() < $akhir) {
     @file_get_contents($target);
 }
 
-echo "Simulasi selesai.\n";  
+echo "Simulasi selesai.\n";   
